@@ -5,7 +5,11 @@ test "$(git branch --show-current)" = "feat/m1-d1-backend-foundation" || { echo 
 command -v node >/dev/null
 command -v corepack >/dev/null
 node --version
-corepack pnpm install --no-frozen-lockfile
+if [[ ! -f pnpm-lock.yaml ]]; then
+ echo "BLOCKED: pnpm-lock.yaml is missing; generate/review/commit it before acceptance." >&2
+ exit 2
+fi
+corepack pnpm install --frozen-lockfile
 corepack pnpm --filter @faji/api typecheck
 corepack pnpm --filter @faji/api lint
 corepack pnpm --filter @faji/api build
@@ -20,6 +24,10 @@ if [[ -n "${FAJI_DATABASE_URL:-}" ]]; then
 else
  echo "SKIP: PostgreSQL/PostGIS migration and database integration; FAJI_DATABASE_URL unset"
 fi
-echo "Security: manually review pnpm audit results (lockfile required)"
+if [[ -n "${REDIS_URL:-}" ]]; then
+ corepack pnpm --filter @faji/worker test:integration
+else
+ echo "SKIP: Redis integration; REDIS_URL unset"
+fi
 corepack pnpm audit --audit-level high
-echo "PASS: local static/unit gates finished. API smoke and Redis/Keycloak integration require disposable services."
+echo "Static/unit gates complete. API smoke is tested in-process; Keycloak live integration belongs to M2."

@@ -1,13 +1,13 @@
 # Developer 1 — Milestone 1 backend setup and acceptance
-This changes only backend, worker, database, infrastructure and related documentation. No Flutter or other developer application code is modified.
+Only Developer 1 backend, worker, database and related documentation are changed. Flutter and other developer workspaces are preserved.
 
 ## Local setup
-Use Node >= 22 and pnpm 9.15.9 (Corepack). Copy `infrastructure/env/development.env.example` to an untracked local environment file and replace all placeholder values. Source into shell only in a trusted development environment. `FAJI_DATABASE_URL` points to the Faji PostGIS database, **never** the Keycloak database.
-Install: `corepack pnpm install --frozen-lockfile` after generating and committing a lockfile. If a lockfile is not present, use `corepack pnpm install --no-frozen-lockfile` and review the generated lockfile before acceptance.
-Use the existing disposable Compose file only on a sufficiently resourced development host; database and Redis may instead be provided by temporary isolated services. Production infrastructure is never part of this procedure.
-`pnpm --filter @faji/database migrate` applies checksummed serial SQL migrations. Never edit an applied migration; append a new numbered file and test against disposable data.
-`pnpm --filter @faji/api dev` starts the API; `pnpm --filter @faji/worker build` compiles the worker. Worker delivery adapter is intentionally disabled.
+Node >=22, pnpm 9.15.9 through Corepack. Load development-only env from `infrastructure/env/development.env.example` after substituting private values outside Git. `FAJI_DATABASE_URL` must point to the Faji PostGIS database, **never** the separate Keycloak database.
+A deterministic lockfile is required for acceptance. Initially run `corepack pnpm install --no-frozen-lockfile` in an isolated checkout, review and commit `pnpm-lock.yaml` to this branch through Wilberry, then all acceptance runs use `--frozen-lockfile`.
+Use temporary PostgreSQL/PostGIS and Redis servers for integration; Docker Compose is optional and should not be started on the constrained laptop.
+Migrate: `pnpm --filter @faji/database migrate`; API: `pnpm --filter @faji/api dev`. The worker delivery adapter intentionally fails closed; do not run it for external notifications.
+Generate OpenAPI: `pnpm --filter @faji/api contracts` with valid M1 test environment.
 
-## Acceptance
-Run `bash tooling/verify-d1-m1.sh` once from a clean branch checkout. Use `FAJI_DATABASE_URL` to enable migration/database tests; `REDIS_URL` for Redis availability testing; `KEYCLOAK_ISSUER` for future OIDC tests. The script runs no Docker and never starts/changes services itself.
-Frontend integration can begin with health/error contracts and API namespace, not live identity or booking APIs. Before M2, enable real issuer/audience/JWKS verification and server-side authorization tests.
+## One-shot verification
+`bash tooling/verify-d1-m1.sh` runs install integrity, API/worker/database typechecks, lint, Nest build, API HTTP smoke and unit tests, worker unit tests, migrations, database integration, optional Redis integration and dependency audit. It has no Docker side effects.
+Acceptance still requires a reviewed pinned lockfile, full successful gate output and live disposable service tests. Keycloak token verification and role/tenant enforcement are expressly M2, not implemented or silently bypassed in M1.
