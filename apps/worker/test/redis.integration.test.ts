@@ -9,5 +9,5 @@ test('Redis supports idempotent notification queue registration',{skip:!process.
   const b=await queue.add('pending-delivery',{eventId:name,recipientId:'fixture',template:'fixture'},{jobId:name});
   assert.equal(a.id,b.id);assert.equal(queue.name,NOTIFICATION_QUEUE);
   await queue.remove(name);
- }finally{await queue.close();await queue.opts.connection?.quit?.();}
+ }finally{await queue.close();}
 });
