@@ -2,7 +2,14 @@ import 'reflect-metadata';
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {IdentityGuard} from '../src/auth/identity.guard';
 import type {IdentityVerifier} from '../src/auth/identity.types';
+import {Test} from '@nestjs/testing';
+import {IdentityModule} from '../src/auth/identity.module';
 const ctx=(authorization?:string)=>({switchToHttp:()=>({getRequest:()=>({headers:{authorization}})})}) as any;
+test('M1 identity module denies bearer tokens until verified OIDC is integrated',async()=>{
+ const module=await Test.createTestingModule({imports:[IdentityModule]}).compile();
+ try{await assert.rejects(module.get(IdentityGuard).canActivate(ctx('Bearer forged.jwt.token')),{status:401});}
+ finally{await module.close();}
+});
 test('identity guard rejects missing access token',async()=>{
  const verifier:IdentityVerifier={verifyAccessToken:async()=>{throw Error('must not call');}};
  await assert.rejects(new IdentityGuard(verifier).canActivate(ctx()),{status:401});

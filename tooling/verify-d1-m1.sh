@@ -15,6 +15,7 @@ corepack pnpm --filter @faji/api lint
 corepack pnpm --filter @faji/api build
 corepack pnpm --filter @faji/api test
 corepack pnpm --filter @faji/worker typecheck
+corepack pnpm --filter @faji/worker lint
 corepack pnpm --filter @faji/worker build
 corepack pnpm --filter @faji/worker test
 corepack pnpm --filter @faji/database typecheck
@@ -25,9 +26,20 @@ else echo "SKIP: PostgreSQL/PostGIS migration and database integration (no FAJI_
 if [[ -n "${REDIS_URL:-}" ]]; then
  corepack pnpm --filter @faji/worker test:integration
 else echo "SKIP: Redis integration (no REDIS_URL)"; fi
-if [[ -n "${FAJI_DATABASE_URL:-}" && -n "${REDIS_URL:-}" && -n "${KEYCLOAK_ISSUER:-}" && -n "${KEYCLOAK_AUDIENCE:-}" && -n "${S3_ENDPOINT:-}" && -n "${S3_BUCKET:-}" ]]; then
- corepack pnpm --filter @faji/api contracts
- node -e "const a=require('./packages/api_contracts/openapi.json');if(!a.paths['/api/v1/health'])process.exit(1)"
-else echo "SKIP: OpenAPI generation (configuration incomplete)"; fi
+# Contract generation needs validated configuration, but does not contact these services.
+FAJI_DATABASE_URL="${FAJI_DATABASE_URL:-postgresql://localhost:1/faji_contracts}" \
+REDIS_URL="${REDIS_URL:-redis://localhost:1}" \
+KEYCLOAK_ISSUER="${KEYCLOAK_ISSUER:-http://localhost:8080/realms/faji}" \
+KEYCLOAK_AUDIENCE="${KEYCLOAK_AUDIENCE:-faji-api}" \
+S3_ENDPOINT="${S3_ENDPOINT:-http://localhost:9000}" \
+S3_BUCKET="${S3_BUCKET:-faji-contracts}" \
+corepack pnpm --filter @faji/api contracts
+node -e "const a=require('./packages/api_contracts/openapi.json');if(!a.paths['/api/v1/health']||!a.paths['/api/v1/health/ready'])process.exit(1)"
+node tooling/smoke-d1-m1.mjs
 corepack pnpm audit --audit-level high
-echo "PASS: executed static/unit gates. Optional services clearly reported above."
+if [[ -z "${FAJI_DATABASE_URL:-}" || -z "${REDIS_URL:-}" ]]; then
+ echo "PASS: local verification. PENDING: Milestone 1 acceptance requires PostgreSQL/PostGIS and Redis integration."
+ if [[ "${1:-}" == "--acceptance" ]]; then exit 2; fi
+else
+ echo "PASS: all Milestone 1 verification gates. Review acceptance report before merging."
+fi
