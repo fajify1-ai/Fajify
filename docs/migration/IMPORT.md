@@ -1,25 +1,32 @@
-# Customer Flutter application migration
+# Faji Customer Flutter Import — Exact Tree Verification
 
-## Source provenance
+## Import status
 
-- Original repository: https://github.com/Faith-loves/Faji
-- Pinned source commit: `b96cc1f294095627b8d2047647505de881fa2e4e` (2026-10-16)
-- Destination repository: https://github.com/fajify1-ai/Fajify
-- Target directory: `apps/customer_mobile/`
-- Review branch: `feat/m1-import-customer-flutter`
+**Complete as a source-file migration on `feat/m1-import-customer-flutter`; runtime/build acceptance remains pending.**
 
-## Import state
+- Upstream: https://github.com/Faith-loves/Faji
+- Upstream pinned commit: `b96cc1f294095627b8d2047647505de881fa2e4e` (2026-10-16)
+- Upstream root Git tree: `f4fc4ad64ede410a2f61ce281905a9a895285407`
+- Destination: `apps/customer_mobile/`
+- Imported tracked files: **287** (151 text/code and 136 image/icon assets)
+- Verification: exact path-to-blob-SHA comparison (287/287) and identical subtree SHA `f4fc4ad64ede410a2f61ce281905a9a895285407`
+- Upstream original author attribution: **Temiloluwa Faith Kareem** (see `AUTHORS.md`).
 
-**Not yet imported.** This branch contains the target monorepo layout, not the legacy app itself. Use `tooling/import-legacy-flutter.sh` with explicit source reuse permission to perform the real import. The import script pins the upstream commit, verifies the imported Git tree and requires a clean worktree. It does not edit the source repository, and it does not merge the review branch into `main`.
+## History and limitations
 
-## Rights and secrets
+This API-based import preserves every tracked file byte-for-byte (as evidenced by the matching Git tree hash), the original commit identifier in documentation, and authorship attribution. **The original upstream commit object/ancestry has NOT been imported:** the connected GitHub API only supplied repository-scoped Git object creation with current connection author metadata. The original upstream history remains accessible through the upstream URL. Do not describe this as a true git-subtree history-preserving import.
 
-The public upstream source does not declare a LICENSE file. Obtain written authorization covering code and image assets before reproducing or distributing them. Upstream tracks `android/app/google-services.json`; review Firebase project ownership, key restrictions, rules and build-time configuration before publishing a release. GitHub history preservation retains any upstream files as part of the original commit. Existing Firebase Auth, Firestore, mock payment, and placeholder booking flows are prototype implementations, **not** the new approved architecture.
+## What remains before merging
 
-## Acceptance
+1. Confirm permission from the upstream code and asset rights holders; upstream has no declared LICENSE.
+2. Review `apps/customer_mobile/android/app/google-services.json`, an existing client Firebase config already present in the public upstream. Confirm Firebase configuration ownership/restrictions and any asset rights. Do not mistake client config for a production server credential.
+3. Run `bash tooling/verify-legacy-flutter.sh` on a local clone to verify imported tree and file count.
+4. On a supported Flutter environment, run `flutter pub get`, `flutter analyze`, `flutter test`, `flutter build apk --debug` (or equivalent target-platform build). Record actual pass/fail results.
+5. Review customer app functionality and ensure new Keycloak/PostgreSQL/NestJS integration is planned without assuming legacy Firebase services have been replaced.
+6. Review PR #1 and merge only after the above release gates are satisfied.
 
-1. Full original Git tree exists under `apps/customer_mobile/` and tree hash matches upstream exactly.
-2. Upstream commit is an ancestor of the import branch's head (not a squash).
-3. Other monorepo paths are present and docs accurately represent planned vs implemented modules.
-4. Flutter dependencies resolve and `flutter analyze`, `flutter test`, and target platform builds are run in a suitable CI/local environment.
-5. Any failures, Firebase configuration handling and licensing/attribution questions are addressed before merging.
+## Legacy functionality is not new production integration
+
+Source currently initializes Firebase and depends on Firebase Auth and Cloud Firestore. Payment and reservation flows may be prototypes. Importing the code does **not** migrate Firebase data, authenticate through Keycloak, implement the new backend, enable merchant/driver production operations, or establish payment settlement.
+
+The original upstream repository has not been modified.
