@@ -1,0 +1,10 @@
+packages:
+  - 'apps/api'
+  - 'apps/worker'
+  - 'apps/customer_web'
+  - 'apps/admin_web'
+  - 'packages/api_contracts'
+  - 'packages/database'
+  - 'packages/domain'
+  - 'packages/web_ui'
+  - 'packages/shared_config'

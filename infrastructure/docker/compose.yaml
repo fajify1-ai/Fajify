@@ -1,0 +1,41 @@
+# Disposable local development; never use start-dev for production.
+services:
+  app-db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: ${FAJI_DATABASE_USER:?set FAJI_DATABASE_USER}
+      POSTGRES_PASSWORD: ${FAJI_DATABASE_PASSWORD:?set FAJI_DATABASE_PASSWORD}
+      POSTGRES_DB: ${FAJI_DATABASE_NAME:?set FAJI_DATABASE_NAME}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - faji-db:/var/lib/postgresql/data
+  identity-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DATABASE_PASSWORD:?set KEYCLOAK_DATABASE_PASSWORD}
+      POSTGRES_DB: keycloak
+    volumes:
+      - keycloak-db:/var/lib/postgresql/data
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://identity-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DATABASE_PASSWORD:?set KEYCLOAK_DATABASE_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - identity-db
+volumes:
+  faji-db:
+  keycloak-db:

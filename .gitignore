@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+**/.dart_tool/
+**/build/
+**/node_modules/
+**/.next/
+**/dist/
+**/coverage/
+*.log
