@@ -6,7 +6,7 @@ command -v node >/dev/null
 command -v corepack >/dev/null
 node --version
 if [[ ! -f pnpm-lock.yaml ]]; then
- echo "BLOCKED: pnpm-lock.yaml is missing; generate/review/commit it before acceptance." >&2
+ echo "BLOCKED: pnpm-lock.yaml missing. Generate/review/commit before acceptance." >&2
  exit 2
 fi
 corepack pnpm install --frozen-lockfile
@@ -21,13 +21,13 @@ corepack pnpm --filter @faji/database typecheck
 if [[ -n "${FAJI_DATABASE_URL:-}" ]]; then
  corepack pnpm --filter @faji/database migrate
  corepack pnpm --filter @faji/database test:integration
-else
- echo "SKIP: PostgreSQL/PostGIS migration and database integration; FAJI_DATABASE_URL unset"
-fi
+else echo "SKIP: PostgreSQL/PostGIS migration and database integration (no FAJI_DATABASE_URL)"; fi
 if [[ -n "${REDIS_URL:-}" ]]; then
  corepack pnpm --filter @faji/worker test:integration
-else
- echo "SKIP: Redis integration; REDIS_URL unset"
-fi
+else echo "SKIP: Redis integration (no REDIS_URL)"; fi
+if [[ -n "${FAJI_DATABASE_URL:-}" && -n "${REDIS_URL:-}" && -n "${KEYCLOAK_ISSUER:-}" && -n "${KEYCLOAK_AUDIENCE:-}" && -n "${S3_ENDPOINT:-}" && -n "${S3_BUCKET:-}" ]]; then
+ corepack pnpm --filter @faji/api contracts
+ node -e "const a=require('./packages/api_contracts/openapi.json');if(!a.paths['/api/v1/health'])process.exit(1)"
+else echo "SKIP: OpenAPI generation (configuration incomplete)"; fi
 corepack pnpm audit --audit-level high
-echo "Static/unit gates complete. API smoke is tested in-process; Keycloak live integration belongs to M2."
+echo "PASS: executed static/unit gates. Optional services clearly reported above."

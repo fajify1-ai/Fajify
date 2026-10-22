@@ -1,4 +1,4 @@
-import {pgTable,uuid,varchar,timestamp,boolean,index,uniqueIndex,text} from 'drizzle-orm/pg-core';
+import {pgTable,uuid,varchar,timestamp,boolean,index,text,sql} from 'drizzle-orm/pg-core';
 export const userProfiles=pgTable('user_profiles',{
  id:uuid('id').primaryKey().defaultRandom(),
  identitySubject:varchar('identity_subject',{length:255}).notNull().unique(),
@@ -21,4 +21,4 @@ export const outboxEvents=pgTable('outbox_events',{
  payload:text('payload').notNull(),
  publishedAt:timestamp('published_at',{withTimezone:true}),
  createdAt:timestamp('created_at',{withTimezone:true}).notNull().defaultNow()
-},t=>[index('outbox_unpublished_idx').on(t.publishedAt,t.createdAt)]);
+},t=>[index('outbox_unpublished_idx').on(t.publishedAt,t.createdAt).where(sql`${t.publishedAt} IS NULL`)]);

@@ -1,13 +1,17 @@
 # Developer 1 — Milestone 1 backend setup and acceptance
-Only Developer 1 backend, worker, database and related documentation are changed. Flutter and other developer workspaces are preserved.
 
-## Local setup
-Node >=22, pnpm 9.15.9 through Corepack. Load development-only env from `infrastructure/env/development.env.example` after substituting private values outside Git. `FAJI_DATABASE_URL` must point to the Faji PostGIS database, **never** the separate Keycloak database.
-A deterministic lockfile is required for acceptance. Initially run `corepack pnpm install --no-frozen-lockfile` in an isolated checkout, review and commit `pnpm-lock.yaml` to this branch through Wilberry, then all acceptance runs use `--frozen-lockfile`.
-Use temporary PostgreSQL/PostGIS and Redis servers for integration; Docker Compose is optional and should not be started on the constrained laptop.
-Migrate: `pnpm --filter @faji/database migrate`; API: `pnpm --filter @faji/api dev`. The worker delivery adapter intentionally fails closed; do not run it for external notifications.
-Generate OpenAPI: `pnpm --filter @faji/api contracts` with valid M1 test environment.
+## Implementation status
+Foundation committed. Acceptance remains pending until a dependency lockfile exists and all required build, security and integration gates pass against the exact commit.
 
-## One-shot verification
-`bash tooling/verify-d1-m1.sh` runs install integrity, API/worker/database typechecks, lint, Nest build, API HTTP smoke and unit tests, worker unit tests, migrations, database integration, optional Redis integration and dependency audit. It has no Docker side effects.
-Acceptance still requires a reviewed pinned lockfile, full successful gate output and live disposable service tests. Keycloak token verification and role/tenant enforcement are expressly M2, not implemented or silently bypassed in M1.
+## Setup
+Use Node.js 22 and pnpm 9.15.9 through Corepack. Run `corepack pnpm install --no-frozen-lockfile` once in an isolated checkout, review and commit the generated `pnpm-lock.yaml` using Wilberry. Subsequent verification requires `--frozen-lockfile`.
+
+Copy values from `infrastructure/env/development.env.example` into local **untracked** secrets; do not commit passwords. The application PostGIS database and Keycloak database must be isolated. Never aim application SQL migrations at Keycloak.
+
+Development: `corepack pnpm --filter @faji/api dev`. Migration: `corepack pnpm --filter @faji/database migrate`. Documentation: `corepack pnpm --filter @faji/api contracts`.
+
+## Consolidated verification
+`bash tooling/verify-d1-m1.sh` does not start Docker or modify production. Without external services it can run dependency integrity, build, typecheck, lint, API unit/HTTP tests, worker tests, database typecheck, and dependency audit. PostgreSQL/PostGIS migration and database tests require disposable DB, Redis integration requires disposable Redis. API contract generation requires valid configuration and must produce the expected paths. Keycloak live validation is M2; the M1 identity verifier refuses all bearer tokens.
+
+## Security boundaries
+M1 protected modules remain unavailable until M2 verifies JWT signatures, JWKS rotation, issuer, audience, expiry and tenant/resource membership. BullMQ notification worker intentionally fails jobs instead of pretending to deliver notifications. Real writes must use transactional outbox and idempotency.
