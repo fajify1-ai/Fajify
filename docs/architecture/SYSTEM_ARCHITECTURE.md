@@ -104,5 +104,3 @@ WebSocket events are authenticated and scoped; clients reconnect, de-duplicate, 
 
 ## 9. Deployment and operational controls
 Isolated development, staging and production resources; no uncontrolled production data in staging. Independently deploy customer web, admin web, Flutter applications, NestJS API, workers, Keycloak, managed PostgreSQL, Redis, object storage and monitoring. Keycloak's database is isolated from Faji's application database. Container deployments use managed secrets, TLS, health checks, logs, alerts and rollback procedures. Schema changes are reviewed and deployed compatibly; application replacement must not delete persistent data.
-
-**Engineering authority:** This document captures the confirmed stack and domain architecture in the supplied `Faji_System_Architecture_Engineering_Roadmap_Wilson_Nkwa.pdf` v1.0. Implementation completion is tracked separately; an architectural specification is not proof of a deployed system.
