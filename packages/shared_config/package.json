@@ -1,0 +1,6 @@
+{
+  "name": "@faji/shared-config",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Shared non-secret TypeScript configuration"
+}

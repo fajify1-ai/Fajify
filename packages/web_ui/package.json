@@ -1,0 +1,6 @@
+{
+  "name": "@faji/web-ui",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Shared Next.js design components"
+}

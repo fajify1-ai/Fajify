@@ -1,0 +1,9 @@
+name: faji_flutter_workspace
+repository: https://github.com/fajify1-ai/Fajify
+packages:
+  - apps/customer_mobile
+  - apps/business_mobile
+  - apps/ride_dispatch
+  - packages/flutter_design_system
+  - packages/flutter_core
+  - packages/flutter_api_client
