@@ -1,28 +1,22 @@
-# Fajify
+# Fajify — Faji Platform
+**Unified lifestyle, hospitality, entertainment, commerce and mobility ecosystem.**
 
-Faji is a multi-platform lifestyle and experiences platform covering discovery, bookings, merchant operations and ride/dispatch.
+Faji connects customers with venues, businesses, experiences, reservations, events, products and transportation through the Faji Customer, Faji Business, Faji Ride & Dispatch and Faji Administration domains.
 
-## Engineering monorepo
+## Engineering documentation
+This repository follows the established Faji System Architecture & Engineering Development Roadmap v1.0.
 
-| Workspace | Role |
-| --- | --- |
-| `apps/customer_mobile` | **Imported** Flutter customer application |
-| `apps/business_mobile` | Business Flutter app — foundation planned |
-| `apps/ride_dispatch` | Single Driver/Dispatcher Flutter app — foundation planned |
-| `apps/customer_web` | Next.js public web — foundation planned |
-| `apps/admin_web` | Next.js admin web — foundation planned |
-| `apps/api` | NestJS modular monolith on Node.js — foundation planned |
-| `apps/worker` | Redis/BullMQ workers — foundation planned |
-| `packages` | Shared Flutter/TypeScript modules — foundation planned |
-| `infrastructure` | Docker, database, Keycloak, IaC and deployment |
-| `docs` / `tests` / `tooling` | Specifications, checks and scripts |
+- [System architecture and confirmed technology stack](docs/architecture/SYSTEM_ARCHITECTURE.md)
+- [Nine development milestones, 63 phases and acceptance criteria](docs/engineering/MILESTONES.md)
+- [Developer 1, Developer 2, Developer 3 and 3A/3B allocations](docs/engineering/DEVELOPER_WORKSTREAMS.md)
+- [Monorepo structure, delivery process and engineering standards](docs/engineering/REPOSITORY_AND_DELIVERY.md)
 
-**Target stack:** Flutter/Dart, Next.js/TypeScript, NestJS/Node.js, PostgreSQL/PostGIS, Keycloak (OIDC/PKCE), Redis/BullMQ, and Paystack or Flutterwave.
-
-## Customer app migration
-
-The legacy customer application was imported from [Faith-loves/Faji](https://github.com/Faith-loves/Faji) at pinned commit `b96cc1f294095627b8d2047647505de881fa2e4e`. All **287 tracked files** were imported byte-for-byte into `apps/customer_mobile/` and independently verified against the original Git tree SHA `f4fc4ad64ede410a2f61ce281905a9a895285407`.
-
-**Important:** File and tree content are preserved; the original upstream commit object/ancestry is **not** present in this repository. Original attribution and validation instructions are in [migration notes](docs/migration/IMPORT.md). The existing app still uses Firebase and is not yet upgraded to the proposed Keycloak/NestJS/PostgreSQL platform.
-
-This feature branch is for review; Flutter build/test acceptance and rights/configuration review are required before merging.
+## Confirmed core stack
+- **Mobile:** Flutter / Dart (customer, business, combined ride/dispatch)
+- **Web:** Next.js / React / TypeScript (customer and admin); Flutter Web (business/dispatch operations)
+- **Backend:** NestJS / Node.js / TypeScript, modular monolith, REST/OpenAPI and WebSockets
+- **Database:** PostgreSQL / PostGIS; Drizzle ORM and SQL
+- **Identity:** Keycloak / OIDC / OAuth 2.0
+- **Queues/cache:** Redis / BullMQ
+- **Services:** S3-compatible storage, Google Maps, Paystack or Flutterwave, transactional email, FCM/APNs push
+- **Delivery:** GitHub, pnpm, Turborepo, Melos, Docker, managed hosting
