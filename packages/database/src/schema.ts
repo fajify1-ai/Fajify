@@ -1,4 +1,5 @@
-import {pgTable,uuid,varchar,timestamp,boolean,index,text,sql} from 'drizzle-orm/pg-core';
+import {pgTable,uuid,varchar,timestamp,boolean,index,text} from 'drizzle-orm/pg-core';
+import {sql} from 'drizzle-orm';
 export const userProfiles=pgTable('user_profiles',{
  id:uuid('id').primaryKey().defaultRandom(),
  identitySubject:varchar('identity_subject',{length:255}).notNull().unique(),
