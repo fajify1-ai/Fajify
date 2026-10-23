@@ -20,6 +20,9 @@ is changed by this work.
 
 ## Verification evidence
 
+**Verified source commit:** `768a17f1997c69a4c8b566f2b4304acfb973b848`.
+The following evidence commit changes documentation only.
+
 The exact source revision and commands are recorded in
 [evidence/d3a-m1-consolidated.txt](evidence/d3a-m1-consolidated.txt).
 
