@@ -11,9 +11,9 @@ const muted = Color(0xFFB5B5BE);
 const good = Color(0xFF5CD58C);
 const amber = Color(0xFFFFBE4D);
 
-ThemeData businessTheme() => ThemeData(
+ThemeData businessTheme({String? fontPackage}) => ThemeData(
   useMaterial3: true,
-  fontFamily: 'Roboto',
+  fontFamily: fontPackage == null ? 'Roboto' : 'packages/$fontPackage/Roboto',
   progressIndicatorTheme: const ProgressIndicatorThemeData(
     color: brand,
     linearTrackColor: Color(0xFF303030),

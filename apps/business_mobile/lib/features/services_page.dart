@@ -15,8 +15,9 @@ const serviceColors = [
 ];
 
 class ServicesPage extends StatelessWidget {
-  const ServicesPage({super.key, required this.controller});
+  const ServicesPage({super.key, required this.controller, this.onExit});
   final BusinessController controller;
+  final VoidCallback? onExit;
   @override
   Widget build(BuildContext context) => PageBody(
     title: 'Services',
@@ -140,11 +141,13 @@ class ServicesPage extends StatelessWidget {
         );
       }),
       OutlinedButton.icon(
-        onPressed: () => preview(
-          context,
-          'Customer app handoff',
-          'The customer application is a separate workstream. Its verified app or website link will be connected after Developer 2 publishes the handoff contract.',
-        ),
+        onPressed:
+            onExit ??
+            () => preview(
+              context,
+              'Customer app handoff',
+              'The customer application is a separate workstream. Its verified app or website link will be connected after Developer 2 publishes the handoff contract.',
+            ),
         icon: const Icon(Icons.swap_horiz),
         label: const Text('Switch to Customer App'),
       ),

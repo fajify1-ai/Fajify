@@ -50,6 +50,8 @@ String safeDestination(String? candidate) {
 GoRouter businessRouter(
   BusinessController controller, {
   String? initialLocation,
+  VoidCallback? onExit,
+  bool embedded = false,
 }) {
   Widget watch(Widget Function() build) =>
       AnimatedBuilder(animation: controller, builder: (_, child) => build());
@@ -59,7 +61,9 @@ GoRouter businessRouter(
         NoTransitionPage(key: state.pageKey, child: watch(() => build(state))),
   );
   return GoRouter(
-    initialLocation: initialLocation,
+    initialLocation: initialLocation ?? (embedded ? '/login' : null),
+    overridePlatformDefaultLocation: embedded,
+    routerNeglect: embedded,
     refreshListenable: controller,
     redirect: (context, state) {
       final path = state.uri.path;
@@ -95,9 +99,9 @@ GoRouter businessRouter(
       ),
     ),
     routes: [
-      page('/', (_) => const WelcomePage()),
-      page('/onboarding', (_) => const WelcomePage()),
-      page('/login', (_) => LoginPage(controller: controller)),
+      page('/', (_) => WelcomePage(onExit: onExit)),
+      page('/onboarding', (_) => WelcomePage(onExit: onExit)),
+      page('/login', (_) => LoginPage(controller: controller, onExit: onExit)),
       page(
         '/access-denied',
         (_) => Scaffold(
@@ -163,7 +167,10 @@ GoRouter businessRouter(
               id: state.pathParameters['id']!,
             ),
           ),
-          page('/services', (_) => ServicesPage(controller: controller)),
+          page(
+            '/services',
+            (_) => ServicesPage(controller: controller, onExit: onExit),
+          ),
           page(
             '/earnings',
             (state) => EarningsPage(
@@ -202,10 +209,16 @@ class BusinessApp extends StatefulWidget {
     this.controller,
     this.initialLocation,
     this.config = BusinessConfig.fromBuild,
-  });
+    this.embedded = false,
+    this.onExit,
+  }) : assert(!embedded || onExit != null);
   final BusinessController? controller;
   final String? initialLocation;
   final BusinessConfig config;
+
+  /// Hosts the merchant workspace inside another app without a second app root.
+  final bool embedded;
+  final VoidCallback? onExit;
   @override
   State<BusinessApp> createState() => _BusinessAppState();
 }
@@ -215,7 +228,43 @@ class _BusinessAppState extends State<BusinessApp> {
   late final router = businessRouter(
     controller,
     initialLocation: widget.initialLocation,
+    embedded: widget.embedded,
+    onExit: widget.onExit == null ? null : _exit,
   );
+  final _heroes = MaterialApp.createMaterialHeroController();
+  bool _leaving = false;
+
+  Future<void> _exit() async {
+    if (_leaving) return;
+    _leaving = true;
+    try {
+      await controller.logout();
+      if (mounted) widget.onExit?.call();
+    } finally {
+      _leaving = false;
+    }
+  }
+
+  void _back() {
+    if (router.canPop()) {
+      router.pop();
+      return;
+    }
+    final path = router.routeInformationProvider.value.uri.path;
+    for (final section in ['/orders', '/reservations', '/menu']) {
+      if (path.startsWith('$section/')) {
+        router.go(section);
+        return;
+      }
+    }
+    if (!destinations.contains(path) &&
+        !['/login', '/onboarding', '/access-denied'].contains(path)) {
+      router.go('/dashboard');
+      return;
+    }
+    _exit();
+  }
+
   @override
   void dispose() {
     router.dispose();
@@ -225,20 +274,52 @@ class _BusinessAppState extends State<BusinessApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.config.problem != null) {
-      return MaterialApp(
-        theme: businessTheme(),
-        home: Scaffold(
-          body: SafeArea(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(widget.config.problem!),
-              ),
+    final problem = widget.config.problem;
+    final errorPage = Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(problem ?? ''),
+                if (widget.onExit != null)
+                  TextButton(
+                    onPressed: _exit,
+                    child: const Text('Back to role selection'),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (widget.embedded) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) _back();
+        },
+        child: Theme(
+          data: businessTheme(fontPackage: 'faji_business'),
+          child: ScaffoldMessenger(
+            child: HeroControllerScope(
+              controller: _heroes,
+              child: problem != null
+                  ? errorPage
+                  : Router(
+                      routeInformationProvider: router.routeInformationProvider,
+                      routeInformationParser: router.routeInformationParser,
+                      routerDelegate: router.routerDelegate,
+                    ),
             ),
           ),
         ),
       );
+    }
+    if (problem != null) {
+      return MaterialApp(theme: businessTheme(), home: errorPage);
     }
     return MaterialApp.router(
       title: 'Faji Business',

@@ -73,3 +73,26 @@ This branch builds on the customer-import integration branch while PR #1 is
 pending. Review its Business-only diff against `feat/m1-import-customer-flutter`;
 coordinate the final mainline integration after the import is accepted. No merge
 or deployment is performed by this delivery.
+
+
+## Main-app integration follow-up — 23 October 2026
+
+The product owner selected Business inside the same installed Faji application.
+The main role-selection Business entry now uses the merchant login and workspace
+through a public local package entry point, with scoped routing/theme and session
+cleanup on return to role selection. The standalone runner remains available.
+
+Verification of the integration implementation: Business analysis passed and
+**38 Business tests plus 3 main-app widget tests passed**. The new customer entry
+and test sources analyze without issues. Full customer analysis still reports
+35 diagnostics in 16 unchanged imported files; the tested D2 cleanup branch has
+not yet been pushed to GitHub. These diagnostics are not accepted as a passing
+full-customer check. Formatting, shell syntax, structure and whitespace passed.
+
+The main APK must be built and the combined flow tested on the physical Android
+phone after integrating D2's tested cleanup. The earlier standalone evidence
+above remains historical and does not establish acceptance for the embedded
+flow. No new Android/iOS or real-device acceptance is claimed.
+
+[Integration and device command](BUSINESS_MAIN_APP_INTEGRATION.md) ·
+[Implementation test log](evidence/business-main-app-checks.txt)

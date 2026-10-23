@@ -7,7 +7,8 @@ import '../shared/business_ui.dart';
 import 'dashboard.dart';
 
 class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
+  const WelcomePage({super.key, this.onExit});
+  final VoidCallback? onExit;
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
@@ -43,6 +44,11 @@ class WelcomePage extends StatelessWidget {
                     child: const Text('Open Business demo'),
                   ),
                 ),
+                if (onExit != null)
+                  TextButton(
+                    onPressed: onExit,
+                    child: const Text('Back to role selection'),
+                  ),
                 const SizedBox(height: 14),
                 const Text(
                   'Milestone 1 · Synthetic data only',
@@ -58,8 +64,9 @@ class WelcomePage extends StatelessWidget {
 }
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key, required this.controller});
+  const LoginPage({super.key, required this.controller, this.onExit});
   final BusinessController controller;
+  final VoidCallback? onExit;
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
@@ -106,6 +113,11 @@ class LoginPage extends StatelessWidget {
             onPressed: () => context.go('/onboarding'),
             child: const Text('Back to introduction'),
           ),
+          if (onExit != null)
+            TextButton(
+              onPressed: onExit,
+              child: const Text('Back to role selection'),
+            ),
         ],
       ),
     ),

@@ -59,8 +59,9 @@ artwork and distribution identifiers need product-owner confirmation.
 
 All financial amounts, approvals, scans and service activations are previews.
 There are no live merchant/auth/payment calls, camera permissions or durable
-business writes. Logout and reset restore fixtures. Customer-app switching opens
-an explanatory handoff until D2 publishes an approved app/web destination.
+business writes. Logout and reset restore fixtures. In embedded mode, customer switching clears the merchant demo session and returns
+to the main role-selection screen. The standalone runner retains an explanatory
+handoff. See [main-app integration](../../docs/engineering/BUSINESS_MAIN_APP_INTEGRATION.md).
 
 ## Configuration
 
@@ -80,12 +81,14 @@ URIs will be added only with agreed M2 adapters. Client secrets do not belong he
 
 ## Code boundaries
 
-- `lib/app/`: router, guarded merchant shell, responsive rail/bottom navigation.
+- `lib/faji_business.dart`: public host-app entry point.
+- `lib/app/`: router, embedded host mode, guarded merchant shell and responsive navigation.
 - `lib/core/`: configuration, UI models, session/data controller, repository and
   identity interfaces, deterministic mocks.
 - `lib/features/`: dashboard, reservations, orders, menu, service and account UI.
 - `lib/shared/business_ui.dart`: Business-local component adapter pending D2's
-  reviewed shared Flutter exports. No imports from another application.
+  reviewed shared Flutter exports. The main customer app now consumes the public Business entry point under the
+  product-owner-approved integration; Business does not import customer internals.
 - `assets/fonts/`: bundled Roboto Regular/Medium/Bold plus its license, providing
   consistent offline typography. Material icon assets come from Flutter.
 - `test/`: controller and widget behavior, including races, guards, write failures,
