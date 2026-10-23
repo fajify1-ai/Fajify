@@ -2,6 +2,7 @@ import {Module,UnauthorizedException} from '@nestjs/common';
 import { IDENTITY_VERIFIER,IdentityVerifier } from './identity.types';
 import {IdentityGuard} from './identity.guard';
 import {KeycloakAccessTokenVerifier} from './keycloak.verifier';
+import {RolesGuard} from './roles.guard';
 
 /** Fail closed until Keycloak configuration is present. No bearer-token bypass. */
 const disabledVerifier:IdentityVerifier={async verifyAccessToken(){throw new UnauthorizedException('Identity provider unavailable');}};
@@ -9,5 +10,5 @@ const disabledVerifier:IdentityVerifier={async verifyAccessToken(){throw new Una
  const issuer=process.env.KEYCLOAK_ISSUER;
  const audience=process.env.KEYCLOAK_AUDIENCE;
  return issuer&&audience?new KeycloakAccessTokenVerifier(issuer,audience):disabledVerifier;
-}},IdentityGuard],exports:[IDENTITY_VERIFIER,IdentityGuard]})
+}},IdentityGuard,RolesGuard],exports:[IDENTITY_VERIFIER,IdentityGuard,RolesGuard]})
 export class IdentityModule {}
