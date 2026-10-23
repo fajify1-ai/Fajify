@@ -1,5 +1,5 @@
 export interface VerifiedIdentity {
- subject:string; issuer:string; audience:string[]; expiresAt:number;
+ subject:string; issuer:string; audience:string[]; expiresAt:number;issuedAt:number;
  roles:readonly string[];
 }
 export interface IdentityVerifier {verifyAccessToken(token:string):Promise<VerifiedIdentity>;}
