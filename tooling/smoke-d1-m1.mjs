@@ -43,5 +43,6 @@ try {
  const [code,signal]=await exited;
  clearTimeout(timer);
  assert.notEqual(signal,'SIGKILL','API graceful shutdown timed out');
- assert.equal(code,0,'API did not shut down cleanly');
+ // Nest completes shutdown hooks and then re-sends the received signal.
+ assert.ok(code===0 || signal==='SIGTERM','API did not shut down cleanly');
 }
