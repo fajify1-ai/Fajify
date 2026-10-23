@@ -15,21 +15,24 @@ Branch: `feat/m1-d2-customer-analyzer-cleanup`.
 
 The first Android build installed Gradle, the NDK, Build Tools 36 and Android Platform 34. Available root disk space after the build was 6.8 GB. No emulator was installed.
 
-## Physical-device smoke test — pending
+## Physical-device smoke test — partial; acceptance incomplete
 
-ADB reported no connected devices. Do not mark runtime acceptance complete from a build or widget test alone.
+Recorded 2026-10-23 against cleanup commit `1a4a497eb4b589605a44bc4a46767ba65372a474` on `feat/m1-d2-customer-analyzer-cleanup`.
 
-When an authorized physical device is connected, record device/Android version, APK version, and actual results for:
+- Device: `2505DRP06G`, Android 15 / API 35.
+- Installed APK: `com.faji.app`, version `1.0.0`, 181,406,552 bytes.
+- Installation and cold launch succeeded after USB installation was enabled on the phone. The startup log reported `FirebaseInitProvider: FirebaseApp initialization successful`; no fatal exception was found in the captured startup log window.
+- Splash completed and role selection rendered. Business and Ride navigation opened branded placeholder screens; Android Back returned to role selection. These are not functional Business/Ride login flows.
+- Customer sign-in and registration forms rendered. The email field focused and displayed the keyboard; the registration form scrolled to its lower fields and submit controls. No credentials were entered, and no account was created.
+- Android Back closed the authentication sheet. Backgrounding and relaunching returned to the running app with its process intact.
+- With Wi-Fi off and mobile data temporarily disabled, the unauthenticated sign-in sheet remained available. Mobile data was restored afterward (`mobile_data=1`).
+- No authenticated session was used. Home, discovery/planning, wishlist, bookings, profile, authentication requests, and authenticated offline behavior remain untested. No booking or payment was attempted.
 
-1. Install the debug APK and cold-launch it; check startup logs for Firebase initialization failures and crashes.
-2. Observe splash completion and role selection; open Business and Ride login screens and return using Android back navigation.
-3. Open customer authentication and check form rendering and keyboard behavior. Use a designated test account for authenticated checks.
-4. With that account, navigate home, discovery/planning, wishlist, bookings and profile; verify back navigation and background/resume behavior.
-5. Record unavailable flows and failures explicitly. Do not create paid orders or treat prototype payment/booking screens as settlement evidence.
+This is partial device evidence only. Do not mark full runtime acceptance complete from this smoke test, an APK build, or widget tests alone.
 
 ## Developer 2 backend migration starting point
 
-The local NestJS implementation currently exposes health only. `packages/api_contracts` and `packages/flutter_api_client` are placeholders. Customer endpoint paths and schemas must come from Developer 1's reviewed contracts before live integration.
+Migration is blocked pending Developer 1's reviewed Keycloak and customer API contracts. The published backend contracts currently expose health only; `packages/api_contracts` and `packages/flutter_api_client` remain placeholders. Do not invent customer routes or schemas.
 
 | Existing Firebase boundary | Migration work |
 | --- | --- |
@@ -41,7 +44,7 @@ The local NestJS implementation currently exposes health only. `packages/api_con
 | `features/wishlist/data/repositories/wishlist_repository.dart` | Replace user-scoped Firestore persistence after session and wishlist contracts are agreed. |
 | `features/bookings/data/repositories/booking_repository.dart` and reservation screen | Replace Firebase UID access and persistence with server-authorized booking operations; review capacity, pricing, idempotency and payment state with Developer 1. |
 
-After the smoke test, start an isolated Developer 2 integration branch from the reviewed cleanup commit. Begin with the read-only discovery repository boundary and fixture-driven tests, then connect the published API contract. Follow with identity, wishlist, plans and bookings as their contracts become available. Do not invent backend routes or claim Firebase replacement from client scaffolding.
+Keep the verified cleanup and this device-test record on `feat/m1-d2-customer-analyzer-cleanup`. Do not remove Firebase or begin live customer API integration until the reviewed contracts are available. Once they are, start an isolated Developer 2 integration branch from the cleanup commit, begin with the read-only discovery repository boundary and fixture-driven tests, and connect only to approved contracts. Follow with identity, wishlist, plans and bookings as their contracts become available. Do not claim Firebase replacement from client scaffolding.
 
 ## Kotlin/Firebase warning investigation — outstanding migration work
 
