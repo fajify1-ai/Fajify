@@ -28,9 +28,18 @@ flutter pub get
 dart format --output=none --set-exit-if-changed lib/features/auth/presentation/screens/business_login_screen.dart test integration_test
 flutter analyze --no-pub
 flutter test --no-pub --reporter expanded
-if "$android"; then flutter build apk --debug --no-pub; fi
 if [[ -n "$device" ]]; then
   flutter test integration_test/business_entry_test.dart -d "$device" --no-pub
+fi
+if "$android"; then
+  # Restore the normal app after the device test replaces it with a test runner.
+  flutter build apk --debug --no-pub
+  sha256sum build/app/outputs/flutter-apk/app-debug.apk
+  if [[ -n "$device" ]]; then
+    command -v adb >/dev/null || { echo 'ADB must be on PATH.' >&2; exit 1; }
+    flutter install --debug -d "$device"
+    adb -s "$device" shell am start -W -n com.faji.app/.MainActivity
+  fi
 fi
 printf 'PASS: all requested Business/main-app checks completed.\n'
 printf 'Android build requested: %s; device test requested: %s\n' "$android" "${device:-no}"

@@ -40,7 +40,7 @@ class _HomeHeaderState extends State<HomeHeader> {
         final key = 'last_home_greeting_date_${user.uid}';
         final lastDate = preferences.getString(key);
         firstEntry = lastDate != today;
-                    greeting = firstEntry ? _greetingForTime(now) : 'Welcome Back';
+        greeting = firstEntry ? _greetingForTime(now) : 'Welcome Back';
 
         try {
           final snapshot = await FirebaseFirestore.instance
@@ -208,7 +208,7 @@ class _ProfileAvatar extends StatelessWidget {
           fit: BoxFit.cover,
           loadingBuilder: (context, child, progress) =>
               progress == null ? child : fallback,
-          errorBuilder: (_, __, ___) => fallback,
+          errorBuilder: (_, _, _) => fallback,
         ),
       ),
     );

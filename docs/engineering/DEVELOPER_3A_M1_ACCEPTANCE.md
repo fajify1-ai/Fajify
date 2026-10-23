@@ -96,3 +96,18 @@ flow. No new Android/iOS or real-device acceptance is claimed.
 
 [Integration and device command](BUSINESS_MAIN_APP_INTEGRATION.md) ·
 [Implementation test log](evidence/business-main-app-checks.txt)
+
+
+## Developer 2 mainline baseline incorporated — 23 October 2026
+
+Developer 2's verified baseline was merged through PR #6 at
+`2533b29fbfeef35bf9b290d81e0c18b30e6dee40` and incorporated into this branch.
+The prior 35 customer analyzer findings above are now resolved by that cleanup.
+The combined verification script passes dependency resolution, formatting,
+**zero issues in both application analyzers**, **38 Business tests and 3 main-app
+widget tests**, structure and whitespace checks. See
+[combined verification log](evidence/business-mainline-consolidated.txt).
+
+Android compilation and combined-app physical-device acceptance have not been
+run in this environment. Run the consolidated command in the integration guide
+on the connected Android phone. PR #5 remains draft for those checks.

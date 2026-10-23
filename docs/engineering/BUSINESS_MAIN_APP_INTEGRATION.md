@@ -42,7 +42,9 @@ This checks both workspaces and builds/tests the **main customer APK** that now
 includes Business. The device test launches the real app entry point, selects
 Business, opens the explicit demo, visits all five tabs, logs out, returns to
 role selection, checks signed-out re-entry and switches back from Services.
-Tests do not require or submit live merchant credentials.
+Tests do not require or submit live merchant credentials. When both options are
+used, the script then builds, hashes, installs and launches the normal main APK
+so manual inspection uses the application rather than the integration-test runner.
 
 Also manually check hardware Back from login, a detail page and a modal;
 background/resume; scrolling, keyboard and larger system text; and offline use
@@ -50,3 +52,17 @@ of the demo. Record the exact source commit, device/OS, APK hash, commands,
 results and screenshots. Automated widget tests do not establish physical-device
 acceptance, and the original Developer 3A standalone evidence does not establish
 acceptance of this embedded mode.
+
+
+## Current mainline baseline
+
+Developer 2 was merged through PR #6 at
+`2533b29fbfeef35bf9b290d81e0c18b30e6dee40`. This Business branch incorporates
+that baseline. The one conflicting customer widget test was replaced by the
+three complete Business/role-selection integration widget tests, rather than
+retaining the obsolete expectation that Business opens a placeholder.
+
+Both applications now analyze with zero issues; 38 Business tests and 3 main-app
+widget tests pass on the combined source. All backend files and other customer
+implementation files retain their mainline versions. Physical-device acceptance
+of the combined APK remains pending.

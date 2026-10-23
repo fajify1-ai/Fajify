@@ -1,7 +1,7 @@
 # Fajify — Developer 3A Development Guide
 ## Milestone 1: Faji Business scaffolding
 
-**Owner:** Developer 3A · **Application:** `apps/business_mobile/`  
+**Owner:** Developer 3A · **Application:** `apps/business_mobile/`
 **Prepared:** 23 October 2026 · **Status:** Repository-grounded guide, revised against all seven supplied screenshots.
 
 ### 1. The outcome you must deliver

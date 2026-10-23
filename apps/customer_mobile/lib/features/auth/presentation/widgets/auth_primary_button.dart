@@ -29,7 +29,7 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton> {
         color: FajiColors.primary,
         borderRadius: BorderRadius.circular(20),
         elevation: 12,
-        shadowColor: FajiColors.primary.withOpacity(.35),
+        shadowColor: FajiColors.primary.withValues(alpha: .35),
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: widget.busy ? null : widget.onTap,

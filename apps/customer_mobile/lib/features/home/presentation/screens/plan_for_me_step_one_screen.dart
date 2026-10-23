@@ -95,8 +95,7 @@ class PlanForMeStepOneScreen extends StatefulWidget {
   const PlanForMeStepOneScreen({super.key});
 
   @override
-  State<PlanForMeStepOneScreen> createState() =>
-      _PlanForMeStepOneScreenState();
+  State<PlanForMeStepOneScreen> createState() => _PlanForMeStepOneScreenState();
 }
 
 class _PlanForMeStepOneScreenState extends State<PlanForMeStepOneScreen> {
@@ -113,9 +112,8 @@ class _PlanForMeStepOneScreenState extends State<PlanForMeStepOneScreen> {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PlanForMeStepTwoPlaceholderScreen(
-          flowState: _flowState,
-        ),
+        builder: (_) =>
+            PlanForMeStepTwoPlaceholderScreen(flowState: _flowState),
       ),
     );
   }
@@ -215,10 +213,7 @@ class _PlanForMeStepOneScreenState extends State<PlanForMeStepOneScreen> {
                   ),
                   child: const Text(
                     'Continue',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -239,9 +234,7 @@ class _BackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: FajiColors.surfaceDark,
-      shape: const CircleBorder(
-        side: BorderSide(color: FajiColors.borderDark),
-      ),
+      shape: const CircleBorder(side: BorderSide(color: FajiColors.borderDark)),
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
@@ -352,10 +345,7 @@ class _PlanTypeCard extends StatelessWidget {
 }
 
 class PlanForMeStepTwoPlaceholderScreen extends StatefulWidget {
-  const PlanForMeStepTwoPlaceholderScreen({
-    super.key,
-    required this.flowState,
-  });
+  const PlanForMeStepTwoPlaceholderScreen({super.key, required this.flowState});
 
   final PlanForMeFlowState flowState;
 
@@ -383,10 +373,9 @@ class _PlanForMeStepTwoScreenState
     HapticFeedback.lightImpact();
     setState(() {
       _selectedRange = null;
-      _exactPeopleCount =
-          (_exactPeopleCount + change)
-              .clamp(_minimumPeople, _maximumPeople)
-              .toInt();
+      _exactPeopleCount = (_exactPeopleCount + change)
+          .clamp(_minimumPeople, _maximumPeople)
+          .toInt();
       widget.flowState.exactPeopleCount = _exactPeopleCount;
       widget.flowState.peopleRange = null;
     });
@@ -402,14 +391,13 @@ class _PlanForMeStepTwoScreenState
   }
 
   void _continue() {
-    widget.flowState.exactPeopleCount =
-        _selectedRange == null ? _exactPeopleCount : null;
+    widget.flowState.exactPeopleCount = _selectedRange == null
+        ? _exactPeopleCount
+        : null;
     widget.flowState.peopleRange = _selectedRange;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PlanForMeStepThreeScreen(
-          flowState: widget.flowState,
-        ),
+        builder: (_) => PlanForMeStepThreeScreen(flowState: widget.flowState),
       ),
     );
   }
@@ -613,11 +601,7 @@ class _PeopleCounterPanel extends StatelessWidget {
               ],
             ),
           ),
-          _CounterButton(
-            icon: Icons.add,
-            onTap: onIncrease,
-            primary: true,
-          ),
+          _CounterButton(icon: Icons.add, onTap: onIncrease, primary: true),
         ],
       ),
     );
@@ -649,9 +633,7 @@ class _CounterButton extends StatelessWidget {
           child: Icon(
             icon,
             size: 29,
-            color: onTap == null
-                ? FajiColors.textSecondaryDark
-                : Colors.white,
+            color: onTap == null ? FajiColors.textSecondaryDark : Colors.white,
           ),
         ),
       ),
@@ -703,10 +685,7 @@ class _PeopleRangeChip extends StatelessWidget {
 }
 
 class PlanForMeStepThreeScreen extends StatefulWidget {
-  const PlanForMeStepThreeScreen({
-    super.key,
-    required this.flowState,
-  });
+  const PlanForMeStepThreeScreen({super.key, required this.flowState});
 
   final PlanForMeFlowState flowState;
 
@@ -715,8 +694,7 @@ class PlanForMeStepThreeScreen extends StatefulWidget {
       _PlanForMeStepThreeScreenState();
 }
 
-class _PlanForMeStepThreeScreenState
-    extends State<PlanForMeStepThreeScreen> {
+class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
   static const _predefinedLocations = [
     'Lekki',
     'Victoria Island',
@@ -787,9 +765,7 @@ class _PlanForMeStepThreeScreenState
               ),
               decoration: InputDecoration(
                 hintText: 'Search location...',
-                hintStyle: const TextStyle(
-                  color: FajiColors.textSecondaryDark,
-                ),
+                hintStyle: const TextStyle(color: FajiColors.textSecondaryDark),
                 prefixIcon: const Icon(
                   Icons.search_rounded,
                   color: FajiColors.textSecondaryDark,
@@ -846,9 +822,7 @@ class _PlanForMeStepThreeScreenState
     widget.flowState.selectedLocation = selectedLocation;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PlanForMeStepFourScreen(
-          flowState: widget.flowState,
-        ),
+        builder: (_) => PlanForMeStepFourScreen(flowState: widget.flowState),
       ),
     );
   }
@@ -915,8 +889,7 @@ class _PlanForMeStepThreeScreenState
                       _LocationCard(
                         label: _selectedLocation!,
                         selected: true,
-                        onTap: () =>
-                            _chooseCustomLocation(),
+                        onTap: () => _chooseCustomLocation(),
                       ),
                       const SizedBox(height: 12),
                     ],
@@ -1047,10 +1020,7 @@ class _LocationCard extends StatelessWidget {
 }
 
 class PlanForMeStepFourScreen extends StatefulWidget {
-  const PlanForMeStepFourScreen({
-    super.key,
-    required this.flowState,
-  });
+  const PlanForMeStepFourScreen({super.key, required this.flowState});
 
   final PlanForMeFlowState flowState;
 
@@ -1083,9 +1053,7 @@ class _PlanForMeStepFourScreenState extends State<PlanForMeStepFourScreen> {
     widget.flowState.selectedBudget = budget;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PlanForMeStepFiveScreen(
-          flowState: widget.flowState,
-        ),
+        builder: (_) => PlanForMeStepFiveScreen(flowState: widget.flowState),
       ),
     );
   }
@@ -1283,10 +1251,7 @@ class _BudgetCard extends StatelessWidget {
 }
 
 class PlanForMeStepFiveScreen extends StatefulWidget {
-  const PlanForMeStepFiveScreen({
-    super.key,
-    required this.flowState,
-  });
+  const PlanForMeStepFiveScreen({super.key, required this.flowState});
 
   final PlanForMeFlowState flowState;
 
@@ -1370,9 +1335,7 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
     widget.flowState.selectedTimeRange = _selectedTimeOfDay!.range;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PlanForMeStepSixScreen(
-          flowState: widget.flowState,
-        ),
+        builder: (_) => PlanForMeStepSixScreen(flowState: widget.flowState),
       ),
     );
   }
@@ -1450,21 +1413,20 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
                       children: [
                         _DateOptionCard(
                           label: 'Today',
-                          selected: _selectedDateOption ==
-                              PlanDateOption.today,
+                          selected: _selectedDateOption == PlanDateOption.today,
                           onTap: () => _selectDate(PlanDateOption.today, today),
                         ),
                         _DateOptionCard(
                           label: 'Tomorrow',
-                          selected: _selectedDateOption ==
-                              PlanDateOption.tomorrow,
+                          selected:
+                              _selectedDateOption == PlanDateOption.tomorrow,
                           onTap: () =>
                               _selectDate(PlanDateOption.tomorrow, tomorrow),
                         ),
                         _DateOptionCard(
                           label: 'This Weekend',
-                          selected: _selectedDateOption ==
-                              PlanDateOption.weekend,
+                          selected:
+                              _selectedDateOption == PlanDateOption.weekend,
                           onTap: () => _selectDate(
                             PlanDateOption.weekend,
                             _weekendDate(),
@@ -1472,8 +1434,8 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
                         ),
                         _DateOptionCard(
                           label: _dateLabel(),
-                          selected: _selectedDateOption ==
-                              PlanDateOption.custom,
+                          selected:
+                              _selectedDateOption == PlanDateOption.custom,
                           onTap: _chooseCustomDate,
                         ),
                       ],
@@ -1553,14 +1515,14 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        label,
-        style: const TextStyle(
-          color: FajiColors.textSecondaryDark,
-          fontSize: 14,
-          letterSpacing: 1.1,
-          fontWeight: FontWeight.w500,
-        ),
-      );
+    label,
+    style: const TextStyle(
+      color: FajiColors.textSecondaryDark,
+      fontSize: 14,
+      letterSpacing: 1.1,
+      fontWeight: FontWeight.w500,
+    ),
+  );
 }
 
 class _DateOptionCard extends StatelessWidget {
@@ -1705,10 +1667,7 @@ String _formatDate(DateTime date) {
 }
 
 class PlanForMeStepSixScreen extends StatefulWidget {
-  const PlanForMeStepSixScreen({
-    super.key,
-    required this.flowState,
-  });
+  const PlanForMeStepSixScreen({super.key, required this.flowState});
 
   final PlanForMeFlowState flowState;
 
@@ -1936,15 +1895,17 @@ class _VibeCard extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _LegacyPlanResultsScreen extends StatelessWidget {
-  const _LegacyPlanResultsScreen({super.key, required this.flowState});
+  const _LegacyPlanResultsScreen({required this.flowState});
 
   final PlanForMeFlowState flowState;
 
   @override
   Widget build(BuildContext context) {
     final vibes = flowState.selectedVibes.map((vibe) => vibe.label).join(', ');
-    final people = flowState.peopleRange?.label ??
+    final people =
+        flowState.peopleRange?.label ??
         '${flowState.exactPeopleCount ?? 6} people';
     return Scaffold(
       backgroundColor: FajiColors.backgroundDark,

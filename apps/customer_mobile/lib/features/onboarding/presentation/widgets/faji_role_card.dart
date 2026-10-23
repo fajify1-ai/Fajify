@@ -38,7 +38,7 @@ class _FajiRoleCardState extends State<FajiRoleCard> {
             decoration: BoxDecoration(
               border: Border.all(
                 color: _pressed
-                    ? FajiColors.primary.withOpacity(.7)
+                    ? FajiColors.primary.withValues(alpha: .7)
                     : FajiColors.borderDark,
               ),
               borderRadius: BorderRadius.circular(18),

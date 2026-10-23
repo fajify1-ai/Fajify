@@ -22,7 +22,8 @@ class RecommendationCard extends StatelessWidget {
   final ValueChanged<bool> onSaved;
   final VoidCallback onBook;
 
-  String _price(int value) => '₦${value.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => ',')}';
+  String _price(int value) =>
+      '₦${value.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => ',')}';
 
   @override
   Widget build(BuildContext context) {
@@ -46,14 +47,21 @@ class RecommendationCard extends StatelessWidget {
                   left: 10,
                   top: 10,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: badgeColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       badge,
-                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
@@ -95,32 +103,49 @@ class RecommendationCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         plan.title,
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       _price(plan.priceMin),
-                      style: const TextStyle(color: FajiColors.primary, fontSize: 15, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                        color: FajiColors.primary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 5),
                 Text(
                   '⌖ ${plan.location}',
-                  style: const TextStyle(color: FajiColors.textSecondaryDark, fontSize: 12),
+                  style: const TextStyle(
+                    color: FajiColors.textSecondaryDark,
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 5),
                 Text(
                   plan.features.join(' · '),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: FajiColors.textSecondaryDark, fontSize: 12),
+                  style: const TextStyle(
+                    color: FajiColors.textSecondaryDark,
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '♧ Up to ${plan.maximumGuests}',
-                  style: const TextStyle(color: FajiColors.textSecondaryDark, fontSize: 12),
+                  style: const TextStyle(
+                    color: FajiColors.textSecondaryDark,
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -130,9 +155,17 @@ class RecommendationCard extends StatelessWidget {
                     onPressed: onBook,
                     style: FilledButton.styleFrom(
                       backgroundColor: FajiColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text('Book Now →', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      'Book Now →',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -155,18 +188,22 @@ class _PlanImage extends StatelessWidget {
       return Image.network(
         plan.imageUrl,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _assetImage(),
+        errorBuilder: (_, _, _) => _assetImage(),
       );
     }
     return _assetImage();
   }
 
   Widget _assetImage() => Image.asset(
-        plan.imageAsset,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
-          color: FajiColors.borderDark,
-          child: const Icon(Icons.image_not_supported_outlined, color: FajiColors.textSecondaryDark, size: 32),
-        ),
-      );
+    plan.imageAsset,
+    fit: BoxFit.cover,
+    errorBuilder: (_, _, _) => Container(
+      color: FajiColors.borderDark,
+      child: const Icon(
+        Icons.image_not_supported_outlined,
+        color: FajiColors.textSecondaryDark,
+        size: 32,
+      ),
+    ),
+  );
 }
