@@ -13,6 +13,14 @@ void main() {
     expect(find.text('Login as a user'), findsOneWidget);
     await tester.tap(find.text('Faji Business'));
     await tester.pumpAndSettle();
+    expect(find.text('Grow your business with fajify'), findsOneWidget);
+    await tester.tap(find.text('Register Your Business'));
+    await tester.pumpAndSettle();
+    expect(find.text('Business name'), findsOneWidget);
+    expect(find.text('Dashboard'), findsNothing);
+    await tester.ensureVisible(find.text('Sign In'));
+    await tester.tap(find.text('Sign In'));
+    await tester.pumpAndSettle();
     expect(find.text('Welcome to Faji Business'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('enter-demo')));
     await tester.pumpAndSettle();
@@ -36,6 +44,8 @@ void main() {
     await tester.tap(find.text('Faji Business'));
     await tester.pumpAndSettle();
     expect(find.text('Dashboard'), findsNothing);
+    await tester.tap(find.text('Sign In'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('enter-demo')));
     await tester.pumpAndSettle();
     await tester.tap(

@@ -2,7 +2,10 @@
 
 The product owner selected one installed application on 23 October 2026.
 The existing role-selection screen remains the entry: **Faji Business** opens
-the merchant login, then the explicit M1 demo opens the five merchant workspaces.
+a choice sheet matching the supplied Business entry reference: **Sign In** and
+**Register Your Business**. Sign In opens the merchant login; Register opens the
+public M1 setup preview. Neither choice grants a merchant session. The explicit
+login demo action opens the five merchant workspaces.
 Customer login and the Ride entry retain their separate destinations.
 
 ## Module and session boundary
@@ -78,3 +81,31 @@ remains D2 migration work for the final combined application; it is not a blanke
 prerequisite for accepting the explicitly synthetic 3A M1 scope. Repeat combined
 verification after runtime changes. No merge or full-platform acceptance is
 implied by the device result.
+
+
+## Business entry correction — source checks passed; device verification pending
+
+The new choice sheet includes a close control, primary Sign In action, outlined
+Register Your Business action, and quick-setup helper text over a dimmed/blurred
+brand background. Browser and phone chrome from the reference are excluded.
+Closing the sheet or pressing Android Back returns to role selection. Existing
+merchant logout/customer switching continues to clear the demo session.
+
+Registration uses the existing setup preview through a public `/register` UI
+route, without requiring demo login. Validation is local, with no account creation,
+approval or backend write. Sign In on that preview leads to the login screen;
+Android Back and Back to role selection exit to the main role selector. Real
+Keycloak login and merchant registration remain M2/M3 implementation work.
+
+The customer widget/device tests have been updated for the choice stage and
+registration entry. Verification with Flutter 3.47.7 / Dart 3.13.5 passed:
+dependency resolution, formatting, both full analyzers (zero issues), 38 Business
+tests and 6 customer flow tests. Customer analysis and all 6 tests passed again
+after the final typography/divider adjustment. A 390×844 widget render was
+visually inspected; this is not a device screenshot. Compact 320×568 layout with
+1.8× system text is covered by a passing widget test.
+
+[Correction verification log](evidence/business-auth-choice-checks.txt).
+Android APK compilation and physical-device checks for this correction remain
+pending. The earlier `8bbb471` device pass applies to the previous entry flow.
+Re-run the consolidated command above before accepting this update.

@@ -125,7 +125,9 @@ class LoginPage extends StatelessWidget {
 }
 
 class BusinessSetupPage extends StatefulWidget {
-  const BusinessSetupPage({super.key});
+  const BusinessSetupPage({super.key, this.registration = false, this.onExit});
+  final bool registration;
+  final VoidCallback? onExit;
   @override
   State<BusinessSetupPage> createState() => _BusinessSetupPageState();
 }
@@ -135,7 +137,7 @@ class _BusinessSetupPageState extends State<BusinessSetupPage> {
   bool submitted = false;
   @override
   Widget build(BuildContext context) => PageBody(
-    title: 'Business setup',
+    title: widget.registration ? 'Register Your Business' : 'Business setup',
     subtitle: 'Preview merchant onboarding',
     children: [
       Form(
@@ -202,9 +204,15 @@ class _BusinessSetupPageState extends State<BusinessSetupPage> {
           ),
         ),
       TextButton(
-        onPressed: () => context.go('/dashboard'),
-        child: const Text('Back to dashboard'),
+        onPressed: () =>
+            context.go(widget.registration ? '/login' : '/dashboard'),
+        child: Text(widget.registration ? 'Sign In' : 'Back to dashboard'),
       ),
+      if (widget.registration && widget.onExit != null)
+        TextButton(
+          onPressed: widget.onExit,
+          child: const Text('Back to role selection'),
+        ),
     ],
   );
 }

@@ -67,7 +67,8 @@ GoRouter businessRouter(
     refreshListenable: controller,
     redirect: (context, state) {
       final path = state.uri.path;
-      final public = path == '/onboarding' || path == '/login';
+      final public =
+          path == '/onboarding' || path == '/login' || path == '/register';
       if (controller.session == SessionStatus.signedOut) {
         if (path == '/') return '/onboarding';
         if (public) return null;
@@ -102,6 +103,14 @@ GoRouter businessRouter(
       page('/', (_) => WelcomePage(onExit: onExit)),
       page('/onboarding', (_) => WelcomePage(onExit: onExit)),
       page('/login', (_) => LoginPage(controller: controller, onExit: onExit)),
+      page(
+        '/register',
+        (_) => Scaffold(
+          body: SafeArea(
+            child: BusinessSetupPage(registration: true, onExit: onExit),
+          ),
+        ),
+      ),
       page(
         '/access-denied',
         (_) => Scaffold(
@@ -258,7 +267,12 @@ class _BusinessAppState extends State<BusinessApp> {
       }
     }
     if (!destinations.contains(path) &&
-        !['/login', '/onboarding', '/access-denied'].contains(path)) {
+        ![
+          '/login',
+          '/register',
+          '/onboarding',
+          '/access-denied',
+        ].contains(path)) {
       router.go('/dashboard');
       return;
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:faji_app/features/auth/presentation/screens/business_login_screen.dart';
 import 'package:faji_app/main.dart';
 
 Future<void> openRoles(WidgetTester tester) async {
@@ -15,6 +16,10 @@ Future<void> openRoles(WidgetTester tester) async {
 
 Future<void> openBusiness(WidgetTester tester) async {
   await tester.tap(find.text('Faji Business'));
+  await tester.pumpAndSettle();
+  expect(find.text('Grow your business with fajify'), findsOneWidget);
+  expect(find.text('Register Your Business'), findsOneWidget);
+  await tester.tap(find.text('Sign In'));
   await tester.pumpAndSettle();
   expect(find.text('Welcome to Faji Business'), findsOneWidget);
 }
@@ -83,10 +88,70 @@ void main() {
     tester,
   ) async {
     await openRoles(tester);
+    await tester.tap(find.text('Faji Business'));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Login as a user'), findsOneWidget);
     await openBusiness(tester);
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.text('Login as a user'), findsOneWidget);
     expect(find.text('Welcome to Faji Business'), findsNothing);
+  });
+
+  testWidgets('Business choice closes without opening a merchant session', (
+    tester,
+  ) async {
+    await openRoles(tester);
+    await tester.tap(find.text('Faji Business'));
+    await tester.pumpAndSettle();
+    expect(find.text('Grow your business with fajify'), findsOneWidget);
+    expect(find.text('Sign In'), findsOneWidget);
+    expect(find.text('Register Your Business'), findsOneWidget);
+    expect(find.byKey(const ValueKey('enter-demo')), findsNothing);
+    await tester.tap(find.byTooltip('Back to role selection'));
+    await tester.pumpAndSettle();
+    expect(find.text('Login as a user'), findsOneWidget);
+  });
+
+  testWidgets('Business registration is reachable without merchant login', (
+    tester,
+  ) async {
+    await openRoles(tester);
+    await tester.tap(find.text('Faji Business'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Register Your Business'));
+    await tester.pumpAndSettle();
+    expect(find.text('Register Your Business'), findsOneWidget);
+    expect(find.text('Business name'), findsOneWidget);
+    expect(find.text('Dashboard'), findsNothing);
+    expect(find.byKey(const ValueKey('enter-demo')), findsNothing);
+    await tester.ensureVisible(find.text('Sign In'));
+    await tester.tap(find.text('Sign In'));
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome to Faji Business'), findsOneWidget);
+  });
+
+  testWidgets('Business choices fit a compact screen with enlarged text', (
+    tester,
+  ) async {
+    await openRoles(tester);
+    await tester.tap(find.text('Faji Business'));
+    await tester.pumpAndSettle();
+    tester.view.physicalSize = const Size(320, 568);
+    final element = tester.element(find.text('Grow your business with fajify'));
+    final data = MediaQuery.of(element);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: data.copyWith(textScaler: const TextScaler.linear(1.8)),
+          child: const BusinessLoginScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Register Your Business'));
+    expect(tester.takeException(), isNull);
   });
 }

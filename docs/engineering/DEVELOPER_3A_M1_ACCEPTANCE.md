@@ -1,6 +1,6 @@
 # Developer 3A — M1 implementation and verification
 
-**Status:** M1 Business scaffold implemented; requested combined-app Android device checks passed on 23 October 2026. Remaining platform/manual checks are listed below; M2 live authentication is not accepted.
+**Status:** M1 Business scaffold implemented. Requested Android device checks passed at `8bbb471`; the subsequent Business login/registration choice correction requires fresh runtime verification. M2 live authentication is not accepted.
 **Branch:** `feat/m1-d3a-business-foundation`.
 
 ## Delivered behavior
@@ -154,3 +154,16 @@ checks or require all M2 engineering to finish before reviewing the M1 scaffold.
 PR #5 remains open and draft pending the team's scope/remaining-check review.
 No merge is performed or implied by this record. After a runtime change such as
 Firebase replacement, repeat combined-app verification at the new source commit.
+
+
+## Business choice correction — verification pending
+
+The subsequent runtime update replaces direct login entry with the supplied
+Sign In / Register Your Business choice sheet and adds public registration-preview
+navigation. The existing device report does not cover this change. Dependency resolution,
+formatting, both application analyzers (zero issues), 38 Business tests and 6
+customer tests passed on the correction source. Customer analysis/tests also
+passed after the final visual adjustment; a 390×844 widget render was inspected.
+APK compilation and device checks remain pending. See the
+[integration guide](BUSINESS_MAIN_APP_INTEGRATION.md#business-entry-correction--source-checks-passed-device-verification-pending)
+and [verification log](evidence/business-auth-choice-checks.txt).
