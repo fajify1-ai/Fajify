@@ -9,7 +9,14 @@ if [[ ! -f pnpm-lock.yaml ]]; then
  echo "BLOCKED: pnpm-lock.yaml missing. Generate/review/commit before acceptance." >&2
  exit 2
 fi
+if [[ "${1:-}" == "--acceptance" && ( -z "${FAJI_DATABASE_URL:-}" || -z "${REDIS_URL:-}" ) ]]; then
+ echo "BLOCKED: acceptance requires disposable PostgreSQL/PostGIS and Redis URLs" >&2
+ exit 2
+fi
 corepack pnpm install --frozen-lockfile
+if [[ -n "${FAJI_DATABASE_URL:-}" ]]; then
+ corepack pnpm --filter @faji/database exec tsx scripts/disposable-target.ts
+fi
 corepack pnpm --filter @faji/api typecheck
 corepack pnpm --filter @faji/api lint
 corepack pnpm --filter @faji/api build
@@ -36,6 +43,7 @@ S3_BUCKET="${S3_BUCKET:-faji-contracts}" \
 corepack pnpm --filter @faji/api contracts
 node -e "const a=require('./packages/api_contracts/openapi.json');if(!a.paths['/api/v1/health']||!a.paths['/api/v1/health/ready'])process.exit(1)"
 node tooling/smoke-d1-m1.mjs
+if [[ -n "${FAJI_DATABASE_URL:-}" ]]; then node tooling/smoke-d1-m1.mjs --database-unavailable; fi
 corepack pnpm audit --audit-level high
 if [[ -z "${FAJI_DATABASE_URL:-}" || -z "${REDIS_URL:-}" ]]; then
  echo "PASS: local verification. PENDING: Milestone 1 acceptance requires PostgreSQL/PostGIS and Redis integration."

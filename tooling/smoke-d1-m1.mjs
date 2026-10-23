@@ -9,9 +9,10 @@ socket.listen(0,'127.0.0.1');
 await once(socket,'listening');
 const port=socket.address().port;
 await new Promise(resolve=>socket.close(resolve));
+const unavailable=process.argv.includes("--database-unavailable");
 const child=spawn(process.execPath,['apps/api/dist/main.js'],{
  env:{...process.env,NODE_ENV:'test',PORT:String(port),
-  FAJI_DATABASE_URL:process.env.FAJI_DATABASE_URL||'postgresql://localhost:1/faji_smoke',
+  FAJI_DATABASE_URL:unavailable?'postgresql://smoke:synthetic@127.0.0.1:1/faji_smoke':(process.env.FAJI_RUNTIME_DATABASE_URL||process.env.FAJI_DATABASE_URL||'postgresql://localhost:1/faji_smoke'),
   REDIS_URL:process.env.REDIS_URL||'redis://localhost:1',
   KEYCLOAK_ISSUER:process.env.KEYCLOAK_ISSUER||'http://localhost:8080/realms/faji',
   KEYCLOAK_AUDIENCE:process.env.KEYCLOAK_AUDIENCE||'faji-api',
@@ -32,7 +33,12 @@ try {
  assert.equal(live.headers.get('x-request-id'),'compiled_smoke');
  assert.equal((await live.json()).status,'ok');
  const ready=await fetch(`${url}/ready`,{signal:AbortSignal.timeout(5000)});
- assert.equal(ready.status,process.env.FAJI_DATABASE_URL?200:503);
+ assert.equal(ready.status,!unavailable && process.env.FAJI_DATABASE_URL?200:503);
+ if(ready.status===503){
+  const body=await ready.text();
+  assert.ok(!body.includes('synthetic') && !body.includes('postgresql://'));
+  assert.equal(JSON.parse(body).error.code,'SERVICE_UNAVAILABLE');
+ }
  const missing=await fetch(`http://127.0.0.1:${port}/api/v1/unknown`);
  assert.equal(missing.status,404);
  assert.equal((await missing.json()).error.code,'NOT_FOUND');
