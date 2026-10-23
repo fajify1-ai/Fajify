@@ -279,15 +279,15 @@ The seven supplied images establish the Business visual direction. Apply their a
 
 | Reference file | Screen | Implementation location |
 | --- | --- | --- |
-| `457536.jpg` | Business dashboard | `/dashboard` and shared merchant header/navigation |
-| `457537.jpg` | Reservations calendar | `/reservations` with calendar/list modes |
-| `457538.jpg` | Orders | `/orders`, filter chips and detail/local-action flow |
-| `457539.jpg` | Menu | `/menu`, six fixture items and availability switches |
-| `457540.jpg` | Services, upper section | `/services`, summary and first capability cards |
-| `457541.jpg` | Services, lower section | Continuation of the same `/services` screen, including account actions |
-| `457489.jpg` | Shared brand/role-selection screen | Brand reference and Business entry handoff with D2 |
+| [457536.jpg](../design/business-m1/457536.jpg) | Business dashboard | `/dashboard` and shared merchant header/navigation |
+| [457537.jpg](../design/business-m1/457537.jpg) | Reservations calendar | `/reservations` with calendar/list modes |
+| [457538.jpg](../design/business-m1/457538.jpg) | Orders | `/orders`, filter chips and detail/local-action flow |
+| [457539.jpg](../design/business-m1/457539.jpg) | Menu | `/menu`, six fixture items and availability switches |
+| [457540.jpg](../design/business-m1/457540.jpg) | Services, upper section | `/services`, summary and first capability cards |
+| [457541.jpg](../design/business-m1/457541.jpg) | Services, lower section | Continuation of the same `/services` screen, including account actions |
+| [457489.jpg](../design/business-m1/457489.jpg) | Shared brand/role-selection screen | Brand reference and Business entry handoff with D2 |
 
-The source images have been supplied separately. Preserve their filenames in the handoff so this table stays usable. Login, business setup, earnings and profile do not have dedicated screenshots here: implement them using the same component system and the roadmap scope, and identify them as inferred layouts in review material.
+The seven source images are committed in [`docs/design/business-m1/`](../design/business-m1/README.md). Use the reference index to inspect each image locally or on GitHub. Login, business setup, earnings and profile do not have dedicated screenshots here: implement them using the same component system and the roadmap scope, and identify them as inferred layouts in review material.
 
 #### 14.2 Shared layout and visual rules
 
