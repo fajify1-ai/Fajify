@@ -1,17 +1,21 @@
 # Developer 1 — Milestone 2 identity and authorization
 
-**Branch:** `feat/m2-d1-keycloak-auth-authorization` — implementation in progress, not accepted.
+**Status: implementation in progress, not accepted.** Branch: `feat/m2-d1-keycloak-auth-authorization`.
 
-Implemented engineering increments:
-- RS256 JWT/JWKS verification with exact Keycloak issuer and API audience, expiry and issued-at validation.
-- Authentication and coarse-grained roles guards with negative security tests.
-- Forward PostgreSQL migration `0002_identity_authorization.sql`: `account_access`, `resource_memberships`, `identity_security_events`.
-- PostgreSQL-backed account suspension and access-token-issued-at revocation cutoff; resource membership checks scoped to business, branch or dispatch area.
-- Protected `GET /api/v1/auth/me` endpoint requiring both validated bearer access token and active Faji account; no mock login or password collection.
-- Disposable Keycloak realm template enabling email verification, reset password, public OIDC clients, and API audience mapper.
+Implemented:
+- RS256 JWT verification against exact issuer and API audience; expiry/issued-at validation.
+- Coarse role guards, server-side account suspension and resource membership guards.
+- Forward migration `0002_identity_authorization.sql` for account access, resource memberships and audit events.
+- Protected `GET /api/v1/auth/me`, requiring validated identity and active account.
+- Trusted internal access service methods for fail-closed provisioning (new accounts suspended), suspension/reinstatement with token revocation cutoff, and resource membership changes. All writes are transactional with an audit event in the same database transaction. **These internal commands are not public HTTP endpoints and require authoritative administrator or approval workflow checks before invocation.**
+- Development Keycloak realm template and mobile client audience mappings.
 
-**Important boundaries:** Keycloak handles credentials and self-service login/recovery. Never implement password-grant login in NestJS. Controllers with protected actions must explicitly compose IdentityGuard, AccountGuard, and appropriate role/resource guards. Existing public health endpoints intentionally stay unauthenticated.
+Still required before acceptance:
+- Verify local migration 0002 with real PostgreSQL and privilege boundaries.
+- Implement a trusted Keycloak-to-Faji provisioning path; never trust arbitrary callers or automatic privilege assignment.
+- Wire server-side admin approval workflows, privileged MFA checks and subject/session revocation against Keycloak.
+- Run actual disposable Keycloak PKCE registration, email verification, recovery, refresh, logout, revocation and MFA tests.
+- Wire domain endpoints to identity, account, role and resource guards; add rate limits and operational security event monitoring.
+- Re-run all API/backend suites and security checks on exact branch commit with zero required skips.
 
-**Unresolved before acceptance:** resource membership approval/provisioning workflows and audit writing, full Keycloak realm import verification, secure PKCE client sessions, active session revocation/logout (JWT revocation cutoff alone is insufficient), MFA for privileged accounts, throttling and abuse controls, database integration on migration 0002, and full end-to-end verification. Do not mark milestone accepted or merge until these tests pass.
-
-Unit/API verification command: `pnpm --filter @faji/api typecheck && pnpm --filter @faji/api lint && pnpm --filter @faji/api test && pnpm --filter @faji/api build`. The suite must be rerun locally on the exact commit; no successful execution is claimed in this document.
+`main` and mobile workspaces are outside this branch's intended change scope.
