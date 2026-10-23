@@ -1,0 +1,15 @@
+v22.23.2
+BLOCKED: acceptance requires disposable PostgreSQL/PostGIS and Redis URLs
+PASS: missing-service acceptance refused with exit 2
+PASS: migration CLI rejects unreachable database, exits, and withholds connection credentials
+
+> @faji/database@0.1.0 migrate /home/wilberry/Desktop/project/Fajify/packages/database
+> tsx scripts/migrate.ts
+
+Migration failed; connection details withheld. Check migration SQL and database availability.
+/home/wilberry/Desktop/project/Fajify/packages/database:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @faji/database@0.1.0 migrate: `tsx scripts/migrate.ts`
+Exit status 1
+PASS: no remaining private test PostgreSQL/Redis processes or cluster directories
+PASS: changed files and evidence checked for private-key, GitHub-token, AWS-key and generated database-credential patterns
+PASS: temporary relocated installation and only this run's downloaded package archives removed

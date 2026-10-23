@@ -1,0 +1,1 @@
+export const DATABASE_POOL=Symbol('FAJI_DATABASE_POOL');

@@ -1,0 +1,9 @@
+PASS: bash -n tooling/run-d1-m1-disposable.sh
+PASS: bash -n tooling/verify-d1-m1.sh
+PASS: Redis wait expression uses the required space
+v22.23.2
+BLOCKED: acceptance requires disposable PostgreSQL/PostGIS and Redis URLs
+PASS: acceptance refuses absent required service URLs with exit 2
+PASS: no remaining private cluster directories or server processes using the temporary installation
+PASS: temporary PostGIS installation and downloaded packages removed
+PASS: scoped changed-file/evidence secret-pattern scan
