@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 cd "$(dirname "$0")/.."
-test "$(git branch --show-current)" = "feat/m1-d1-backend-foundation" || { echo "Wrong branch"; exit 1; }
+test "$(git branch --show-current)" = "feat/m1-d1-backend-clean-integration" || { echo "Wrong branch"; exit 1; }
 command -v node >/dev/null
 command -v corepack >/dev/null
 node --version

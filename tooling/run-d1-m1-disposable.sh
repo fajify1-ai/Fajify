@@ -8,7 +8,10 @@ run_dir=$(mktemp -d /tmp/fajify-m1-test.XXXXXXXX)
 chmod 700 "$run_dir"
 cleanup() {
  if [[ -f "$run_dir/data/postmaster.pid" ]]; then "$pg_bin/pg_ctl" -D "$run_dir/data" -m fast -w stop >/dev/null; fi
- if [[ -n "${redis_pid:-}" ]] && kill -0 "$redis_pid" 2>/dev/null; then kill "$redis_pid"; wait "$redis_pid" || true; fi
+ if [[ -n "${redis_pid:-}" ]] && kill -0 "$redis_pid" 2>/dev/null; then
+  kill "$redis_pid"
+  wait "$redis_pid" || true
+ fi
  rm -rf -- "$run_dir"
  echo 'CLEANUP: private PostgreSQL cluster and Redis stopped; run directory removed'
 }
