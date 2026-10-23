@@ -56,7 +56,7 @@ export class KeycloakAccessTokenVerifier implements IdentityVerifier {
    const now=this.now();
    if(typeof c.exp!=='number'||!Number.isInteger(c.exp)||c.exp<=now||c.exp>now+86400)return fail();
    if(c.nbf!==undefined&&(typeof c.nbf!=='number'||c.nbf>now))return fail();
-   if(c.iat!==undefined&&(typeof c.iat!=='number'||c.iat>now+60))return fail();
+   if(typeof c.iat!=='number'||!Number.isInteger(c.iat)||c.iat>now+60||c.iat>c.exp)return fail();
    let keys=await this.keys();
    let selected=keys.find(k=>k.kid===h.kid);
    if(!selected){keys=await this.keys(true);selected=keys.find(k=>k.kid===h.kid);}
@@ -67,7 +67,7 @@ export class KeycloakAccessTokenVerifier implements IdentityVerifier {
    const realm=isRecord(c.realm_access)?safeRoles(c.realm_access.roles):[];
    const resources=isRecord(c.resource_access)?c.resource_access:{};
    const client=isRecord(resources[this.audience])?safeRoles(resources[this.audience].roles):[];
-   return {subject:c.sub,issuer:this.issuer,audience:audiences as string[],expiresAt:c.exp,roles:[...new Set([...realm,...client])]};
+   return {subject:c.sub,issuer:this.issuer,audience:audiences as string[],expiresAt:c.exp,issuedAt:c.iat,roles:[...new Set([...realm,...client])]};
   }catch{return fail();}
  }
 }

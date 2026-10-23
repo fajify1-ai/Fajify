@@ -19,7 +19,7 @@ test('identity guard rejects forged or unverified bearer',async()=>{
  await assert.rejects(new IdentityGuard(verifier).canActivate(ctx('Bearer forged')), {status:401});
 });
 test('verified subject passes through dependency-injected verifier',async()=>{
- const identity={subject:'immutable-subject',issuer:'https://issuer.example',audience:['faji-api'],expiresAt:9999999999,roles:[]};
+ const identity={subject:'immutable-subject',issuer:'https://issuer.example',audience:['faji-api'],expiresAt:9999999999,issuedAt:1700000000,roles:[]};
  const verifier:IdentityVerifier={verifyAccessToken:async(token)=>{assert.equal(token,'verified.jwt.token');return identity;}};
  const request={headers:{authorization:'Bearer verified.jwt.token'},identity:undefined as unknown};
  const context={switchToHttp:()=>({getRequest:()=>request})} as any;
