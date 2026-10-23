@@ -54,8 +54,8 @@ class FajiApp extends StatelessWidget {
           settings: settings,
           opaque: false,
           barrierColor: Colors.transparent,
-          pageBuilder: (_, __, ___) => const UserAuthScreen(),
-          transitionsBuilder: (_, animation, __, child) =>
+          pageBuilder: (_, _, _) => const UserAuthScreen(),
+          transitionsBuilder: (_, animation, _, child) =>
               FadeTransition(opacity: animation, child: child),
         );
       }

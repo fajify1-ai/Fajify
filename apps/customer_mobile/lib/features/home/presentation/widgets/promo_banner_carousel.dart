@@ -127,7 +127,7 @@ class _PromoSlide extends StatelessWidget {
         Image.asset(
           promo.imagePath,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
+          errorBuilder: (_, _, _) => Container(
             color: FajiColors.borderDark,
             child: const Icon(
               Icons.image_not_supported_outlined,

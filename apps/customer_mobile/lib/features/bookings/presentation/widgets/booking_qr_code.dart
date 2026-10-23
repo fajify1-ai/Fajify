@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/faji_colors.dart';
 import '../../data/models/confirmed_booking.dart';
 
 class BookingQrCode extends StatelessWidget {
@@ -15,9 +14,7 @@ class BookingQrCode extends StatelessWidget {
       height: 152,
       padding: const EdgeInsets.all(10),
       color: Colors.white,
-      child: CustomPaint(
-        painter: _PlaceholderQrPainter(seed: booking.id),
-      ),
+      child: CustomPaint(painter: _PlaceholderQrPainter(seed: booking.id)),
     );
   }
 }
@@ -34,7 +31,8 @@ class _PlaceholderQrPainter extends CustomPainter {
     for (var row = 0; row < 21; row++) {
       for (var column = 0; column < 21; column++) {
         final value = seed.codeUnitAt((row * 21 + column) % seed.length);
-        final finder = _finder(row, column, 0, 0) ||
+        final finder =
+            _finder(row, column, 0, 0) ||
             _finder(row, column, 14, 0) ||
             _finder(row, column, 0, 14);
         if (finder || (value + row * 3 + column * 5) % 7 < 3) {
@@ -51,7 +49,11 @@ class _PlaceholderQrPainter extends CustomPainter {
     final r = row - startRow;
     final c = column - startColumn;
     if (r < 0 || r > 6 || c < 0 || c > 6) return false;
-    return r == 0 || r == 6 || c == 0 || c == 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4);
+    return r == 0 ||
+        r == 6 ||
+        c == 0 ||
+        c == 6 ||
+        (r >= 2 && r <= 4 && c >= 2 && c <= 4);
   }
 
   @override

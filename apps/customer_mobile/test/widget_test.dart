@@ -4,7 +4,7 @@ import 'package:faji_app/main.dart';
 void main() {
   testWidgets('role selection actions navigate', (tester) async {
     await tester.pumpWidget(const FajiApp());
-    await tester.pump(const Duration(milliseconds: 1200));
+    await tester.pumpAndSettle();
 
     expect(find.text('Plan. Book. Enjoy.'), findsOneWidget);
     expect(find.text('Login as a user'), findsOneWidget);

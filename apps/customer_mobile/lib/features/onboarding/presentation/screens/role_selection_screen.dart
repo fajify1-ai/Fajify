@@ -232,7 +232,7 @@ class _DotPattern extends StatelessWidget {
               height: 6,
               margin: const EdgeInsets.only(right: 8, bottom: 9),
               decoration: BoxDecoration(
-                color: FajiColors.primary.withOpacity(.26),
+                color: FajiColors.primary.withValues(alpha: .26),
                 shape: BoxShape.circle,
               ),
             ),

@@ -265,7 +265,7 @@ class _UserAuthScreenState extends State<UserAuthScreen>
             Positioned.fill(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                child: Container(color: Colors.black.withOpacity(.54)),
+                child: Container(color: Colors.black.withValues(alpha: .54)),
               ),
             ),
             Align(
@@ -868,9 +868,10 @@ class _RegisterFields extends StatelessWidget {
         child: child!,
       ),
     );
-    if (date != null)
+    if (date != null) {
       dob.text =
           '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}/${date.year}';
+    }
   }
 }
 

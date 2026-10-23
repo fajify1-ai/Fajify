@@ -24,7 +24,7 @@ class _AnimatedPrimaryLoginButtonState
         color: FajiColors.primary,
         borderRadius: BorderRadius.circular(21),
         elevation: 12,
-        shadowColor: FajiColors.primary.withOpacity(.4),
+        shadowColor: FajiColors.primary.withValues(alpha: .4),
         child: InkWell(
           borderRadius: BorderRadius.circular(21),
           onTap: widget.onTap,

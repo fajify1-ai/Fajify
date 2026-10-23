@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/theme/faji_colors.dart';
 import '../../../home/presentation/screens/plan_for_me_step_one_screen.dart';
-import '../../../plans/data/models/plan_option.dart';
 import '../../data/models/booking_draft.dart';
 
 class BookingTimeSheetResult {
@@ -36,11 +35,11 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
   }
 
   DateTime _startFor(BookingTimePeriod period) => DateTime(
-        widget.draft.bookingDate.year,
-        widget.draft.bookingDate.month,
-        widget.draft.bookingDate.day,
-        period.startHour,
-      );
+    widget.draft.bookingDate.year,
+    widget.draft.bookingDate.month,
+    widget.draft.bookingDate.day,
+    period.startHour,
+  );
 
   DateTime? _endFor(BookingTimePeriod period) => period.endHour == null
       ? null
@@ -125,9 +124,9 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
             ),
             const SizedBox(height: 10),
             InkWell(
-              onTap: () => Navigator.of(context).pop(
-                const BookingTimeSheetResult.backToDate(),
-              ),
+              onTap: () =>
+                  Navigator.of(context)
+                      .pop(const BookingTimeSheetResult.backToDate()),
               borderRadius: BorderRadius.circular(8),
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -148,7 +147,10 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 13,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xff2d0d0e),
                   border: Border.all(color: FajiColors.primary),
@@ -203,8 +205,13 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
                   ),
                 ),
                 child: Text(
-                  _selectedPeriod == null ? 'Select a time to confirm' : 'Continue',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  _selectedPeriod == null
+                      ? 'Select a time to confirm'
+                      : 'Continue',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -252,8 +259,8 @@ class _TimeOption extends StatelessWidget {
                 selected ? Icons.radio_button_checked : Icons.radio_button_off,
                 color: enabled
                     ? selected
-                        ? FajiColors.primary
-                        : FajiColors.textSecondaryDark
+                          ? FajiColors.primary
+                          : FajiColors.textSecondaryDark
                     : const Color(0xff414141),
                 size: 22,
               ),

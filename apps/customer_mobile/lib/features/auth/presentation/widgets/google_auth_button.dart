@@ -31,7 +31,7 @@ class GoogleAuthButton extends StatelessWidget {
               Text(
                 'Continue with Google',
                 style: TextStyle(
-                  color: FajiColors.textPrimaryDark.withOpacity(.9),
+                  color: FajiColors.textPrimaryDark.withValues(alpha: .9),
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
