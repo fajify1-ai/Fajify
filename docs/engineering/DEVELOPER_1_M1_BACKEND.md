@@ -1,7 +1,7 @@
 # Developer 1 — Milestone 1 backend setup and acceptance
 
 ## Implementation status
-Foundation and dependency lockfile committed. See [verification and acceptance report](DEVELOPER_1_M1_ACCEPTANCE.md). Developer 1 Milestone 1 is accepted against implementation commit `79a5531`, including isolated PostgreSQL/PostGIS integration and full regressions; the linked report records evidence and scope. No push, merge or Milestone 2 work has been performed.
+Foundation and dependency lockfile committed. See [verification and acceptance report](DEVELOPER_1_M1_ACCEPTANCE.md). Developer 1 Milestone 1 is accepted against clean integration commit `c267372`, including isolated PostgreSQL/PostGIS integration and full regressions; the linked report records evidence and scope. Delivery continues through PR #4; no merge or Milestone 2 work has been performed.
 
 ## Setup
 Use Node.js 22 and pnpm 9.15.9 through Corepack. Install with `corepack pnpm install --frozen-lockfile`. Dependency updates must update and commit `pnpm-lock.yaml`.
