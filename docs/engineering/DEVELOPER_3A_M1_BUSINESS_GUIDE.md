@@ -23,9 +23,11 @@ Read these files in order:
 
 At the reviewed revision, Business has only a minimal `main.dart`, `pubspec.yaml` and README. Its manifest declares `faji_business`, Dart `>=3.5.0 <4.0.0`, `go_router: ^14.0.0`, Flutter tests and Flutter lints. Android, iOS and web runners have not been initialized. The three shared Flutter packages are scaffolds; their existence does not mean reusable components or clients are implemented.
 
-**Developer 2 reference:** PR #1 imports the legacy customer app and records provenance. It is not evidence of accepted runtime behavior or a completed shared design system. Its customer entrypoint initializes Firebase and its manifest includes Firebase Auth/Firestore. Those legacy dependencies must not be copied into Business. Business targets Keycloak identity and the NestJS API backed by PostgreSQL; the mobile client never connects directly to PostgreSQL.
+**Current integration baseline (23 October 2026):** Developer 2's accepted cleanup is on `main` through PR #6 at `2533b29fbfeef35bf9b290d81e0c18b30e6dee40`. PR #5 incorporates that baseline and embeds Business inside the main app; the standalone Business runner remains available. See [current acceptance evidence](DEVELOPER_3A_M1_ACCEPTANCE.md) for the reported Android device pass and outstanding checks.
 
-The parallel-development document currently says to branch from the migration integration branch while PR #1 is pending. Follow the team's current integration-base decision. If that instruction has not been superseded, use the current PR #1 branch as the feature base and keep the customer import out of 3A's own change set. Do not silently substitute a different base or merge PR #1 as part of this work.
+**Historical Developer 2 reference:** PR #1 imports the legacy customer app and records provenance. It is not evidence of accepted runtime behavior or a completed shared design system. Its customer entrypoint initializes Firebase and its manifest includes Firebase Auth/Firestore. Those legacy dependencies must not be copied into Business. Business targets Keycloak identity and the NestJS API backed by PostgreSQL; the mobile client never connects directly to PostgreSQL.
+
+For new work, use current `main` as the base. Continue PR #5 on its existing reviewed branch. The earlier instruction to use the pending PR #1 import base is superseded by the accepted PR #6 integration; do not re-import customer code or merge another workstream as part of 3A delivery.
 
 ### 3. Ownership and coordination
 

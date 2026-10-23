@@ -1,6 +1,6 @@
 # Developer 3A — M1 implementation and verification
 
-**Status:** Business scaffold implemented; platform/browser acceptance remains open.
+**Status:** M1 Business scaffold implemented; requested combined-app Android device checks passed on 23 October 2026. Remaining platform/manual checks are listed below; M2 live authentication is not accepted.
 **Branch:** `feat/m1-d3a-business-foundation`.
 
 ## Delivered behavior
@@ -18,7 +18,7 @@ icons, launch assets, tests, setup documentation and a consolidated verification
 script are included. No shared package, customer source or backend implementation
 is changed by this work.
 
-## Verification evidence
+## Historical standalone verification evidence
 
 **Verified source commit:** `768a17f1997c69a4c8b566f2b4304acfb973b848`.
 The following evidence commit changes documentation only.
@@ -56,7 +56,7 @@ The Android Gradle configuration limits the heap to 2 GiB and workers to two for
 development laptops. Re-run the Android gate on a machine with working dependency
 access. Any later native compilation failure must be fixed and reverified.
 
-## Remaining acceptance work
+## Historical standalone follow-up checklist
 
 1. Run `bash tooling/verify-d3a-m1.sh --android` with the Android toolchain and
    working Gradle dependency access; launch the resulting app on a device/emulator.
@@ -108,6 +108,49 @@ The combined verification script passes dependency resolution, formatting,
 widget tests**, structure and whitespace checks. See
 [combined verification log](evidence/business-mainline-consolidated.txt).
 
-Android compilation and combined-app physical-device acceptance have not been
-run in this environment. Run the consolidated command in the integration guide
-on the connected Android phone. PR #5 remains draft for those checks.
+The earlier local environment did not run Android compilation or the combined-app
+physical-device checks. The later product-owner report below supersedes that
+pending status for the requested combined Android scope only.
+
+
+## Combined Android physical-device result — 23 October 2026
+
+The product owner supplied a passing verification report for source commit
+`8bbb47195d71acfe6ce6fe25cab3ff7447e51557`, the PR #5 implementation head
+at the time of testing. The report was supplied by the owner; the reviewer did
+not independently operate the phone.
+
+| Check | Reported result |
+| --- | --- |
+| Connected Android device detected through ADB | Passed |
+| Business static analysis | Passed |
+| Business controller/widget tests | 38 passed |
+| Customer static analysis | Passed |
+| Customer/Business embedding tests | 3 passed |
+| Combined Android debug APK build | Passed |
+| Physical-device integration test | Passed |
+| APK installation and cold launch | Passed |
+
+The reported device flow opened Business from the main application, visited its
+tabs and returned safely. The submitted summary does not provide the device/OS,
+APK hash or raw log attachment location; those details are not inferred from the
+earlier Developer 2 smoke test. Unrequested scenarios remain unverified.
+
+The standalone Android dependency-download failure above is historical. This
+combined APK pass does not assert a new standalone APK, iOS build or browser
+walkthrough pass. Manual hardware Back, background/resume, offline demo,
+keyboard/scrolling and large-text device coverage remain unverified unless the
+underlying evidence explicitly demonstrates them. The prior automated widget
+coverage remains separate from physical-device evidence.
+
+### Acceptance boundary and remaining review
+
+[M1 scope](../roadmap/MILESTONE_1.md) assigns 3A scaffolding and auth hooks;
+[M2](MILESTONES.md) owns working OIDC, secure sessions and authorization.
+Customer Firebase removal is a separate D2 migration dependency for the final
+combined application. It does not, by itself, invalidate the passing 3A M1 demo
+checks or require all M2 engineering to finish before reviewing the M1 scaffold.
+
+PR #5 remains open and draft pending the team's scope/remaining-check review.
+No merge is performed or implied by this record. After a runtime change such as
+Firebase replacement, repeat combined-app verification at the new source commit.

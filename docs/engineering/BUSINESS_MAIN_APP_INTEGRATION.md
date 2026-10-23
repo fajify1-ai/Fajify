@@ -64,5 +64,17 @@ retaining the obsolete expectation that Business opens a placeholder.
 
 Both applications now analyze with zero issues; 38 Business tests and 3 main-app
 widget tests pass on the combined source. All backend files and other customer
-implementation files retain their mainline versions. Physical-device acceptance
-of the combined APK remains pending.
+implementation files retain their mainline versions.
+
+The product owner reported the combined Android debug build, physical-device
+integration test, installation and cold launch passed at
+`8bbb47195d71acfe6ce6fe25cab3ff7447e51557` on 23 October 2026. This covers
+the requested Business entry/tab/return scope; unrequested scenarios remain
+unverified. See the [current acceptance record](DEVELOPER_3A_M1_ACCEPTANCE.md#combined-android-physical-device-result--23-october-2026)
+for evidence provenance, missing metadata and remaining checks.
+
+M1 scaffold review and M2 identity acceptance are separate. Firebase replacement
+remains D2 migration work for the final combined application; it is not a blanket
+prerequisite for accepting the explicitly synthetic 3A M1 scope. Repeat combined
+verification after runtime changes. No merge or full-platform acceptance is
+implied by the device result.
