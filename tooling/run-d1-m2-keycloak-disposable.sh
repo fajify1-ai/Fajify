@@ -116,4 +116,4 @@ export FAJI_KC_ORIGIN="http://127.0.0.1:$kc_port"
 node tooling/keycloak-m2-lifecycle.mjs
 node tooling/keycloak-m2-email-acceptance.mjs
 echo "SOURCE: $(git rev-parse HEAD)"
-echo 'LIMITATION: user-facing registration, completing email links/password change, privileged MFA and authoritative access-token revocation still require acceptance.'
+echo 'LIMITATION: user-facing self-registration, privileged MFA and authoritative access-token revocation still require acceptance.'

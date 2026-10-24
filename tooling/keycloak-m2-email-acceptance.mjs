@@ -71,6 +71,10 @@ try{
  const user=await request(realmApi+'/users/'+encodeURIComponent(id),{headers},200);
  assert.equal((await user.json()).emailVerified,false);
  const userPath=realmApi+'/users/'+encodeURIComponent(id);
+ const previousPassword='Aa1!'+randomBytes(20).toString('base64url');
+ await request(userPath+'/reset-password',{method:'PUT',headers,body:JSON.stringify({
+  type:'password',value:previousPassword,temporary:false
+ })});
  const mobileClient='faji-customer-mobile';
  const mobileRedirect='com.faji.customer:/oauth/callback';
  const actionParams=new URLSearchParams({client_id:mobileClient,redirect_uri:mobileRedirect});
@@ -216,11 +220,8 @@ try{
  const updatedUser=await request(userPath,{headers},200);
  const remainingActions=(await updatedUser.json()).requiredActions??[];
  if(remainingActions.includes('UPDATE_PASSWORD'))throw Error('Password recovery did not complete: UPDATE_PASSWORD remains required');
- // Verify actual credentials through the Keycloak admin API without enabling
- // resource-owner-password grants for mobile clients. This endpoint validates
- // a supplied password against Keycloak's credential store.
- // A credential listing cannot validate plaintext passwords. Perform two
- // independent authorization-code browser login attempts instead.
+ // Verify credentials using independent browser Authorization Code flows.
+ // Public mobile clients retain PKCE and have no direct password grant.
  async function loginResult(candidatePassword){
   const verifier=randomBytes(32).toString('base64url');
   const {createHash}=await import('node:crypto');
@@ -263,8 +264,10 @@ try{
  }
  assert.equal(await loginResult(updatedPassword),true,'new password must authenticate');
  console.log('PASS: new password authenticates through real Keycloak authorization flow');
- console.log('PASS: password recovery action cleared after form submission (password authentication not yet verified)');
- console.log('LIMITATION: self-registration form submission, previous password rejection, MFA, and API-side revocation remain pending');
+ assert.equal(await loginResult(previousPassword),false,'previous password must be rejected after recovery');
+ console.log('PASS: previous password rejected after recovery');
+ console.log('PASS: password recovery action cleared and updated credentials authenticated');
+ console.log('LIMITATION: self-registration form submission, MFA, and API-side revocation remain pending');
 }finally{
  for(const socket of sockets)socket.destroy();
  await new Promise(resolve=>server.close(resolve));
