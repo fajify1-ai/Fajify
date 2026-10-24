@@ -216,8 +216,55 @@ try{
  const updatedUser=await request(userPath,{headers},200);
  const remainingActions=(await updatedUser.json()).requiredActions??[];
  if(remainingActions.includes('UPDATE_PASSWORD'))throw Error('Password recovery did not complete: UPDATE_PASSWORD remains required');
+ // Verify actual credentials through the Keycloak admin API without enabling
+ // resource-owner-password grants for mobile clients. This endpoint validates
+ // a supplied password against Keycloak's credential store.
+ // A credential listing cannot validate plaintext passwords. Perform two
+ // independent authorization-code browser login attempts instead.
+ async function loginResult(candidatePassword){
+  const verifier=randomBytes(32).toString('base64url');
+  const {createHash}=await import('node:crypto');
+  const challenge=createHash('sha256').update(verifier).digest('base64url');
+  const authUrl=new URL(origin+'/realms/faji/protocol/openid-connect/auth');
+  for(const [key,value] of Object.entries({
+   client_id:mobileClient,redirect_uri:mobileRedirect,response_type:'code',scope:'openid',
+   state:randomBytes(12).toString('hex'),code_challenge:challenge,code_challenge_method:'S256'
+  }))authUrl.searchParams.set(key,value);
+  const jar=new Map();
+  const save=res=>{for(const cookie of res.headers.getSetCookie?.()??[]){
+   const part=cookie.split(';',1)[0],i=part.indexOf('=');if(i>0)jar.set(part.slice(0,i),part.slice(i+1));
+  }};
+  const cookies=()=>[...jar].map(([k,v])=>k+'='+v).join('; ');
+  let res=await fetch(authUrl,{redirect:'manual'});save(res);
+  for(let i=0;i<6&&[301,302,303].includes(res.status);i++){
+   const target=new URL(res.headers.get('location'),origin);
+   assert.equal(target.origin,origin);
+   res=await fetch(target,{redirect:'manual',headers:{cookie:cookies()}});save(res);
+  }
+  assert.equal(res.status,200,'login challenge must render');
+  const page=await res.text();
+  const forms=[...page.matchAll(/<form\\b([^>]*)>/gi)].map(m=>m[1]);
+  const loginForm=forms.find(v=>/\\bid=["']kc-form-login["']/i.test(v))??forms.find(v=>/login-actions\\/authenticate/.test(v));
+  assert.ok(loginForm,'login form required for credential verification');
+  const endpoint=loginForm.match(/\\baction=["']([^"']+)["']/i)?.[1];
+  assert.ok(endpoint);
+  const actionUrl=new URL(endpoint.replaceAll('&amp;','&'),origin);
+  assert.equal(actionUrl.origin,origin);
+  res=await fetch(actionUrl,{method:'POST',redirect:'manual',headers:{
+   'content-type':'application/x-www-form-urlencoded',cookie:cookies()
+  },body:form({username,password:candidatePassword,credentialId:''})});save(res);
+  for(let i=0;i<8&&[301,302,303].includes(res.status);i++){
+   const dest=new URL(res.headers.get('location'),origin);
+   if(dest.protocol==='com.faji.customer:')return Boolean(dest.searchParams.get('code'));
+   assert.equal(dest.origin,origin,'unexpected login destination');
+   res=await fetch(dest,{redirect:'manual',headers:{cookie:cookies()}});save(res);
+  }
+  return false;
+ }
+ assert.equal(await loginResult(updatedPassword),true,'new password must authenticate');
+ console.log('PASS: new password authenticates through real Keycloak authorization flow');
  console.log('PASS: password recovery action cleared after form submission (password authentication not yet verified)');
- console.log('LIMITATION: self-registration form submission, old/new password login comparison, MFA, and API-side revocation remain pending');
+ console.log('LIMITATION: self-registration form submission, previous password rejection, MFA, and API-side revocation remain pending');
 }finally{
  for(const socket of sockets)socket.destroy();
  await new Promise(resolve=>server.close(resolve));
