@@ -342,15 +342,41 @@ try{
  const registeredState=await registeredDetails.json();
  const actions=registeredState.requiredActions??[];
  console.log('INFO: public signup required actions: '+(actions.length?actions.join(', '):'none'));
- const registrationEmailMessages=messages.filter(message=>message.includes(registerEmail));
+ // Submission may continue through redirects before Keycloak dispatches mail.
+ let registrationResult=submitRegistration;
+ let registrationStatus=submitRegistration.status;
+ for(let i=0;i<8&&[301,302,303].includes(registrationResult.status);i++){
+  const location=registrationResult.headers.get('location');
+  assert.ok(location,'registration redirect must have location');
+  const target=new URL(location,origin);
+  if(target.protocol===new URL(mobileRedirect).protocol)break;
+  const safeTarget=safeUrl(target);
+  registrationResult=await fetch(safeTarget,{redirect:'manual',headers:{cookie:registrationCookieHeader()}});
+  saveRegistrationCookies(registrationResult);
+  registrationStatus=registrationResult.status;
+ }
+ console.log('INFO: registration final HTTP '+registrationStatus);
+ let registrationEmailMessages=[];
+ for(let tick=0;tick<40;tick++){
+  registrationEmailMessages=messages.filter(message=>message.includes(registerEmail));
+  if(registrationEmailMessages.length)break;
+  await new Promise(resolve=>setTimeout(resolve,150));
+ }
+ console.log('INFO: public signup required actions: '+(actions.length?actions.join(', '):'none'));
  console.log('INFO: public signup email messages captured: '+registrationEmailMessages.length);
  assert.equal(registeredState.emailVerified,false,'new registration must remain unverified before email action');
  console.log('PASS: public registration HTML form creates a unique unverified Keycloak account');
- if(!hasPassword){
-  console.log('LIMITATION: registration has no inline password fields; inspect required actions before declaring credential enrollment complete');
-  if(!actions.includes('UPDATE_PASSWORD'))console.log('LIMITATION: no UPDATE_PASSWORD action on registered user; password enrollment may require a separate login/required-action flow');
+ assert.ok(actions.includes('VERIFY_EMAIL'),'signup must require verified email');
+ assert.ok(actions.includes('UPDATE_PASSWORD'),'signup without inline password must require password enrollment');
+ console.log('PASS: signup requires email verification and password enrollment');
+ if(registrationEmailMessages.length){
+  const registrationMailLink=linkFromMail(registrationEmailMessages[0]);
+  const confirmed=await followAction(registrationMailLink);
+  console.log('INFO: registration email action initial HTTP '+confirmed.response.status);
+  console.log('LIMITATION: registration email-link confirmation and UPDATE_PASSWORD completion still require acceptance');
+ }else{
+  console.log('LIMITATION: signup did not dispatch verification mail during bounded wait; required-action browser workflow must be completed');
  }
- if(!registrationEmailMessages.length)console.log('LIMITATION: no registration email observed at this point; registration notification/verification delivery requires separate acceptance');
  console.log('LIMITATION: privileged MFA, authoritative API-side revocation and integrated onboarding acceptance remain pending');
 }finally{
  for(const socket of sockets)socket.destroy();
