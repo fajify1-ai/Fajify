@@ -72,13 +72,29 @@ export KC_HOSTNAME="http://127.0.0.1:$kc_port"
 export JAVA_OPTS_APPEND="-Xms64m -Xmx384m"
 "$root/kc/bin/kc.sh" start-dev --import-realm --http-host=127.0.0.1 --http-port="$kc_port" >"$root/keycloak.log" 2>&1 &
 kc_pid=$!
+# First boot can spend substantial time rebuilding Quarkus and applying identity schema.
+# Use a monotonic deadline; allow a bounded override for slower laptops.
+startup_timeout="${FAJI_KC_STARTUP_TIMEOUT_SECONDS:-600}"
+[[ "$startup_timeout" =~ ^[0-9]+$ ]] && (( startup_timeout >= 60 && startup_timeout <= 1800 )) || {
+ echo 'BLOCKED: startup timeout must be 60-1800 seconds' >&2; exit 2;
+}
 ready=0
-for attempt in $(seq 1 120); do
- if ! kill -0 "$kc_pid" 2>/dev/null; then echo 'FAIL: Keycloak exited; sanitized diagnostics will be saved' >&2; exit 1; fi
+start_seconds=$SECONDS
+next_progress=30
+while (( SECONDS-start_seconds < startup_timeout )); do
+ if ! kill -0 "$kc_pid" 2>/dev/null; then
+  echo 'FAIL: Keycloak exited before discovery; sanitized diagnostics will be saved' >&2
+  exit 1
+ fi
  if curl --max-time 2 -fsS "http://127.0.0.1:$kc_port/realms/faji/.well-known/openid-configuration" -o "$root/discovery.json" 2>/dev/null; then ready=1; break; fi
+ elapsed=$(( SECONDS-start_seconds ))
+ if (( elapsed >= next_progress )); then
+  printf 'Keycloak starting: %ss elapsed (limit %ss)\n' "$elapsed" "$startup_timeout"
+  next_progress=$(( next_progress+30 ))
+ fi
  sleep 2
 done
-[[ "$ready" == 1 ]] || { echo 'FAIL: Keycloak discovery not ready' >&2; exit 1; }
+[[ "$ready" == 1 ]] || { echo "FAIL: Keycloak discovery not ready after ${startup_timeout}s; sanitized diagnostics will be saved" >&2; exit 1; }
 FAJI_DISCOVERY_FILE="$root/discovery.json" FAJI_KC_PORT="$kc_port" node <<'NODE'
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
