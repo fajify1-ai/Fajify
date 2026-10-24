@@ -62,8 +62,10 @@ async function authorizeCode(){
  }
  assert.equal(response.status,200,'Keycloak login form must render');
  const html=await response.text();
- const loginAction=html.match(/<form\\b[^>]*\\bid=["']kc-form-login["'][^>]*\\baction=["']([^"']+)["']/i)?.[1]
-  ??html.match(/<form\\b[^>]*\\baction=["']([^"']+login-actions[^"']*)["']/i)?.[1];
+ const forms=[...html.matchAll(/<form\b([^>]*)>/gi)].map(match=>match[1]);
+ const actionFor=formTag=>formTag.match(/\baction=["']([^"']+)["']/i)?.[1];
+ const loginAction=forms.filter(tag=>/\bid=["']kc-form-login["']/i.test(tag)).map(actionFor)[0]
+  ?? forms.map(actionFor).find(value=>value?.includes('/login-actions/authenticate'));
  assert.ok(loginAction,'Keycloak login action not found');
  const decoded=loginAction.replaceAll('&amp;','&');
  assert.ok(decoded.startsWith(origin+'/realms/faji/'),'login form must be local');
