@@ -183,9 +183,22 @@ try{
  assert.match(recoveryMessage,/password/i,'password recovery purpose');
  console.log('PASS: live Keycloak password recovery email captured on loopback SMTP');
  const resetLink=linkFromMail(recoveryMessage);
- const reset=await followAction(resetLink);
- assert.equal(reset.response.status,200,'password recovery form must render');
- const resetHtml=await reset.response.text();
+ let reset=await followAction(resetLink);
+ assert.equal(reset.response.status,200,'password recovery page must render');
+ let resetHtml=await reset.response.text();
+ if(!/password-new|password-confirm/i.test(resetHtml)){
+  const links=[...resetHtml.matchAll(/<a\\b([^>]*)>([\\s\\S]*?)<\\/a>/gi)].map(x=>({
+   attrs:x[1],label:x[2].replace(/<[^>]*>/g,'').trim().toLowerCase()
+  }));
+  const proceed=links.find(a=>/proceed|continue|click here|confirm/i.test(a.label)&&/\\bhref=["'][^"']*login-actions\\//i.test(a.attrs));
+  console.log('INFO: password recovery intermediate page: forms '+[...resetHtml.matchAll(/<form\\b/gi)].length+', proceed link '+Boolean(proceed));
+  assert.ok(proceed,'password recovery requires action not recognized by test harness');
+  const href=proceed.attrs.match(/\\bhref=["']([^"']+)["']/i)?.[1];
+  assert.ok(href,'recovery proceed link missing');
+  reset=await followAction(safeUrl(href.replaceAll('&amp;','&')));
+  assert.equal(reset.response.status,200,'password recovery form after proceed');
+  resetHtml=await reset.response.text();
+ }
  const action=htmlForm(resetHtml);
  assert.match(resetHtml,/password-new|password-confirm/i,'password update form must be shown');
  const updatedPassword='Aa1!'+randomBytes(20).toString('base64url');
