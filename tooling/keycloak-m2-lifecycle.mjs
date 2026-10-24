@@ -31,10 +31,15 @@ const username='acceptance_'+randomBytes(8).toString('hex');
 const password='Aa1!'+randomBytes(20).toString('base64url');
 const userRes=await fetch(origin+'/admin/realms/faji/users',{
  method:'POST',headers:adminHeaders,
- body:JSON.stringify({username,email:username+'@example.invalid',emailVerified:true,enabled:true,
+ body:JSON.stringify({username,firstName:'Faji',lastName:'Acceptance',email:username+'@example.invalid',emailVerified:true,enabled:true,requiredActions:[],
   credentials:[{type:'password',value:password,temporary:false}]})
 });
 assert.equal(userRes.status,201,'disposable synthetic user creation');
+const userId=userRes.headers.get('location')?.split('/').pop();
+assert.ok(userId,'Keycloak user Location header required');
+const createdUser=await json(origin+'/admin/realms/faji/users/'+encodeURIComponent(userId),{headers:adminHeaders});
+assert.deepEqual(createdUser.requiredActions??[],[],'synthetic test user must not have pending required actions');
+assert.equal(createdUser.emailVerified,true,'synthetic verified-email fixture required');
 const verifier=randomBytes(32).toString('base64url');
 const challenge=createHash('sha256').update(verifier).digest('base64url');
 const redirect='com.faji.customer:/oauth/callback';
@@ -76,8 +81,9 @@ for(let step=0;step<8;step++){
  if(![302,303].includes(response.status)){
   const content=await response.text();
   const flags=[...content.matchAll(/class=["'][^"']*(?:alert-error|kc-feedback-text)[^"']*["']/g)].length;
+  const actionNames=[...content.matchAll(/name=["'](?:firstName|lastName|email|username|password-new|password-confirm|totp|webauthn)["']/gi)].map(x=>x[0].slice(0,65));
   throw Error('Keycloak login did not reach mobile callback: HTTP '+response.status+
-    ', path '+destination.pathname+', feedback markers '+flags);
+    ', path '+destination.pathname+', feedback markers '+flags+', required action input names '+[...new Set(actionNames)].join(', '));
  }
 }
 assert.equal(destination.protocol,'com.faji.customer:','expected registered mobile callback');
