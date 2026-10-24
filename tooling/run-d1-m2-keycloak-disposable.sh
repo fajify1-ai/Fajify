@@ -12,11 +12,27 @@ keycloak_home="${FAJI_KEYCLOAK_HOME:-}"
 "$pg_bin/postgres" --version | grep -q ' 16\.' || { echo 'BLOCKED: PostgreSQL 16 required' >&2; exit 2; }
 "$keycloak_home/bin/kc.sh" --version | grep -q '^Keycloak 26\.' || { echo 'BLOCKED: Keycloak 26.x required' >&2; exit 2; }
 root=$(mktemp -d /tmp/fajify-m2-keycloak.XXXXXXXX)
+report_dir="${FAJI_M2_DIAGNOSTICS_DIR:-$HOME/Desktop/project/fajify-m2-keycloak-diagnostics}"
+mkdir -p "$report_dir"
+chmod 700 "$report_dir"
+report="$report_dir/startup-$(date +%Y%m%d-%H%M%S).log"
 chmod 700 "$root"
 pg_started=0; kc_pid=''
 cleanup(){
  local result=$?
  trap - EXIT
+ if [[ "$result" -ne 0 ]]; then
+  { printf 'Keycloak startup failed at commit %s\n' "$(git rev-parse HEAD)";
+    printf 'Last Keycloak log lines (credentials and tokens omitted):\n';
+    if [[ -f "$root/keycloak.log" ]]; then
+      tail -n 110 "$root/keycloak.log" | sed -E '/(password|secret|token|credential|authorization:|jdbc:postgresql)/Id; s/(127\.0\.0\.1:)[0-9]+/\1[PORT]/g' ;
+    fi
+    printf '\nLast PostgreSQL log lines:\n';
+    if [[ -f "$root/postgresql.log" ]]; then tail -n 30 "$root/postgresql.log" | sed -E '/(password|secret|token|credential)/Id'; fi
+  } > "$report"
+  chmod 600 "$report"
+  echo "DIAGNOSTIC REPORT: $report" >&2
+ fi
  if [[ -n "$kc_pid" ]] && kill -0 "$kc_pid" 2>/dev/null; then kill "$kc_pid" || true; wait "$kc_pid" 2>/dev/null || true; fi
  if [[ "$pg_started" == 1 ]]; then "$pg_bin/pg_ctl" -D "$root/pg" -m immediate -w stop >/dev/null || true; fi
  rm -rf -- "$root"
@@ -44,7 +60,6 @@ REVOKE ALL ON DATABASE m2_keycloak_identity FROM PUBLIC;
 SQL
 # Keycloak's server distribution is shared but its configuration, working data and DB are isolated.
 mkdir -p "$root/kc/data/import" "$root/kc/conf"
-cp infrastructure/keycloak/realm-faji-m2.json "$root/kc/data/import/faji-realm.json"
 # Prefer a private copy of the distribution to avoid writing cache/build state to a shared installation.
 cp -a "$keycloak_home/." "$root/kc/"
 cp infrastructure/keycloak/realm-faji-m2.json "$root/kc/data/import/faji-realm.json"
@@ -59,7 +74,7 @@ export JAVA_OPTS_APPEND="-Xms64m -Xmx384m"
 kc_pid=$!
 ready=0
 for attempt in $(seq 1 120); do
- if ! kill -0 "$kc_pid" 2>/dev/null; then echo 'FAIL: Keycloak exited; inspect local preflight/import configuration' >&2; tail -n 35 "$root/keycloak.log" | sed -E 's/((PASSWORD|PASS|SECRET|TOKEN)=[^ ]+)/[REDACTED]/gi' >&2; exit 1; fi
+ if ! kill -0 "$kc_pid" 2>/dev/null; then echo 'FAIL: Keycloak exited; sanitized diagnostics will be saved' >&2; exit 1; fi
  if curl --max-time 2 -fsS "http://127.0.0.1:$kc_port/realms/faji/.well-known/openid-configuration" -o "$root/discovery.json" 2>/dev/null; then ready=1; break; fi
  sleep 2
 done
