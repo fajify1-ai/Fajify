@@ -10,7 +10,7 @@ const ctx=(authorization?:string)=>({switchToHttp:()=>({getRequest:()=>({headers
 test('M1 identity module denies bearer tokens until verified OIDC is integrated',async()=>{
  const module=await Test.createTestingModule({imports:[DatabaseModule,IdentityModule]})
   .overrideProvider(DATABASE_POOL)
-  .useValue({query:async()=>{throw Error('Database must not be queried by invalid token');}})
+  .useValue({query:async()=>{throw Error('Database must not be queried by invalid token');},end:async()=>{}})
   .compile();
  try{await assert.rejects(module.get(IdentityGuard).canActivate(ctx('Bearer forged.jwt.token')),{status:401});}
  finally{await module.close();}
