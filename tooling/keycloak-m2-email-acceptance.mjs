@@ -136,6 +136,22 @@ try{
   const html=await verification.response.text();
   const signals=['verify-email','confirm','proceed','restart','error','login'].filter(tag=>html.toLowerCase().includes(tag));
   console.log('INFO: verification page signals: '+signals.join(', '));
+  // Keycloak's action-token interstitial commonly presents a "Click here to proceed"
+  // anchor rather than a form. Follow only same-origin realm links, never raw
+  // arbitrary hrefs, and never log one-time action tokens.
+  const proceedAnchors=[...html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)].map(match=>({
+   attrs:match[1],label:match[2].replace(/<[^>]*>/g,'').trim().toLowerCase()
+  }));
+  const proceed=proceedAnchors.find(a=>/proceed|confirm|continue|click here/i.test(a.label) &&
+    /\bhref=["'][^"']*login-actions\//i.test(a.attrs));
+  console.log('INFO: verification interstitial forms '+[...html.matchAll(/<form\b/gi)].length+
+    ', actionable proceed links '+proceedAnchors.filter(a=>/login-actions\//.test(a.attrs)).length);
+  if(proceed){
+   const href=proceed.attrs.match(/\bhref=["']([^"']+)["']/i)?.[1];
+   assert.ok(href,'proceed link must have href');
+   verification=await followAction(safeUrl(href.replaceAll('&amp;','&')));
+   console.log('INFO: followed confirmation proceed link, final HTTP '+verification.response.status);
+  }
   // Keycloak 26 typically requires a deliberate confirmation POST rather than
   // accepting an action-token GET as a completed verification.
   if(/<form\b/i.test(html)&&/login-actions\//.test(html)){
