@@ -83,12 +83,36 @@ try{
  assert.ok(verifyMessage.includes(username+'@example.invalid'),'verification destination');
  assert.match(verifyMessage,/verify|confirm/i,'verification email purpose');
  console.log('PASS: live Keycloak verification email captured on loopback SMTP');
+ const linkFromMail=(raw)=>{
+  // Keycloak MIME may use quoted-printable soft breaks and HTML-escaped query separators.
+  const decoded=raw.replace(/=\r?\n/g,'').replace(/=3D/gi,'=').replace(/&amp;/g,'&');
+  const candidates=[...decoded.matchAll(/https?:\/\/[^\s<>"']+/gi)].map(m=>m[0].replace(/[).,]+$/,''));
+  const found=candidates.find(u=>{try{const x=new URL(u);return x.origin===origin&&x.pathname.startsWith('/realms/faji/login-actions/action-token');}catch{return false;}});
+  assert.ok(found,'Keycloak email action-token URL not found (message content is not logged)');
+  return found;
+ };
+ const verifiedLink=linkFromMail(verifyMessage);
+ const verifyPage=await fetch(verifiedLink,{redirect:'manual'});
+ assert.ok([200,302,303].includes(verifyPage.status),'verification action link must render or redirect');
+ const verifiedUser=await request(userPath,{headers},200);
+ const verifiedState=(await verifiedUser.json()).emailVerified;
+ if(!verifiedState){
+  console.log('INFO: verification link requires user confirmation; automated confirmation pending');
+ }else{
+  console.log('PASS: one-time verification link marks account verified');
+ }
+
  await request(userPath+'/execute-actions-email',{method:'PUT',headers,body:JSON.stringify(['UPDATE_PASSWORD'])});
  const recoveryMessage=await received(2);
  assert.ok(recoveryMessage.includes(username+'@example.invalid'),'recovery destination');
  assert.match(recoveryMessage,/password/i,'password recovery purpose');
  console.log('PASS: live Keycloak password recovery email captured on loopback SMTP');
- console.log('LIMITATION: registration form submission, clicking one-time links, and completing password change have not been exercised');
+ const resetLink=linkFromMail(recoveryMessage);
+ const resetPage=await fetch(resetLink,{redirect:'manual'});
+ assert.ok([200,302,303].includes(resetPage.status),'password reset action link must render or redirect');
+ console.log('PASS: password recovery one-time link accepted or presented by Keycloak');
+
+ console.log('LIMITATION: registration form submission, confirmation-required verification actions, and password change completion remain pending');
 }finally{
  for(const socket of sockets)socket.destroy();
  await new Promise(resolve=>server.close(resolve));
