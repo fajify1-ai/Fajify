@@ -62,9 +62,25 @@ const decoded=loginAction.replaceAll('&amp;','&');
 assert.ok(decoded.startsWith(origin+'/realms/faji/'),'login form must be local');
 response=await fetch(decoded,{method:'POST',redirect:'manual',headers:{'content-type':'application/x-www-form-urlencoded',cookie:cookieHeader()},
  body:form({username,password,credentialId:''})});collect(response);
-assert.ok([302,303].includes(response.status),'Keycloak login should redirect to client');
-const destination=new URL(response.headers.get('location'));
-assert.equal(destination.protocol,'com.faji.customer:');
+assert.ok([302,303].includes(response.status),'Keycloak login should redirect');
+let destination;
+for(let step=0;step<8;step++){
+ const location=response.headers.get('location');
+ assert.ok(location,'redirect must include Location header');
+ destination=new URL(location,origin);
+ if(destination.protocol==='com.faji.customer:')break;
+ assert.equal(destination.origin,origin,'unexpected external redirect');
+ assert.ok(destination.pathname.startsWith('/realms/faji/'),'unexpected redirect outside faji realm');
+ response=await fetch(destination,{redirect:'manual',headers:{cookie:cookieHeader()}});
+ collect(response);
+ if(![302,303].includes(response.status)){
+  const content=await response.text();
+  const flags=[...content.matchAll(/class=["'][^"']*(?:alert-error|kc-feedback-text)[^"']*["']/g)].length;
+  throw Error('Keycloak login did not reach mobile callback: HTTP '+response.status+
+    ', path '+destination.pathname+', feedback markers '+flags);
+ }
+}
+assert.equal(destination.protocol,'com.faji.customer:','expected registered mobile callback');
 assert.equal(destination.searchParams.get('state'),state);
 const code=destination.searchParams.get('code');
 assert.ok(code,'authorization code required');
