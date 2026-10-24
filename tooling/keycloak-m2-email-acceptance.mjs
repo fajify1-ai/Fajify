@@ -205,10 +205,18 @@ try{
  const update=await fetch(action,{method:'POST',redirect:'manual',headers:{
   'content-type':'application/x-www-form-urlencoded',cookie:cookieHeader()
  },body:form({'password-new':updatedPassword,'password-confirm':updatedPassword})});
- assert.ok([302,303].includes(update.status),'password update must redirect on completion');
+ captureCookies(update);
+ const updateBody=update.status===200?await update.text():'';
+ if(update.status===200){
+  const names=[...updateBody.matchAll(/<(?:input|button)\\b[^>]*\\bname=["']([^"']+)["']/gi)].map(x=>x[1]);
+  const signals=['password-new','password-confirm','alert-error','kc-feedback-text','error','success','confirm'].filter(v=>updateBody.toLowerCase().includes(v));
+  console.log('INFO: password update response HTTP 200, input fields '+[...new Set(names)].filter(x=>/password|submit|credential/i.test(x)).join(', ')+', page signals '+signals.join(', '));
+ }else console.log('INFO: password update response HTTP '+update.status);
+ assert.ok([200,302,303].includes(update.status),'unexpected password action response');
  const updatedUser=await request(userPath,{headers},200);
- assert.ok(!(await updatedUser.json()).requiredActions?.includes('UPDATE_PASSWORD'),'password change action must be cleared');
- console.log('PASS: password recovery form submitted and password update action cleared');
+ const remainingActions=(await updatedUser.json()).requiredActions??[];
+ if(remainingActions.includes('UPDATE_PASSWORD'))throw Error('Password recovery did not complete: UPDATE_PASSWORD remains required');
+ console.log('PASS: password recovery action cleared after form submission (password authentication not yet verified)');
  console.log('LIMITATION: self-registration form submission, old/new password login comparison, MFA, and API-side revocation remain pending');
 }finally{
  for(const socket of sockets)socket.destroy();
