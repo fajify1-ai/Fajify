@@ -91,16 +91,63 @@ try{
   assert.ok(found,'Keycloak email action-token URL not found (message content is not logged)');
   return found;
  };
- const verifiedLink=linkFromMail(verifyMessage);
- const verifyPage=await fetch(verifiedLink,{redirect:'manual'});
- assert.ok([200,302,303].includes(verifyPage.status),'verification action link must render or redirect');
- const verifiedUser=await request(userPath,{headers},200);
- const verifiedState=(await verifiedUser.json()).emailVerified;
- if(!verifiedState){
-  console.log('INFO: verification link requires user confirmation; automated confirmation pending');
- }else{
-  console.log('PASS: one-time verification link marks account verified');
+ // Do not print one-time action links or token-bearing Location headers.
+ const cookieJar=new Map();
+ const captureCookies=res=>{
+  for(const cookie of res.headers.getSetCookie?.()??[]){
+   const first=cookie.split(';',1)[0],idx=first.indexOf('=');
+   if(idx>0)cookieJar.set(first.slice(0,idx),first.slice(idx+1));
+  }
+ };
+ const cookieHeader=()=>[...cookieJar].map(([k,v])=>k+'='+v).join('; ');
+ const safeUrl=value=>{
+  const u=new URL(value,origin);
+  assert.equal(u.origin,origin,'email flow must remain on temporary local Keycloak');
+  assert.ok(u.pathname.startsWith('/realms/faji/'),'email flow must remain in faji realm');
+  return u;
+ };
+ async function followAction(url){
+  let res=await fetch(safeUrl(url),{redirect:'manual',headers:{cookie:cookieHeader()}});
+  captureCookies(res);
+  for(let i=0;i<8&&[301,302,303,307,308].includes(res.status);i++){
+   const location=res.headers.get('location');
+   assert.ok(location,'redirect Location required');
+   const dest=new URL(location,origin);
+   if(dest.protocol!=='http:')return {response:res,external:true};
+   res=await fetch(safeUrl(dest),{redirect:'manual',headers:{cookie:cookieHeader()}});
+   captureCookies(res);
+  }
+  return {response:res,external:false};
  }
+ const htmlForm=html=>{
+  const candidates=[...html.matchAll(/<form\b([^>]*)>/gi)].map(x=>x[1]);
+  const candidate=candidates.find(t=>/\baction=["'][^"']*login-actions\//i.test(t));
+  assert.ok(candidate,'Keycloak required-action form not found');
+  const url=candidate.match(/\baction=["']([^"']+)["']/i)?.[1];
+  assert.ok(url,'Keycloak action URL missing');
+  return safeUrl(url.replaceAll('&amp;','&'));
+ };
+ const verifiedLink=linkFromMail(verifyMessage);
+ let verification=await followAction(verifiedLink);
+ if(verification.response.status===200){
+  const html=await verification.response.text();
+  // Keycloak 26 typically requires a deliberate confirmation POST rather than
+  // accepting an action-token GET as a completed verification.
+  if(/<form\b/i.test(html)&&/login-actions\//.test(html)){
+   const action=htmlForm(html);
+   const res=await fetch(action,{method:'POST',redirect:'manual',headers:{
+    'content-type':'application/x-www-form-urlencoded',cookie:cookieHeader()
+   },body:form({})});
+   captureCookies(res);
+   if([301,302,303,307,308].includes(res.status)){
+    const target=res.headers.get('location');
+    if(target){const next=new URL(target,origin);if(next.protocol==='http:')verification=await followAction(next);}
+   }
+  }
+ }
+ const verifiedUser=await request(userPath,{headers},200);
+ assert.equal((await verifiedUser.json()).emailVerified,true,'verification action must mark the account verified');
+ console.log('PASS: one-time verification link and confirmation mark account verified');
 
  await request(userPath+'/execute-actions-email',{method:'PUT',headers,body:JSON.stringify(['UPDATE_PASSWORD'])});
  const recoveryMessage=await received(2);
@@ -108,11 +155,20 @@ try{
  assert.match(recoveryMessage,/password/i,'password recovery purpose');
  console.log('PASS: live Keycloak password recovery email captured on loopback SMTP');
  const resetLink=linkFromMail(recoveryMessage);
- const resetPage=await fetch(resetLink,{redirect:'manual'});
- assert.ok([200,302,303].includes(resetPage.status),'password reset action link must render or redirect');
- console.log('PASS: password recovery one-time link accepted or presented by Keycloak');
-
- console.log('LIMITATION: registration form submission, confirmation-required verification actions, and password change completion remain pending');
+ const reset=await followAction(resetLink);
+ assert.equal(reset.response.status,200,'password recovery form must render');
+ const resetHtml=await reset.response.text();
+ const action=htmlForm(resetHtml);
+ assert.match(resetHtml,/password-new|password-confirm/i,'password update form must be shown');
+ const updatedPassword='Aa1!'+randomBytes(20).toString('base64url');
+ const update=await fetch(action,{method:'POST',redirect:'manual',headers:{
+  'content-type':'application/x-www-form-urlencoded',cookie:cookieHeader()
+ },body:form({'password-new':updatedPassword,'password-confirm':updatedPassword})});
+ assert.ok([302,303].includes(update.status),'password update must redirect on completion');
+ const updatedUser=await request(userPath,{headers},200);
+ assert.ok(!(await updatedUser.json()).requiredActions?.includes('UPDATE_PASSWORD'),'password change action must be cleared');
+ console.log('PASS: password recovery form submitted and password update action cleared');
+ console.log('LIMITATION: self-registration form submission, old/new password login comparison, MFA, and API-side revocation remain pending');
 }finally{
  for(const socket of sockets)socket.destroy();
  await new Promise(resolve=>server.close(resolve));
