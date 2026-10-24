@@ -19,7 +19,7 @@ before(async()=>{
 });
 after(async()=>{
  if(admin){
-  await admin.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[subject,actor]);
+  await admin.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[subject,actor]]);
   await admin.query('DELETE FROM resource_memberships WHERE identity_subject=$1',[subject]);
   await admin.query('DELETE FROM account_access WHERE identity_subject=$1',[subject]);
   await admin.query('DELETE FROM user_profiles WHERE identity_subject=$1',[subject]);
@@ -47,7 +47,7 @@ test('suspension sets revocation cutoff and audit trail exists',async()=>{
  assert.equal(state.suspended,true);
  assert.ok(state.revokedAfter instanceof Date);
  const events=await admin!.query<{event_type:string}>(
-  'SELECT event_type FROM identity_security_events WHERE actor_subject=ANY($1::varchar[]) ORDER BY occurred_at,id',[subject,actor]);
+  'SELECT event_type FROM identity_security_events WHERE actor_subject=ANY($1::varchar[]) ORDER BY occurred_at,id',[[subject,actor]]);
  for(const name of ['account_provisioned','membership_enabled','membership_disabled','account_suspended'])
   assert.ok(events.rows.some(e=>e.event_type===name),name);
 });
