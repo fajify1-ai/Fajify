@@ -12,10 +12,11 @@ import {IDENTITY_VERIFIER,IdentityVerifier} from '../src/auth/identity.types';
 
 const verified={subject:'real-subject',issuer:'https://identity.example',audience:['faji-api'],expiresAt:1900000000,issuedAt:1800000000,roles:['customer']};
 const run=async(state:{suspended:boolean;revokedAfter:Date|null},tokenValid=true)=>{
- const verifier:IdentityVerifier={verifyAccessToken:async()=>{if(!tokenValid)throw Error('bad signature');return verified;}};
+ let verificationCalls=0;let stateCalls=0;
+ const verifier:IdentityVerifier={verifyAccessToken:async()=>{verificationCalls++;if(!tokenValid)throw Error('bad signature');return verified;}};
  const module=await Test.createTestingModule({controllers:[SessionController],providers:[
   IdentityGuard,AccountGuard,{provide:IDENTITY_VERIFIER,useValue:verifier},
-  {provide:AccessService,useValue:{state:async()=>state}}
+  {provide:AccessService,useValue:{state:async(subject:string)=>{stateCalls++;assert.equal(subject,verified.subject);return state;}}}
  ]}).compile();
  const app=module.createNestApplication();
  app.setGlobalPrefix('api');app.enableVersioning({type:VersioningType.URI,defaultVersion:'1'});await app.init();
@@ -24,6 +25,7 @@ const run=async(state:{suspended:boolean;revokedAfter:Date|null},tokenValid=true
   const noToken=await request(server).get('/api/v1/auth/me');
   assert.equal(noToken.status,401);
   const result=await request(server).get('/api/v1/auth/me').set('Authorization','Bearer signed.token.value');
+  if(result.status===403&&state.suspended===false&&state.revokedAfter===null)throw new Error('Unexpected 403 in active-session test. Verifier calls: '+verificationCalls+', state calls: '+stateCalls+', response: '+JSON.stringify(result.body));
   return result;
  }finally{await app.close();}
 };

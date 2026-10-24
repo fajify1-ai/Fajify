@@ -4,9 +4,13 @@ import {IdentityGuard} from '../src/auth/identity.guard';
 import type {IdentityVerifier} from '../src/auth/identity.types';
 import {Test} from '@nestjs/testing';
 import {IdentityModule} from '../src/auth/identity.module';
+import {DATABASE_POOL} from '../src/tokens';
 const ctx=(authorization?:string)=>({switchToHttp:()=>({getRequest:()=>({headers:{authorization}})})}) as any;
 test('M1 identity module denies bearer tokens until verified OIDC is integrated',async()=>{
- const module=await Test.createTestingModule({imports:[IdentityModule]}).compile();
+ const module=await Test.createTestingModule({imports:[IdentityModule]})
+  .overrideProvider(DATABASE_POOL)
+  .useValue({query:async()=>{throw Error('Database must not be queried by invalid token');}})
+  .compile();
  try{await assert.rejects(module.get(IdentityGuard).canActivate(ctx('Bearer forged.jwt.token')),{status:401});}
  finally{await module.close();}
 });
