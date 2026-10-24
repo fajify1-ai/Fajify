@@ -134,6 +134,8 @@ try{
  let verification=await followAction(verifiedLink);
  if(verification.response.status===200){
   const html=await verification.response.text();
+  const signals=['verify-email','confirm','proceed','restart','error','login'].filter(tag=>html.toLowerCase().includes(tag));
+  console.log('INFO: verification page signals: '+signals.join(', '));
   // Keycloak 26 typically requires a deliberate confirmation POST rather than
   // accepting an action-token GET as a completed verification.
   if(/<form\b/i.test(html)&&/login-actions\//.test(html)){
@@ -149,12 +151,6 @@ try{
     if(target){const next=new URL(target,origin);if(next.protocol==='http:')verification=await followAction(next);}
    }
   }
- }
- // Observe the page category, without leaking email tokens, HTML or redirect URLs.
- if(!verification.external&&verification.response.status===200){
-  const page=await verification.response.clone().text();
-  const signals=['verify-email','confirm','proceed','restart','error','login'].filter(tag=>page.toLowerCase().includes(tag));
-  console.log('INFO: verification final page signals: '+signals.join(', '));
  }
  const verifiedUser=await request(userPath,{headers},200);
  const verified=(await verifiedUser.json()).emailVerified;
