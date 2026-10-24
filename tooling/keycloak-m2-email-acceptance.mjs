@@ -71,7 +71,10 @@ try{
  const user=await request(realmApi+'/users/'+encodeURIComponent(id),{headers},200);
  assert.equal((await user.json()).emailVerified,false);
  const userPath=realmApi+'/users/'+encodeURIComponent(id);
- await request(userPath+'/send-verify-email',{method:'PUT',headers});
+ const mobileClient='faji-customer-mobile';
+ const mobileRedirect='com.faji.customer:/oauth/callback';
+ const actionParams=new URLSearchParams({client_id:mobileClient,redirect_uri:mobileRedirect});
+ await request(userPath+'/send-verify-email?'+actionParams,{method:'PUT',headers});
  async function received(count){
   for(let t=0;t<100;t++){
    if(messages.length>=count)return messages[count-1];
@@ -147,16 +150,22 @@ try{
    }
   }
  }
+ // Observe the page category, without leaking email tokens, HTML or redirect URLs.
+ if(!verification.external&&verification.response.status===200){
+  const page=await verification.response.clone().text();
+  const signals=['verify-email','confirm','proceed','restart','error','login'].filter(tag=>page.toLowerCase().includes(tag));
+  console.log('INFO: verification final page signals: '+signals.join(', '));
+ }
  const verifiedUser=await request(userPath,{headers},200);
  const verified=(await verifiedUser.json()).emailVerified;
  if(!verified){
   const status=verification.response.status;
   const pagePath=verification.external?'external-redirect':'local-Keycloak-page';
-  throw Error('Email verification not completed: final HTTP '+status+', destination '+pagePath+'. This may require an authenticated user session; account was not modified by test.');
+  throw Error('Email verification not completed: final HTTP '+status+', destination '+pagePath+'. Inspect non-sensitive page signals above; no administrative bypass performed.');
  }
  console.log('PASS: one-time verification link and confirmation mark account verified');
 
- await request(userPath+'/execute-actions-email',{method:'PUT',headers,body:JSON.stringify(['UPDATE_PASSWORD'])});
+ await request(userPath+'/execute-actions-email?'+actionParams,{method:'PUT',headers,body:JSON.stringify(['UPDATE_PASSWORD'])});
  const recoveryMessage=await received(2);
  assert.ok(recoveryMessage.includes(username+'@example.invalid'),'recovery destination');
  assert.match(recoveryMessage,/password/i,'password recovery purpose');
