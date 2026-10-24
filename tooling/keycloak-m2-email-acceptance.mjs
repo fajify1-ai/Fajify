@@ -243,8 +243,8 @@ try{
   }
   assert.equal(res.status,200,'login challenge must render');
   const page=await res.text();
-  const forms=[...page.matchAll(/<form\\b([^>]*)>/gi)].map(m=>m[1]);
-  const loginForm=forms.find(v=>/\\bid=["']kc-form-login["']/i.test(v))??forms.find(v=>/login-actions\\/authenticate/.test(v));
+  const forms=[...page.matchAll(/<form\b([^>]*)>/gi)].map(m=>m[1]);
+  const loginForm=forms.find(v=>v.includes('kc-form-login'))??forms.find(v=>v.includes('login-actions/authenticate'));
   assert.ok(loginForm,'login form required for credential verification');
   const endpoint=loginForm.match(/\\baction=["']([^"']+)["']/i)?.[1];
   assert.ok(endpoint);

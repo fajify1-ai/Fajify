@@ -6,6 +6,10 @@ cd "$(dirname "$0")/.."
 [[ "$(git branch --show-current)" == "feat/m2-d1-keycloak-auth-authorization" ]] || { echo 'BLOCKED: wrong branch' >&2; exit 2; }
 [[ -z "$(git status --porcelain --untracked-files=no)" ]] || { echo 'BLOCKED: tracked worktree modifications' >&2; exit 2; }
 for bin in node curl; do command -v "$bin" >/dev/null || { echo "Missing $bin" >&2; exit 2; }; done
+echo '=== PREFLIGHT: JavaScript syntax ==='
+node --check tooling/keycloak-m2-lifecycle.mjs
+node --check tooling/keycloak-m2-email-acceptance.mjs
+echo 'PASS: Keycloak lifecycle test syntax'
 pg_bin="${FAJI_PG_BIN:-/usr/lib/postgresql/16/bin}"
 keycloak_home="${FAJI_KEYCLOAK_HOME:-}"
 [[ -n "$keycloak_home" && -x "$keycloak_home/bin/kc.sh" ]] || { echo 'BLOCKED: set FAJI_KEYCLOAK_HOME to extracted Keycloak 26 distribution' >&2; exit 2; }
