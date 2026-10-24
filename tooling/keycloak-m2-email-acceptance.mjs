@@ -371,9 +371,27 @@ try{
  console.log('PASS: signup requires email verification and password enrollment');
  if(registrationEmailMessages.length){
   const registrationMailLink=linkFromMail(registrationEmailMessages[0]);
-  const confirmed=await followAction(registrationMailLink);
+  let confirmed=await followAction(registrationMailLink);
   console.log('INFO: registration email action initial HTTP '+confirmed.response.status);
-  console.log('LIMITATION: registration email-link confirmation and UPDATE_PASSWORD completion still require acceptance');
+  if(confirmed.response.status===200){
+   const confirmationHtml=await confirmed.response.text();
+   const proceedLinks=[...confirmationHtml.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)].map(m=>({
+    attrs:m[1],label:m[2].replace(/<[^>]*>/g,'').trim().toLowerCase()
+   }));
+   const proceedLink=proceedLinks.find(a=>/proceed|continue|confirm|click here/i.test(a.label)&&a.attrs.includes('login-actions/'));
+   assert.ok(proceedLink,'registration email confirmation should present a proceed action');
+   const target=proceedLink.attrs.match(/href=["']([^"']+)["']/i)?.[1];
+   assert.ok(target,'registration confirmation proceed URL');
+   confirmed=await followAction(safeUrl(target.replaceAll('&amp;','&')));
+  }
+  const postConfirmation=await request(realmApi+'/users/'+encodeURIComponent(registeredId),{headers},200);
+  const finalRegistrationState=await postConfirmation.json();
+  assert.equal(finalRegistrationState.emailVerified,true,'public registration email confirmation must verify account');
+  console.log('PASS: registration email confirmation marks public-signup account verified');
+  const pending=finalRegistrationState.requiredActions??[];
+  assert.ok(pending.includes('UPDATE_PASSWORD'),'signup must retain password enrollment until completed');
+  console.log('INFO: password enrollment still required after registration verification');
+  console.log('LIMITATION: public-signup UPDATE_PASSWORD form completion and first login remain pending');
  }else{
   console.log('LIMITATION: signup did not dispatch verification mail during bounded wait; required-action browser workflow must be completed');
  }
