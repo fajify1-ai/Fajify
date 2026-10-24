@@ -134,10 +134,12 @@ try{
   // Keycloak 26 typically requires a deliberate confirmation POST rather than
   // accepting an action-token GET as a completed verification.
   if(/<form\b/i.test(html)&&/login-actions\//.test(html)){
+   const names=[...html.matchAll(/<(?:input|button)\b[^>]*\bname=["']([^"']+)["']/gi)].map(x=>x[1]).filter(x=>/^(submitAction|confirm|cancel|credentialId|username|password|firstName|lastName|email)$/.test(x));
+   console.log('INFO: verification action form fields: '+[...new Set(names)].join(', '));
    const action=htmlForm(html);
    const res=await fetch(action,{method:'POST',redirect:'manual',headers:{
     'content-type':'application/x-www-form-urlencoded',cookie:cookieHeader()
-   },body:form({})});
+   },body:form({submitAction:'Confirm'})});
    captureCookies(res);
    if([301,302,303,307,308].includes(res.status)){
     const target=res.headers.get('location');
@@ -146,7 +148,12 @@ try{
   }
  }
  const verifiedUser=await request(userPath,{headers},200);
- assert.equal((await verifiedUser.json()).emailVerified,true,'verification action must mark the account verified');
+ const verified=(await verifiedUser.json()).emailVerified;
+ if(!verified){
+  const status=verification.response.status;
+  const pagePath=verification.external?'external-redirect':'local-Keycloak-page';
+  throw Error('Email verification not completed: final HTTP '+status+', destination '+pagePath+'. This may require an authenticated user session; account was not modified by test.');
+ }
  console.log('PASS: one-time verification link and confirmation mark account verified');
 
  await request(userPath+'/execute-actions-email',{method:'PUT',headers,body:JSON.stringify(['UPDATE_PASSWORD'])});
