@@ -89,5 +89,7 @@ for(const key of ['authorization_endpoint','token_endpoint','jwks_uri','end_sess
  assert.ok(x[key]?.startsWith(issuer+'/protocol/openid-connect/'),key);
 console.log('PASS: live Keycloak 26 OIDC discovery and realm import');
 NODE
+export FAJI_KC_ORIGIN="http://127.0.0.1:$kc_port"
+node tooling/keycloak-m2-lifecycle.mjs
 echo "SOURCE: $(git rev-parse HEAD)"
-echo 'LIMITATION: PKCE browser redemption, verification email, recovery, MFA, refresh and logout are not yet tested.'
+echo 'LIMITATION: self-registration, email verification, password recovery, privileged MFA, and authoritative access-token revocation still require acceptance.'
