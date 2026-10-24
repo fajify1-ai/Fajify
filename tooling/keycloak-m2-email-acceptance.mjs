@@ -246,7 +246,7 @@ try{
   const forms=[...page.matchAll(/<form\b([^>]*)>/gi)].map(m=>m[1]);
   const loginForm=forms.find(v=>v.includes('kc-form-login'))??forms.find(v=>v.includes('login-actions/authenticate'));
   assert.ok(loginForm,'login form required for credential verification');
-  const endpoint=loginForm.match(/\\baction=["']([^"']+)["']/i)?.[1];
+  const endpoint=loginForm.match(/action=["']([^"']+)["']/i)?.[1];
   assert.ok(endpoint);
   const actionUrl=new URL(endpoint.replaceAll('&amp;','&'),origin);
   assert.equal(actionUrl.origin,origin);
