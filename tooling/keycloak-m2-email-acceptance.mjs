@@ -267,7 +267,69 @@ try{
  assert.equal(await loginResult(previousPassword),false,'previous password must be rejected after recovery');
  console.log('PASS: previous password rejected after recovery');
  console.log('PASS: password recovery action cleared and updated credentials authenticated');
- console.log('LIMITATION: self-registration form submission, MFA, and API-side revocation remain pending');
+ // Self-service registration: exercise the actual public HTML forms, not the admin API.
+ // This is a separate synthetic user, and must initially remain unverified.
+ const registerName='registered_'+randomBytes(8).toString('hex');
+ const registerEmail=registerName+'@example.invalid';
+ const registerPassword='Aa1!'+randomBytes(20).toString('base64url');
+ const registerVerifier=randomBytes(32).toString('base64url');
+ const registerChallenge=(await import('node:crypto')).createHash('sha256').update(registerVerifier).digest('base64url');
+ const registerUrl=new URL(origin+'/realms/faji/protocol/openid-connect/auth');
+ for(const [key,value] of Object.entries({
+  client_id:mobileClient,redirect_uri:mobileRedirect,response_type:'code',scope:'openid',
+  state:randomBytes(12).toString('hex'),code_challenge:registerChallenge,code_challenge_method:'S256'
+ }))registerUrl.searchParams.set(key,value);
+ const registrationCookies=new Map();
+ const saveRegistrationCookies=res=>{
+  for(const cookie of res.headers.getSetCookie?.()??[]){
+   const part=cookie.split(';',1)[0],index=part.indexOf('=');
+   if(index>0)registrationCookies.set(part.slice(0,index),part.slice(index+1));
+  }
+ };
+ const registrationCookieHeader=()=>[...registrationCookies].map(([k,v])=>k+'='+v).join('; ');
+ let registrationPage=await fetch(registerUrl,{redirect:'manual'});
+ saveRegistrationCookies(registrationPage);
+ for(let i=0;i<6&&[301,302,303].includes(registrationPage.status);i++){
+  const destination=safeUrl(new URL(registrationPage.headers.get('location'),origin));
+  registrationPage=await fetch(destination,{redirect:'manual',headers:{cookie:registrationCookieHeader()}});
+  saveRegistrationCookies(registrationPage);
+ }
+ assert.equal(registrationPage.status,200,'registration entry login page must render');
+ const loginHtml=await registrationPage.text();
+ const registerLinks=[...loginHtml.matchAll(/<a\b([^>]*)>/gi)].map(m=>m[1]);
+ const registerLink=registerLinks.map(tag=>tag.match(/href=["']([^"']+)["']/i)?.[1])
+  .find(href=>href?.includes('/login-actions/registration'));
+ assert.ok(registerLink,'public registration link must be available');
+ registrationPage=await fetch(safeUrl(registerLink.replaceAll('&amp;','&')),{redirect:'manual',headers:{cookie:registrationCookieHeader()}});
+ saveRegistrationCookies(registrationPage);
+ assert.equal(registrationPage.status,200,'registration page must render');
+ const registrationHtml=await registrationPage.text();
+ const registerForms=[...registrationHtml.matchAll(/<form\b([^>]*)>/gi)].map(x=>x[1]);
+ const registerForm=registerForms.find(t=>t.includes('login-actions/registration'))??registerForms[0];
+ assert.ok(registerForm,'registration form required');
+ const registerAction=registerForm.match(/action=["']([^"']+)["']/i)?.[1];
+ assert.ok(registerAction,'registration form action required');
+ const registrationFields=[...registrationHtml.matchAll(/<input\b([^>]*)>/gi)].map(m=>m[1]);
+ const fieldNames=registrationFields.map(tag=>tag.match(/name=["']([^"']+)["']/i)?.[1]).filter(Boolean);
+ for(const required of ['username','email','password','password-confirm']){
+  assert.ok(fieldNames.includes(required),'registration field missing: '+required);
+ }
+ const registrationPayload={username:registerName,email:registerEmail,firstName:'Faji',lastName:'Registration',
+  password:registerPassword,'password-confirm':registerPassword};
+ const submitRegistration=await fetch(safeUrl(registerAction.replaceAll('&amp;','&')),{
+  method:'POST',redirect:'manual',headers:{
+   'content-type':'application/x-www-form-urlencoded',cookie:registrationCookieHeader()
+  },body:form(registrationPayload)
+ });
+ saveRegistrationCookies(submitRegistration);
+ assert.ok([200,302,303].includes(submitRegistration.status),'unexpected registration response');
+ const lookup=await request(realmApi+'/users?username='+encodeURIComponent(registerName)+'&exact=true',{headers},200);
+ const accounts=await lookup.json();
+ assert.equal(accounts.length,1,'public signup must create exactly one Keycloak account');
+ assert.equal(accounts[0].emailVerified,false,'public signup must require verified email');
+ assert.equal(accounts[0].enabled,true,'new signup should be enabled at Keycloak identity layer');
+ console.log('PASS: public registration HTML form creates a unique unverified Keycloak account');
+ console.log('LIMITATION: privileged MFA, authoritative API-side revocation and integrated onboarding acceptance remain pending');
 }finally{
  for(const socket of sockets)socket.destroy();
  await new Promise(resolve=>server.close(resolve));
