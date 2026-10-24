@@ -3,7 +3,7 @@ import {UnauthorizedException} from '@nestjs/common';
 import type {IdentityVerifier, VerifiedIdentity} from './identity.types';
 
 type JwtHeader={alg?:unknown;kid?:unknown;typ?:unknown};
-type Claims={iss?:unknown;aud?:unknown;sub?:unknown;exp?:unknown;nbf?:unknown;iat?:unknown;realm_access?:{roles?:unknown};resource_access?:Record<string,{roles?:unknown}>};
+type Claims={iss?:unknown;aud?:unknown;sub?:unknown;exp?:unknown;nbf?:unknown;iat?:unknown;acr?:unknown;auth_time?:unknown;realm_access?:{roles?:unknown};resource_access?:Record<string,{roles?:unknown}>};
 type Key={kid?:string;kty?:string;use?:string;alg?:string;n?:string;e?:string};
 export type JwksFetch=(url:string)=>Promise<{keys:Key[]}>;
 const b64=(value:string)=>JSON.parse(Buffer.from(value,'base64url').toString('utf8')) as unknown;
@@ -67,7 +67,7 @@ export class KeycloakAccessTokenVerifier implements IdentityVerifier {
    const realm=isRecord(c.realm_access)?safeRoles(c.realm_access.roles):[];
    const resources=isRecord(c.resource_access)?c.resource_access:{};
    const client=isRecord(resources[this.audience])?safeRoles(resources[this.audience].roles):[];
-   return {subject:c.sub,issuer:this.issuer,audience:audiences as string[],expiresAt:c.exp,issuedAt:c.iat,roles:[...new Set([...realm,...client])]};
+   return {subject:c.sub,issuer:this.issuer,audience:audiences as string[],expiresAt:c.exp,issuedAt:c.iat,roles:[...new Set([...realm,...client])],authContext:typeof c.acr==='string'?c.acr:undefined,authTime:typeof c.auth_time==='number'&&Number.isInteger(c.auth_time)?c.auth_time:undefined};
   }catch{return fail();}
  }
 }
