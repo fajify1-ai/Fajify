@@ -336,8 +336,21 @@ try{
  assert.equal(accounts.length,1,'public signup must create exactly one Keycloak account');
  assert.equal(accounts[0].emailVerified,false,'public signup must require verified email');
  assert.equal(accounts[0].enabled,true,'new signup should be enabled at Keycloak identity layer');
+ const registeredId=accounts[0].id;
+ assert.ok(registeredId,'registered account ID is required');
+ const registeredDetails=await request(realmApi+'/users/'+encodeURIComponent(registeredId),{headers},200);
+ const registeredState=await registeredDetails.json();
+ const actions=registeredState.requiredActions??[];
+ console.log('INFO: public signup required actions: '+(actions.length?actions.join(', '):'none'));
+ const registrationEmailMessages=messages.filter(message=>message.includes(registerEmail));
+ console.log('INFO: public signup email messages captured: '+registrationEmailMessages.length);
+ assert.equal(registeredState.emailVerified,false,'new registration must remain unverified before email action');
  console.log('PASS: public registration HTML form creates a unique unverified Keycloak account');
- if(!hasPassword)console.log('LIMITATION: registration form did not present password fields; password enrollment through required action must be verified separately');
+ if(!hasPassword){
+  console.log('LIMITATION: registration has no inline password fields; inspect required actions before declaring credential enrollment complete');
+  if(!actions.includes('UPDATE_PASSWORD'))console.log('LIMITATION: no UPDATE_PASSWORD action on registered user; password enrollment may require a separate login/required-action flow');
+ }
+ if(!registrationEmailMessages.length)console.log('LIMITATION: no registration email observed at this point; registration notification/verification delivery requires separate acceptance');
  console.log('LIMITATION: privileged MFA, authoritative API-side revocation and integrated onboarding acceptance remain pending');
 }finally{
  for(const socket of sockets)socket.destroy();
