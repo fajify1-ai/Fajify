@@ -77,7 +77,11 @@
             "access.token.claim": "true"
           }
         }
-      ]
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "serviceAccountsEnabled": false
     },
     {
       "clientId": "faji-business-mobile",
@@ -100,7 +104,11 @@
             "access.token.claim": "true"
           }
         }
-      ]
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "serviceAccountsEnabled": false
     },
     {
       "clientId": "faji-ride-mobile",
@@ -123,7 +131,11 @@
             "access.token.claim": "true"
           }
         }
-      ]
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "serviceAccountsEnabled": false
     }
   ]
 }
