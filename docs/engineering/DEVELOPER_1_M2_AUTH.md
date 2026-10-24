@@ -19,3 +19,7 @@ Still required before acceptance:
 - Re-run all API/backend suites and security checks on exact branch commit with zero required skips.
 
 `main` and mobile workspaces are outside this branch's intended change scope.
+
+## Strict account-access invariant
+
+A legacy `user_profiles` row alone never authorizes protected routes. Both `account_access` and `user_profiles` must exist and be unsuspended; absent rows deny access. This prevents previously imported customer identities from becoming active without explicit approval. This increment adds negative unit tests but has not been locally verified yet.

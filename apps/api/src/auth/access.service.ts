@@ -12,10 +12,12 @@ export class AccessService {
  async state(subject:string):Promise<AccessState>{
   const result=await this.pool.query<{suspended:boolean;revoked_after:Date|null}>(
    'SELECT suspended,revoked_after FROM account_access WHERE identity_subject=$1',[subject]);
-  if(result.rows.length)return {suspended:result.rows[0].suspended,revokedAfter:result.rows[0].revoked_after};
-  const profile=await this.pool.query<{suspended:boolean}>('SELECT suspended FROM user_profiles WHERE identity_subject=$1',[subject]);
-  if(!profile.rows.length)return {suspended:true,revokedAfter:null};
-  return {suspended:profile.rows[0].suspended,revokedAfter:null};
+  if(result.rows.length){
+   const profile=await this.pool.query<{suspended:boolean}>('SELECT suspended FROM user_profiles WHERE identity_subject=$1',[subject]);
+   return {suspended:result.rows[0].suspended||profile.rows.length!==1||profile.rows[0].suspended,revokedAfter:result.rows[0].revoked_after};
+  }
+  // No implicitly active account via the legacy profile fallback.
+  return {suspended:true,revokedAfter:null};
  }
  async member(subject:string,type:ResourceType,id:string,roles:readonly string[]):Promise<boolean>{
   if(!validTypes.has(type)||!roles.length||roles.some(r=>!validRoles.has(r as ResourceRole)))return false;
