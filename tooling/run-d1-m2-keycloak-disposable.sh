@@ -74,27 +74,30 @@ export JAVA_OPTS_APPEND="-Xms64m -Xmx384m"
 kc_pid=$!
 # First boot can spend substantial time rebuilding Quarkus and applying identity schema.
 # Use a monotonic deadline; allow a bounded override for slower laptops.
-startup_timeout="${FAJI_KC_STARTUP_TIMEOUT_SECONDS:-600}"
+startup_timeout="${FAJI_KC_STARTUP_TIMEOUT_SECONDS:-900}"
 [[ "$startup_timeout" =~ ^[0-9]+$ ]] && (( startup_timeout >= 60 && startup_timeout <= 1800 )) || {
  echo 'BLOCKED: startup timeout must be 60-1800 seconds' >&2; exit 2;
 }
 ready=0
 start_seconds=$SECONDS
 next_progress=30
+last_http='none'
 while (( SECONDS-start_seconds < startup_timeout )); do
  if ! kill -0 "$kc_pid" 2>/dev/null; then
   echo 'FAIL: Keycloak exited before discovery; sanitized diagnostics will be saved' >&2
   exit 1
  fi
- if curl --max-time 2 -fsS "http://127.0.0.1:$kc_port/realms/faji/.well-known/openid-configuration" -o "$root/discovery.json" 2>/dev/null; then ready=1; break; fi
+ # Record HTTP status without storing response bodies or sensitive headers.
+ last_http=$(curl --connect-timeout 2 --max-time 10 -sS -o "$root/discovery.json" -w '%{http_code}' "http://127.0.0.1:$kc_port/realms/faji/.well-known/openid-configuration" 2>"$root/curl-error.log") || last_http="network-error"
+ if [[ "$last_http" == 200 ]] && FAJI_DISCOVERY_FILE="$root/discovery.json" node -e 'const x=JSON.parse(require("fs").readFileSync(process.env.FAJI_DISCOVERY_FILE));if(!x.issuer||!x.token_endpoint)process.exit(1)' 2>/dev/null; then ready=1; break; fi
  elapsed=$(( SECONDS-start_seconds ))
  if (( elapsed >= next_progress )); then
-  printf 'Keycloak starting: %ss elapsed (limit %ss)\n' "$elapsed" "$startup_timeout"
+  printf 'Keycloak starting: %ss elapsed (limit %ss; discovery HTTP %s)\n' "$elapsed" "$startup_timeout" "$last_http"
   next_progress=$(( next_progress+30 ))
  fi
  sleep 2
 done
-[[ "$ready" == 1 ]] || { echo "FAIL: Keycloak discovery not ready after ${startup_timeout}s; sanitized diagnostics will be saved" >&2; exit 1; }
+[[ "$ready" == 1 ]] || { echo "FAIL: Keycloak discovery not ready after ${startup_timeout}s (last HTTP: ${last_http}); sanitized diagnostics will be saved" >&2; exit 1; }
 FAJI_DISCOVERY_FILE="$root/discovery.json" FAJI_KC_PORT="$kc_port" node <<'NODE'
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
