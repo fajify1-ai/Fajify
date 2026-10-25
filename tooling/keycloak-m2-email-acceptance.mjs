@@ -222,7 +222,7 @@ try{
  if(remainingActions.includes('UPDATE_PASSWORD'))throw Error('Password recovery did not complete: UPDATE_PASSWORD remains required');
  // Verify credentials using independent browser Authorization Code flows.
  // Public mobile clients retain PKCE and have no direct password grant.
- async function loginResult(candidatePassword){
+ async function loginResult(candidatePassword, loginUsername=username){
   const verifier=randomBytes(32).toString('base64url');
   const {createHash}=await import('node:crypto');
   const challenge=createHash('sha256').update(verifier).digest('base64url');
@@ -253,7 +253,7 @@ try{
   assert.equal(actionUrl.origin,origin);
   res=await fetch(actionUrl,{method:'POST',redirect:'manual',headers:{
    'content-type':'application/x-www-form-urlencoded',cookie:cookies()
-  },body:form({username,password:candidatePassword,credentialId:''})});save(res);
+  },body:form({username:loginUsername,password:candidatePassword,credentialId:''})});save(res);
   for(let i=0;i<8&&[301,302,303].includes(res.status);i++){
    const dest=new URL(res.headers.get('location'),origin);
    if(dest.protocol==='com.faji.customer:')return Boolean(dest.searchParams.get('code'));
@@ -407,7 +407,8 @@ try{
     assert.ok(!(await accountAfterPassword.json()).requiredActions?.includes('UPDATE_PASSWORD'),
      'password enrollment must clear UPDATE_PASSWORD');
     console.log('PASS: signup password enrollment action cleared');
-    console.log('LIMITATION: first login with newly enrolled registration credential requires separate browser acceptance');
+    assert.equal(await loginResult(registerPassword,registerName),true,'newly registered user must authenticate with enrolled password');
+    console.log('PASS: public signup first login through browser Authorization Code flow');
    }else{
     const signal=['password-new','password-confirm','login-actions','verify-email','restart'].filter(x=>page.toLowerCase().includes(x));
     console.log('INFO: post-verification page signals: '+signal.join(', '));
