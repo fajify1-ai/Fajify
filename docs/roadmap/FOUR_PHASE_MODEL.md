@@ -36,6 +36,20 @@ These allocations are **delivery responsibilities**, not proof of completion. Sc
 - **Do not rename or rewrite historical commits, authors, existing branches, merged PRs, evidence logs, or dated acceptance records.** Historical identifiers such as `d1`, `Developer 3A`, and `DEVELOPER_1_M1_ACCEPTANCE.md` remain valid evidence references. New documentation uses phase labels and links back to historical evidence as needed.
 - Never replace the original contributor attribution with a phase label; Git author and review history remain attributable to individuals.
 
+## Existing branch and PR transition register
+
+Existing branch refs remain functional and **are not automatically renamed** by this documentation change. Use these mappings for all current status reports and when creating successor branches:
+
+| Existing branch | Standard phase ID | Treatment |
+| --- | --- | --- |
+| `feat/m1-d1-backend-clean-integration` | `M1-P1` | Historic backend integration; retain ref |
+| `feat/m1-d2-main-integration` | `M1-P2` | Historic customer integration; retain ref |
+| `feat/m1-d3a-business-foundation` | `M1-P3` | Open Business PR #5; retain PR branch until review finishes |
+| `feat/m1-d3b-ride-foundation` | `M1-P4` | Active Ride/Dispatch branch; migrate only via reviewed successor |
+| `feat/m2-d1-keycloak-auth-authorization` | `M2-P1` | Active identity/security branch; new phase-named successor only after coordinating owners |
+
+Merged and unmerged M1 PR titles #1–#6 have been updated to phase terminology, while descriptions retain historical verification facts. Future feature branches and PR titles follow the phase-first convention. Any branch replacement must explicitly preserve its exact commit and update affected clones, CI and PR links; do not delete old refs while collaborators depend on them.
+
 ## Delivery gate
 
 Each phase requires implemented code, reproducible checks, negative/security cases where relevant, contract compatibility, and a reviewed PR. A milestone is accepted only after its four phase deliveries and shared integration acceptance have cleared; a dependency can be recorded as blocked without incorrectly marking a milestone done.
