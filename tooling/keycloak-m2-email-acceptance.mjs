@@ -391,7 +391,32 @@ try{
   const pending=finalRegistrationState.requiredActions??[];
   assert.ok(pending.includes('UPDATE_PASSWORD'),'signup must retain password enrollment until completed');
   console.log('INFO: password enrollment still required after registration verification');
-  console.log('LIMITATION: public-signup UPDATE_PASSWORD form completion and first login remain pending');
+  // The original registration browser session continues after email verification.
+  // Inspect the action response without exposing token-bearing links or form HTML.
+  let enrollment=confirmed;
+  if(enrollment.response.status===200){
+   const page=await enrollment.response.text();
+   if(/password-new|password-confirm/i.test(page)){
+    const passwordAction=htmlForm(page);
+    const completed=await fetch(passwordAction,{method:'POST',redirect:'manual',
+     headers:{'content-type':'application/x-www-form-urlencoded',cookie:cookieHeader()},
+     body:form({'password-new':registerPassword,'password-confirm':registerPassword})});
+    captureCookies(completed);
+    assert.ok([200,302,303].includes(completed.status),'password enrollment submission HTTP status');
+    const accountAfterPassword=await request(realmApi+'/users/'+encodeURIComponent(registeredId),{headers},200);
+    assert.ok(!(await accountAfterPassword.json()).requiredActions?.includes('UPDATE_PASSWORD'),
+     'password enrollment must clear UPDATE_PASSWORD');
+    console.log('PASS: signup password enrollment action cleared');
+    console.log('LIMITATION: first login with newly enrolled registration credential requires separate browser acceptance');
+   }else{
+    const signal=['password-new','password-confirm','login-actions','verify-email','restart'].filter(x=>page.toLowerCase().includes(x));
+    console.log('INFO: post-verification page signals: '+signal.join(', '));
+    console.log('LIMITATION: password enrollment form not presented after email confirmation; independent action session needed');
+   }
+  }else{
+   console.log('INFO: post-verification action HTTP '+enrollment.response.status);
+   console.log('LIMITATION: password enrollment form not directly available after verification');
+  }
  }else{
   console.log('LIMITATION: signup did not dispatch verification mail during bounded wait; required-action browser workflow must be completed');
  }
