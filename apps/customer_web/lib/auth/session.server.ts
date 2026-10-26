@@ -14,6 +14,12 @@ export interface VerifiedCustomerIdentity {
 export interface ServerSession {
   readonly identity: VerifiedCustomerIdentity;
   readonly expiresAt: number;
+  /** Opaque server-vault reference; never a bearer token. */
+  readonly providerSessionId?: string;
+}
+
+export interface SessionValidator {
+  validate(session: ServerSession): Promise<ServerSession | null>;
 }
 
 /** A shared persistent TTL store is required before enabling live sessions.
@@ -62,6 +68,7 @@ export class SessionService {
     private readonly store: SessionStore,
     private readonly revoker: SessionRevoker,
     private readonly clock: () => number = Date.now,
+    private readonly validator?: SessionValidator,
   ) {}
 
   /** Call only after a maintained OIDC SDK AND account policy have verified
@@ -71,7 +78,9 @@ export class SessionService {
     session: ServerSession,
     previousId?: string,
   ): Promise<{ cookie: string }> {
-    if (!authorized(session, this.clock())) {
+    if (!authorized(session, this.clock()) ||
+      (session.providerSessionId !== undefined &&
+        (!validId(session.providerSessionId) || !this.validator))) {
       throw new Error("Session is not authorized");
     }
     // Invalidate an existing browser session before issuing a fresh opaque ID.
@@ -84,11 +93,23 @@ export class SessionService {
   async read(id: string | undefined): Promise<ServerSession | null> {
     if (!validId(id)) return null;
     const key = digest(id);
-    const session = await this.store.get(key);
+    let session = await this.store.get(key);
     if (!session) return null;
+    if (session.providerSessionId !== undefined &&
+      (!validId(session.providerSessionId) || !this.validator)) {
+      await this.store.delete(key);
+      return null;
+    }
     if (!authorized(session, this.clock())) {
       await this.store.delete(key);
       return null;
+    }
+    if (this.validator) {
+      session = await this.validator.validate(session);
+      if (!session || !authorized(session, this.clock())) {
+        await this.store.delete(key);
+        return null;
+      }
     }
     return session;
   }
@@ -99,8 +120,9 @@ export class SessionService {
   async logout(id: string | undefined): Promise<void> {
     if (!validId(id)) return;
     const key = digest(id);
-    const session = await this.store.get(key);
-    await this.store.delete(key);
+    let session: ServerSession | null = null;
+    try { session = await this.store.get(key); }
+    finally { await this.store.delete(key); }
     if (session) await this.revoker.revoke(session);
   }
 }

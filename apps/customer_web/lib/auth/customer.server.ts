@@ -6,8 +6,9 @@ import { AuthenticationUnavailable } from "./oidc.server";
 import { SESSION_COOKIE_NAME, type ServerSession } from "./session.server";
 
 /** Production composition is deliberately disabled. BLOCKED BY PHASE 1:
- * approved web OIDC configuration, maintained SDK, shared persistent session
- * store and account policy. No test store or fake identity is used at runtime.
+ * approved web OIDC configuration and encrypted persistent session/credential/
+ * transaction stores. OpenIdClientAdapter is implemented independently; no
+ * test store or fake identity is used at runtime.
  */
 export const customerIdentityIntegration = {
   status: "blocked",

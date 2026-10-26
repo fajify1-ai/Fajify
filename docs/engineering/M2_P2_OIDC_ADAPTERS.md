@@ -66,3 +66,75 @@ git branch --show-current
 git log -5 --oneline
 git push --set-upstream origin feat/m2-p2-customer-auth
 ~~~
+
+
+## Web milestone: task 4
+
+Native milestone committed as 9d89b954647a09a59c393f30c554c18eacd86a75. This web milestone follows it as a separate local commit.
+
+### Implemented
+
+- Added maintained openid-client 6.8.8 with its jose/oauth4webapi dependencies; existing dependency versions were not changed.
+- OpenIdClientAdapter uses SDK discovery, random state/nonce, S256 PKCE, authorization-code exchange and explicit non-repudiation/JWS checks. UserInfo email verification and NestJS /me active-customer checks are mandatory.
+- Initiation stores the verifier/nonce/state server-side and returns a host-only Secure/HttpOnly/SameSite browser-binding cookie. Callback reuses the existing atomically consumed, browser-bound transaction checks, then SDK signature/issuer/audience/expiry/nonce validation.
+- Provider tokens are never included in ServerSession or browser cookies. ServerSession contains an opaque vault reference. The vault record binds credentials to issuer, client, API origin, callback/logout and scopes.
+- A supplied ProviderCredentialStore must use encrypted durable storage and serialize refresh/logout across all server instances. No production in-memory store is implemented or selected. Test-only stores demonstrate the required locking semantics.
+- SessionService now requires a validator for provider-backed records. Every validated read checks current provider email status and backend account access; near-expiry tokens refresh/rotate through the SDK. Refresh does not extend the approved absolute browser-session lifetime.
+- Provider token revocation attempts both refresh and access token revocation using the discovered SDK endpoint. Vault records are removed even if revocation fails; callers do not claim remote success.
+- Local session deletion is attempted even when session retrieval fails. completeOidcLogin cleans up the provider session if durable browser-session creation fails, and returns an expired transaction-binding cookie on success.
+- No auth routes are mounted, no customer web client is invented, and public Next.js pages remain unchanged. Browser SSO RP end-session routing remains pending; token revocation alone is not claimed to clear the provider's browser cookie.
+
+### Web environment and composition
+
+The server-only .env.example adds FAJI_CUSTOMER_WEB_AUTH_ENABLED=false plus explicit API origin, scopes, session maximum age and transaction maximum age fields. Issuer/client/secret/callback/logout placeholders remain blank. Both lifetimes require approved positive integer seconds; no live duration or hostname is invented. Never use NEXT_PUBLIC_ for these secrets.
+
+loadWebOidcSettings returns null unless enabled and all required values validate. Valid values alone do not mount application routes: approved durable session, transaction and encrypted provider-credential stores must also be composed. The existing customer.server.ts remains disabled. Once approved, construct the adapter and SessionService with the adapter as both revoker and validator; reuse the callback service, completeOidcLogin, guarded handlers and POST/exact-Origin logout. Append both returned cookie headers; never return provider/session records to browser JavaScript.
+
+### Reusable Components
+
+No new Next.js UI or duplicate forms were introduced. Reused loadAuthConfiguration, OidcCallbackService, SessionService, SessionRevoker, guarded-handler/logout helpers and CustomerIdentityClient. Authentication remains server-only. New durable-store interfaces supply token custody/rotation without duplicating application auth state or introducing Firebase.
+
+### Web verification
+
+- Full web suite: 32 passed (previous 20 plus 12 SDK/configuration/lifecycle/session tests).
+- The real openid-client SDK processes synthetic RSA-signed ID tokens through mocked HTTPS provider endpoints. Tests reject bad signature, wrong nonce/issuer/audience/expiry, replay, unverified email and denied customer account.
+- Refresh rotation, serialized concurrent refresh/logout, changed configuration, session expiry, vault cleanup, provider revocation failure and failed cookie-session creation are tested.
+- Web TypeScript check and Next.js production build passed.
+- Frozen/offline pnpm 9.15.9 install passed; new lockfile entries are limited to the SDK and its two dependencies.
+- pnpm audit returned exit 1 with the same two pre-existing high advisories in zod and multer. No new advisory was reported for the SDK additions. Audit evidence: C:\Users\omola\AppData\Local\Temp\fajify-oidc-sdk-audit.json. Shared dependency remediation remains coordinated Phase 1 work.
+- Live browser OIDC/Keycloak, durable-store adapters and distributed locking under a real database, native devices and real provider revocation were not exercised. Synthetic fixtures are not live acceptance.
+- No backend source, shared security policies, production credentials or other checkout was changed.
+
+## Updated eight-task checklist
+
+| Task | Current implementation and remaining acceptance |
+| --- | --- |
+| 1. Flutter OIDC Code + PKCE | Native AppAuth gateway/composition and callback registrations implemented; disabled until explicit valid settings; device/browser acceptance pending |
+| 2. Registration, verification, login | Browser login and UserInfo/email + backend customer verification implemented; local password fields removed in browser mode; direct registration/enrollment UX and live account-policy acceptance pending |
+| 3. Recovery | Existing shared recovery UI retained; explicit provider sign-in-page guidance; no fabricated recovery success; direct approved handoff pending |
+| 4. Secure session lifecycle | Device secure store, verified restoration, rotation, pre-expiry/resume refresh and local-first RP logout implemented/tested; native revocation policy/device acceptance pending |
+| 5. /api/v1/auth/me | Existing typed clients now composed into native and server adapters; live integration and separate display-profile DTO remain pending |
+| 6. Navigation/roles | Existing route protection reused; verified email/subject/customer account policy enforced by adapters; server authorization remains authoritative |
+| 7. Next.js server-managed auth | Maintained SDK, cookie/session validation, vault contract, refresh/revocation and cleanup implemented; durable store implementations, approved web client and mounted routes pending |
+| 8. Evidence | 70 Flutter tests and 32 web tests pass, plus analysis/typecheck/build; Android/iOS/live distributed integration and existing dependency audit gates remain open |
+
+## Delivery and next step
+
+The preferred folder, origin and feat/m2-p2-customer-auth remain unchanged. Changes are committed locally; the final delivery message records the web commit hash and clean status. No automatic push or main merge occurs.
+
+The next independent work is implementing an owner-approved encrypted durable store and reviewed route composition, followed by approved provider registration/recovery handoffs. Deployment settings are explicitly pending per the user. Do not invent production values, a web client, database credentials, account policy or successful backend responses. Native device checks require the Android SDK or an iOS build environment.
+
+Manual delivery commands from the preferred folder:
+
+~~~powershell
+Set-Location 'C:\Users\omola\OneDrive\Desktop\Fajify-main'
+git remote get-url origin
+git status --short
+git branch --show-current
+git log -5 --oneline
+git push --set-upstream origin feat/m2-p2-customer-auth
+~~~
+
+SDK source: [openid-client documentation](https://github.com/panva/openid-client).
+
+Final source checks: no active Firebase matches, common secret-pattern findings, conflict markers or tracked local settings were found. Phase 1 sources and the retained Google configuration are unchanged from 749f7b9. Dart formatting checked 87 files with zero changes. These are scoped source checks, not native or live-provider acceptance.

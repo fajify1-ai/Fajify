@@ -46,3 +46,38 @@ export function loadAuthConfiguration(
     return { status: "blocked", reason: "invalid_configuration" };
   }
 }
+
+export interface WebOidcSettings {
+  readonly auth: Extract<AuthConfiguration, { status: "configured" }>;
+  readonly apiOrigin: URL;
+  readonly scopes: string;
+  readonly sessionLifetimeMs: number;
+  readonly transactionLifetimeMs: number;
+}
+
+/** Enabling the SDK is separate from supplying secrets. No production defaults.
+ * Durable store composition remains mandatory before routes can be mounted.
+ */
+export function loadWebOidcSettings(env: Record<string, string | undefined>): WebOidcSettings | null {
+  if (env.FAJI_CUSTOMER_WEB_AUTH_ENABLED !== "true") return null;
+  const auth = loadAuthConfiguration(env);
+  if (auth.status !== "configured") return null;
+  try {
+    const apiOrigin = secureUrl(env.FAJI_CUSTOMER_API_ORIGIN ?? "");
+    const scopes = env.FAJI_CUSTOMER_OIDC_SCOPES ?? "";
+    const list = scopes.split(" ");
+    const sessionSeconds = Number(env.FAJI_CUSTOMER_SESSION_MAX_AGE_SECONDS);
+    const transactionSeconds = Number(env.FAJI_CUSTOMER_TRANSACTION_MAX_AGE_SECONDS);
+    if (apiOrigin.pathname !== "/" ||
+      !list.includes("openid") || !list.includes("email") ||
+      list.some(scope => !/^[A-Za-z0-9._:-]+$/.test(scope)) ||
+      auth.redirectUri.origin !== auth.postLogoutRedirectUri.origin ||
+      !Number.isSafeInteger(sessionSeconds) || sessionSeconds <= 0 ||
+      !Number.isSafeInteger(transactionSeconds) || transactionSeconds <= 0 ||
+      !Number.isSafeInteger(sessionSeconds * 1000) ||
+      !Number.isSafeInteger(transactionSeconds * 1000)) return null;
+    return { auth, apiOrigin, scopes,
+      sessionLifetimeMs: sessionSeconds * 1000,
+      transactionLifetimeMs: transactionSeconds * 1000 };
+  } catch { return null; }
+}

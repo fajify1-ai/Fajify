@@ -29,6 +29,12 @@ is claimed.
   It is not mounted or connected to an enabled provider/session store yet.
 - `test/auth.test.ts`: explicit in-memory test doubles only, never used at
   runtime. All authentication modules use the `server-only` boundary marker.
+- `openid-client.server.ts`: maintained openid-client 6.8.8 SDK adapter with
+  discovery, PKCE/state/nonce, signed ID-token checks, UserInfo and active-account
+  validation, refresh and provider token revocation. Provider credentials belong
+  in a separately supplied encrypted durable vault; cookies remain opaque IDs.
+  No production memory store is provided. Vault updates must serialize refresh
+  and logout across every server instance.
 
 Existing pages, branding and layout are unchanged. No auth routes have been
 mounted because the web client and exact callback remain unapproved.
@@ -37,13 +43,15 @@ mounted because the web client and exact callback remain unapproved.
 
 1. Approve and provision the customer web confidential OIDC client, issuer,
    HTTPS callback/logout URIs, scopes and active-account/customer role policy.
-2. Select and wire a maintained OIDC SDK. It must generate cryptographic state,
-   nonce, S256 PKCE and HttpOnly browser binding; validate JWT signature, issuer,
-   audience, expiry and nonce; then apply the approved account contract.
+2. Wire the implemented OpenIdClientAdapter only after deployment approval.
+   It generates state, nonce, S256 PKCE and HttpOnly browser binding, verifies
+   signed ID tokens through the maintained SDK and checks UserInfo plus /auth/me.
 3. Supply a shared persistent TTL session/transaction store with atomic
    transaction consumption. No production process-local fallback is provided.
-4. Agree token custody, refresh rotation, session lifetime, revocation and
-   provider logout. Do not extend sessions merely by changing cookie expiry.
+4. Supply approved session/transaction lifetimes in server environment settings.
+   Configure provider-token vault retention/encryption and reviewed browser SSO
+   logout. Token revocation is implemented; browser SSO end-session routing is
+   not mounted. Refresh does not extend the approved browser-session lifetime.
 5. Supply a running test environment, securely provisioned synthetic accounts
    and accepted contracts for profile/enrollment/verification/recovery.
 
@@ -60,7 +68,7 @@ from the local merge. See the current M2_P2_SYNC_AND_IDENTITY.md report.
 
 Using Corepack pnpm 9.15.9 and Node 20.20.0:
 
-- `pnpm --filter @faji/customer-web test`: **20 passed**.
+- `pnpm --filter @faji/customer-web test`: **32 passed**.
 - `pnpm --filter @faji/customer-web typecheck`: **passed**.
 - `pnpm --filter @faji/customer-web build`: **passed**.
 - No live identity provider, persistent session adapter, browser login or
@@ -71,6 +79,19 @@ modules. That flag is for the test process; do not apply it to browser builds.
 Use Corepack shims on PATH when invoking Turborepo, since this workstation also
 has a different default pnpm version.
 
-Follow-up: integrate the approved provider/store adapters, mount reviewed
+Follow-up: integrate approved durable store adapters, mount reviewed
 handlers, then verify login, callback replay/CSRF, server authorization,
 expiry/refresh, logout and revocation end-to-end.
+
+See [current adapter report](../../docs/engineering/M2_P2_OIDC_ADAPTERS.md).
+FAJI_CUSTOMER_WEB_AUTH_ENABLED defaults to false; issuer, client/secret,
+callback/logout, API origin, scopes and session/transaction lifetime settings
+have no live defaults. The public application composition remains disabled
+until approved durable stores and deployment settings are wired.
+
+When composing approved stores: discover OpenIdClientAdapter; create
+SessionService with that adapter as BOTH revoker and validator; use adapter.begin
+with durable transaction creation; use OidcCallbackService with atomic transaction
+consumption and completeOidcLogin for callback/session creation. Route handlers
+must append both returned Set-Cookie headers, never return session/provider token
+records, and keep the existing per-handler guard and POST/exact-Origin logout.
