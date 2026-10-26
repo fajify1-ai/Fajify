@@ -25,7 +25,7 @@ const seed=randomBytes(20);
 let bits=0,hold=0,secret='';
 for(const byte of seed){hold=(hold<<8)|byte;bits+=8;while(bits>=5){bits-=5;secret+=alphabet[(hold>>bits)&31];}}
 if(bits)secret+=alphabet[(hold<<(5-bits))&31];
-const credential={type:'otp',userLabel:'disposable-otp',
+// Keycloak's OTP credential secretData stores literal secret characters by default.\n// HMAC must use those UTF-8 bytes (not the random seed used to generate that text).\nconst credential={type:'otp',userLabel:'disposable-otp',
  secretData:JSON.stringify({value:secret}),
  credentialData:JSON.stringify({digits:6,counter:0,period:30,algorithm:'HmacSHA1',subType:'totp'})};
 const user=await fetch(origin+'/admin/realms/faji/users',{method:'POST',headers,body:JSON.stringify({
@@ -100,7 +100,7 @@ console.log('PASS: privileged password-only login blocked at mandatory OTP chall
 function totp(at=Date.now()){
  const counter=Math.floor(at/1000/30);
  const num=Buffer.alloc(8);num.writeBigUInt64BE(BigInt(counter));
- const mac=createHmac('sha1',seed).update(num).digest();
+ const mac=createHmac('sha1',Buffer.from(secret,'utf8')).update(num).digest();
  const i=mac[mac.length-1]&15;
  return (((mac.readUInt32BE(i)&0x7fffffff)%1000000)+'').padStart(6,'0');
 }

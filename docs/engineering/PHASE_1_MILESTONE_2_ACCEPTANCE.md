@@ -47,3 +47,7 @@ The consolidated run at `c47145f` passed 60/60 API tests and successfully import
 ## 2026-10-26 privileged OTP form binding fix
 
 The live acceptance at `8d219b8` still reached the OTP challenge, but the test submission returned HTTP 200 with Keycloak feedback. The script was submitting an undocumented `credentialId` field. Keycloak's OTP login form instead uses `selectedCredentialId` when credential selection is needed. The harness now sends that field with the saved synthetic credential. This remains unverified until the next disposable run; no authentication requirement has been relaxed.
+
+## 2026-10-26 OTP secret encoding correction
+
+At `ab83480`, the disposable Keycloak accepted the password and displayed the OTP challenge, but rejected the code with `invalid-otp`; the realm policy and stored credential metadata matched. The test harness stored a Base32 text string under `secretData.value` while computing HMAC from the original raw random bytes. Keycloak treats the stored OTP secret as literal credential secret bytes under its default encoding. The harness now computes HMAC from the UTF-8 bytes of the exact stored secret. The corrected live test remains pending.
