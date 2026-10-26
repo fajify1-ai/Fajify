@@ -1,6 +1,6 @@
 # Phase 1 — Milestone 2: Keycloak acceptance evidence and remaining gates
 
-**Status:** customer authentication passed at commit `5e831b4d5d542998a65a773ec6edf097006bd71e` on a disposable Keycloak 26.8.1 / PostgreSQL 16 environment. The latest authorization/security commits have **not** yet passed consolidated acceptance.
+**Status:** customer authentication passed at commit `5e831b4d5d542998a65a773ec6edf097006bd71e` on a disposable Keycloak 26.8.1 / PostgreSQL 16 environment. The latest authorization/security commits have **not** yet passed consolidated acceptance. An automated synthetic administrator TOTP challenge-and-token test has been added to the disposable Keycloak runner, but remains unexecuted.
 
 ## Accepted customer lifecycle
 

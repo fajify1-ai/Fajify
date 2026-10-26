@@ -27,7 +27,7 @@ before(async()=>{
 });
 after(async()=>{
  if(admin){
-  await admin.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[subject,actor,liveSubject]]);
+  await admin.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[subject,actor,liveSubject,signedSubject]]);
   await admin.query('DELETE FROM resource_memberships WHERE identity_subject=$1',[subject]);
   await admin.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[subject,liveSubject,signedSubject]]);
   await admin.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[subject,liveSubject]]);
