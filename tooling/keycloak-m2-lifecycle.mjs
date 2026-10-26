@@ -27,6 +27,23 @@ assert.equal(client.directAccessGrantsEnabled,false);
 assert.equal(client.implicitFlowEnabled,false);
 console.log('PASS: imported customer client enforces PKCE S256, disallows direct and implicit grants');
 
+const admins=await json(origin+'/admin/realms/faji/clients?clientId=faji-admin-web',{headers:adminHeaders});
+assert.equal(admins.length,1,'dedicated privileged client missing');
+const adminClient=admins[0];
+assert.equal(adminClient.publicClient,true);
+assert.equal(adminClient.standardFlowEnabled,true);
+assert.equal(adminClient.directAccessGrantsEnabled,false);
+assert.equal(adminClient.attributes?.['pkce.code.challenge.method'],'S256');
+assert.ok(adminClient.authenticationFlowBindingOverrides?.browser,'admin browser authentication binding missing');
+const flows=await json(origin+'/admin/realms/faji/authentication/flows',{headers:adminHeaders});
+assert.ok(flows.some(flow=>flow.alias==='faji-admin-browser'),'admin MFA browser flow not imported');
+const executions=await json(origin+'/admin/realms/faji/authentication/flows/faji-admin-browser/executions',{headers:adminHeaders});
+assert.ok(executions.some(ex=>ex.providerId==='auth-otp-form'&&ex.requirement==='REQUIRED'),'admin OTP must be REQUIRED');
+assert.ok(executions.some(ex=>ex.providerId==='auth-username-password-form'&&ex.requirement==='REQUIRED'),'admin password must be REQUIRED');
+assert.equal(executions.some(ex=>ex.providerId==='auth-cookie'),false,'cookie bypass must not be possible');
+console.log('PASS: live imported privileged admin flow mandates password and OTP without cookie bypass');
+
+
 const username='acceptance_'+randomBytes(8).toString('hex');
 const password='Aa1!'+randomBytes(20).toString('base64url');
 const userRes=await fetch(origin+'/admin/realms/faji/users',{
