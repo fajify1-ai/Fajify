@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {randomBytes,createHash,createHmac} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 
 // Disposable privileged browser acceptance: never use real admin users or OTP secrets.
 const origin=process.env.FAJI_KC_ORIGIN;
@@ -120,3 +121,12 @@ assert.equal(claims.acr,'faji-mfa','OTP authenticated token must contain the enf
 assert.ok(Number.isInteger(claims.auth_time),'admin token auth_time required');
 assert.ok(Math.abs(Math.floor(Date.now()/1000)-claims.auth_time)<=300,'MFA authentication must be recent');
 console.log('PASS: real Keycloak administrator password plus TOTP, PKCE and privileged signed claims');
+
+const combined=spawnSync('corepack',['pnpm','--filter','@faji/api','exec','tsx','test/keycloak-http-acceptance.ts'],{
+ env:process.env,input:JSON.stringify({token:tokens.access_token,subject:claims.sub}),
+ encoding:'utf8',maxBuffer:1024*1024,timeout:120000
+});
+if(combined.status!==0)throw Error('Live privileged JWT-to-PostgreSQL API acceptance failed (exit '+String(combined.status)+'): '+String(combined.stderr??'').slice(0,1000));
+assert.match(combined.stdout,/PASS: real Keycloak-signed OTP bearer authorizes API approval/);
+console.log('PASS: Keycloak-signed admin OTP token verified by NestJS and PostgreSQL account state');
+
