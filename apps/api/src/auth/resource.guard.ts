@@ -15,7 +15,11 @@ export class ResourceGuard implements CanActivate {
   if(!request.identity)throw new ForbiddenException();
   const id=request.params?.[policy.param];
   if(!id||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))throw new BadRequestException('Invalid resource identifier');
-  try{return await this.access.member(request.identity.subject,policy.type,id,policy.roles);}
+  try{
+   const state=await this.access.state(request.identity.subject);
+   if(state.suspended||state.revokedAfter&&state.revokedAfter.getTime()/1000>=request.identity.issuedAt)return false;
+   return await this.access.member(request.identity.subject,policy.type,id,policy.roles);
+  }
   catch{return false;}
  }
 }

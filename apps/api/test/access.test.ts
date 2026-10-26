@@ -21,9 +21,17 @@ test('current identity allowed when access state is active',async()=>{
 });
 test('resource guard enforces database membership not token role alone',async()=>{
  let called=false;
- const access={member:async(sub:string,type:string,resource:string,roles:readonly string[])=>{
+ const access={state:async()=>({suspended:false,revokedAfter:null}),member:async(sub:string,type:string,resource:string,roles:readonly string[])=>{
   called=true;assert.equal(sub,subject);assert.equal(type,'business');assert.equal(resource,id);assert.deepEqual(roles,['owner']);return false;
  }} as unknown as AccessService;
  assert.equal(await new ResourceGuard(new Reflector(),access).canActivate(ctx(Policy.prototype.restricted)),false);
  assert.equal(called,true);
+});
+
+test('resource guard denies revoked tokens even when resource membership exists',async()=>{
+ let membershipChecked=false;
+ const access={state:async()=>({suspended:false,revokedAfter:new Date((identity.issuedAt+10)*1000)}),
+  member:async()=>{membershipChecked=true;return true;}} as unknown as AccessService;
+ assert.equal(await new ResourceGuard(new Reflector(),access).canActivate(ctx(Policy.prototype.restricted)),false);
+ assert.equal(membershipChecked,false,'revoked bearer cannot reach membership lookup');
 });
