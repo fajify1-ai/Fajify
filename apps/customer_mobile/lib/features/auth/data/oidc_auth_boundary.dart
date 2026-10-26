@@ -16,17 +16,6 @@ class CustomerOidcConfiguration {
   final Uri? postLogoutRedirectUri;
 }
 
-/// Future adapter uses a maintained native OIDC SDK, the system browser and
-/// Authorization Code + S256 PKCE. Password collection is deliberately absent.
-abstract interface class BrowserOidcAuthorization
-    implements CustomerAccountRecovery {
-  Future<AuthSession> authorize();
-  Future<AuthSession> completeAuthorization(Uri callback);
-  Future<void> beginRegistration();
-  @override
-  Future<void> beginRecovery();
-}
-
 /// Implement with platform-backed secure storage; never SharedPreferences.
 /// Values are opaque to presentation and must not be logged.
 abstract interface class SecureSessionStore {

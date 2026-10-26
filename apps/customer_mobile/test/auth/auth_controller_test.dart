@@ -12,7 +12,7 @@ void main() {
   AuthSession session({bool verified = true, bool access = true}) =>
       AuthSession(
         subject: 'test-subject',
-        provider: IdentityProvider.legacyFirebase,
+        provider: IdentityProvider.external,
         expiresAt: now.add(const Duration(minutes: 5)),
         emailVerified: verified,
         customerAccess: access,
@@ -43,7 +43,7 @@ void main() {
     expect(controller.state.status, AuthStatus.signedOut);
     repository.session = AuthSession(
       subject: 'test',
-      provider: IdentityProvider.legacyFirebase,
+      provider: IdentityProvider.external,
       expiresAt: now,
       emailVerified: true,
       customerAccess: true,

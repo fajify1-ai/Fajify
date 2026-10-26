@@ -88,7 +88,9 @@ class PlanRecommendationService {
     final time = state.selectedTimeOfDay;
     if (time == null || plan.supportedTimes.contains(time)) score += 15;
     final date = state.selectedDate;
-    if (date == null || plan.availableWeekdays.contains(date.weekday)) score += 10;
+    if (date == null || plan.availableWeekdays.contains(date.weekday)) {
+      score += 10;
+    }
     for (final vibe in state.selectedVibes) {
       if (plan.vibes.contains(vibe)) score += 8;
     }
@@ -126,7 +128,8 @@ class PlanRecommendationService {
   ) {
     final min = state.selectedBudget?.min;
     return ranked.cast<PlanOption?>().firstWhere(
-      (plan) => plan != null &&
+      (plan) =>
+          plan != null &&
           !used.contains(plan.id) &&
           min != null &&
           plan.priceMax < min,
@@ -143,7 +146,8 @@ class PlanRecommendationService {
     if (max == null) return null;
     final limit = max * 1.3;
     return ranked.cast<PlanOption?>().firstWhere(
-      (plan) => plan != null &&
+      (plan) =>
+          plan != null &&
           !used.contains(plan.id) &&
           plan.priceMin > max &&
           plan.priceMin <= limit,

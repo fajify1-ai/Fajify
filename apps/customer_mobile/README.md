@@ -15,3 +15,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## M2-P2 integration status
+
+See [current migration report](../../docs/engineering/M2_P2_FIREBASE_REMOVAL.md). Identity and customer data integrations are explicitly unavailable pending reviewed contracts; repository fallbacks do not fabricate live customer data. Native secure session storage is implemented but not enabled for live authentication.

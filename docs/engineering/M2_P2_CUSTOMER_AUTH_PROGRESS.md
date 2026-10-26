@@ -1,3 +1,5 @@
+> Historical evidence below is superseded for current development by [M2-P2 Firebase removal](M2_P2_FIREBASE_REMOVAL.md). The product owner's 2026-10-26 instruction authorizes removal before customer APIs exist, using typed unavailable boundaries.
+
 # FAJIFY M2-P2 customer authentication progress
 
 Recorded 2026-10-26. Branch: `feat/m2-p2-customer-auth`.
@@ -144,3 +146,7 @@ and Windows symlink support, then run package setup, debug APK build and device
 regressions. Next integration task: review the accepted Phase 1 commit and wire
 the real native/server OIDC SDK and persistent-store adapters before enabling
 any Keycloak flow.
+
+## Reusable component reconciliation
+
+Component commit 7565984 is preserved through a reviewed patch reconciliation with the migration. See [reusable components](M2_P2_REUSABLE_COMPONENTS.md) and [current reconciliation report](M2_P2_RECONCILIATION.md).

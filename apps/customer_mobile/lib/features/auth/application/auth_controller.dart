@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../domain/auth_repository.dart';
+import '../domain/auth_input.dart';
 import '../domain/auth_session.dart';
 
 /// Owns client session state; providers own credential/token verification.
@@ -25,7 +26,7 @@ class AuthController extends ChangeNotifier {
   final CustomerAuthRepository _repository;
   final DateTime Function() _clock;
 
-  /// Legacy Firebase policy is preserved. Enable only with an agreed policy.
+  /// Email verification policy is enforced for Keycloak. Enable only with an agreed policy.
   final bool requireVerifiedEmail;
   late final StreamSubscription<AuthSession?> _subscription;
   Timer? _expiry;
@@ -43,6 +44,51 @@ class AuthController extends ChangeNotifier {
   Future<void> refresh() =>
       _run(AuthStatus.restoring, _repository.refreshSession);
 
+  bool get usesBrowserAuthentication => _repository is BrowserOidcAuthorization;
+
+  Future<void> authorize() async {
+    final provider = _repository;
+    if (provider is! BrowserOidcAuthorization) return;
+    await _run(
+      AuthStatus.authenticating,
+      () => (provider as BrowserOidcAuthorization).authorize(),
+    );
+  }
+
+  /// Delegates callback validation, transaction replay protection and token
+  /// verification to the maintained SDK adapter. A URI alone grants no access.
+  Future<void> completeAuthorization(Uri callback) async {
+    final provider = _repository;
+    if (provider is! BrowserOidcAuthorization) {
+      if (!_disposed && !_busy) {
+        _fail(
+          const AuthFailure(
+            AuthErrorCode.providerUnavailable,
+            'Browser authentication is not configured.',
+          ),
+        );
+      }
+      return;
+    }
+    await _run(
+      AuthStatus.authenticating,
+      () => (provider as BrowserOidcAuthorization).completeAuthorization(
+        callback,
+      ),
+    );
+  }
+
+  Future<void> beginRegistration() async {
+    final provider = _repository;
+    if (provider is! BrowserOidcAuthorization || _disposed || _busy) return;
+    // Starting registration does not authenticate the caller. Only a verified
+    // callback accepted by the provider may create a session.
+    await _run(AuthStatus.authenticating, () async {
+      await (provider as BrowserOidcAuthorization).beginRegistration();
+      return null;
+    });
+  }
+
   Future<void> signIn(String email, String password) async {
     final provider = _repository;
     if (provider is! LegacyPasswordAuth) {
@@ -57,7 +103,7 @@ class AuthController extends ChangeNotifier {
     await _run(
       AuthStatus.authenticating,
       () => (provider as LegacyPasswordAuth).signIn(
-        email.trim().toLowerCase(),
+        AuthInput.normalizeEmail(email),
         password,
       ),
     );

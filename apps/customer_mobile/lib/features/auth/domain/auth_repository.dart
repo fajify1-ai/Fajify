@@ -13,7 +13,7 @@ abstract interface class LegacyPasswordAuth {
   Future<AuthSession> register(LegacyRegistration registration);
 }
 
-/// Existing Firebase profile fields; this is NOT a backend registration DTO.
+/// Existing form profile fields; this is NOT a backend registration DTO.
 class LegacyRegistration {
   const LegacyRegistration({
     required this.email,
@@ -52,5 +52,16 @@ class UnavailableAuthRepository implements CustomerAuthRepository {
 
 abstract interface class CustomerAccountRecovery {
   /// Delegates to the provider's account flow; never accepts a password.
+  Future<void> beginRecovery();
+}
+
+/// Future adapter uses a maintained native OIDC SDK, the system browser and
+/// Authorization Code + S256 PKCE. Password collection is deliberately absent.
+abstract interface class BrowserOidcAuthorization
+    implements CustomerAccountRecovery {
+  Future<AuthSession> authorize();
+  Future<AuthSession> completeAuthorization(Uri callback);
+  Future<void> beginRegistration();
+  @override
   Future<void> beginRecovery();
 }

@@ -1,3 +1,5 @@
+import '../../../../core/widgets/service_unavailable_view.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/faji_colors.dart';
@@ -13,11 +15,15 @@ import '../../data/repositories/plan_repository.dart';
 import '../../domain/services/plan_recommendation_service.dart';
 import '../widgets/recommendation_card.dart';
 import '../../data/models/plan_option.dart';
-import '../../../wishlist/data/models/wishlist_item.dart';
 import '../../../wishlist/data/repositories/wishlist_repository.dart';
 
 class PlanResultsScreen extends StatefulWidget {
-  const PlanResultsScreen({super.key, required this.flowState});
+  const PlanResultsScreen({
+    super.key,
+    required this.flowState,
+    this.repository,
+  });
+  final CustomerPlanRepository? repository;
 
   final PlanForMeFlowState flowState;
 
@@ -26,7 +32,8 @@ class PlanResultsScreen extends StatefulWidget {
 }
 
 class _PlanResultsScreenState extends State<PlanResultsScreen> {
-  final _repository = PlanRepository();
+  late final CustomerPlanRepository _repository =
+      widget.repository ?? PlanRepository();
   final _service = PlanRecommendationService();
   late Future<PlanRecommendationResult> _recommendations;
 
@@ -82,44 +89,56 @@ class _PlanResultsScreenState extends State<PlanResultsScreen> {
     return AnimatedBuilder(
       animation: WishlistRepository.instance,
       builder: (context, _) => Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
-      body: Stack(
-        children: [
-          SafeArea(
-            child: FutureBuilder<PlanRecommendationResult>(
-              future: _recommendations,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: FajiColors.primary),
+        backgroundColor: FajiColors.backgroundDark,
+        body: Stack(
+          children: [
+            SafeArea(
+              child: FutureBuilder<PlanRecommendationResult>(
+                future: _recommendations,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const ServiceUnavailableView(feature: 'Plans');
+                  }
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: FajiColors.primary,
+                      ),
+                    );
+                  }
+                  final result = snapshot.data!;
+                  return _ResultsContent(
+                    state: widget.flowState,
+                    result: result,
+                    savedPlanIds: WishlistRepository.instance.savedIds,
+                    onSaved: (plan, _) => ScaffoldMessenger.of(context)
+                        .showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              WishlistRepository.instance.loadError,
+                            ),
+                          ),
+                        ),
+                    onBook: _openBookingDateSheet,
                   );
-                }
-                final result = snapshot.data!;
-                return _ResultsContent(
-                  state: widget.flowState,
-                  result: result,
-                  savedPlanIds: WishlistRepository.instance.savedIds,
-                  onSaved: (plan, _) => WishlistRepository.instance.toggle(WishlistItem.fromPlan(plan)),
-                  onBook: _openBookingDateSheet,
-                );
-              },
+                },
+              ),
             ),
-          ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 16,
-            child: FloatingHomeNav(
-              currentItem: HomeNavItem.home,
-              showQuickActions: false,
-              onNavigation: (item) => _replaceResultsTopLevel(context, item),
-              onPlanForMe: () {},
-              onBrowsePlans: () {},
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: FloatingHomeNav(
+                currentItem: HomeNavItem.home,
+                showQuickActions: false,
+                onNavigation: (item) => _replaceResultsTopLevel(context, item),
+                onPlanForMe: () {},
+                onBrowsePlans: () {},
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -166,12 +185,21 @@ class _ResultsContent extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
           alignment: Alignment.centerLeft,
           padding: EdgeInsets.zero,
-          icon: const Icon(Icons.chevron_left, color: FajiColors.textSecondaryDark, size: 30),
+          icon: const Icon(
+            Icons.chevron_left,
+            color: FajiColors.textSecondaryDark,
+            size: 30,
+          ),
         ),
         const SizedBox(height: 5),
         const Text(
           '🎉 We found some plans\nfor you!',
-          style: TextStyle(color: Colors.white, fontSize: 22, height: 1.1, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            height: 1.1,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 8),
         const Text(
@@ -263,10 +291,20 @@ class _PreferenceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(color: FajiColors.primary, borderRadius: BorderRadius.circular(16)),
-        child: Text(label, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: FajiColors.primary,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Text(
+      label,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  );
 }
 
 class _ResultSection extends StatelessWidget {
@@ -290,30 +328,38 @@ class _ResultSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 1, bottom: 9),
-              child: Text(title, style: TextStyle(color: color, fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w600)),
+    padding: const EdgeInsets.only(bottom: 18),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 1, bottom: 9),
+          child: Text(
+            title,
+            style: TextStyle(
+              color: color,
+              fontSize: 13,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w600,
             ),
-            ...plans.map(
-              (plan) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: RecommendationCard(
-                  plan: plan,
-                  badge: badge,
-                  badgeColor: color,
-                  saved: savedPlanIds.contains(plan.id),
-                  onSaved: (saved) => onSaved(plan, saved),
-                  onBook: () => onBook(plan),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-      );
+        ...plans.map(
+          (plan) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: RecommendationCard(
+              plan: plan,
+              badge: badge,
+              badgeColor: color,
+              saved: savedPlanIds.contains(plan.id),
+              onSaved: (saved) => onSaved(plan, saved),
+              onBook: () => onBook(plan),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _EmptyResults extends StatelessWidget {
@@ -323,18 +369,22 @@ class _EmptyResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 36),
-          child: Column(
-            children: [
-              const Text(
-                "We couldn't find an exact match.",
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 14),
-              TextButton(onPressed: onBack, child: const Text('Adjust your plan')),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.only(top: 36),
+      child: Column(
+        children: [
+          const Text(
+            "We couldn't find an exact match.",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-      );
+          const SizedBox(height: 14),
+          TextButton(onPressed: onBack, child: const Text('Adjust your plan')),
+        ],
+      ),
+    ),
+  );
 }

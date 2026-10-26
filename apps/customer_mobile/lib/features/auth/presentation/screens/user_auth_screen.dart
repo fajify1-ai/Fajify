@@ -6,6 +6,9 @@ import 'package:flutter/services.dart';
 import '../../../../core/theme/faji_colors.dart';
 import '../../../../main.dart';
 import '../../domain/auth_repository.dart';
+import '../../domain/auth_input.dart';
+import '../widgets/auth_error_message.dart';
+import '../widgets/auth_form_layout.dart';
 import '../auth_scope.dart';
 import '../widgets/auth_divider.dart';
 import '../widgets/auth_primary_button.dart';
@@ -66,27 +69,11 @@ class _UserAuthScreenState extends State<UserAuthScreen>
     super.dispose();
   }
 
-  void _message(String value) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: FajiColors.primary,
-        margin: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        duration: const Duration(seconds: 4),
-      ),
-    );
-  }
+  void _message(String value) => showAuthMessage(
+    context,
+    value,
+    presentation: AuthMessagePresentation.sheet,
+  );
 
   void _close() {
     HapticFeedback.lightImpact();
@@ -99,12 +86,26 @@ class _UserAuthScreenState extends State<UserAuthScreen>
   }
 
   Future<void> _signIn() async {
-    if (signingIn || !(_signInForm.currentState?.validate() ?? false)) return;
-    final email = _email.text.trim().toLowerCase();
-    if (!email.contains('@')) {
-      _message('Please use your email address to sign in for now.');
+    final browserAuth = AuthScope.of(context);
+    if (browserAuth.usesBrowserAuthentication) {
+      if (signingIn) return;
+      setState(() => signingIn = true);
+      await browserAuth.authorize();
+      if (!mounted) return;
+      setState(() => signingIn = false);
+      if (browserAuth.canAccessCustomer) {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil(FajiRoutes.userHome, (_) => false);
+      } else {
+        _message(
+          browserAuth.state.failure?.message ??
+              'Complete sign-in in your browser.',
+        );
+      }
       return;
     }
+    if (signingIn || !(_signInForm.currentState?.validate() ?? false)) return;
+    final email = AuthInput.normalizeEmail(_email.text);
     final auth = AuthScope.of(context);
     setState(() => signingIn = true);
     await auth.signIn(email, _signPassword.text);
@@ -123,6 +124,19 @@ class _UserAuthScreenState extends State<UserAuthScreen>
   }
 
   Future<void> _registerAccount() async {
+    final browserAuth = AuthScope.of(context);
+    if (browserAuth.usesBrowserAuthentication) {
+      if (registering) return;
+      setState(() => registering = true);
+      await browserAuth.beginRegistration();
+      if (!mounted) return;
+      setState(() => registering = false);
+      _message(
+        browserAuth.state.failure?.message ??
+            'Complete registration in your browser.',
+      );
+      return;
+    }
     if (registering || !(_registerForm.currentState?.validate() ?? false)) {
       return;
     }
@@ -157,19 +171,6 @@ class _UserAuthScreenState extends State<UserAuthScreen>
       );
     }
   }
-
-  String? _required(String? value, String label) =>
-      value == null || value.trim().isEmpty ? '$label is required' : null;
-  String? _emailValidator(String? value) {
-    final error = _required(value, 'Email');
-    if (error != null) return error;
-    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value!.trim())
-        ? null
-        : 'Enter a valid email';
-  }
-
-  String? _passwordValidator(String? value) =>
-      value == null || value.length < 8 ? 'Use at least 8 characters' : null;
 
   @override
   Widget build(BuildContext context) {
@@ -232,9 +233,9 @@ class _UserAuthScreenState extends State<UserAuthScreen>
                   onRegister: _registerAccount,
                   onGoogle: _google,
                   onMessage: _message,
-                  requiredValidator: _required,
-                  emailValidator: _emailValidator,
-                  passwordValidator: _passwordValidator,
+                  requiredValidator: AuthInput.requiredValue,
+                  emailValidator: AuthInput.email,
+                  passwordValidator: AuthInput.registrationPassword,
                 ),
               ),
             ),
@@ -477,59 +478,53 @@ class _SignInFields extends StatelessWidget {
   final bool showPassword, signingIn;
   final VoidCallback onPasswordToggle, onForgot, onSubmit, onGoogle;
   @override
-  Widget build(BuildContext context) => Form(
-    key: form,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _Label('EMAIL OR USERNAME'),
-        FajiAuthTextField(
-          controller: email,
-          hint: 'Enter your email or username',
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
-          validator: (v) => v == null || v.trim().isEmpty
-              ? 'Email or username is required'
-              : null,
-        ),
-        const SizedBox(height: 18),
-        _Label('PASSWORD'),
-        FajiAuthTextField(
-          controller: password,
-          hint: 'Your password',
-          obscureText: !showPassword,
-          keyboardType: TextInputType.visiblePassword,
-          textInputAction: TextInputAction.done,
-          suffixIcon: IconButton(
-            onPressed: onPasswordToggle,
-            icon: Icon(
-              showPassword
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
-              color: FajiColors.textSecondaryDark,
-            ),
-          ),
-          validator: (v) =>
-              v == null || v.isEmpty ? 'Password is required' : null,
-        ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: onForgot,
-            child: const Text(
-              'Forgot password?',
-              style: TextStyle(color: FajiColors.primary, fontSize: 15),
-            ),
+  Widget build(BuildContext context) => AuthFormLayout(
+    formKey: form,
+    children: [
+      _Label('EMAIL OR USERNAME'),
+      FajiAuthTextField(
+        controller: email,
+        hint: 'Enter your email or username',
+        keyboardType: TextInputType.emailAddress,
+        textInputAction: TextInputAction.next,
+        validator: AuthInput.email,
+      ),
+      const SizedBox(height: 18),
+      _Label('PASSWORD'),
+      FajiAuthTextField(
+        controller: password,
+        hint: 'Your password',
+        obscureText: !showPassword,
+        keyboardType: TextInputType.visiblePassword,
+        textInputAction: TextInputAction.done,
+        suffixIcon: IconButton(
+          onPressed: onPasswordToggle,
+          icon: Icon(
+            showPassword
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            color: FajiColors.textSecondaryDark,
           ),
         ),
-        const SizedBox(height: 2),
-        AuthPrimaryButton(label: 'Sign In', onTap: onSubmit, busy: signingIn),
-        const SizedBox(height: 25),
-        const AuthDivider(),
-        const SizedBox(height: 22),
-        GoogleAuthButton(onTap: onGoogle),
-      ],
-    ),
+        validator: AuthInput.signInPassword,
+      ),
+      Align(
+        alignment: Alignment.centerRight,
+        child: TextButton(
+          onPressed: onForgot,
+          child: const Text(
+            'Forgot password?',
+            style: TextStyle(color: FajiColors.primary, fontSize: 15),
+          ),
+        ),
+      ),
+      const SizedBox(height: 2),
+      AuthPrimaryButton(label: 'Sign In', onTap: onSubmit, busy: signingIn),
+      const SizedBox(height: 25),
+      const AuthDivider(),
+      const SizedBox(height: 22),
+      GoogleAuthButton(onTap: onGoogle),
+    ],
   );
 }
 
@@ -608,167 +603,164 @@ class _RegisterFields extends StatelessWidget {
     ),
   );
   @override
-  Widget build(BuildContext context) => Form(
-    key: form,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        field(
-          'FULL NAME',
-          name,
-          'e.g. Adaeze Okonkwo',
-          type: TextInputType.name,
-          action: TextInputAction.next,
-          validator: (v) => requiredValidator(v, 'Full name'),
+  Widget build(BuildContext context) => AuthFormLayout(
+    formKey: form,
+    children: [
+      field(
+        'FULL NAME',
+        name,
+        'e.g. Adaeze Okonkwo',
+        type: TextInputType.name,
+        action: TextInputAction.next,
+        validator: (v) => requiredValidator(v, 'Full name'),
+      ),
+      field(
+        'USERNAME',
+        username,
+        'yourhandle',
+        type: TextInputType.text,
+        action: TextInputAction.next,
+        validator: (v) {
+          final e = requiredValidator(v, 'Username');
+          if (e != null) return e;
+          return v!.contains(' ') ? 'Username cannot contain spaces' : null;
+        },
+        prefix: '@ ',
+      ),
+      field(
+        'EMAIL ADDRESS',
+        email,
+        'you@email.com',
+        type: TextInputType.emailAddress,
+        action: TextInputAction.next,
+        validator: emailValidator,
+      ),
+      field(
+        'PHONE NUMBER',
+        phone,
+        '0801 234 5678',
+        type: TextInputType.phone,
+        action: TextInputAction.next,
+        validator: (v) => requiredValidator(v, 'Phone'),
+        prefix: '+234  ',
+      ),
+      field(
+        'DATE OF BIRTH',
+        dob,
+        'mm/dd/yyyy',
+        readOnly: true,
+        onTap: () => _pickDate(context),
+        suffix: IconButton(
+          onPressed: () => _pickDate(context),
+          icon: const Icon(Icons.calendar_today_outlined, size: 19),
         ),
-        field(
-          'USERNAME',
-          username,
-          'yourhandle',
-          type: TextInputType.text,
-          action: TextInputAction.next,
-          validator: (v) {
-            final e = requiredValidator(v, 'Username');
-            if (e != null) return e;
-            return v!.contains(' ') ? 'Username cannot contain spaces' : null;
-          },
-          prefix: '@ ',
-        ),
-        field(
-          'EMAIL ADDRESS',
-          email,
-          'you@email.com',
-          type: TextInputType.emailAddress,
-          action: TextInputAction.next,
-          validator: emailValidator,
-        ),
-        field(
-          'PHONE NUMBER',
-          phone,
-          '0801 234 5678',
-          type: TextInputType.phone,
-          action: TextInputAction.next,
-          validator: (v) => requiredValidator(v, 'Phone'),
-          prefix: '+234  ',
-        ),
-        field(
-          'DATE OF BIRTH',
-          dob,
-          'mm/dd/yyyy',
-          readOnly: true,
-          onTap: () => _pickDate(context),
-          suffix: IconButton(
-            onPressed: () => _pickDate(context),
-            icon: const Icon(Icons.calendar_today_outlined, size: 19),
+        validator: (v) => requiredValidator(v, 'Date of birth'),
+      ),
+      field(
+        'HOME ADDRESS',
+        address,
+        'Street, City, State',
+        type: TextInputType.streetAddress,
+        action: TextInputAction.next,
+        validator: (v) => requiredValidator(v, 'Address'),
+      ),
+      field(
+        'PASSWORD',
+        password,
+        'Min. 8 characters',
+        type: TextInputType.visiblePassword,
+        action: TextInputAction.next,
+        obscureText: !showPassword,
+        suffix: IconButton(
+          onPressed: onPasswordToggle,
+          icon: Icon(
+            showPassword
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            color: FajiColors.textSecondaryDark,
           ),
-          validator: (v) => requiredValidator(v, 'Date of birth'),
         ),
-        field(
-          'HOME ADDRESS',
-          address,
-          'Street, City, State',
-          type: TextInputType.streetAddress,
-          action: TextInputAction.next,
-          validator: (v) => requiredValidator(v, 'Address'),
+        validator: passwordValidator,
+      ),
+      field(
+        'CONFIRM PASSWORD',
+        confirm,
+        'Re-enter password',
+        type: TextInputType.visiblePassword,
+        action: TextInputAction.done,
+        obscureText: !showConfirm,
+        suffix: IconButton(
+          onPressed: onConfirmToggle,
+          icon: Icon(
+            showConfirm
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            color: FajiColors.textSecondaryDark,
+          ),
         ),
-        field(
-          'PASSWORD',
-          password,
-          'Min. 8 characters',
-          type: TextInputType.visiblePassword,
-          action: TextInputAction.next,
-          obscureText: !showPassword,
-          suffix: IconButton(
-            onPressed: onPasswordToggle,
-            icon: Icon(
-              showPassword
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
-              color: FajiColors.textSecondaryDark,
+        validator: (v) {
+          final e = passwordValidator(v);
+          return e ?? (v != password.text ? 'Passwords do not match' : null);
+        },
+      ),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Checkbox(
+            value: terms,
+            onChanged: onTermsChanged,
+            activeColor: FajiColors.primary,
+            side: const BorderSide(color: FajiColors.borderDark),
+          ),
+          Expanded(
+            child: Wrap(
+              children: [
+                const Text(
+                  "I agree to Faji's ",
+                  style: TextStyle(
+                    color: FajiColors.textSecondaryDark,
+                    fontSize: 12,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () =>
+                      onMessage('Terms of Service will be connected later.'),
+                  child: const Text(
+                    'Terms of Service',
+                    style: TextStyle(color: FajiColors.primary, fontSize: 12),
+                  ),
+                ),
+                const Text(
+                  ' and ',
+                  style: TextStyle(
+                    color: FajiColors.textSecondaryDark,
+                    fontSize: 12,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () =>
+                      onMessage('Privacy Policy will be connected later.'),
+                  child: const Text(
+                    'Privacy Policy',
+                    style: TextStyle(color: FajiColors.primary, fontSize: 12),
+                  ),
+                ),
+              ],
             ),
           ),
-          validator: passwordValidator,
-        ),
-        field(
-          'CONFIRM PASSWORD',
-          confirm,
-          'Re-enter password',
-          type: TextInputType.visiblePassword,
-          action: TextInputAction.done,
-          obscureText: !showConfirm,
-          suffix: IconButton(
-            onPressed: onConfirmToggle,
-            icon: Icon(
-              showConfirm
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
-              color: FajiColors.textSecondaryDark,
-            ),
-          ),
-          validator: (v) {
-            final e = passwordValidator(v);
-            return e ?? (v != password.text ? 'Passwords do not match' : null);
-          },
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Checkbox(
-              value: terms,
-              onChanged: onTermsChanged,
-              activeColor: FajiColors.primary,
-              side: const BorderSide(color: FajiColors.borderDark),
-            ),
-            Expanded(
-              child: Wrap(
-                children: [
-                  const Text(
-                    "I agree to Faji's ",
-                    style: TextStyle(
-                      color: FajiColors.textSecondaryDark,
-                      fontSize: 12,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () =>
-                        onMessage('Terms of Service will be connected later.'),
-                    child: const Text(
-                      'Terms of Service',
-                      style: TextStyle(color: FajiColors.primary, fontSize: 12),
-                    ),
-                  ),
-                  const Text(
-                    ' and ',
-                    style: TextStyle(
-                      color: FajiColors.textSecondaryDark,
-                      fontSize: 12,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () =>
-                        onMessage('Privacy Policy will be connected later.'),
-                    child: const Text(
-                      'Privacy Policy',
-                      style: TextStyle(color: FajiColors.primary, fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        AuthPrimaryButton(
-          label: 'Create Account',
-          onTap: onCreate,
-          busy: registering,
-        ),
-        const SizedBox(height: 25),
-        const AuthDivider(),
-        const SizedBox(height: 22),
-        GoogleAuthButton(onTap: onGoogle),
-      ],
-    ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      AuthPrimaryButton(
+        label: 'Create Account',
+        onTap: onCreate,
+        busy: registering,
+      ),
+      const SizedBox(height: 25),
+      const AuthDivider(),
+      const SizedBox(height: 22),
+      GoogleAuthButton(onTap: onGoogle),
+    ],
   );
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();

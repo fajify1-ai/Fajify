@@ -4,10 +4,7 @@ import '../../../../core/theme/faji_colors.dart';
 import '../../data/models/booking_draft.dart';
 
 class BookingReviewPlaceholderScreen extends StatelessWidget {
-  const BookingReviewPlaceholderScreen({
-    super.key,
-    required this.draft,
-  });
+  const BookingReviewPlaceholderScreen({super.key, required this.draft});
 
   final BookingDraft draft;
 

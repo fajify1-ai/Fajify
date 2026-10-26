@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../application/auth_controller.dart';
 import '../domain/auth_session.dart';
+import 'widgets/auth_loading_indicator.dart';
 
 /// Does not construct the protected subtree until access is established.
 class CustomerAccessGate extends StatelessWidget {
@@ -21,7 +22,7 @@ class CustomerAccessGate extends StatelessWidget {
     listenable: controller,
     builder: (context, _) {
       if (controller.state.status == AuthStatus.restoring) {
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        return const Scaffold(body: Center(child: AuthLoadingIndicator()));
       }
       return controller.canAccessCustomer
           ? builder(context)

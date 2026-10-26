@@ -237,7 +237,8 @@ class _CalendarGrid extends StatelessWidget {
         }
         final date = DateTime(month.year, month.month, dayNumber);
         final available = isAvailable(date);
-        final selected = selectedDate?.year == date.year &&
+        final selected =
+            selectedDate?.year == date.year &&
             selectedDate?.month == date.month &&
             selectedDate?.day == date.day;
         return Center(
@@ -286,24 +287,24 @@ class _SheetIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        color: const Color(0xff101010),
-        shape: const CircleBorder(),
-        child: InkWell(
-          onTap: enabled ? onTap : null,
-          customBorder: const CircleBorder(),
-          child: SizedBox(
-            width: 36,
-            height: 36,
-            child: Icon(
-              icon,
-              size: 18,
-              color: enabled
-                  ? FajiColors.textPrimaryDark
-                  : FajiColors.textSecondaryDark,
-            ),
-          ),
+    color: const Color(0xff101010),
+    shape: const CircleBorder(),
+    child: InkWell(
+      onTap: enabled ? onTap : null,
+      customBorder: const CircleBorder(),
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: Icon(
+          icon,
+          size: 18,
+          color: enabled
+              ? FajiColors.textPrimaryDark
+              : FajiColors.textSecondaryDark,
         ),
-      );
+      ),
+    ),
+  );
 }
 
 String _monthLabel(DateTime date) {
