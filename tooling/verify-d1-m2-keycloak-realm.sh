@@ -10,6 +10,7 @@ assert.equal(r.realm,'faji');
 assert.equal(r.verifyEmail,true);
 assert.equal(r.resetPasswordAllowed,true);
 assert.equal(r.bruteForceProtected,true);
+assert.deepEqual(r.defaultRole?.composites?.realm,['customer'],'no elevated default roles');
 assert.ok(r.accessTokenLifespan<=300);
 const ids=new Set();
 const expected=new Set(['faji-customer-mobile','faji-business-mobile','faji-ride-mobile']);

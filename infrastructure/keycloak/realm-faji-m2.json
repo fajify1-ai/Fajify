@@ -202,5 +202,15 @@
   ],
   "attributes": {
     "acr.loa.map": "{\"faji-mfa\":\"1\"}"
+  },
+  "defaultRole": {
+    "name": "default-roles-faji",
+    "description": "Default role for newly registered Fajify identities",
+    "composite": true,
+    "composites": {
+      "realm": [
+        "customer"
+      ]
+    }
   }
 }

@@ -42,6 +42,12 @@ assert.ok(executions.some(ex=>ex.providerId==='auth-otp-form'&&ex.requirement===
 assert.ok(executions.some(ex=>ex.providerId==='auth-username-password-form'&&ex.requirement==='REQUIRED'),'admin password must be REQUIRED');
 assert.equal(executions.some(ex=>ex.providerId==='auth-cookie'),false,'cookie bypass must not be possible');
 console.log('PASS: live imported privileged admin flow mandates password and OTP without cookie bypass');
+const defaultRoles=await json(origin+'/admin/realms/faji/roles/default-roles-faji/composites',{headers:adminHeaders});
+const defaultNames=defaultRoles.map(role=>role.name);
+assert.ok(defaultNames.includes('customer'),'self-registered identities must receive base customer role');
+for(const elevated of ['merchant','driver','dispatcher','platform-admin'])
+ assert.equal(defaultNames.includes(elevated),false,'no default elevated role '+elevated);
+console.log('PASS: Keycloak default enrollment assigns customer, never merchant or privileged roles');
 
 
 const username='acceptance_'+randomBytes(8).toString('hex');
