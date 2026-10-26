@@ -35,6 +35,7 @@ export interface WritableOidcTransactionStore {
 }
 
 export const OIDC_BINDING_COOKIE = "__Host-faji-oidc-binding";
+export type CustomerWebJourney = "signIn" | "registration" | "recovery" | "verifyEmail";
 
 /** Maintained SDK adapter. The caller must supply real durable stores. This
  * module does not mount routes or enable the blocked customer composition.
@@ -69,8 +70,11 @@ export class OpenIdClientAdapter implements OidcSdkAdapter, SessionValidator, Se
     } catch { throw new AuthenticationUnavailable(); }
   }
 
-  async begin(transactions: WritableOidcTransactionStore): Promise<{ redirect: URL; cookie: string }> {
+  async begin(transactions: WritableOidcTransactionStore, journey: CustomerWebJourney = "signIn"): Promise<{ redirect: URL; cookie: string }> {
     try {
+      if (!["signIn", "registration", "recovery", "verifyEmail"].includes(journey)) {
+        throw new AuthenticationUnavailable();
+      }
       const state = oidc.randomState();
       const nonce = oidc.randomNonce();
       const codeVerifier = oidc.randomPKCECodeVerifier();
@@ -80,6 +84,9 @@ export class OpenIdClientAdapter implements OidcSdkAdapter, SessionValidator, Se
         redirect_uri: this.settings.auth.redirectUri.href, scope: this.settings.scopes,
         state, nonce, code_challenge_method: "S256",
         code_challenge: await oidc.calculatePKCECodeChallenge(codeVerifier),
+        ...(journey === "registration" ? { prompt: "create" } : {}),
+        ...(journey === "recovery" ? { prompt: "login" } : {}),
+        ...(journey === "verifyEmail" ? { kc_action: "VERIFY_EMAIL" } : {}),
       });
       await transactions.create({ state, nonce, codeVerifier,
         browserBindingDigest: createHash("sha256").update(binding).digest("hex"),
@@ -170,6 +177,10 @@ export class OpenIdClientAdapter implements OidcSdkAdapter, SessionValidator, Se
   }
 }
 
+export function expiredOidcBindingCookie(): string {
+  return `${OIDC_BINDING_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+}
+
 /** Clear a partially created provider session if durable browser-session
  * creation fails. Never return tokens or provider diagnostics to the browser.
  */
@@ -181,7 +192,7 @@ export async function completeOidcLogin(
   try {
     const result = await sessions.create(session, previousId);
     return { ...result,
-      bindingCookie: `${OIDC_BINDING_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0` };
+      bindingCookie: expiredOidcBindingCookie() };
   } catch {
     try { await revoker.revoke(session); } catch { /* Remain denied. */ }
     throw new AuthenticationUnavailable();

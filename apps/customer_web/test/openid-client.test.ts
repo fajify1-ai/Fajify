@@ -134,6 +134,24 @@ test("SDK initiation creates browser-bound random state, nonce and S256 PKCE", a
   assert.ok(!start.cookie.includes(stored.codeVerifier));
 });
 
+test("SDK journey hints use provider authorization without changing approved endpoints", async () => {
+  const f = fixture();
+  const store = { async create() {} };
+  const registration = await f.adapter.begin(store, "registration");
+  assert.equal(registration.redirect.searchParams.get("prompt"), "create");
+  const recovery = await f.adapter.begin(store, "recovery");
+  assert.equal(recovery.redirect.searchParams.get("prompt"), "login");
+  const verification = await f.adapter.begin(store, "verifyEmail");
+  assert.equal(verification.redirect.searchParams.get("kc_action"), "VERIFY_EMAIL");
+  for (const start of [registration, recovery, verification]) {
+    assert.equal(start.redirect.pathname, "/realms/fixture/authorize-fixture");
+    assert.equal(start.redirect.searchParams.get("client_id"), f.settings.auth.clientId);
+    assert.equal(start.redirect.searchParams.get("code_challenge_method"), "S256");
+    assert.ok(!start.redirect.href.includes(f.settings.auth.clientSecret));
+  }
+  await assert.rejects(f.adapter.begin(store, "other" as "signIn"), AuthenticationUnavailable);
+});
+
 test("real SDK verifies signed callback then stores credentials only in the server vault", async () => {
   const f = fixture(); let transaction: OidcTransaction | null = null;
   const start = await f.adapter.begin({ async create(value) { transaction = value; } });

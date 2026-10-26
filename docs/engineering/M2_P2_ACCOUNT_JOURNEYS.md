@@ -62,3 +62,49 @@ Statuses refer to full acceptance, including live/native evidence. No full task 
 | 6. Protected navigation/customer roles | PARTIALLY IMPLEMENTED | Central access gate, verified completion navigation and role-denial feedback tested; live authorization acceptance pending |
 | 7. Next.js server-managed auth | PARTIALLY IMPLEMENTED | Existing SDK/session/vault boundaries preserved; new journey/HTTP helpers are verified in the following milestone; durable stores, deployment configuration and mounting remain blocked |
 | 8. Tests/build/integration evidence | PARTIALLY IMPLEMENTED | 80 Flutter tests passed; native/live evidence remains unavailable; web results recorded below |
+
+
+## Milestone 2 — Next.js account journeys and security handlers
+
+Flutter milestone commit: a594a78e5dfdab2ae79b6091d04426016bc3eafa.
+
+### Completed code
+
+- OpenIdClientAdapter.begin now accepts a closed journey type while preserving configured issuer/client/scopes, random state/nonce, PKCE and browser binding. Registration uses prompt=create; verification requests VERIFY_EMAIL; recovery uses prompt=login and provider-page recovery instructions.
+- No custom password collection, guessed reset endpoint, client ID, return URL or production configuration is added. Runtime values remain gated and the application composition stays disabled.
+- OidcCallbackService rejects cancelled or ambiguous duplicate action-status callbacks before token exchange/session creation. A provider hint is never treated as proof of verification or password reset.
+- New journey-http.server.ts provides reusable, UNMOUNTED initiation/callback helpers. Null runtime explicitly returns 503 unavailable; no in-memory production fallback or fake identity exists.
+- Initiation requires POST and the exact configured application Origin before invoking the SDK/store. It returns a private HTTPS redirect and secure browser-binding cookie.
+- Callback requires GET, reuses existing state/binding/one-time transaction and SDK verification, and rotates any previous browser session on success. It returns both opaque session and expired binding cookies, with no-store/no-referrer headers.
+- The successful return URL is an explicitly supplied approved same-origin configuration value. Arbitrary callback next/return queries are ignored; unsafe configured targets are rejected before exchange.
+- Errors return only safe status/code responses, clear transaction binding and never reflect provider diagnostics or issue an authenticated cookie. Existing session/provider cleanup, revocation and account revalidation remain shared.
+
+### Reusable Components
+
+Reused OpenIdClientAdapter, OidcCallbackService, completeOidcLogin, SessionService, session/transaction store interfaces and HttpOnly cookie helpers. Centralized the expired browser-binding cookie value to avoid divergent cleanup behavior. No Next.js UI components, page redesign, duplicated SDK exchange or second authentication state was added.
+
+Flutter's new shared AuthStatusView and existing form/buttons/error views are described in Milestone 1. Firebase runtime removal is preserved on both platforms; the disconnected owner-pending Google configuration remains untouched.
+
+### Verification
+
+- Customer web TypeScript check: passed.
+- Full customer web suite: 40 passed, zero failed (previous 32 plus seven HTTP journey security tests and one SDK journey-hint test).
+- Next.js production build: passed.
+- Cases include missing configuration, POST/exact-Origin enforcement, secure/private redirects, cookie rotation, ignored/unapproved return targets, cancelled/malformed callbacks, safe provider failure responses and absence of authenticated cookies on error.
+- Existing real-SDK synthetic signed-token, refresh, expiry, revocation, storage, replay and protected-handler tests remain passing.
+- Full Flutter suite: 80 passed; analysis zero issues. Native package dependency versions are unchanged in this milestone.
+- Git whitespace and workspace structure checks passed. Source scans found no active Firebase, conflict-marker or common-secret-pattern findings; retained Google configuration and Phase 1 backend/security sources are unchanged.
+- The backend suite and registry dependency audit were not rerun because backend/dependency versions are unchanged. The previously reported two high shared-backend dependency advisories remain open; they are not represented as resolved.
+- Android/iOS builds, live Keycloak/SMTP, browser/device authentication and real durable/distributed storage were not executed.
+
+### Remaining blockers and next work
+
+Approved issuer/API/scopes/callback/logout settings and customer web client are still pending. Web route mounting requires owner-approved encrypted persistent credential/session storage, atomic one-time transactions and cross-instance locking. No production store or routes are selected in this milestone.
+
+Account self-enrollment/approval UX requires coordination with the existing Phase 1 pending/suspension policy; a verified email does not confer account approval. Full profile display still lacks its own contract. Direct reset-screen targeting, live email delivery/recovery/old-password rejection, native callback/keystore/keychain, provider revocation and cross-instance session acceptance need evidence. Native SDK/browser and Android build verification remain blocked by missing tooling/deployment access.
+
+The eight-task table above remains the full acceptance status: all eight are partially implemented, with their remaining live/native/contract gates blocked. Task 7 now additionally has tested journey initiation/callback helpers, and Task 8 now has 80 Flutter plus 40 web tests and a passing web build. No full acceptance task is declared complete without the required integration evidence.
+
+The next independently useful milestone is owner-approved durable web storage and reviewed route composition, then coordinated account enrollment/approval presentation and live provider acceptance. Do not invent backend outcomes or enable authentication merely to remove an unavailable state.
+
+The final web milestone is committed locally after these checks; its exact hash and clean status appear in the delivery message. Use the manual PowerShell commands above to push the branch yourself. No automatic push, remote branch modification or main merge is performed.

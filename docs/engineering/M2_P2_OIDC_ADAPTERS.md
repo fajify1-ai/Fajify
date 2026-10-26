@@ -1,5 +1,7 @@
 # M2-P2 configurable OIDC adapters — 2026-10-26
 
+Historical adapter milestone. The [customer account journey report](M2_P2_ACCOUNT_JOURNEYS.md) records the subsequent registration, verification, recovery and HTTP journey work with current acceptance statuses.
+
 ## Native milestone: tasks 1–3
 
 Published baseline verified: origin/feat/m2-p2-customer-auth = 749f7b9f7174718769b61029c60a413695412fae. The preferred working folder and branch remain C:\Users\omola\OneDrive\Desktop\Fajify-main and feat/m2-p2-customer-auth. No remote changes are made.

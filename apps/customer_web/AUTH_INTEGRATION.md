@@ -68,7 +68,7 @@ from the local merge. See the current M2_P2_SYNC_AND_IDENTITY.md report.
 
 Using Corepack pnpm 9.15.9 and Node 20.20.0:
 
-- `pnpm --filter @faji/customer-web test`: **32 passed**.
+- `pnpm --filter @faji/customer-web test`: **40 passed**.
 - `pnpm --filter @faji/customer-web typecheck`: **passed**.
 - `pnpm --filter @faji/customer-web build`: **passed**.
 - No live identity provider, persistent session adapter, browser login or
@@ -84,6 +84,8 @@ handlers, then verify login, callback replay/CSRF, server authorization,
 expiry/refresh, logout and revocation end-to-end.
 
 See [current adapter report](../../docs/engineering/M2_P2_OIDC_ADAPTERS.md).
+See [customer journey report](../../docs/engineering/M2_P2_ACCOUNT_JOURNEYS.md)
+for the newer registration, verification and provider-guided recovery milestone.
 FAJI_CUSTOMER_WEB_AUTH_ENABLED defaults to false; issuer, client/secret,
 callback/logout, API origin, scopes and session/transaction lifetime settings
 have no live defaults. The public application composition remains disabled
@@ -95,3 +97,17 @@ with durable transaction creation; use OidcCallbackService with atomic transacti
 consumption and completeOidcLogin for callback/session creation. Route handlers
 must append both returned Set-Cookie headers, never return session/provider token
 records, and keep the existing per-handler guard and POST/exact-Origin logout.
+
+`adapter.begin` accepts a closed journey type: signIn, registration, recovery or
+verifyEmail. Registration uses prompt=create; verification uses the provider's
+VERIFY_EMAIL action; recovery opens a fresh sign-in page where the user chooses
+Forgot password. Neither requesting a journey nor returning from it proves that
+an email was sent or a password changed. UserInfo and /auth/me still decide access.
+
+`journey-http.server.ts` provides unmounted initiation/callback helpers. Pass null
+runtime until approved settings and durable stores exist to return an explicit
+503 unavailable response. Initiation requires POST and exact Origin. Callback
+completion appends both cookies, rotates the previous session, clears browser
+binding, uses an explicitly supplied same-origin return target and redacts errors.
+Callback return query parameters never select the return URL. Cancelled provider
+actions cannot issue a browser session. No app/api route or page is enabled here.

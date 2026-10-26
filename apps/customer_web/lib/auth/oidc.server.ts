@@ -78,6 +78,8 @@ export class OidcCallbackService {
       url.pathname !== this.redirectUri.pathname ||
       url.username || url.password || url.hash ||
       url.searchParams.has("error") ||
+      url.searchParams.get("kc_action_status") === "cancelled" ||
+      url.searchParams.getAll("kc_action_status").length > 1 ||
       !browserBinding || !/^[A-Za-z0-9_-]{43}$/.test(browserBinding)
     ) return invalid();
 
