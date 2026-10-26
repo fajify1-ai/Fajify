@@ -50,7 +50,9 @@ async function main(){
    .set('Authorization','Bearer '+fixture.token).send({suspended:false});
   assert.equal(approved.status,201,'real Keycloak OTP token must authorize privileged account approval');
   assert.equal((await access.state(target)).suspended,false);
-  const tampered=fixture.token.slice(0,-1)+(fixture.token.at(-1)==='A'?'B':'A');
+  const jwtParts=fixture.token.split('.');
+  jwtParts[1]=Buffer.from(JSON.stringify({sub:'attacker'})).toString('base64url');
+  const tampered=jwtParts.join('.');
   const invalid=await request(app.getHttpServer()).get('/api/v1/auth/me')
    .set('Authorization','Bearer '+tampered);
   assert.equal(invalid.status,401,'tampered signed bearer must be rejected');
