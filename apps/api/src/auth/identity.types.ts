@@ -1,6 +1,11 @@
 export interface VerifiedIdentity {
- subject:string; issuer:string; audience:string[]; expiresAt:number;
+ subject:string; issuer:string; audience:string[]; expiresAt:number;issuedAt:number;
  roles:readonly string[];
+ /** Authorized OIDC client ID (azp) present in the signed access token. */
+ authorizedParty?:string;
+ /** Authenticator assurance details supplied by the signed Keycloak access token. */
+ authContext?:string;
+ authTime?:number;
 }
 export interface IdentityVerifier {verifyAccessToken(token:string):Promise<VerifiedIdentity>;}
 export const IDENTITY_VERIFIER=Symbol('IDENTITY_VERIFIER');

@@ -7,8 +7,8 @@ Faji connects customers with venues, businesses, experiences, reservations, even
 This repository follows the established Faji System Architecture & Engineering Development Roadmap v1.0.
 
 - [System architecture and confirmed technology stack](docs/architecture/SYSTEM_ARCHITECTURE.md)
-- [Nine development milestones, 63 phases and acceptance criteria](docs/engineering/MILESTONES.md)
-- [Developer 1, Developer 2, Developer 3 and 3A/3B allocations](docs/engineering/DEVELOPER_WORKSTREAMS.md)
+- [Nine milestones, four delivery phases per milestone, and acceptance criteria](docs/engineering/MILESTONES.md)
+- [Four-phase allocation matrix for all milestones](docs/roadmap/FOUR_PHASE_MODEL.md)
 - [Monorepo structure, delivery process and engineering standards](docs/engineering/REPOSITORY_AND_DELIVERY.md)
 
 ## Confirmed core stack

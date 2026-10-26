@@ -1,28 +1,23 @@
 # Parallel development and workspace ownership
 
-## Workstreams
-| Developer | Primary code ownership | Milestone 1 delivery |
+Fajify delivers each milestone via **four concurrently owned phases**. See [the canonical phase allocation](../roadmap/FOUR_PHASE_MODEL.md).
+
+| Phase | Primary workspace | Responsibility |
 | --- | --- | --- |
-| Developer 1 — Backend & Platform | `apps/api/`, `apps/worker/`, `packages/database/`, `packages/domain/`, `packages/api_contracts/`, `infrastructure/` | NestJS modular API, PostgreSQL/PostGIS, OpenAPI, development services, Keycloak preparation |
-| Developer 2 — Customer & Frontend | `apps/customer_mobile/`, `apps/customer_web/`, `packages/flutter_design_system/`, `packages/flutter_core/`, `packages/flutter_api_client/`, `packages/web_ui/` | Flutter customer preservation/migration, shared UI, Next.js customer web |
-| Developer 3A — Business | `apps/business_mobile/` | Flutter merchant onboarding and dashboard/navigation shells |
-| Developer 3B — Ride & Dispatch | `apps/ride_dispatch/` | Single Flutter application with separate driver and dispatcher navigation |
-| Developer 3 — Platform Operations | `apps/admin_web/` jointly with Developer 1 | Administration screens and audited operations interfaces |
+| Phase 1 — Backend & Platform | `apps/api/`, `apps/worker/`, `packages/database/`, `packages/api_contracts/`, `infrastructure/` | Auth, data, APIs, providers, infrastructure and shared backend verification |
+| Phase 2 — Customer & Frontend | `apps/customer_mobile/`, `apps/customer_web/`, Flutter/web shared UI | Customer journeys and platform integrations |
+| Phase 3 — Faji Business | `apps/business_mobile/` | Business application, merchant workflows |
+| Phase 4 — Ride, Dispatch & Operations | `apps/ride_dispatch/`, `apps/admin_web/` | Driver/dispatcher flows and administration experience |
 
-## Branch and pull-request workflow
-1. For new work, branch from current `main`, which includes the accepted D2 baseline through PR #6 at `2533b29fbfeef35bf9b290d81e0c18b30e6dee40`. Continue existing workstreams on their reviewed branches; do not reset another developer's branch or push unreviewed work directly to `main`. The former PR #1 migration-base instruction is historical.
-2. Suggested feature branches: `feat/m1-d1-backend-foundation`, `feat/m1-d2-customer-foundation`, `feat/m1-d3a-business-foundation`, `feat/m1-d3b-ride-foundation`.
-3. Change assigned files independently. Shared contracts, APIs, database migrations, and design-system components require reviewer agreement between affected developers.
-4. Developer 1 publishes typed OpenAPI contracts and mock data; Developers 2 and 3 use mocks until secure backend integration is ready.
-5. Preserve the imported Flutter customer tree until licensing and source acceptance are resolved. Any later refactor must be isolated and reviewed.
-6. Authenticate with Keycloak and enforce permission boundaries in NestJS; UI routes do not authorize backend access.
-7. PR descriptions must identify assigned milestone, changed modules, tests, screenshots for UI changes, risks and dependencies.
-8. Integration proceeds through reviewed branches; build, security and database gates are mandatory before merging completed milestones.
+## Branches and PRs
 
-## Local setup by workstream
-- JS/TypeScript: Node.js >=20, pnpm 9; `pnpm install` and `pnpm structure:check`. Start a web project with `pnpm --filter @faji/customer-web dev` or NestJS with `pnpm --filter @faji/api dev`.
-- Flutter: install Flutter/Dart; `flutter pub get` in each app. Customer cleanup is incorporated into `main`; preserve its accepted behavior when refactoring. Business includes native runners and can run standalone or embedded in the customer application. Check each app's committed runner files before generating anything; do not overwrite established identifiers/configuration.
-- Infrastructure: copy `.env.example` to `.env`, set unique development credentials and run `docker compose --env-file .env -f infrastructure/docker/compose.yaml up -d` if local services are required.
-- Validation: `pnpm structure:check` validates folder configuration only. Run independent Flutter analysis/build/tests and backend/web checks before declaring functionality complete.
+- New work uses phase-based branch names, e.g. `feat/m2-p1-keycloak-auth`, `feat/m2-p2-customer-auth`, `feat/m2-p3-business-auth`, `feat/m2-p4-ride-auth`.
+- PR titles use `M2 · Phase 2 · Customer authentication`. Describe scope, owner, API/schema changes, test and device evidence, blockers and review gates.
+- The existing `feat/m2-d1-keycloak-auth-authorization` and Milestone 1 feature branches **remain untouched**; replace conventions only on new contributions. Do not rewrite historical PRs or Git attribution.
+- Contracts come from Phase 1; clients use mock fixtures until live backend gates pass. All protected actions require server-side authorization.
+- Coordinate shared UI and contract changes; isolate work in phase-owned directories.
+- Each phase requires passing affected tests and reviewed changes before merge. Parallel progress does not imply integrated release acceptance.
 
-All nine milestones and acceptance gates are defined in [MILESTONES.md](MILESTONES.md). The confirmed stack is in [SYSTEM_ARCHITECTURE.md](../architecture/SYSTEM_ARCHITECTURE.md).
+## Development environments
+
+TypeScript workspaces use Node/pnpm; Flutter workspaces use Flutter/Dart. Development may use disposable local Postgres/Keycloak/test services; never commit live credentials. Build, static analysis, migration, integration and physical-device checks remain scoped to affected components. Refer to [engineering standards](REPOSITORY_AND_DELIVERY.md).
