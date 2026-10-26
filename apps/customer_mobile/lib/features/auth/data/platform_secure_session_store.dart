@@ -8,7 +8,14 @@ import 'oidc_auth_boundary.dart';
 /// treats cached metadata as proof of authentication and has no plaintext fallback.
 /// Compose with the OIDC SDK only after device storage acceptance checks.
 class PlatformSecureSessionStore implements SecureSessionStore {
-  PlatformSecureSessionStore([this._storage = const FlutterSecureStorage()]);
+  PlatformSecureSessionStore([
+    this._storage = const FlutterSecureStorage(
+      iOptions: IOSOptions(
+        accessibility: KeychainAccessibility.unlocked_this_device,
+        synchronizable: false,
+      ),
+    ),
+  ]);
 
   final FlutterSecureStorage _storage;
   static const _key = 'fajify.customer.oidc.session.v1';

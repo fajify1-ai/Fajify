@@ -30,6 +30,30 @@ void main() {
     await repository.changes.close();
   });
 
+  testWidgets(
+    'Keycloak refresh starts before expiry and failure removes access',
+    (tester) async {
+      var time = now;
+      final timed = AuthController(repository, clock: () => time);
+      addTearDown(timed.dispose);
+      repository.session = AuthSession(
+        subject: 'fixture-subject',
+        provider: IdentityProvider.keycloak,
+        expiresAt: now.add(const Duration(minutes: 5)),
+        emailVerified: true,
+        customerAccess: true,
+      );
+      await timed.restore();
+      repository.failure = StateError('private refresh diagnostics');
+      time = now.add(const Duration(minutes: 4, seconds: 30));
+      await tester.pump(const Duration(minutes: 4, seconds: 30));
+      await tester.pump();
+      expect(repository.refreshCalls, 1);
+      expect(timed.canAccessCustomer, isFalse);
+      expect(timed.state.failure!.message, isNot(contains('private')));
+    },
+  );
+
   test('restoration starts denied and restores an existing session', () async {
     expect(controller.canAccessCustomer, isFalse);
     repository.session = session();

@@ -4,3 +4,8 @@ Future<({int statusCode, String body})> requestIdentity(
   Uri endpoint,
   String accessToken,
 ) async => throw UnsupportedError('Native identity transport required');
+
+Future<({int statusCode, String body})> requestOidcJson(
+  Uri endpoint,
+  String? accessToken,
+) async => throw UnsupportedError('Native identity transport required');

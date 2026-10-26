@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'core/theme/faji_theme.dart';
 import 'features/auth/application/auth_controller.dart';
-import 'features/auth/data/oidc_auth_boundary.dart';
+import 'features/auth/data/customer_auth_composition.dart';
 import 'features/auth/domain/auth_session.dart';
 import 'features/auth/presentation/auth_scope.dart';
 import 'features/auth/presentation/customer_access_gate.dart';
@@ -47,10 +47,7 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
     super.initState();
     // Tests and previews without platform composition fail closed.
     _auth =
-        widget.authController ??
-        AuthController(
-          const PendingKeycloakRepository(CustomerOidcConfiguration()),
-        );
+        widget.authController ?? AuthController(createCustomerAuthRepository());
     WidgetsBinding.instance.addObserver(this);
     _auth.addListener(_sessionChanged);
     unawaited(_auth.restore());
@@ -83,7 +80,10 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _auth.checkExpiry();
-      // Provider refresh is connected through the reviewed lifecycle adapter.
+      if (_auth.state.status == AuthStatus.authenticated ||
+          _auth.state.status == AuthStatus.expired) {
+        unawaited(_auth.refresh());
+      }
     }
   }
 

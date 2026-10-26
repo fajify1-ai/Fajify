@@ -30,6 +30,7 @@ class AuthController extends ChangeNotifier {
   final bool requireVerifiedEmail;
   late final StreamSubscription<AuthSession?> _subscription;
   Timer? _expiry;
+  Timer? _refreshTimer;
   int _generation = 0;
   bool _disposed = false;
   bool _busy = false;
@@ -211,6 +212,14 @@ class AuthController extends ChangeNotifier {
         ),
       );
       _expiry = Timer(session.expiresAt.difference(_clock()), checkExpiry);
+      final untilRefresh =
+          session.expiresAt.difference(_clock()) - const Duration(seconds: 30);
+      if (verified &&
+          session.customerAccess &&
+          session.provider == IdentityProvider.keycloak &&
+          untilRefresh > Duration.zero) {
+        _refreshTimer = Timer(untilRefresh, () => unawaited(refresh()));
+      }
     }
   }
 
@@ -233,6 +242,8 @@ class AuthController extends ChangeNotifier {
     if (_disposed) return;
     _expiry?.cancel();
     _expiry = null;
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
     _state = state;
     notifyListeners();
   }
@@ -242,6 +253,7 @@ class AuthController extends ChangeNotifier {
     _disposed = true;
     ++_generation;
     _expiry?.cancel();
+    _refreshTimer?.cancel();
     unawaited(_subscription.cancel());
     super.dispose();
   }

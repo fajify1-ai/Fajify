@@ -13,6 +13,9 @@ import 'package:faji_app/features/auth/presentation/widgets/auth_loading_indicat
 import 'package:faji_app/features/auth/presentation/widgets/auth_primary_button.dart';
 import 'package:faji_app/features/auth/presentation/widgets/faji_auth_text_field.dart';
 import 'package:faji_app/main.dart';
+import 'package:faji_app/features/auth/application/auth_controller.dart';
+
+import 'fake_auth_repository.dart';
 
 Future<Uint8List> capture(WidgetTester tester, Widget child) async {
   final key = GlobalKey();
@@ -62,7 +65,9 @@ void main() {
   testWidgets('login, registration and recovery compose the shared controls', (
     tester,
   ) async {
-    await tester.pumpWidget(const FajiApp());
+    final controller = AuthController(FakeAuthRepository());
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(FajiApp(authController: controller));
     await tester.pumpAndSettle();
     navigatorKey.currentState!.pushNamed(FajiRoutes.userLogin);
     await tester.pumpAndSettle();
@@ -86,6 +91,24 @@ void main() {
     expect(find.byType(AuthErrorMessage), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'browser sign-in and registration reuse controls without collecting passwords',
+    (tester) async {
+      await tester.pumpWidget(const FajiApp());
+      await tester.pumpAndSettle();
+      navigatorKey.currentState!.pushNamed(FajiRoutes.userLogin);
+      await tester.pumpAndSettle();
+      expect(find.byType(AuthFormLayout), findsOneWidget);
+      expect(find.byType(AuthPrimaryButton), findsOneWidget);
+      expect(find.byType(FajiAuthTextField), findsNothing);
+      await tester.tap(find.text('Register'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AuthFormLayout), findsOneWidget);
+      expect(find.byType(AuthPrimaryButton), findsOneWidget);
+      expect(find.byType(FajiAuthTextField), findsNothing);
+    },
+  );
 
   testWidgets(
     'busy variants block duplicate actions and reuse the progress view',

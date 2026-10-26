@@ -18,14 +18,21 @@ samples, guidance on mobile development, and a full API reference.
 
 ## M2-P2 integration status
 
-See [current integration report](../../docs/engineering/M2_P2_SYNC_AND_IDENTITY.md). Live identity and customer data integrations remain explicitly unavailable; repository fallbacks do not fabricate live customer data. Native secure session storage is implemented but not enabled for live authentication.
+See [current OIDC adapter report](../../docs/engineering/M2_P2_OIDC_ADAPTERS.md).
+Native AppAuth, secure storage, refresh/restoration and logout are connected
+through environment-gated composition. Live authentication is disabled by
+default until approved deployment settings and platform acceptance are supplied.
+Customer data fallbacks do not fabricate live data.
 
 `CustomerIdentityClient` consumes the merged Phase 1 `GET /api/v1/auth/me`
-contract (`subject`, `roles`) through native HTTPS. Its future OIDC adapter
+contract (`subject`, `roles`) through native HTTPS. Its native OIDC adapter
 caller must supply a reviewed API origin, the verified provider subject and
 access token. It performs a fresh active-account check, rejects redirected,
 unauthorized, mismatched or malformed results, and requires the customer role.
 The returned identity has no display name or photo fields. Profile UI remains
 unavailable until a display-profile contract exists. Browser bearer transport
 is unsupported; the customer website uses its separate server-only boundary.
-This client is tested in isolation, not connected to live OIDC composition.
+Copy `oidc-config.example.json` to ignored `oidc-config.local.json`, supply only
+reviewed public settings, and use `flutter run --dart-define-from-file=oidc-config.local.json`.
+Do not put secrets in native build settings. Keep the enable flag false until
+the deployment is approved. Native browser/device acceptance remains pending.

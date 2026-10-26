@@ -6,15 +6,30 @@ Future<({int statusCode, String body})> requestIdentity(
   Uri endpoint,
   String accessToken,
 ) async {
+  return requestOidcJson(endpoint, accessToken);
+}
+
+/// Shared bounded transport for discovery, UserInfo and active-account checks.
+Future<({int statusCode, String body})> requestOidcJson(
+  Uri endpoint,
+  String? accessToken,
+) async {
+  if (endpoint.scheme != 'https' ||
+      endpoint.userInfo.isNotEmpty ||
+      endpoint.hasFragment) {
+    throw const FormatException();
+  }
   final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
   try {
     return await (() async {
       final request = await client.getUrl(endpoint);
       request.followRedirects = false;
-      request.headers.set(
-        HttpHeaders.authorizationHeader,
-        'Bearer $accessToken',
-      );
+      if (accessToken != null) {
+        request.headers.set(
+          HttpHeaders.authorizationHeader,
+          'Bearer $accessToken',
+        );
+      }
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
       request.headers.set(HttpHeaders.cacheControlHeader, 'no-store');
       final response = await request.close();

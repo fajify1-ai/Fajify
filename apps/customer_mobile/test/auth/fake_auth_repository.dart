@@ -10,6 +10,7 @@ class FakeAuthRepository implements CustomerAuthRepository, LegacyPasswordAuth {
   Object? failure;
   Completer<AuthSession?>? pendingRestore;
   int logoutCalls = 0;
+  int refreshCalls = 0;
   String? receivedEmail;
 
   @override
@@ -21,7 +22,11 @@ class FakeAuthRepository implements CustomerAuthRepository, LegacyPasswordAuth {
   }
 
   @override
-  Future<AuthSession?> refreshSession() => restoreSession();
+  Future<AuthSession?> refreshSession() {
+    refreshCalls++;
+    return restoreSession();
+  }
+
   @override
   Future<AuthSession> signIn(String email, String password) async {
     receivedEmail = email;
