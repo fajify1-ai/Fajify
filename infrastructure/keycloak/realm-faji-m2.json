@@ -168,7 +168,8 @@
         "acr",
         "roles",
         "profile",
-        "email"
+        "email",
+        "basic"
       ]
     }
   ],

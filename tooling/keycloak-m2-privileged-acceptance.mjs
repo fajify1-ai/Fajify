@@ -56,7 +56,7 @@ const state=randomBytes(18).toString('base64url');
 const redirect='com.faji.admin:/oauth/callback';
 const u=new URL(realm+'/protocol/openid-connect/auth');
 for(const [key,value] of Object.entries({
- client_id:'faji-admin-web',redirect_uri:redirect,response_type:'code',scope:'openid',
+ client_id:'faji-admin-web',redirect_uri:redirect,response_type:'code',scope:'openid',max_age:'0',
  state,code_challenge:challenge,code_challenge_method:'S256'
 }))u.searchParams.set(key,value);
 let response=await fetch(u,{redirect:'manual'});collect(response);

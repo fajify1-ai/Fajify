@@ -40,6 +40,7 @@ assert.equal(admin.publicClient,true);
 assert.equal(admin.standardFlowEnabled,true);
 assert.equal(admin.directAccessGrantsEnabled,false);
 assert.equal(admin.attributes?.['pkce.code.challenge.method'],'S256');
+assert.ok(admin.defaultClientScopes?.includes('basic'),'admin access token must inherit Keycloak basic auth_time mapping');
 assert.equal(admin.authenticationFlowBindingOverrides?.browser,undefined,'binding must be installed after import with runtime flow UUID');
 const flow=r.authenticationFlows?.find(f=>f.alias==='faji-admin-browser');
 assert.ok(flow,'privileged authentication flow missing');
