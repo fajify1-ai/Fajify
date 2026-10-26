@@ -1,4 +1,4 @@
-# Developer 1 — Milestone 2 identity and authorization
+# Phase 1 — Milestone 2 identity and authorization (engineering ownership: Developer 1)
 
 **Status: implementation in progress, not accepted.** Branch: `feat/m2-d1-keycloak-auth-authorization`.
 
@@ -10,7 +10,7 @@ Implemented:
 - Trusted internal access service methods for fail-closed provisioning (new accounts suspended), suspension/reinstatement with token revocation cutoff, and resource membership changes. All writes are transactional with an audit event in the same database transaction. **These internal commands are not public HTTP endpoints and require authoritative administrator or approval workflow checks before invocation.**
 - Development Keycloak realm template and mobile client audience mappings.
 
-Still required before acceptance:
+Still required before acceptance (see PHASE_1_MILESTONE_2_ACCEPTANCE.md):
 - Verify local migration 0002 with real PostgreSQL and privilege boundaries.
 - Implement a trusted Keycloak-to-Faji provisioning path; never trust arbitrary callers or automatic privilege assignment.
 - Wire server-side admin approval workflows, privileged MFA checks and subject/session revocation against Keycloak.

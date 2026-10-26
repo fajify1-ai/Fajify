@@ -1,31 +1,22 @@
-# Milestone 2 — Keycloak lifecycle acceptance
+# Phase 1 — Milestone 2: Keycloak acceptance evidence and remaining gates
 
-**Status: partially verified; not yet accepted for merge.** The separate disposable PostgreSQL application-authorization acceptance passed at commit `d3ea70a`: 37/37 API and database tests, zero skips. The live Keycloak 26.8.1 acceptance at `039a0b718e3a8dbcd77bd9c790eb446022f9f547` passed discovery, imported client PKCE S256 restrictions, invalid-verifier rejection, browser-form Authorization Code, API audience, refresh, logout invalidating refresh tokens, outbound verification/recovery email capture, verification-link confirmation, password reset and login with the new password, and rejection of the previous password. These are distinct historical local test runs, not one consolidated final release gate.
+**Status:** customer authentication passed at commit `5e831b4d5d542998a65a773ec6edf097006bd71e` on a disposable Keycloak 26.8.1 / PostgreSQL 16 environment. The latest authorization/security commits have **not** yet passed consolidated acceptance.
 
-## Phase 1 — Realm policy preflight
+## Accepted customer lifecycle
 
-Run `bash tooling/verify-d1-m2-keycloak-realm.sh`. This checks that every Fajify mobile public client enforces authorization code with **S256 PKCE**, excludes password/direct grants and implicit grants, uses specific registered callbacks and maps the API audience. The check uses no Keycloak process and does **not** prove imported runtime settings.
+The exact disposable acceptance run at `5e831b4` logged PASS for public self-registration, verification email capture, confirmation, enrollment of first password, first login using browser Authorization Code + S256 PKCE, refresh and logout, recovery mail, new-password authentication, old-password rejection and test cleanup. These are scoped identity lifecycle results, not evidence that onboarding approval, privileged MFA or token revocation passed.
 
-## Phase 2 — Live disposable Keycloak runtime (executed for current scoped tests)
+## Pending privileged identity and API authorization gate
 
-Provision **a separate temporary PostgreSQL instance for Keycloak** and use a pinned Keycloak 26.x installation. The scoped checks described above have been executed locally; additional acceptance gates below remain open. Run Keycloak exclusively on loopback, supply freshly generated administrator credentials, import `infrastructure/keycloak/realm-faji-m2.json`, and verify successful startup and OIDC discovery. Do not reuse the application's database, existing Keycloak services or permanent identity data. Official import documentation: https://www.keycloak.org/server/importExport.
+The realm now defines `faji-admin-web`, a dedicated browser flow mandating username/password and OTP, an ACR mapping for `faji-mfa`, and a client binding. The API privileged guard requires this client's signed `azp`, `platform-admin`, matching `acr`, and recent `auth_time`. Mandatory real-world checks:
+- Import the realm into Keycloak 26.8.1, check Admin REST execution requirements, then perform a **browser authorization flow with OTP**. Confirm no password-only token satisfies privileged guard and OTP-issued token does.
+- Validate actual `azp`, `acr` and `auth_time` of signed JWTs without logging tokens or secrets.
+- Run newly committed database-backed HTTP guards with PostgreSQL 16 and verify outstanding static and runtime tests; then repeat using a real Keycloak-signed token.
+- Verify suspension and reinstatement deny previously issued access tokens, while refresh/session invalidation and remaining admin access controls are confirmed.
+- Confirm scoped merchant approval/membership contracts, missing-account denial, cross-tenant isolation, brute-force handling and audit records.
 
-## Remaining mandatory live gate before merge
+## Consolidated verification
 
-1. Inspect imported clients through the authenticated administration API; fail if PKCE S256 is not enforced or password/implicit grants are enabled.
-2. Run authorization-code PKCE using a system browser and registered redirect. Verify code challenges and that invalid verifiers cannot redeem a code.
-3. Verify registration requires email verification, then complete verified login with disposable SMTP capture (no production email).
-4. Verify reset-password messages and recovery using disposable email.
-5. Verify refresh rotation, logout, and privileged administrative revocation; ensure old access tokens do not pass the Fajify API after effective revocation.
-6. Require and demonstrate actual Keycloak MFA step-up flow for `platform-admin`, with ACR and `auth_time` claims matched to the Fajify privileged guard.
-7. Verify account approval workflow, cross-tenant isolation, account suspension, throttling, and audit emission.
-8. Record exact binary/image version, source SHA, logs, and pass/fail evidence; confirm both identity and application disposable databases are destroyed.
+`FAJI_KEYCLOAK_HOME="$HOME/Downloads/keycloak-26.8.1" bash tooling/verify-phase1-m2-consolidated.sh`
 
-**Do not merge based solely on the policy preflight.** A signed JWT carrying a claimed ACR is not by itself evidence that Keycloak required MFA. Likewise, short-lived access tokens plus application cutoff checks do not establish global logout revocation without an authoritative integration.
-
-## Current scoped evidence and gaps
-
-- **Verified:** live Keycloak startup and realm discovery, registered public mobile-client PKCE checks, real browser-form Authorization Code exchange, token refresh and refresh-token invalidation on logout, verification email receipt and user-confirmed link processing, password recovery and new-password browser authentication with old-password rejection (commit `039a0b7`).
-- **Not yet verified:** self-service registration form submission; privileged Keycloak MFA with real ACR/auth_time evidence; authoritative backend access-token revocation; account approval/suspension, cross-tenant isolation, throttling and audit within the integrated identity boundary. Earlier app database tests do not replace these live gates.
-- **Scope:** loopback-only disposable Keycloak and PostgreSQL, synthetic accounts and SMTP capture. No production customer identity system was modified. The script cleans up its disposable Keycloak database and generated credentials after each run.
-- **Next action:** engineer the remaining gates, repeat all relevant checks at a single exact source SHA, then review merge readiness. Do not mark the milestone accepted before that consolidated verification.
+The runner performs existing scoped automated gates, not all of the additional live admin and signed-token acceptance checks listed above. Until those checks pass, this milestone is not accepted for merge. Do not operate on production identity databases or live customer accounts.
