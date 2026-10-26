@@ -107,13 +107,15 @@ function totp(at=Date.now()){
 // Always submit the exact field names from the rendered Keycloak OTP form.
 // A one-window clock tolerance is tested only for the disposable synthetic user.
 function otpFormFields(html){
- const formTag=[...html.matchAll(/<form\\b([^>]*)>/gi)].map(m=>m[1])
-  .find(tag=>tag.includes('kc-otp-login-form')||tag.includes('login-actions/'));
- assert.ok(formTag,'OTP action form missing');
+ // The form action is already parsed and validated by action(html).
+ // Here extract only input fields; Keycloak's form action may be HTML-escaped
+ // or its form id can differ between themes.
  const names=[...html.matchAll(/<input\\b([^>]*)>/gi)].map(m=>m[1])
-  .map(tag=>({name:tag.match(/\\bname=["']([^"']+)["']/i)?.[1],value:tag.match(/\\bvalue=["']([^"']*)["']/i)?.[1]??''}));
+  .map(tag=>({name:tag.match(/\\bname=["']([^"']+)["']/i)?.[1],
+   value:tag.match(/\\bvalue=["']([^"']*)["']/i)?.[1]??''}));
  const chosen=names.find(n=>n.name==='selectedCredentialId');
- return {selected:chosen?.value||otpCredentials[0].id,field:names.some(n=>n.name==='otp')?'otp':otpField};
+ return {selected:chosen?.value||otpCredentials[0].id,
+  field:names.some(n=>n.name==='otp')?'otp':otpField};
 }
 async function submitOtp(html,at){
  const f=otpFormFields(html);
