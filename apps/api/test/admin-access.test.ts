@@ -16,7 +16,7 @@ async function fixture(acr?:string,roles:string[]=['customer']){
  const events:{actor:string;subject:string;suspended:boolean}[]=[];
  const verifier:IdentityVerifier={verifyAccessToken:async()=>({
   subject:'admin-subject',issuer:'https://identity.example/realms/faji',audience:['faji-api'],
-  expiresAt:now+300,issuedAt:now-10,roles,authContext:acr,authTime:now-10
+  expiresAt:now+300,issuedAt:now-10,roles,authorizedParty:'faji-admin-web',authContext:acr,authTime:now-10
  })};
  const access={
   state:async()=>({suspended:false,revokedAfter:null}),
