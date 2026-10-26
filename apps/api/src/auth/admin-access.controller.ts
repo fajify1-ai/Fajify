@@ -1,4 +1,4 @@
-import {Body,Controller,Param,Post,Req,UseGuards,BadRequestException} from '@nestjs/common';
+import {Body,Controller,Param,Post,Req,UseGuards,BadRequestException,Inject} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
 import {IsBoolean,IsIn,IsUUID} from 'class-validator';
 import type {ResourceType,ResourceRole} from './access.service';
@@ -27,7 +27,7 @@ class SuspensionInput {
 @Controller({path:'admin/accounts',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
 export class AdminAccessController {
- constructor(private readonly access:AccessService){}
+ constructor(@Inject(AccessService) private readonly access:AccessService){}
  @Post(':subject/suspension')
  async setSuspension(@Req() req:{identity:VerifiedIdentity},
   @Param('subject') subject:string,@Body() body:SuspensionInput){

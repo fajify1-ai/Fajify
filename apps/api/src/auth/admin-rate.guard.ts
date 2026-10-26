@@ -1,4 +1,4 @@
-import {CanActivate,ExecutionContext,HttpException,HttpStatus,Injectable} from '@nestjs/common';
+import {CanActivate,ExecutionContext,HttpException,HttpStatus,Injectable,Inject} from '@nestjs/common';
 import {AccessService} from './access.service';
 import type {VerifiedIdentity} from './identity.types';
 
@@ -7,7 +7,7 @@ import type {VerifiedIdentity} from './identity.types';
  */
 @Injectable()
 export class AdminRateGuard implements CanActivate {
- constructor(private readonly access:AccessService){}
+ constructor(@Inject(AccessService) private readonly access:AccessService){}
  async canActivate(ctx:ExecutionContext):Promise<boolean>{
   const identity=ctx.switchToHttp().getRequest<{identity?:VerifiedIdentity}>().identity;
   if(!identity)throw new HttpException('Unauthorized',HttpStatus.UNAUTHORIZED);

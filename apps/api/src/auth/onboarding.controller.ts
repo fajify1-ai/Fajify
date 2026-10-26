@@ -1,4 +1,4 @@
-import {Controller,Post,Req,UseGuards} from '@nestjs/common';
+import {Controller,Post,Req,UseGuards,Inject} from '@nestjs/common';
 import {ApiBearerAuth,ApiOperation,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from './identity.guard';
 import {AccessService} from './access.service';
@@ -11,7 +11,7 @@ import type {VerifiedIdentity} from './identity.types';
 @ApiBearerAuth('keycloak')
 @Controller({path:'auth',version:'1'})
 export class OnboardingController {
- constructor(private readonly access:AccessService){}
+ constructor(@Inject(AccessService) private readonly access:AccessService){}
  @Post('enroll')
  @UseGuards(IdentityGuard)
  @ApiOperation({summary:'Register verified Keycloak subject for approval (pending by default)'})
