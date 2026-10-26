@@ -40,6 +40,11 @@ const assign=await fetch(origin+'/admin/realms/faji/users/'+encodeURIComponent(u
  method:'POST',headers,body:JSON.stringify([role])
 });
 assert.equal(assign.status,204,'privileged role assignment');
+// Do not assume Keycloak persists an OTP credential supplied in the user-create representation.
+const persisted=await json(origin+'/admin/realms/faji/users/'+encodeURIComponent(userId)+'/credentials');
+const otpCredentials=persisted.filter(c=>c.type==='otp');
+assert.equal(otpCredentials.length,1,'Keycloak did not persist the synthetic OTP credential during provisioning');
+assert.ok(otpCredentials[0].id,'persisted OTP credential must have an ID');
 const cookies=new Map();
 const collect=r=>{for(const entry of r.headers.getSetCookie?.()??[]){const c=entry.split(';',1)[0],i=c.indexOf('=');if(i>0)cookies.set(c.slice(0,i),c.slice(i+1));}};
 const cookie=()=>[...cookies].map(([a,b])=>a+'='+b).join('; ');
@@ -92,8 +97,8 @@ const otpField=/name=["']otp["']/i.test(html)?'otp':/name=["']totp["']/i.test(ht
 assert.ok(otpField,'real Keycloak OTP challenge input required');
 const otpAction=action(html);
 console.log('PASS: privileged password-only login blocked at mandatory OTP challenge');
-function totp(){
- const counter=Math.floor(Date.now()/1000/30);
+function totp(at=Date.now()){
+ const counter=Math.floor(at/1000/30);
  const num=Buffer.alloc(8);num.writeBigUInt64BE(BigInt(counter));
  const mac=createHmac('sha1',seed).update(num).digest();
  const i=mac[mac.length-1]&15;
@@ -101,10 +106,20 @@ function totp(){
 }
 response=await fetch(otpAction,{method:'POST',redirect:'manual',
  headers:{'content-type':'application/x-www-form-urlencoded',cookie:cookie()},
- body:form({[otpField]:totp()})});
+ body:form({[otpField]:totp(),credentialId:otpCredentials[0].id})});
 collect(response);
 step=await settle(response);
-assert.ok(step.callback,'valid TOTP login must reach admin callback');
+if(!step.callback){
+ const status=step.response.status;
+ let failure='no callback';
+ if(status===200){
+  const failureHtml=await step.response.text();
+  const feedback=[...failureHtml.matchAll(/class=["'][^"']*(?:alert-error|kc-feedback-text)[^"']*["']/gi)].length;
+  const fields=[...failureHtml.matchAll(/name=["'](otp|totp|credentialId|firstName|lastName|email)["']/gi)].map(m=>m[1]);
+  failure='returned login HTML; feedback markers='+feedback+', fields='+[...new Set(fields)].join(',');
+ }else if([302,303].includes(status))failure='unexpected redirect without callback';
+ throw new Error('Synthetic TOTP did not complete admin login (HTTP '+status+': '+failure+'). Check saved OTP credential, required actions and browser challenge; no OTP secrets logged');
+}
 assert.equal(step.callback.searchParams.get('state'),state);
 const code=step.callback.searchParams.get('code');assert.ok(code);
 const exchanged=await fetch(realm+'/protocol/openid-connect/token',{
