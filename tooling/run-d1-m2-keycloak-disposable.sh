@@ -9,6 +9,7 @@ for bin in node curl; do command -v "$bin" >/dev/null || { echo "Missing $bin" >
 echo '=== PREFLIGHT: JavaScript syntax ==='
 node --check tooling/keycloak-m2-lifecycle.mjs
 node --check tooling/keycloak-m2-email-acceptance.mjs
+node --check tooling/keycloak-m2-privileged-acceptance.mjs
 echo 'PASS: Keycloak lifecycle test syntax'
 pg_bin="${FAJI_PG_BIN:-/usr/lib/postgresql/16/bin}"
 keycloak_home="${FAJI_KEYCLOAK_HOME:-}"
@@ -114,6 +115,7 @@ console.log('PASS: live Keycloak 26 OIDC discovery and realm import');
 NODE
 export FAJI_KC_ORIGIN="http://127.0.0.1:$kc_port"
 node tooling/keycloak-m2-lifecycle.mjs
+node tooling/keycloak-m2-privileged-acceptance.mjs
 node tooling/keycloak-m2-email-acceptance.mjs
 echo "SOURCE: $(git rev-parse HEAD)"
-echo 'LIMITATION: privileged MFA, authoritative access-token revocation and integrated onboarding still require acceptance.'
+echo 'LIMITATION: signed Keycloak access-token HTTP revocation and integrated onboarding acceptance remain pending.'
