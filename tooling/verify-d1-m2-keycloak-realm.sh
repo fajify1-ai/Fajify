@@ -32,6 +32,7 @@ for(const c of r.clients){
  }
 }
 for(const id of expected)assert.ok(ids.has(id));
+assert.equal(JSON.parse(r.attributes?.['acr.loa.map']??'{}')['faji-mfa'],'1');
 const admin=r.clients.find(c=>c.clientId==='faji-admin-web');
 assert.ok(admin,'dedicated privileged client required');
 assert.equal(admin.publicClient,true);
