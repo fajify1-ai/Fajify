@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/faji_colors.dart';
+import '../auth_scope.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -24,10 +25,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
     setState(() => _busy = true);
-    await Future<void>.delayed(const Duration(milliseconds: 350));
+    final failure = await AuthScope.of(context).requestRecovery();
     if (mounted) {
       setState(() => _busy = false);
-      _message('Password reset will be connected when Firebase is configured.');
+      _message(
+        failure?.message ?? 'Continue recovery in your account provider.',
+      );
     }
   }
 
@@ -63,7 +66,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Enter your email and we will send you a reset link.',
+                'Account recovery is awaiting the shared identity integration.',
                 style: TextStyle(color: FajiColors.textSecondaryDark),
               ),
               const SizedBox(height: 28),

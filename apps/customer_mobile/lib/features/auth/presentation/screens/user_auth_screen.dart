@@ -1,12 +1,12 @@
 import 'dart:ui';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/faji_colors.dart';
 import '../../../../main.dart';
+import '../../domain/auth_repository.dart';
+import '../auth_scope.dart';
 import '../widgets/auth_divider.dart';
 import '../widgets/auth_primary_button.dart';
 import '../widgets/auth_segmented_control.dart';
@@ -98,68 +98,27 @@ class _UserAuthScreenState extends State<UserAuthScreen>
     _message('Google sign-in will be connected later.');
   }
 
-  String _authMessage(FirebaseAuthException error) {
-    switch (error.code) {
-      case 'email-already-in-use':
-        return 'An account already exists with this email.';
-      case 'invalid-email':
-        return 'Please enter a valid email address.';
-      case 'weak-password':
-        return 'Please choose a stronger password.';
-      case 'invalid-credential':
-      case 'wrong-password':
-      case 'user-not-found':
-        return 'Incorrect email or password.';
-      case 'user-disabled':
-        return 'This account has been disabled.';
-      case 'too-many-requests':
-        return 'Too many attempts. Please try again later.';
-      case 'network-request-failed':
-        return 'Check your internet connection and try again.';
-      case 'operation-not-allowed':
-        return 'Email and password authentication is not enabled.';
-      default:
-        return error.message ?? 'Authentication failed. Please try again.';
-    }
-  }
-
   Future<void> _signIn() async {
-    if (signingIn || !(_signInForm.currentState?.validate() ?? false)) {
-      return;
-    }
-
+    if (signingIn || !(_signInForm.currentState?.validate() ?? false)) return;
     final email = _email.text.trim().toLowerCase();
-
-    // Username sign-in will be added securely later.
     if (!email.contains('@')) {
       _message('Please use your email address to sign in for now.');
       return;
     }
-
+    final auth = AuthScope.of(context);
     setState(() => signingIn = true);
-
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: _signPassword.text,
-      );
-
-      if (!mounted) return;
-
-      setState(() => signingIn = false);
-
+    await auth.signIn(email, _signPassword.text);
+    if (!mounted) return;
+    setState(() => signingIn = false);
+    if (auth.canAccessCustomer) {
+      _signPassword.clear();
       Navigator.of(context)
           .pushNamedAndRemoveUntil(FajiRoutes.userHome, (route) => false);
-    } on FirebaseAuthException catch (error) {
-      if (!mounted) return;
-
-      setState(() => signingIn = false);
-      _message(_authMessage(error));
-    } catch (_) {
-      if (!mounted) return;
-
-      setState(() => signingIn = false);
-      _message('Something went wrong. Please try again.');
+    } else {
+      _message(
+        auth.state.failure?.message ??
+            'Your account is not ready for customer access.',
+      );
     }
   }
 
@@ -167,75 +126,35 @@ class _UserAuthScreenState extends State<UserAuthScreen>
     if (registering || !(_registerForm.currentState?.validate() ?? false)) {
       return;
     }
-
     if (!terms) {
       _message('Please accept the Terms of Service and Privacy Policy.');
       return;
     }
-
+    final auth = AuthScope.of(context);
     setState(() => registering = true);
-
-    User? createdUser;
-
-    try {
-      final email = _regEmail.text.trim().toLowerCase();
-      final fullName = _name.text.trim();
-      final username = _username.text.trim();
-
-      final credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-            email: email,
-            password: _regPassword.text,
-          );
-
-      createdUser = credential.user;
-
-      if (createdUser == null) {
-        throw Exception('Firebase could not create the user.');
-      }
-
-      await createdUser.updateDisplayName(fullName);
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(createdUser.uid)
-          .set({
-            'uid': createdUser.uid,
-            'fullName': fullName,
-            'username': username,
-            'usernameLowercase': username.toLowerCase(),
-            'email': email,
-            'phone': _phone.text.trim(),
-            'dateOfBirth': _dob.text.trim(),
-            'homeAddress': _address.text.trim(),
-            'role': 'user',
-            'createdAt': FieldValue.serverTimestamp(),
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-
-      if (!mounted) return;
-
-      setState(() => registering = false);
-
+    await auth.register(
+      LegacyRegistration(
+        email: _regEmail.text,
+        password: _regPassword.text,
+        fullName: _name.text,
+        username: _username.text,
+        phone: _phone.text,
+        dateOfBirth: _dob.text,
+        homeAddress: _address.text,
+      ),
+    );
+    if (!mounted) return;
+    setState(() => registering = false);
+    if (auth.canAccessCustomer) {
+      _regPassword.clear();
+      _confirmPassword.clear();
       Navigator.of(context)
           .pushNamedAndRemoveUntil(FajiRoutes.userHome, (route) => false);
-    } on FirebaseAuthException catch (error) {
-      if (!mounted) return;
-
-      setState(() => registering = false);
-      _message(_authMessage(error));
-    } catch (_) {
-      // If Firestore profile creation fails, remove the incomplete Auth user.
-      if (createdUser != null) {
-        try {
-          await createdUser.delete();
-        } catch (_) {}
-      }
-
-      if (!mounted) return;
-
-      setState(() => registering = false);
-      _message('We could not finish creating your account. Please try again.');
+    } else {
+      _message(
+        auth.state.failure?.message ??
+            'Your account is not ready for customer access.',
+      );
     }
   }
 
