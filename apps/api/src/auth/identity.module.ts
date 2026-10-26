@@ -8,6 +8,7 @@ import {AccountGuard} from './account.guard';
 import {ResourceGuard} from './resource.guard';
 import {SessionController} from './session.controller';
 import {PrivilegedGuard} from './privileged.guard';
+import {AdminRateGuard} from './admin-rate.guard';
 import {AdminAccessController} from './admin-access.controller';
 import {OnboardingController} from './onboarding.controller';
 const disabledVerifier:IdentityVerifier={async verifyAccessToken(){throw new UnauthorizedException('Identity provider unavailable');}};
@@ -15,6 +16,6 @@ const disabledVerifier:IdentityVerifier={async verifyAccessToken(){throw new Una
  const issuer=process.env.KEYCLOAK_ISSUER;
  const audience=process.env.KEYCLOAK_AUDIENCE;
  return issuer&&audience?new KeycloakAccessTokenVerifier(issuer,audience):disabledVerifier;
-}},IdentityGuard,RolesGuard,AccessService,AccountGuard,ResourceGuard,PrivilegedGuard],
- exports:[IDENTITY_VERIFIER,IdentityGuard,RolesGuard,AccessService,AccountGuard,ResourceGuard,PrivilegedGuard]})
+}},IdentityGuard,RolesGuard,AccessService,AccountGuard,ResourceGuard,PrivilegedGuard,AdminRateGuard],
+ exports:[IDENTITY_VERIFIER,IdentityGuard,RolesGuard,AccessService,AccountGuard,ResourceGuard,PrivilegedGuard,AdminRateGuard]})
 export class IdentityModule {}

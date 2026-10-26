@@ -5,6 +5,7 @@ import type {ResourceType,ResourceRole} from './access.service';
 import {IdentityGuard} from './identity.guard';
 import {AccountGuard} from './account.guard';
 import {PrivilegedGuard} from './privileged.guard';
+import {AdminRateGuard} from './admin-rate.guard';
 import {AccessService} from './access.service';
 import type {VerifiedIdentity} from './identity.types';
 
@@ -24,7 +25,7 @@ class SuspensionInput {
 @ApiTags('identity-admin')
 @ApiBearerAuth('keycloak')
 @Controller({path:'admin/accounts',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard)
+@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
 export class AdminAccessController {
  constructor(private readonly access:AccessService){}
  @Post(':subject/suspension')

@@ -8,6 +8,7 @@ import {AdminAccessController} from '../src/auth/admin-access.controller';
 import {IdentityGuard} from '../src/auth/identity.guard';
 import {AccountGuard} from '../src/auth/account.guard';
 import {PrivilegedGuard} from '../src/auth/privileged.guard';
+import {AdminRateGuard} from '../src/auth/admin-rate.guard';
 import {AccessService} from '../src/auth/access.service';
 import {IDENTITY_VERIFIER,type IdentityVerifier} from '../src/auth/identity.types';
 
@@ -22,10 +23,11 @@ async function fixture(acr?:string,roles:string[]=['customer']){
  const access={
   state:async()=>({suspended:false,revokedAfter:null}),
   setSuspended:async(actor:string,subject:string,suspended:boolean)=>{events.push({actor,subject,suspended});},
-  setMembership:async(actor:string,subject:string,type:string,resourceId:string,role:string,active:boolean)=>{members.push({actor,subject,type,resourceId,role,active});}
+  setMembership:async(actor:string,subject:string,type:string,resourceId:string,role:string,active:boolean)=>{members.push({actor,subject,type,resourceId,role,active});},
+  allowPrivilegedRequest:async()=>true
  };
  const module=await Test.createTestingModule({controllers:[AdminAccessController],providers:[
-  IdentityGuard,AccountGuard,PrivilegedGuard,
+  IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,
   {provide:IDENTITY_VERIFIER,useValue:verifier},{provide:AccessService,useValue:access}
  ]}).compile();
  const app=module.createNestApplication();

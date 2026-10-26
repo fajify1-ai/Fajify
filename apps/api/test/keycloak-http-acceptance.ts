@@ -10,6 +10,7 @@ import {AdminAccessController} from '../src/auth/admin-access.controller';
 import {IdentityGuard} from '../src/auth/identity.guard';
 import {AccountGuard} from '../src/auth/account.guard';
 import {PrivilegedGuard} from '../src/auth/privileged.guard';
+import {AdminRateGuard} from '../src/auth/admin-rate.guard';
 import {AccessService} from '../src/auth/access.service';
 import {KeycloakAccessTokenVerifier} from '../src/auth/keycloak.verifier';
 import {IDENTITY_VERIFIER} from '../src/auth/identity.types';
@@ -29,7 +30,7 @@ async function main(){
  const rootActor='m2-acceptance-root';
  const verifier=new KeycloakAccessTokenVerifier(process.env.KEYCLOAK_ISSUER!,process.env.KEYCLOAK_AUDIENCE!);
  const module=await Test.createTestingModule({controllers:[SessionController,AdminAccessController],providers:[
-  IdentityGuard,AccountGuard,PrivilegedGuard,
+  IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,
   {provide:IDENTITY_VERIFIER,useValue:verifier},
   {provide:AccessService,useValue:access}
  ]}).compile();

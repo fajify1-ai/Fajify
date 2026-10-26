@@ -49,6 +49,24 @@ export class AccessService {
    await client.query('COMMIT');
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
  }
+ /** Database-serialized privileged mutation budget: shared across API instances.
+  * Records each accepted attempt in the same transaction as its quota decision.
+  */
+ async allowPrivilegedRequest(actor:string):Promise<boolean>{
+  if(!actor||actor.length>255)return false;
+  const client=await this.pool.connect();
+  try{
+   await client.query('BEGIN');
+   await client.query('SELECT pg_advisory_xact_lock(hashtext($1))',[actor]);
+   const count=await client.query<{total:string}>(
+    "SELECT COUNT(*)::text AS total FROM identity_security_events WHERE actor_subject=$1 AND event_type='admin_request' AND occurred_at>now()-interval '60 seconds'",[actor]);
+   const allowed=Number(count.rows[0]?.total??'0')<20;
+   if(allowed)await client.query(
+    "INSERT INTO identity_security_events(actor_subject,event_type) VALUES($1,'admin_request')",[actor]);
+   await client.query('COMMIT');
+   return allowed;
+  }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
+ }
  async setMembership(actor:string,subject:string,type:ResourceType,id:string,role:ResourceRole,active:boolean):Promise<void>{
   if(!actor||!subject||!validTypes.has(type)||!validRoles.has(role)||!/^[0-9a-f-]{36}$/i.test(id))throw Error('Invalid membership command');
   const client=await this.pool.connect();
