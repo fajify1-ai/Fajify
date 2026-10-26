@@ -41,3 +41,16 @@ test('membership modification produces auditable transaction',async()=>{
  assert.equal(f.queries.at(-1)?.text,'COMMIT');
  assert.equal(f.queries[2].args[1],'membership_enabled');
 });
+
+test('repeat enrollment is idempotent and does not emit duplicate provisioning audit',async()=>{
+ const queries:string[]=[];
+ const client={query:async(text:string)=>{
+  queries.push(text);
+  if(text.startsWith('INSERT INTO account_access'))return {rowCount:0,rows:[]};
+  return {rowCount:1,rows:[]};
+ },release:()=>{}};
+ const pool={connect:async()=>client} as unknown as Pool;
+ await new AccessService(pool).provisionSubject('already-provisioned');
+ assert.equal(queries.some(text=>text.startsWith('INSERT INTO identity_security_events')),false);
+ assert.equal(queries.at(-1),'COMMIT');
+});

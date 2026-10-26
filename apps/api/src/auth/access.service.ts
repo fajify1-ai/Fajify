@@ -31,8 +31,9 @@ export class AccessService {
   try{
    await client.query('BEGIN');
    await client.query('INSERT INTO user_profiles(identity_subject,suspended) VALUES($1,true) ON CONFLICT(identity_subject) DO NOTHING',[subject]);
-   await client.query('INSERT INTO account_access(identity_subject,suspended) VALUES($1,true) ON CONFLICT(identity_subject) DO NOTHING',[subject]);
-   await client.query('INSERT INTO identity_security_events(actor_subject,event_type) VALUES($1,$2)',[subject,'account_provisioned']);
+   const inserted=await client.query('INSERT INTO account_access(identity_subject,suspended) VALUES($1,true) ON CONFLICT(identity_subject) DO NOTHING RETURNING identity_subject',[subject]);
+   if(inserted.rowCount===1)
+    await client.query('INSERT INTO identity_security_events(actor_subject,event_type) VALUES($1,$2)',[subject,'account_provisioned']);
    await client.query('COMMIT');
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
  }
