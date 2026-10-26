@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../domain/auth_repository.dart';
+import '../domain/auth_input.dart';
 import '../domain/auth_session.dart';
 
 /// Owns client session state; providers own credential/token verification.
@@ -57,7 +58,7 @@ class AuthController extends ChangeNotifier {
     await _run(
       AuthStatus.authenticating,
       () => (provider as LegacyPasswordAuth).signIn(
-        email.trim().toLowerCase(),
+        AuthInput.normalizeEmail(email),
         password,
       ),
     );

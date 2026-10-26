@@ -4,7 +4,7 @@ Recorded 2026-10-26. Branch: `feat/m2-p2-customer-auth`.
 Baseline: `0ff79d4110af4db4fc42e9e88cc987c6b7dfd366` (merged main,
 including the customer analyzer cleanup and device-evidence branch).
 
-**Delivery is local only. The user will push. Do not perform GitHub writes.**
+**Feature-branch delivery is authorized using the intended repository credentials. Do not use the previously connected GitHub account.**
 
 ## Completed independent work
 
@@ -65,7 +65,7 @@ no auth routes, SDK exchange or persistent production store are enabled.
 | 5. Customer profile via /auth/me | BLOCKED | BLOCKED BY PHASE 1: accepted active-account and profile contract. No fabricated DTO or endpoint use. |
 | 6. Protected navigation/customer roles | IMPLEMENTED, INTEGRATION PENDING | Legacy entry/stack protection tested. Keycloak role/active-account decision must be supplied by a verified provider and enforced by backend. |
 | 7. Next.js server authentication | IMPLEMENTED, INTEGRATION PENDING | Isolated server configuration/callback/session/cookie/logout guards verified. SDK, shared store, approved web client and live routes remain disabled. |
-| 8. Automated/build/integration evidence | IN PROGRESS | 21 Flutter and 16 web auth tests pass; web build passes. Android SDK/device and live identity acceptance remain blocked. |
+| 8. Automated/build/integration evidence | IN PROGRESS | 28 Flutter and 16 web auth tests pass; web build passes. Android SDK/device and live identity acceptance remain blocked. |
 
 The independently testable primitives are IMPLEMENTED AND VERIFIED. The complete
 M2-P2 identity integration is not complete.
@@ -102,7 +102,7 @@ versions or dependency constraints were changed.
 | --- | --- |
 | Dart format on changed Flutter files | Passed |
 | flutter analyze --no-pub | Passed, no issues |
-| flutter test --no-pub | Passed, 21 tests, including existing navigation test |
+| flutter test --no-pub | Passed, 28 tests, including existing navigation and component regression tests |
 | pnpm --filter @faji/customer-web test | Passed, 16 tests |
 | pnpm --filter @faji/customer-web typecheck | Passed |
 | pnpm --filter @faji/customer-web build | Passed |
@@ -144,3 +144,7 @@ and Windows symlink support, then run package setup, debug APK build and device
 regressions. Next integration task: review the accepted Phase 1 commit and wire
 the real native/server OIDC SDK and persistent-store adapters before enabling
 any Keycloak flow.
+
+## Reusable Components
+
+See [M2-P2 reusable authentication components](M2_P2_REUSABLE_COMPONENTS.md) for the reuse inventory, new shared modules, visual regression evidence and isolated-checkout handoff.

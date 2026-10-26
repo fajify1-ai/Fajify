@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../domain/auth_repository.dart';
+import '../domain/auth_input.dart';
 import '../domain/auth_session.dart';
 
 /// Retains legacy Firebase identity and Firestore paths during migration.
@@ -65,7 +66,7 @@ class FirebaseCustomerAuthRepository
     User? createdUser;
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
-        email: registration.email.trim().toLowerCase(),
+        email: AuthInput.normalizeEmail(registration.email),
         password: registration.password,
       );
       createdUser = credential.user;
@@ -77,7 +78,7 @@ class FirebaseCustomerAuthRepository
         'fullName': registration.fullName.trim(),
         'username': username,
         'usernameLowercase': username.toLowerCase(),
-        'email': registration.email.trim().toLowerCase(),
+        'email': AuthInput.normalizeEmail(registration.email),
         'phone': registration.phone.trim(),
         'dateOfBirth': registration.dateOfBirth.trim(),
         'homeAddress': registration.homeAddress.trim(),
