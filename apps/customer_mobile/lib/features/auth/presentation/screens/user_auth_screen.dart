@@ -10,6 +10,8 @@ import '../../domain/auth_input.dart';
 import '../widgets/auth_error_message.dart';
 import '../widgets/auth_form_layout.dart';
 import '../auth_scope.dart';
+import '../customer_auth_navigation.dart';
+import '../widgets/auth_status_view.dart';
 import '../widgets/auth_divider.dart';
 import '../widgets/auth_primary_button.dart';
 import '../widgets/auth_segmented_control.dart';
@@ -94,13 +96,7 @@ class _UserAuthScreenState extends State<UserAuthScreen>
       if (!mounted) return;
       setState(() => signingIn = false);
       if (browserAuth.canAccessCustomer) {
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil(FajiRoutes.userHome, (_) => false);
-      } else {
-        _message(
-          browserAuth.state.failure?.message ??
-              'Complete sign-in in your browser.',
-        );
+        continueToCustomerHome(context, browserAuth);
       }
       return;
     }
@@ -131,10 +127,7 @@ class _UserAuthScreenState extends State<UserAuthScreen>
       await browserAuth.beginRegistration();
       if (!mounted) return;
       setState(() => registering = false);
-      _message(
-        browserAuth.state.failure?.message ??
-            'Complete registration in your browser.',
-      );
+      continueToCustomerHome(context, browserAuth);
       return;
     }
     if (registering || !(_registerForm.currentState?.validate() ?? false)) {
@@ -483,10 +476,16 @@ class _SignInFields extends StatelessWidget {
       ? AuthFormLayout(
           formKey: form,
           children: [
+            AuthStatusView(
+              state: AuthScope.of(context).state,
+              onVerifyEmail: AuthScope.of(context).supportsBrowserJourneys
+                  ? () => verifyEmailAndContinue(context, AuthScope.of(context))
+                  : null,
+            ),
             AuthPrimaryButton(
               label: 'Sign In',
               onTap: onSubmit,
-              busy: signingIn,
+              busy: signingIn || AuthScope.of(context).isBusy,
             ),
             TextButton(
               onPressed: onForgot,
@@ -628,10 +627,16 @@ class _RegisterFields extends StatelessWidget {
       ? AuthFormLayout(
           formKey: form,
           children: [
+            AuthStatusView(
+              state: AuthScope.of(context).state,
+              onVerifyEmail: AuthScope.of(context).supportsBrowserJourneys
+                  ? () => verifyEmailAndContinue(context, AuthScope.of(context))
+                  : null,
+            ),
             AuthPrimaryButton(
               label: 'Create Account',
               onTap: onCreate,
-              busy: registering,
+              busy: registering || AuthScope.of(context).isBusy,
             ),
           ],
         )

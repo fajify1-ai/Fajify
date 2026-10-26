@@ -8,6 +8,7 @@ import 'package:faji_app/features/auth/data/native_oidc_gateway.dart';
 import 'package:faji_app/features/auth/data/native_oidc_settings.dart';
 import 'package:faji_app/features/auth/data/oidc_auth_boundary.dart';
 import 'package:faji_app/features/auth/domain/auth_session.dart';
+import 'package:faji_app/features/auth/domain/auth_repository.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -56,8 +57,12 @@ class Gateway implements NativeOidcGateway {
   Completer<NativeOidcTokens>? pending;
   int refreshes = 0, logouts = 0;
   NativeOidcTokens? previous;
+  CustomerAuthJourney? journey;
   @override
-  Future<NativeOidcTokens> authorize() async {
+  Future<NativeOidcTokens> authorize({
+    CustomerAuthJourney journey = CustomerAuthJourney.signIn,
+  }) async {
+    this.journey = journey;
     if (error != null) throw error!;
     return pending?.future ?? result;
   }
@@ -89,6 +94,7 @@ class Accounts implements NativeAccountVerifier {
 }
 
 class Sdk extends FlutterAppAuth {
+  Map<String, dynamic>? actionParameters;
   AuthorizationTokenRequest? authorization;
   TokenRequest? refreshRequest;
   EndSessionRequest? logout;
@@ -104,7 +110,7 @@ class Sdk extends FlutterAppAuth {
       'id',
       'Bearer',
       settings().scopes,
-      null,
+      actionParameters,
       null,
     );
   }
@@ -206,6 +212,39 @@ void main() {
       );
     },
   );
+
+  test('SDK journeys preserve issuer/client/scopes and use supported provider hints', () async {
+    final sdk = Sdk();
+    final adapter = AppAuthOidcGateway(settings(), sdk: sdk);
+    await adapter.authorize(journey: CustomerAuthJourney.registration);
+    expect(sdk.authorization!.promptValues, ['create']);
+    expect(sdk.authorization!.additionalParameters, isNull);
+    await adapter.authorize(journey: CustomerAuthJourney.recovery);
+    expect(sdk.authorization!.promptValues, ['login']);
+    expect(sdk.authorization!.additionalParameters, isNull);
+    await adapter.authorize(journey: CustomerAuthJourney.verifyEmail);
+    expect(sdk.authorization!.additionalParameters, {
+      'kc_action': 'VERIFY_EMAIL',
+    });
+    expect(sdk.authorization!.clientId, settings().clientId);
+    expect(sdk.authorization!.issuer, settings().issuer.toString());
+    expect(sdk.authorization!.scopes, settings().scopes);
+    expect(sdk.authorization!.clientSecret, isNull);
+  });
+
+  test('cancelled provider verification cannot persist a successful SDK token response', () async {
+    final sdk = Sdk()..actionParameters = {'kc_action_status': 'cancelled'};
+    final repo = NativeKeycloakRepository(
+      settings: settings(),
+      gateway: AppAuthOidcGateway(settings(), sdk: sdk),
+      store: store,
+      accounts: accounts,
+      clock: () => now,
+    );
+    await expectLater(repo.verifyEmailInBrowser(), throwsA(isA<AuthFailure>()));
+    expect(store.value, isNull);
+    expect(accounts.checks, 0);
+  });
 
   test('authorization verifies account and stores credentials without access token', () async {
     final session = await repository().authorize();
@@ -352,18 +391,26 @@ void main() {
     },
   );
 
-  test('raw callback and unapproved account actions never authorize', () async {
-    final repo = repository();
-    await expectLater(
-      repo.completeAuthorization(
-        Uri.parse('com.faji.customer:/oauth/callback?code=forged'),
-      ),
-      throwsA(isA<AuthFailure>()),
-    );
-    await expectLater(repo.beginRegistration(), throwsA(isA<AuthFailure>()));
-    await expectLater(repo.beginRecovery(), throwsA(isA<AuthFailure>()));
-    expect(store.value, isNull);
-  });
+  test(
+    'raw callback never authorizes; browser journeys verify before access',
+    () async {
+      final repo = repository();
+      await expectLater(
+        repo.completeAuthorization(
+          Uri.parse('com.faji.customer:/oauth/callback?code=forged'),
+        ),
+        throwsA(isA<AuthFailure>()),
+      );
+      expect(store.value, isNull);
+      await repo.beginRegistration();
+      expect(gateway.journey, CustomerAuthJourney.registration);
+      await repo.beginRecovery();
+      expect(gateway.journey, CustomerAuthJourney.recovery);
+      await repo.verifyEmailInBrowser();
+      expect(gateway.journey, CustomerAuthJourney.verifyEmail);
+      expect(accounts.checks, 3);
+    },
+  );
 
   test('UserInfo verifies email and backend binds customer subject', () async {
     final calls = <String>[];

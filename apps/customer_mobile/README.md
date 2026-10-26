@@ -36,3 +36,5 @@ Copy `oidc-config.example.json` to ignored `oidc-config.local.json`, supply only
 reviewed public settings, and use `flutter run --dart-define-from-file=oidc-config.local.json`.
 Do not put secrets in native build settings. Keep the enable flag false until
 the deployment is approved. Native browser/device acceptance remains pending.
+
+Registration, email-verification retry and provider-guided recovery now share the verified browser-session pipeline and AuthStatusView. See [current journey report](../../docs/engineering/M2_P2_ACCOUNT_JOURNEYS.md) for behavior, evidence and all eight acceptance statuses. Live settings remain pending.

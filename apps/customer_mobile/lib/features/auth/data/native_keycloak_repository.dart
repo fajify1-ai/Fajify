@@ -12,7 +12,7 @@ import 'oidc_auth_boundary.dart';
 /// source of presentation state. Serialized work plus a logout generation
 /// prevents late login/refresh writes from resurrecting cleared credentials.
 class NativeKeycloakRepository
-    implements CustomerAuthRepository, BrowserOidcAuthorization {
+    implements CustomerAuthRepository, CustomerBrowserJourneys {
   NativeKeycloakRepository({
     required this.settings,
     required this.gateway,
@@ -125,13 +125,15 @@ class NativeKeycloakRepository
   }
 
   @override
-  Future<AuthSession> authorize() {
+  Future<AuthSession> authorize() => _authorize(CustomerAuthJourney.signIn);
+
+  Future<AuthSession> _authorize(CustomerAuthJourney journey) {
     final generation = _generation;
     return _ordered(
       () async => (await _guard(() async {
         _current(generation);
         await _forget();
-        return _accept(await gateway.authorize(), generation);
+        return _accept(await gateway.authorize(journey: journey), generation);
       }))!,
     );
   }
@@ -259,14 +261,24 @@ class NativeKeycloakRepository
       );
 
   @override
-  Future<void> beginRegistration() async => throw const AuthFailure(
-    AuthErrorCode.providerUnavailable,
-    'Registration requires the approved identity-provider browser flow.',
-  );
+  Future<AuthSession> registerInBrowser() =>
+      _authorize(CustomerAuthJourney.registration);
 
   @override
-  Future<void> beginRecovery() async => throw const AuthFailure(
-    AuthErrorCode.providerUnavailable,
-    'Open password recovery from the identity-provider sign-in page.',
-  );
+  Future<AuthSession> recoverInBrowser() =>
+      _authorize(CustomerAuthJourney.recovery);
+
+  @override
+  Future<AuthSession> verifyEmailInBrowser() =>
+      _authorize(CustomerAuthJourney.verifyEmail);
+
+  @override
+  Future<void> beginRegistration() async {
+    await registerInBrowser();
+  }
+
+  @override
+  Future<void> beginRecovery() async {
+    await recoverInBrowser();
+  }
 }

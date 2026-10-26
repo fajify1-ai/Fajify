@@ -70,7 +70,7 @@ class OidcAccountVerifier implements NativeAccountVerifier {
       }
       if (user['email_verified'] != true) {
         throw const AuthFailure(
-          AuthErrorCode.disabled,
+          AuthErrorCode.verificationRequired,
           'Please verify your email before signing in.',
         );
       }

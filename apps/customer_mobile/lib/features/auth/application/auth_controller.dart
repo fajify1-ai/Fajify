@@ -46,6 +46,8 @@ class AuthController extends ChangeNotifier {
       _run(AuthStatus.restoring, _repository.refreshSession);
 
   bool get usesBrowserAuthentication => _repository is BrowserOidcAuthorization;
+  bool get supportsBrowserJourneys => _repository is CustomerBrowserJourneys;
+  bool get isBusy => _busy;
 
   Future<void> authorize() async {
     final provider = _repository;
@@ -82,12 +84,28 @@ class AuthController extends ChangeNotifier {
   Future<void> beginRegistration() async {
     final provider = _repository;
     if (provider is! BrowserOidcAuthorization || _disposed || _busy) return;
+    if (provider is CustomerBrowserJourneys) {
+      await _run(
+        AuthStatus.authenticating,
+        (provider as CustomerBrowserJourneys).registerInBrowser,
+      );
+      return;
+    }
     // Starting registration does not authenticate the caller. Only a verified
     // callback accepted by the provider may create a session.
     await _run(AuthStatus.authenticating, () async {
       await (provider as BrowserOidcAuthorization).beginRegistration();
       return null;
     });
+  }
+
+  Future<void> verifyEmail() async {
+    final provider = _repository;
+    if (provider is! CustomerBrowserJourneys || _disposed || _busy) return;
+    await _run(
+      AuthStatus.authenticating,
+      (provider as CustomerBrowserJourneys).verifyEmailInBrowser,
+    );
   }
 
   Future<void> signIn(String email, String password) async {
@@ -173,6 +191,14 @@ class AuthController extends ChangeNotifier {
       'Password recovery is awaiting the shared identity integration.',
     );
     final provider = _repository;
+    if (provider is CustomerBrowserJourneys) {
+      if (_disposed || _busy) return unavailable;
+      await _run(
+        AuthStatus.authenticating,
+        (provider as CustomerBrowserJourneys).recoverInBrowser,
+      );
+      return _state.failure;
+    }
     if (_disposed || provider is! CustomerAccountRecovery) return unavailable;
     try {
       await (provider as CustomerAccountRecovery).beginRecovery();
@@ -227,7 +253,9 @@ class AuthController extends ChangeNotifier {
     _listenEnabled = false;
     _set(
       AuthState(
-        AuthStatus.failure,
+        error is AuthFailure && error.code == AuthErrorCode.verificationRequired
+            ? AuthStatus.verificationRequired
+            : AuthStatus.failure,
         failure: error is AuthFailure
             ? error
             : const AuthFailure(

@@ -65,3 +65,14 @@ abstract interface class BrowserOidcAuthorization
   @override
   Future<void> beginRecovery();
 }
+
+enum CustomerAuthJourney { signIn, registration, recovery, verifyEmail }
+
+/// Browser actions return only fully verified client session metadata. Opening
+/// a provider page or requesting an email action is never proof of completion.
+abstract interface class CustomerBrowserJourneys
+    implements BrowserOidcAuthorization {
+  Future<AuthSession> registerInBrowser();
+  Future<AuthSession> recoverInBrowser();
+  Future<AuthSession> verifyEmailInBrowser();
+}

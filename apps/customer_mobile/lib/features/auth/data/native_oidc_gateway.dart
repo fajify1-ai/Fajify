@@ -1,6 +1,7 @@
 import 'package:flutter_appauth/flutter_appauth.dart';
 
 import 'native_oidc_settings.dart';
+import '../domain/auth_repository.dart';
 
 /// Secret-bearing provider data. Never pass this object to presentation/logs.
 class NativeOidcTokens {
@@ -19,7 +20,9 @@ class NativeOidcTokens {
 }
 
 abstract interface class NativeOidcGateway {
-  Future<NativeOidcTokens> authorize();
+  Future<NativeOidcTokens> authorize({
+    CustomerAuthJourney journey = CustomerAuthJourney.signIn,
+  });
   Future<NativeOidcTokens> refresh(NativeOidcTokens previous);
   Future<void> endSession(NativeOidcTokens tokens);
 }
@@ -63,19 +66,32 @@ class AppAuthOidcGateway implements NativeOidcGateway {
   }
 
   @override
-  Future<NativeOidcTokens> authorize() async {
+  Future<NativeOidcTokens> authorize({
+    CustomerAuthJourney journey = CustomerAuthJourney.signIn,
+  }) async {
     try {
-      return _tokens(
-        await _sdk.authorizeAndExchangeCode(
-          AuthorizationTokenRequest(
-            settings.clientId,
-            settings.redirectUri.toString(),
-            issuer: settings.issuer.toString(),
-            scopes: settings.scopes,
-            allowInsecureConnections: false,
-          ),
+      final response = await _sdk.authorizeAndExchangeCode(
+        AuthorizationTokenRequest(
+          settings.clientId,
+          settings.redirectUri.toString(),
+          issuer: settings.issuer.toString(),
+          scopes: settings.scopes,
+          allowInsecureConnections: false,
+          promptValues: switch (journey) {
+            CustomerAuthJourney.registration => ['create'],
+            CustomerAuthJourney.recovery => ['login'],
+            _ => null,
+          },
+          additionalParameters: journey == CustomerAuthJourney.verifyEmail
+              ? {'kc_action': 'VERIFY_EMAIL'}
+              : null,
         ),
       );
+      if (response.authorizationAdditionalParameters?['kc_action_status'] ==
+          'cancelled') {
+        throw const NativeAuthorizationCancelled();
+      }
+      return _tokens(response);
     } on FlutterAppAuthUserCancelledException {
       throw const NativeAuthorizationCancelled();
     }

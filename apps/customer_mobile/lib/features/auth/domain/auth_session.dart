@@ -41,6 +41,7 @@ enum AuthErrorCode {
   network,
   providerUnavailable,
   operationFailed,
+  verificationRequired,
 }
 
 class AuthFailure implements Exception {

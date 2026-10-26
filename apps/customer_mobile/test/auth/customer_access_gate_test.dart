@@ -15,8 +15,8 @@ void main() {
       await tester.pumpAndSettle();
       navigatorKey.currentState!.pushNamed(FajiRoutes.forgotPassword);
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'test@example.invalid');
-      await tester.tap(find.text('Send reset link'));
+      expect(find.byType(TextField), findsNothing);
+      await tester.tap(find.text('Continue in browser'));
       await tester.pumpAndSettle();
       expect(
         find.text(
