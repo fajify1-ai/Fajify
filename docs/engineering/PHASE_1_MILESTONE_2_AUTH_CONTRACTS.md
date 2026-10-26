@@ -31,7 +31,7 @@ For account enrollment the request body is ignored; the account's identity comes
 2. **Revocation:** Account suspension sets `revoked_after` transactionally in PostgreSQL. Existing signed tokens must be rejected at `/auth/me`, even after reinstatement. Unit and database-backed HTTP gates have been committed but are pending a consolidated execution. Identity provider logout/token revocation is a separate requirement.
 3. **Approval:** New accounts are suspended until a privileged decision. The generic administrative endpoint is not a complete business KYC/approval workflow; merchant ownership must be checked independently.
 4. **Audit and isolation:** Suspension, reinstatement, provisioning and membership changes must be recorded. Tenant/resource guards must be applied to every future domain route, then exercised across tenants.
-5. **Operations:** Throttling, security monitoring, final migrations, real Keycloak JWT-to-API tests and full disposable acceptance must pass on one pinned commit.
+5. **Operations:** PostgreSQL-backed privileged request quota (20 requests per actor per 60 seconds) is implemented and its accepted attempts are audited. The final migrations, real Keycloak JWT-to-API tests and full disposable acceptance must pass on one pinned commit; review Keycloak session revocation and operational monitoring before release.
 
 ## Test posture
 
