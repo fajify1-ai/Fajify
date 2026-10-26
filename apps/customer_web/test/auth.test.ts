@@ -11,6 +11,75 @@ import {
   PendingOidcAdapter, type OidcTransaction, type OidcSdkAdapter,
 } from "../lib/auth/oidc.server";
 import { logoutCustomer, withCustomerSession } from "../lib/auth/http.server";
+import { CustomerIdentityClient, CustomerIdentityFailure } from "../lib/auth/identity-api.server";
+
+test("identity API binds the verified subject and disables redirects and caching", async () => {
+  let calls = 0;
+  const api = new CustomerIdentityClient(new URL("https://api.example.invalid"), async (url, init) => {
+    calls++;
+    assert.equal(String(url), "https://api.example.invalid/api/v1/auth/me");
+    assert.equal(init?.cache, "no-store");
+    assert.equal(init?.redirect, "error");
+    assert.equal(init?.credentials, "omit");
+    assert.equal(new Headers(init?.headers).get("authorization"), "Bearer fixture-token");
+    assert.ok(init?.signal);
+    return Response.json({ subject: "fixture-subject", roles: ["customer"] });
+  });
+  const identity = await api.load("fixture-token", "fixture-subject");
+  assert.deepEqual(identity, { subject: "fixture-subject", roles: ["customer"] });
+  assert.ok(Object.isFrozen(identity.roles));
+  await api.load("fixture-token", "fixture-subject");
+  assert.equal(calls, 2);
+});
+
+test("identity API refuses insecure origins and invalid credentials before requests", async () => {
+  for (const url of ["http://api.example.invalid", "https://user:password@api.example.invalid", "https://api.example.invalid/path", "https://api.example.invalid?q=1", "https://api.example.invalid#fragment"]) {
+    assert.throws(() => new CustomerIdentityClient(new URL(url)));
+  }
+  const api = new CustomerIdentityClient(new URL("https://api.example.invalid"), async () => {
+    assert.fail("Invalid credentials must not reach transport");
+  });
+  for (const token of ["", "token\r\nInjected: value"]) {
+    await assert.rejects(api.load(token, "fixture-subject"), (e: unknown) =>
+      e instanceof CustomerIdentityFailure && e.code === "session_invalid");
+  }
+  await assert.rejects(api.load("fixture-token", " "), CustomerIdentityFailure);
+});
+
+test("identity API denies rejected and malformed identities without leaking bodies", async () => {
+  for (const [status, code] of [[401, "session_invalid"], [403, "access_denied"], [302, "unavailable"], [503, "unavailable"]] as const) {
+    const api = new CustomerIdentityClient(new URL("https://api.example.invalid"), async () =>
+      new Response("private response", { status }));
+    await assert.rejects(api.load("fixture-token", "fixture-subject"), (e: unknown) =>
+      e instanceof CustomerIdentityFailure && e.code === code && !e.message.includes("private"));
+  }
+  for (const value of [null, [], {}, { subject: "other", roles: ["customer"] },
+    { subject: "fixture-subject", roles: "customer" },
+    { subject: "fixture-subject", roles: ["customer", 42] },
+    { subject: "fixture-subject", roles: ["customer", ""] }]) {
+    const api = new CustomerIdentityClient(new URL("https://api.example.invalid"), async () => Response.json(value));
+    await assert.rejects(api.load("fixture-token", "fixture-subject"), CustomerIdentityFailure);
+  }
+});
+
+test("identity API rejects non-customer roles, oversized bodies and transport failures", async () => {
+  for (const roles of [[], ["platform-admin"], ["Customer"]]) {
+    const api = new CustomerIdentityClient(new URL("https://api.example.invalid"), async () =>
+      Response.json({ subject: "fixture-subject", roles }));
+    await assert.rejects(api.load("fixture-token", "fixture-subject"), (e: unknown) =>
+      e instanceof CustomerIdentityFailure && e.code === "access_denied");
+  }
+  for (const request of [
+    async () => new Response("x".repeat(65537), { headers: { "content-type": "application/json" } }),
+    async () => new Response("not JSON", { headers: { "content-type": "application/json" } }),
+    async () => new Response("<html>private</html>"),
+    async () => { throw new Error("fixture-token private diagnostics"); },
+  ]) {
+    const api = new CustomerIdentityClient(new URL("https://api.example.invalid"), request);
+    await assert.rejects(api.load("fixture-token", "fixture-subject"), (e: unknown) =>
+      e instanceof CustomerIdentityFailure && e.code === "unavailable" && !e.message.includes("fixture-token"));
+  }
+});
 
 // Explicit test doubles. Never imported by application/runtime composition.
 class TestSessionStore implements SessionStore {

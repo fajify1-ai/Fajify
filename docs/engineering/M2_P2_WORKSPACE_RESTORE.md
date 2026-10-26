@@ -1,5 +1,7 @@
 # M2-P2 preferred workspace restoration — 2026-10-26
 
+Historical restoration evidence. See [current synchronization and identity milestone](M2_P2_SYNC_AND_IDENTITY.md) for the integrated Phase 1 baseline, current GitHub access and updated verification.
+
 ## Official workspace and preservation
 
 - Repository: https://github.com/fajify1-ai/Fajify
@@ -27,7 +29,7 @@ Next.js retains server-only configuration, OIDC transaction boundaries, opaque s
 
 ## Reusable Components
 
-Existing FajiAuthTextField, AuthPrimaryButton and established design tokens/layouts are reused. Shared AuthFormLayout, AuthErrorMessage, AuthLoadingIndicator, AuthInput validation, CustomerAccessGate and ServiceUnavailableView prevent repeated form, authorization and unavailable-state logic. AuthStatusView composition remains centralized with the access gate. Login, registration and recovery use shared controls. Seven component tests include three in-memory pixel comparisons; these are component evidence rather than native device screenshots. No new UI components were created during workspace migration.
+Existing FajiAuthTextField, AuthPrimaryButton and established design tokens/layouts are reused. Shared AuthFormLayout, AuthErrorMessage, AuthLoadingIndicator, AuthInput validation, CustomerAccessGate and ServiceUnavailableView prevent repeated form, authorization and unavailable-state logic. Access state is rendered through CustomerAccessGate; there is no separate AuthStatusView widget. Login, registration and recovery use shared controls. Seven component tests include three in-memory pixel comparisons; these are component evidence rather than native device screenshots. No new UI components were created during workspace migration.
 
 ## Verification in the official preferred folder
 

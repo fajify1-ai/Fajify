@@ -22,6 +22,11 @@ is claimed.
 - `customer.server.ts`: disabled production composition. Forged cookies cannot
   enable it. Future protected components/actions must call the server guard
   beside data access; a layout or cookie-presence check is insufficient.
+- `identity-api.server.ts`: server-only client for the merged Phase 1
+  `GET /api/v1/auth/me` contract. Requires an explicitly approved HTTPS API
+  origin, the SDK-verified subject and its access token. Disables caching and
+  redirects, bounds response size/time, binds subject and requires `customer`.
+  It is not mounted or connected to an enabled provider/session store yet.
 - `test/auth.test.ts`: explicit in-memory test doubles only, never used at
   runtime. All authentication modules use the `server-only` boundary marker.
 
@@ -42,18 +47,20 @@ mounted because the web client and exact callback remain unapproved.
 5. Supply a running test environment, securely provisioned synthetic accounts
    and accepted contracts for profile/enrollment/verification/recovery.
 
-Candidate Phase 1 work was inspected read-only at
-`c47145ffcd5d40fc88993ab8baa36196ade415be` on
-`feat/m2-d1-keycloak-auth-authorization`. Its acceptance documentation reports
-consolidated Keycloak verification pending. It is not merged into this branch.
-The candidate `/auth/me` response is identity/roles, not a complete customer
-profile DTO; do not fabricate additional fields.
+Phase 1 source `36f7ad798aabfb170873fd2d67985d99a6b55e70` was merged to
+official main as `ab80a3e00fac4bd80f8735b4ba0846140455f56a` (PR #8), then
+merged locally into this branch. The published `/auth/me` response is
+`{subject, roles}`, not a full customer display profile. The realm template
+contains a mobile customer client but no customer web client; its issuer and
+redirect deployment settings still need approval. The latest PR acceptance
+and older in-file historical status differ; no live acceptance is inferred
+from the local merge. See the current M2_P2_SYNC_AND_IDENTITY.md report.
 
 ## Verification (2026-10-26)
 
 Using Corepack pnpm 9.15.9 and Node 20.20.0:
 
-- `pnpm --filter @faji/customer-web test`: **16 passed**.
+- `pnpm --filter @faji/customer-web test`: **20 passed**.
 - `pnpm --filter @faji/customer-web typecheck`: **passed**.
 - `pnpm --filter @faji/customer-web build`: **passed**.
 - No live identity provider, persistent session adapter, browser login or
