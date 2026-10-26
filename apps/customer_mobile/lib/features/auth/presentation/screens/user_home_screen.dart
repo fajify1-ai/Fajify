@@ -1,3 +1,5 @@
+import '../../../../core/widgets/service_unavailable_view.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,18 +17,19 @@ import '../../../home/presentation/widgets/venue_card.dart';
 import '../../../home/presentation/screens/temporary_home_destinations.dart';
 import '../../../home/presentation/screens/plan_for_me_step_one_screen.dart';
 import '../../../home/presentation/widgets/floating_home_nav.dart';
-import '../../../wishlist/data/models/wishlist_item.dart';
 import '../../../wishlist/data/repositories/wishlist_repository.dart';
 
 class UserHomeScreen extends StatefulWidget {
-  const UserHomeScreen({super.key});
+  const UserHomeScreen({super.key, this.repository});
+  final CustomerDiscoveryRepository? repository;
 
   @override
   State<UserHomeScreen> createState() => _UserHomeScreenState();
 }
 
 class _UserHomeScreenState extends State<UserHomeScreen> {
-  final _repository = HomeBusinessRepository();
+  late final CustomerDiscoveryRepository _repository =
+      widget.repository ?? HomeBusinessRepository();
   final _searchController = TextEditingController();
 
   List<HomeBusiness> _businesses = const [];
@@ -36,6 +39,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   String _rating = 'Any';
   String _category = 'All';
   bool _loading = true;
+  bool _unavailable = false;
 
   @override
   void initState() {
@@ -51,7 +55,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   }
 
   Future<void> _loadBusinesses() async {
-    final businesses = await _repository.loadHomeBusinesses();
+    List<HomeBusiness> businesses;
+    try {
+      businesses = await _repository.loadHomeBusinesses();
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _unavailable = true;
+        });
+      }
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _businesses = businesses;
@@ -164,124 +179,147 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         final results = _results;
         final wishlist = WishlistRepository.instance;
         return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  color: FajiColors.backgroundDark,
-                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const HomeHeader(),
-                      const SizedBox(height: 18),
-                      HomeSearchBar(
-                        controller: _searchController,
-                        onChanged: (value) => setState(() => _query = value),
-                        onFilter: _openFilters,
-                        filterActive: _filtersActive,
-                      ),
-                      const SizedBox(height: 14),
-                      const PromoBannerCarousel(),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 170),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    children: [
-                      WhatsOnSection(
-                        savedIds: wishlist.savedIds,
-                        onSaved: (item) => wishlist.toggle(WishlistItem.fromWhatsOn(item)),
-                        onCtaPressed: (item) => _showWhatsOnMessage(item),
-                        onSeeAll: () =>
-                            _showMessage('All events and offers coming next'),
-                      ),
-                      const SizedBox(height: 18),
-                      HomeCategoryFilter(
-                        selectedCategory: _category,
-                        onSelected: (value) =>
-                            setState(() => _category = value),
-                      ),
-                      const SizedBox(height: 18),
-                      if (_loading)
-                        const SizedBox(
-                          height: 220,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: FajiColors.primary,
-                            ),
+          backgroundColor: FajiColors.backgroundDark,
+          body: Stack(
+            children: [
+              SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      color: FajiColors.backgroundDark,
+                      padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const HomeHeader(),
+                          const SizedBox(height: 18),
+                          HomeSearchBar(
+                            controller: _searchController,
+                            onChanged: (value) =>
+                                setState(() => _query = value),
+                            onFilter: _openFilters,
+                            filterActive: _filtersActive,
                           ),
-                        )
-                      else if (results.isEmpty)
-                        _EmptySearchState(
-                          query: _query,
-                          category: _category,
-                          filtersActive: _filtersActive,
-                          onClear: _clearFilters,
-                        )
-                      else
-                        for (var index = 0; index < results.length; index++) ...[
-                          VenueCard(
-                            business: results[index],
-                            saved: wishlist.isSaved('venue_${results[index].id}'),
-                            onSaved: (_) => wishlist.toggle(WishlistItem.fromBusiness(results[index])),
-                            onBook: () => _showMessage(
-                              'Booking details coming next for ${results[index].businessName}.',
-                            ),
-                          ),
-                          if (index < results.length - 1)
-                            const SizedBox(height: 10),
+                          const SizedBox(height: 14),
+                          const PromoBannerCarousel(),
                         ],
-                    ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(18, 18, 18, 170),
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        children: [
+                          if (_unavailable)
+                            const ServiceUnavailableView(feature: 'Events')
+                          else
+                            WhatsOnSection(
+                              savedIds: wishlist.savedIds,
+                              onSaved: (item) =>
+                                  _showMessage(wishlist.loadError),
+                              onCtaPressed: (item) => _showWhatsOnMessage(item),
+                              onSeeAll: () => _showMessage(
+                                'All events and offers coming next',
+                              ),
+                            ),
+                          const SizedBox(height: 18),
+                          HomeCategoryFilter(
+                            selectedCategory: _category,
+                            onSelected: (value) =>
+                                setState(() => _category = value),
+                          ),
+                          const SizedBox(height: 18),
+                          if (_loading)
+                            const SizedBox(
+                              height: 220,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: FajiColors.primary,
+                                ),
+                              ),
+                            )
+                          else if (_unavailable)
+                            const ServiceUnavailableView(feature: 'Discovery')
+                          else if (results.isEmpty)
+                            _EmptySearchState(
+                              query: _query,
+                              category: _category,
+                              filtersActive: _filtersActive,
+                              onClear: _clearFilters,
+                            )
+                          else
+                            for (
+                              var index = 0;
+                              index < results.length;
+                              index++
+                            ) ...[
+                              VenueCard(
+                                business: results[index],
+                                saved: wishlist.isSaved(
+                                  'venue_${results[index].id}',
+                                ),
+                                onSaved: (_) =>
+                                    _showMessage(wishlist.loadError),
+                                onBook: () => _showMessage(
+                                  'Booking details coming next for ${results[index].businessName}.',
+                                ),
+                              ),
+                              if (index < results.length - 1)
+                                const SizedBox(height: 10),
+                            ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 16,
+                child: FloatingHomeNav(
+                  currentItem: HomeNavItem.home,
+                  onNavigation: (item) {
+                    switch (item) {
+                      case HomeNavItem.home:
+                        break;
+                      case HomeNavItem.wishlist:
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const WishlistScreen(),
+                          ),
+                        );
+                      case HomeNavItem.bookings:
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const BookingsScreen(),
+                          ),
+                        );
+                      case HomeNavItem.profile:
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (_) => const ProfileScreen(),
+                          ),
+                        );
+                    }
+                  },
+                  onPlanForMe: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const PlanForMeStepOneScreen(),
+                    ),
+                  ),
+                  onBrowsePlans: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const BrowsePlansScreen(),
+                    ),
                   ),
                 ),
-              ],
               ),
+            ],
           ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 16,
-            child: FloatingHomeNav(
-              currentItem: HomeNavItem.home,
-              onNavigation: (item) {
-                switch (item) {
-                  case HomeNavItem.home:
-                    break;
-                  case HomeNavItem.wishlist:
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const WishlistScreen()),
-                    );
-                  case HomeNavItem.bookings:
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const BookingsScreen()),
-                    );
-                  case HomeNavItem.profile:
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                    );
-                }
-              },
-              onPlanForMe: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const PlanForMeStepOneScreen(),
-                ),
-              ),
-              onBrowsePlans: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const BrowsePlansScreen()),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+        );
       },
     );
   }

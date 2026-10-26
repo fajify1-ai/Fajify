@@ -1,4 +1,4 @@
-enum IdentityProvider { legacyFirebase, keycloak }
+enum IdentityProvider { external, keycloak }
 
 /// Client session metadata only. Never contains passwords or bearer tokens.
 class AuthSession {

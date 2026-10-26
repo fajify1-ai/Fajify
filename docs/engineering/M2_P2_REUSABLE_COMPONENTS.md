@@ -1,3 +1,5 @@
+> Historical component milestone from commit 7565984. Reconciled with the migration; see [current reconciliation report](M2_P2_RECONCILIATION.md). All GitHub publishing requires the user's manual push. The historical delivery authorization below is superseded.
+
 # M2-P2 reusable authentication components
 
 ## Milestone status

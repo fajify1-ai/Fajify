@@ -20,12 +20,20 @@ class AddPaymentCardScreen extends StatelessWidget {
           children: [
             const Text(
               'Secure card setup',
-              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 10),
             const Text(
               'Card details will be collected by a PCI-compliant payment provider. Faji does not store raw card numbers, CVV, or PIN.',
-              style: TextStyle(color: FajiColors.textSecondaryDark, fontSize: 15, height: 1.4),
+              style: TextStyle(
+                color: FajiColors.textSecondaryDark,
+                fontSize: 15,
+                height: 1.4,
+              ),
             ),
             const Spacer(),
             SizedBox(
@@ -35,9 +43,14 @@ class AddPaymentCardScreen extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(true),
                 style: FilledButton.styleFrom(
                   backgroundColor: FajiColors.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                child: const Text('Use secure provider', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                child: const Text(
+                  'Use secure provider',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
               ),
             ),
           ],

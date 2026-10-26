@@ -1,14 +1,10 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'core/theme/faji_theme.dart';
 import 'features/auth/application/auth_controller.dart';
-import 'features/auth/data/firebase_auth_repository.dart';
-import 'features/auth/domain/auth_repository.dart';
+import 'features/auth/data/oidc_auth_boundary.dart';
 import 'features/auth/domain/auth_session.dart';
 import 'features/auth/presentation/auth_scope.dart';
 import 'features/auth/presentation/customer_access_gate.dart';
@@ -31,17 +27,7 @@ class FajiRoutes {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(
-    FajiApp(
-      authController: AuthController(
-        FirebaseCustomerAuthRepository(
-          FirebaseAuth.instance,
-          FirebaseFirestore.instance,
-        ),
-      ),
-    ),
-  );
+  runApp(const FajiApp());
 }
 
 class FajiApp extends StatefulWidget {
@@ -62,7 +48,9 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
     // Tests and previews without platform composition fail closed.
     _auth =
         widget.authController ??
-        AuthController(const UnavailableAuthRepository());
+        AuthController(
+          const PendingKeycloakRepository(CustomerOidcConfiguration()),
+        );
     WidgetsBinding.instance.addObserver(this);
     _auth.addListener(_sessionChanged);
     unawaited(_auth.restore());
@@ -95,7 +83,7 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _auth.checkExpiry();
-      // Firebase owns legacy automatic refresh; preserve valid offline sessions.
+      // Provider refresh is connected through the reviewed lifecycle adapter.
     }
   }
 

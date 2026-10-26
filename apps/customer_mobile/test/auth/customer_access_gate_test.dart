@@ -20,7 +20,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.text(
-          'Password recovery is awaiting the shared identity integration.',
+          'Keycloak sign-in is awaiting approved integration configuration.',
         ),
         findsOneWidget,
       );
@@ -56,7 +56,7 @@ void main() {
     repository.changes.add(
       AuthSession(
         subject: 'test',
-        provider: IdentityProvider.legacyFirebase,
+        provider: IdentityProvider.external,
         expiresAt: DateTime.now().add(const Duration(hours: 1)),
         emailVerified: true,
         customerAccess: true,
@@ -70,16 +70,17 @@ void main() {
     expect(find.text('protected'), findsNothing);
   });
 
-  testWidgets('named customer route denies access without touching Firebase', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const FajiApp());
-    await tester.pumpAndSettle();
-    navigatorKey.currentState!.pushNamed(FajiRoutes.userHome);
-    await tester.pumpAndSettle();
-    expect(find.text('Login as a user'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'named customer route denies access without initializing a provider',
+    (tester) async {
+      await tester.pumpWidget(const FajiApp());
+      await tester.pumpAndSettle();
+      navigatorKey.currentState!.pushNamed(FajiRoutes.userHome);
+      await tester.pumpAndSettle();
+      expect(find.text('Login as a user'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('logout clears directly pushed customer pages from the stack', (
     tester,
@@ -93,7 +94,7 @@ void main() {
     repository.changes.add(
       AuthSession(
         subject: 'test',
-        provider: IdentityProvider.legacyFirebase,
+        provider: IdentityProvider.external,
         expiresAt: DateTime.now().add(const Duration(hours: 1)),
         emailVerified: true,
         customerAccess: true,

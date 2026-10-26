@@ -86,6 +86,24 @@ class _UserAuthScreenState extends State<UserAuthScreen>
   }
 
   Future<void> _signIn() async {
+    final browserAuth = AuthScope.of(context);
+    if (browserAuth.usesBrowserAuthentication) {
+      if (signingIn) return;
+      setState(() => signingIn = true);
+      await browserAuth.authorize();
+      if (!mounted) return;
+      setState(() => signingIn = false);
+      if (browserAuth.canAccessCustomer) {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil(FajiRoutes.userHome, (_) => false);
+      } else {
+        _message(
+          browserAuth.state.failure?.message ??
+              'Complete sign-in in your browser.',
+        );
+      }
+      return;
+    }
     if (signingIn || !(_signInForm.currentState?.validate() ?? false)) return;
     final email = AuthInput.normalizeEmail(_email.text);
     final auth = AuthScope.of(context);
@@ -106,6 +124,19 @@ class _UserAuthScreenState extends State<UserAuthScreen>
   }
 
   Future<void> _registerAccount() async {
+    final browserAuth = AuthScope.of(context);
+    if (browserAuth.usesBrowserAuthentication) {
+      if (registering) return;
+      setState(() => registering = true);
+      await browserAuth.beginRegistration();
+      if (!mounted) return;
+      setState(() => registering = false);
+      _message(
+        browserAuth.state.failure?.message ??
+            'Complete registration in your browser.',
+      );
+      return;
+    }
     if (registering || !(_registerForm.currentState?.validate() ?? false)) {
       return;
     }

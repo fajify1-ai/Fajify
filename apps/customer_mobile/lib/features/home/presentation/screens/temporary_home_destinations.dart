@@ -468,14 +468,14 @@ class _BookingsScreenState extends State<BookingsScreen> {
   Widget _content(BuildContext context) {
     final bookings = _visibleBookings();
     final emptyTitle = switch (_tab) {
-      0 => 'No upcoming bookings yet',
-      1 => 'No orders yet',
-      2 => 'No completed bookings yet',
-      _ => 'No cancelled bookings',
+      0 => 'Bookings unavailable',
+      1 => 'Orders unavailable',
+      2 => 'Bookings unavailable',
+      _ => 'Bookings unavailable',
     };
     final emptyBody = _tab == 1
-        ? 'Your venue and restaurant orders will appear here.'
-        : 'When you make a reservation, your tickets will appear here.';
+        ? BookingRepository.instance.loadError
+        : BookingRepository.instance.loadError;
 
     return SafeArea(
       child: RefreshIndicator(
