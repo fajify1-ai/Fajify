@@ -32,5 +32,19 @@ for(const c of r.clients){
  }
 }
 for(const id of expected)assert.ok(ids.has(id));
+const admin=r.clients.find(c=>c.clientId==='faji-admin-web');
+assert.ok(admin,'dedicated privileged client required');
+assert.equal(admin.publicClient,true);
+assert.equal(admin.standardFlowEnabled,true);
+assert.equal(admin.directAccessGrantsEnabled,false);
+assert.equal(admin.attributes?.['pkce.code.challenge.method'],'S256');
+assert.equal(admin.authenticationFlowBindingOverrides?.browser,'faji-admin-browser');
+const flow=r.authenticationFlows?.find(f=>f.alias==='faji-admin-browser');
+assert.ok(flow,'privileged authentication flow missing');
+const mandatory=flow.authenticationExecutions?.filter(e=>e.requirement==='REQUIRED').map(e=>e.authenticator);
+assert.ok(mandatory?.includes('auth-username-password-form'));
+assert.ok(mandatory?.includes('auth-otp-form'));
+assert.ok(!flow.authenticationExecutions?.some(e=>e.authenticator==='auth-cookie'), 'cookie-only MFA bypass');
+
 console.log('PASS: Keycloak M2 realm policy invariants');
 NODE
