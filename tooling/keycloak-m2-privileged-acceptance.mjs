@@ -104,21 +104,45 @@ function totp(at=Date.now()){
  const i=mac[mac.length-1]&15;
  return (((mac.readUInt32BE(i)&0x7fffffff)%1000000)+'').padStart(6,'0');
 }
-response=await fetch(otpAction,{method:'POST',redirect:'manual',
- headers:{'content-type':'application/x-www-form-urlencoded',cookie:cookie()},
- body:form({[otpField]:totp(),selectedCredentialId:otpCredentials[0].id})});
-collect(response);
-step=await settle(response);
+// Always submit the exact field names from the rendered Keycloak OTP form.
+// A one-window clock tolerance is tested only for the disposable synthetic user.
+function otpFormFields(html){
+ const formTag=[...html.matchAll(/<form\\b([^>]*)>/gi)].map(m=>m[1])
+  .find(tag=>tag.includes('kc-otp-login-form')||tag.includes('login-actions/'));
+ assert.ok(formTag,'OTP action form missing');
+ const names=[...html.matchAll(/<input\\b([^>]*)>/gi)].map(m=>m[1])
+  .map(tag=>({name:tag.match(/\\bname=["']([^"']+)["']/i)?.[1],value:tag.match(/\\bvalue=["']([^"']*)["']/i)?.[1]??''}));
+ const chosen=names.find(n=>n.name==='selectedCredentialId');
+ return {selected:chosen?.value||otpCredentials[0].id,field:names.some(n=>n.name==='otp')?'otp':otpField};
+}
+async function submitOtp(html,at){
+ const f=otpFormFields(html);
+ const nextAction=action(html);
+ const res=await fetch(nextAction,{method:'POST',redirect:'manual',
+  headers:{'content-type':'application/x-www-form-urlencoded',cookie:cookie()},
+  body:form({[f.field]:totp(at),selectedCredentialId:f.selected})});
+ collect(res);
+ return settle(res);
+}
+step=await submitOtp(html,Date.now());
 if(!step.callback){
  const status=step.response.status;
  let failure='no callback';
  if(status===200){
-  const failureHtml=await step.response.text();
-  const feedback=[...failureHtml.matchAll(/class=["'][^"']*(?:alert-error|kc-feedback-text)[^"']*["']/gi)].length;
-  const fields=[...failureHtml.matchAll(/name=["'](otp|totp|credentialId|selectedCredentialId|firstName|lastName|email)["']/gi)].map(m=>m[1]);
-  failure='returned login HTML; feedback markers='+feedback+', fields='+[...new Set(fields)].join(',');
+  const retryHtml=await step.response.text();
+  const feedback=[...retryHtml.matchAll(/class=["'][^"']*(?:alert-error|kc-feedback-text)[^"']*["']/gi)].length;
+  const fields=[...retryHtml.matchAll(/name=["'](otp|totp|credentialId|selectedCredentialId|firstName|lastName|email)["']/gi)].map(m=>m[1]);
+  // Check local and server TOTP configuration, not the secret value.
+  const credentialInfo=JSON.parse(otpCredentials[0].credentialData??'{}');
+  const realmInfo=await json(origin+'/admin/realms/faji');
+  const configured={digits:realmInfo.otpPolicyDigits,period:realmInfo.otpPolicyPeriod,type:realmInfo.otpPolicyType,algorithm:realmInfo.otpPolicyAlgorithm};
+  const present={digits:credentialInfo.digits,period:credentialInfo.period,subType:credentialInfo.subType,algorithm:credentialInfo.algorithm};
+  const matches=Number(configured.digits)===Number(present.digits)&&Number(configured.period)===Number(present.period)&&configured.algorithm===present.algorithm&&configured.type===present.subType;
+  failure='returned OTP form; feedback markers='+feedback+', fields='+[...new Set(fields)].join(',')+
+   ', credential-policy-match='+matches+', configured-policy='+JSON.stringify(configured);
  }else if([302,303].includes(status))failure='unexpected redirect without callback';
- throw new Error('Synthetic TOTP did not complete admin login (HTTP '+status+': '+failure+'). Check saved OTP credential, required actions and browser challenge; no OTP secrets logged');
+ throw new Error('Synthetic TOTP did not complete admin login (HTTP '+status+': '+failure+
+  '). Verify realm OTP policy, credential encoding, and disposable host clock; secrets withheld');
 }
 assert.equal(step.callback.searchParams.get('state'),state);
 const code=step.callback.searchParams.get('code');assert.ok(code);
