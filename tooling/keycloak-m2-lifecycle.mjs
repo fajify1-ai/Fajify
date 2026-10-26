@@ -29,19 +29,33 @@ console.log('PASS: imported customer client enforces PKCE S256, disallows direct
 
 const admins=await json(origin+'/admin/realms/faji/clients?clientId=faji-admin-web',{headers:adminHeaders});
 assert.equal(admins.length,1,'dedicated privileged client missing');
-const adminClient=admins[0];
+let adminClient=admins[0];
 assert.equal(adminClient.publicClient,true);
 assert.equal(adminClient.standardFlowEnabled,true);
 assert.equal(adminClient.directAccessGrantsEnabled,false);
 assert.equal(adminClient.attributes?.['pkce.code.challenge.method'],'S256');
-assert.ok(adminClient.authenticationFlowBindingOverrides?.browser,'admin browser authentication binding missing');
 const flows=await json(origin+'/admin/realms/faji/authentication/flows',{headers:adminHeaders});
-assert.ok(flows.some(flow=>flow.alias==='faji-admin-browser'),'admin MFA browser flow not imported');
+const adminFlow=flows.find(flow=>flow.alias==='faji-admin-browser');
+assert.ok(adminFlow?.id,'admin MFA browser flow not imported');
 const executions=await json(origin+'/admin/realms/faji/authentication/flows/faji-admin-browser/executions',{headers:adminHeaders});
 assert.ok(executions.some(ex=>ex.providerId==='auth-otp-form'&&ex.requirement==='REQUIRED'),'admin OTP must be REQUIRED');
 assert.ok(executions.some(ex=>ex.providerId==='auth-username-password-form'&&ex.requirement==='REQUIRED'),'admin password must be REQUIRED');
 assert.equal(executions.some(ex=>ex.providerId==='auth-cookie'),false,'cookie bypass must not be possible');
-console.log('PASS: live imported privileged admin flow mandates password and OTP without cookie bypass');
+// Keycloak requires the *runtime flow UUID* for a client-level browser override.
+// A flow alias in an imported realm cannot resolve, and prevents server startup.
+if(adminClient.authenticationFlowBindingOverrides?.browser!==adminFlow.id){
+ const changed={...adminClient,authenticationFlowBindingOverrides:{
+  ...(adminClient.authenticationFlowBindingOverrides??{}),browser:adminFlow.id
+ }};
+ const put=await fetch(origin+'/admin/realms/faji/clients/'+encodeURIComponent(adminClient.id),{
+  method:'PUT',headers:adminHeaders,body:JSON.stringify(changed)
+ });
+ assert.equal(put.status,204,'bind admin browser flow to runtime UUID');
+}
+const refreshed=await json(origin+'/admin/realms/faji/clients/'+encodeURIComponent(adminClient.id),{headers:adminHeaders});
+assert.equal(refreshed.authenticationFlowBindingOverrides?.browser,adminFlow.id,'privileged browser flow must be bound after import');
+console.log('PASS: privileged admin client bound to live Keycloak OTP flow UUID, without cookie bypass');
+
 const defaultRoles=await json(origin+'/admin/realms/faji/roles/default-roles-faji/composites',{headers:adminHeaders});
 const defaultNames=defaultRoles.map(role=>role.name);
 assert.ok(defaultNames.includes('customer'),'self-registered identities must receive base customer role');

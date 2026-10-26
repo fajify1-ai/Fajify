@@ -40,7 +40,7 @@ assert.equal(admin.publicClient,true);
 assert.equal(admin.standardFlowEnabled,true);
 assert.equal(admin.directAccessGrantsEnabled,false);
 assert.equal(admin.attributes?.['pkce.code.challenge.method'],'S256');
-assert.equal(admin.authenticationFlowBindingOverrides?.browser,'faji-admin-browser');
+assert.equal(admin.authenticationFlowBindingOverrides?.browser,undefined,'binding must be installed after import with runtime flow UUID');
 const flow=r.authenticationFlows?.find(f=>f.alias==='faji-admin-browser');
 assert.ok(flow,'privileged authentication flow missing');
 const mandatory=flow.authenticationExecutions?.filter(e=>e.requirement==='REQUIRED').map(e=>e.authenticator);
