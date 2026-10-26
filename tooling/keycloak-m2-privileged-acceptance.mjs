@@ -106,7 +106,7 @@ function totp(at=Date.now()){
 }
 response=await fetch(otpAction,{method:'POST',redirect:'manual',
  headers:{'content-type':'application/x-www-form-urlencoded',cookie:cookie()},
- body:form({[otpField]:totp(),credentialId:otpCredentials[0].id})});
+ body:form({[otpField]:totp(),selectedCredentialId:otpCredentials[0].id})});
 collect(response);
 step=await settle(response);
 if(!step.callback){
@@ -115,7 +115,7 @@ if(!step.callback){
  if(status===200){
   const failureHtml=await step.response.text();
   const feedback=[...failureHtml.matchAll(/class=["'][^"']*(?:alert-error|kc-feedback-text)[^"']*["']/gi)].length;
-  const fields=[...failureHtml.matchAll(/name=["'](otp|totp|credentialId|firstName|lastName|email)["']/gi)].map(m=>m[1]);
+  const fields=[...failureHtml.matchAll(/name=["'](otp|totp|credentialId|selectedCredentialId|firstName|lastName|email)["']/gi)].map(m=>m[1]);
   failure='returned login HTML; feedback markers='+feedback+', fields='+[...new Set(fields)].join(',');
  }else if([302,303].includes(status))failure='unexpected redirect without callback';
  throw new Error('Synthetic TOTP did not complete admin login (HTTP '+status+': '+failure+'). Check saved OTP credential, required actions and browser challenge; no OTP secrets logged');

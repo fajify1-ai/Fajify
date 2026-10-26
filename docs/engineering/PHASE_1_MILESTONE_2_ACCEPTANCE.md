@@ -43,3 +43,7 @@ The first consolidated run at `129a4f3` passed all 60 API tests, lint, typecheck
 ## 2026-10-26 default role import follow-up
 
 The consolidated run at `c47145f` passed 60/60 API tests and successfully imported Keycloak, bound the administrative OTP flow, and then found that the imported `default-roles-faji` composite did not include `customer`. The runtime bootstrap now checks that no elevated roles are default, adds only the `customer` composite via authenticated Keycloak Admin REST if missing, and reads back the result before proceeding. This preserves least privilege and tests the effective runtime policy instead of assuming the realm JSON was imported verbatim. Pending a rerun.
+
+## 2026-10-26 privileged OTP form binding fix
+
+The live acceptance at `8d219b8` still reached the OTP challenge, but the test submission returned HTTP 200 with Keycloak feedback. The script was submitting an undocumented `credentialId` field. Keycloak's OTP login form instead uses `selectedCredentialId` when credential selection is needed. The harness now sends that field with the saved synthetic credential. This remains unverified until the next disposable run; no authentication requirement has been relaxed.
