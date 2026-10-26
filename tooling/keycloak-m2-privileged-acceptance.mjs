@@ -140,7 +140,19 @@ if(!step.callback){
   const configured={digits:realmInfo.otpPolicyDigits,period:realmInfo.otpPolicyPeriod,type:realmInfo.otpPolicyType,algorithm:realmInfo.otpPolicyAlgorithm};
   const present={digits:credentialInfo.digits,period:credentialInfo.period,subType:credentialInfo.subType,algorithm:credentialInfo.algorithm};
   const matches=Number(configured.digits)===Number(present.digits)&&Number(configured.period)===Number(present.period)&&configured.algorithm===present.algorithm&&configured.type===present.subType;
-  failure='returned OTP form; feedback markers='+feedback+', fields='+[...new Set(fields)].join(',')+
+  // Extract only known Keycloak validation categories, never dump HTML or secrets.
+  const errors=[];
+  const lower=retryHtml.toLowerCase();
+  for(const [label,pattern] of [
+   ['invalid-otp',/invalid (?:authenticator |verification |one-time |otp )?code|invalid otp|invalid authenticator/i],
+   ['expired-session',/login timeout|session expired|page has expired/i],
+   ['required-action',/configure otp|set up authenticator|update password/i],
+   ['invalid-credentials',/invalid username or password/i],
+   ['credential-unavailable',/credential (?:not found|unavailable)|authenticator not configured/i]
+  ])if(pattern.test(lower))errors.push(label);
+  const selectedInput=retryHtml.match(/<input\\b[^>]*name=["']selectedCredentialId["'][^>]*>/i)?.[0]??'';
+  const selectedPresent=/\\bvalue=["'][^"']+["']/i.test(selectedInput);
+  failure='returned OTP form; validation-categories='+errors.join('|')+', selected-credential-value-present='+selectedPresent+', feedback markers='+feedback+', fields='+[...new Set(fields)].join(',')+
    ', credential-policy-match='+matches+', configured-policy='+JSON.stringify(configured);
  }else if([302,303].includes(status))failure='unexpected redirect without callback';
  throw new Error('Synthetic TOTP did not complete admin login (HTTP '+status+': '+failure+
