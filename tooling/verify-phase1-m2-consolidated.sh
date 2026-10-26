@@ -14,4 +14,4 @@ echo '=== 3/3: Disposable identity PostgreSQL and Keycloak lifecycle ==='
 FAJI_KEYCLOAK_HOME="${FAJI_KEYCLOAK_HOME:?Set FAJI_KEYCLOAK_HOME to Keycloak 26.8.1}" bash tooling/run-d1-m2-keycloak-disposable.sh
 [[ "$(git rev-parse HEAD)" == "$source_sha" ]] || { echo 'BLOCKED: source commit changed during acceptance' >&2; exit 3; }
 echo "PASS: scoped M2 automated gates at $source_sha"
-echo 'REMAINS: review the live OTP and signed-token API acceptance outputs plus Keycloak session revocation, domain approvals, throttling and cross-tenant controls before final milestone acceptance.'
+echo 'REMAINS: Keycloak session-level revocation, domain-specific onboarding approvals, distributed throttling and real cross-tenant authorization acceptance before final milestone sign-off.'

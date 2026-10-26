@@ -421,7 +421,8 @@ try{
  }else{
   console.log('LIMITATION: signup did not dispatch verification mail during bounded wait; required-action browser workflow must be completed');
  }
- console.log('LIMITATION: privileged MFA, authoritative API-side revocation and integrated onboarding acceptance remain pending');
+ console.log('PASS: public registration and recovery acceptance complete; privileged MFA and real JWT/API suspension are checked by the preceding privileged runner');
+ console.log('REMAINS: Keycloak session-level revocation, business/domain onboarding, distributed throttling and cross-tenant acceptance');
 }finally{
  for(const socket of sockets)socket.destroy();
  await new Promise(resolve=>server.close(resolve));

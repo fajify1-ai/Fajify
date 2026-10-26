@@ -1,11 +1,11 @@
 # Phase 1 — Milestone 2: Engineering and consolidated acceptance
 
 **Branch:** `feat/m2-d1-keycloak-auth-authorization`  
-**Status:** engineering increment committed; acceptance NOT YET RUN.
+**Status (2026-10-26):** automated backend and disposable live Keycloak acceptance passed in separate executions. Final consolidated exact-commit run and additional release/security acceptance remain pending.
 
 ## Scope implemented
 
-- Keycloak public mobile clients use Authorization Code + PKCE S256; dedicated `faji-admin-web` client binds a browser flow requiring username/password and OTP (no cookie-only shortcut). The privileged NestJS guard additionally requires the signed access token's `azp=faji-admin-web`, `platform-admin` role, `acr=faji-mfa`, and `auth_time` within five minutes. The realm import and actual OTP-generated ACR must be confirmed against Keycloak 26.8.1. The live OTP browser acceptance test is now included in the Keycloak runner, but has not yet executed.
+- Keycloak public mobile clients use Authorization Code + PKCE S256; dedicated `faji-admin-web` client binds a browser flow requiring username/password and OTP (no cookie-only shortcut). The privileged NestJS guard additionally requires the signed access token's `azp=faji-admin-web`, `platform-admin` role, `acr=faji-mfa`, and `auth_time` within five minutes. The realm import, live OTP browser flow, privileged ACR and signed token have been verified against disposable Keycloak 26.8.1.
 - `POST /api/v1/auth/enroll` provisions the verified JWT subject in PostgreSQL as pending/suspended; it grants no account access or roles.
 - `POST /api/v1/admin/accounts/:subject/suspension` performs approval/reinstatement and suspension through the guarded and audited PostgreSQL service.
 - `GET /api/v1/auth/me` enforces verified JWT and active PostgreSQL account. Suspension cutoff prevents previous tokens from working even after reinstatement.
@@ -34,7 +34,7 @@ This sequence runs static Keycloak policy checks, disposable PostgreSQL/API migr
 
 A configured MFA flow is not equivalent to proof of MFA. Before acceptance, a **real** `platform-admin` must log in via `faji-admin-web`, complete OTP, and obtain signed token claims `azp=faji-admin-web`, `acr=faji-mfa`, and fresh `auth_time`; a password-only request must be denied. Likewise a real Keycloak-signed token, not the injected-verifier database test, must pass through `/auth/me` then be rejected upon suspension and after reinstatement. Review Keycloak session-level revocation, quota events, cross-tenant authorization on actual domain controllers, and merchant/business verification criteria separately. These are not inferred from the authentication test.
 
-**Never merge into main until the real security acceptance evidence exists.** Admin MFA may need additional realm-specific ACR mapping once observed in the imported runtime.
+**Do not merge into main until the exact-commit consolidated run is green and the remaining session-revocation, domain approval, throttling and cross-tenant release requirements have been reviewed or explicitly scoped out.** Live admin MFA and signed-token API acceptance have passed.
 
 ## 2026-10-26 Keycloak startup diagnostic and correction
 
@@ -51,3 +51,7 @@ The live acceptance at `8d219b8` still reached the OTP challenge, but the test s
 ## 2026-10-26 OTP secret encoding correction
 
 At `ab83480`, the disposable Keycloak accepted the password and displayed the OTP challenge, but rejected the code with `invalid-otp`; the realm policy and stored credential metadata matched. The test harness stored a Base32 text string under `secretData.value` while computing HMAC from the original raw random bytes. Keycloak treats the stored OTP secret as literal credential secret bytes under its default encoding. The harness now computes HMAC from the UTF-8 bytes of the exact stored secret. The corrected live test remains pending.
+
+## 2026-10-26 live acceptance evidence
+
+At commit `9ca9f67ff47dd8e8daea28687cbd322c2bcfbf3d`, the disposable Keycloak-only runner completed successfully. It verified realm import, PKCE and customer browser tokens, refresh/logout, mandatory admin password + TOTP authentication, the signed privileged access token (including `acr`, `azp` and `auth_time`), NestJS + disposable PostgreSQL account-state enforcement, loopback email verification, password recovery/old-password rejection, and public registration with email verification and first password enrollment. The previous full consolidated run at `59b8e4d` passed all 60 backend tests, typecheck, lint, build and migrations. These are **separate exact-commit results**; a complete green consolidated run at one source SHA is still required. The email test's old final `LIMITATION` string was stale; privileged MFA and real-token API checks actually ran before the email runner and passed. Session-level revocation, business/domain onboarding approvals, distributed throttling and cross-tenant authorization are not covered by this evidence.
