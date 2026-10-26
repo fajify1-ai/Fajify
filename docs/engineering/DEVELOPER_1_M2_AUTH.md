@@ -23,3 +23,9 @@ Still required before acceptance:
 ## Strict account-access invariant
 
 A legacy `user_profiles` row alone never authorizes protected routes. Both `account_access` and `user_profiles` must exist and be unsuspended; absent rows deny access. This prevents previously imported customer identities from becoming active without explicit approval. This increment adds negative unit tests but has not been locally verified yet.
+
+## Revocation integration increment (pending verification)
+
+A disposable PostgreSQL-backed HTTP acceptance test now exercises `GET /api/v1/auth/me` with an injected verified identity, a real `AccessService` and real PostgreSQL account-state updates. It checks approved access, immediate denial after suspension, and continued denial after reinstatement using the previously issued identity. The test also checks suspension/reinstatement audit events. Run it only against the disposable migration/runtime database environment; it intentionally does not start or modify permanent services.
+
+**Evidence boundary:** the injected verifier tests the database/HTTP authorization boundary, not Keycloak signature verification. The final combined gate must also present a real Keycloak-signed token to the API and demonstrate revocation. This increment has not yet passed a local test run.
