@@ -25,7 +25,9 @@ const seed=randomBytes(20);
 let bits=0,hold=0,secret='';
 for(const byte of seed){hold=(hold<<8)|byte;bits+=8;while(bits>=5){bits-=5;secret+=alphabet[(hold>>bits)&31];}}
 if(bits)secret+=alphabet[(hold<<(5-bits))&31];
-// Keycloak's OTP credential secretData stores literal secret characters by default.\n// HMAC must use those UTF-8 bytes (not the random seed used to generate that text).\nconst credential={type:'otp',userLabel:'disposable-otp',
+// Keycloak's OTP credential secretData stores literal secret characters by default.
+// HMAC must use those UTF-8 bytes (not the random seed used to generate that text).
+const credential={type:'otp',userLabel:'disposable-otp',
  secretData:JSON.stringify({value:secret}),
  credentialData:JSON.stringify({digits:6,counter:0,period:30,algorithm:'HmacSHA1',subType:'totp'})};
 const user=await fetch(origin+'/admin/realms/faji/users',{method:'POST',headers,body:JSON.stringify({
