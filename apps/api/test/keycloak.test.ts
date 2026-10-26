@@ -44,3 +44,8 @@ test('ordinary mobile-issued JWT cannot impersonate admin authorized party',asyn
  const id=await verifier().verifyAccessToken(token({azp:'faji-customer-mobile',acr:'faji-mfa',auth_time:now-10}));
  assert.equal(id.authorizedParty,'faji-customer-mobile');
 });
+
+test('issuer permits isolated loopback Keycloak acceptance and rejects remote plaintext HTTP',()=>{
+ assert.doesNotThrow(()=>new KeycloakAccessTokenVerifier('http://127.0.0.1:18080/realms/faji',audience,load));
+ assert.throws(()=>new KeycloakAccessTokenVerifier('http://remote.example.test/realms/faji',audience,load),/Invalid Keycloak issuer/);
+});

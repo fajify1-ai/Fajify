@@ -28,7 +28,7 @@ export class KeycloakAccessTokenVerifier implements IdentityVerifier {
  constructor(private readonly issuer:string,private readonly audience:string,private readonly load:JwksFetch=defaultFetch,
   private readonly now:()=>number=()=>Math.floor(Date.now()/1000)){
   const url=new URL(issuer);
-  if(url.search||url.hash||url.username||url.password||!(url.protocol==='https:'||(url.protocol==='http:'&&url.hostname==='localhost')))
+  if(url.search||url.hash||url.username||url.password||!(url.protocol==='https:'||(url.protocol==='http:'&&['localhost','127.0.0.1','[::1]'].includes(url.hostname))))
    throw Error('Invalid Keycloak issuer');
   if(!audience.trim())throw Error('Keycloak audience is required');
  }
