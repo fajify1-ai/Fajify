@@ -1,6 +1,6 @@
 # Faji — Nine Engineering Milestones and Acceptance Gates
-**Execution baseline:** 9 milestones · 63 phases · four platform domains.
-Phases are numbered as in the approved v1.0 engineering roadmap. Milestones can overlap when their dependencies are satisfied. Every acceptance statement is a **required verification gate**, not a claim of completion.
+**Execution baseline:** 9 milestones · **4 delivery phases per milestone** (36 phase allocations) · four platform domains.
+The former 63 numbered roadmap items are **technical work packages**, not additional delivery phases. Section identifiers such as 2.1–2.6 remain as traceable scope references. Each milestone runs Phase 1 (Backend & Platform), Phase 2 (Customer & Frontend), Phase 3 (Faji Business) and Phase 4 (Ride, Dispatch & Operations). See [four-phase allocation](../roadmap/FOUR_PHASE_MODEL.md). Phase workstreams may overlap once dependencies are satisfied. Every acceptance statement is a **required verification gate**, not a claim of completion.
 
 ## M1 — Engineering Foundation & Infrastructure
 **Objective:** reproducible workspaces, backend/database foundation, applications and engineering automation.
@@ -10,7 +10,7 @@ Phases are numbered as in the approved v1.0 engineering roadmap. Milestones can 
 - **1.4 APIs:** NestJS module layout, /api/v1 versioning, OpenAPI, validation, errors, logging and trace IDs.
 - **1.5 Design system:** Faji tokens, Flutter widgets, Next.js components, responsiveness, accessibility and brand consistency.
 - **1.6 Automation:** build/unit checks, dependency and secret scanning, branch protection, release workflow foundations.
-**Acceptance:** all app shells build; migrations work (rollback where supported); local/staging reproducible; OpenAPI generates; automated checks pass. Developer-level steps: [workstreams](DEVELOPER_WORKSTREAMS.md).
+**Acceptance:** all app shells build; migrations work (rollback where supported); local/staging reproducible; OpenAPI generates; automated checks pass. Phase-level steps: [workstreams](DEVELOPER_WORKSTREAMS.md).
 
 ## M2 — Identity, Access & Platform Security
 - **2.1 Keycloak:** isolate identity PostgreSQL; realms, clients, TLS, backup, monitoring.
@@ -99,4 +99,4 @@ Phases are numbered as in the approved v1.0 engineering roadmap. Milestones can 
 - M6 requires usable discovery/availability data; M7 depends on identity, location, finance and administration foundations.
 - M8 integrates operational domains; M9 validates the complete platform.
 - Introduce baseline auditing, security, monitoring and tests **throughout**, not only during M8/M9.
-- Document for each milestone: work item ownership, dependency, implementation PR(s), verification command/result, threat/failure coverage, open issues, release decision and approver.
+- Document for each **milestone/phase identifier** (e.g. M2-P1): work package ownership, dependency, implementation PR(s), verification command/result, threat/failure coverage, open issues, release decision and approver. A milestone closes only after all four phases and their integration checks pass.

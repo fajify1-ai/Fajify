@@ -75,11 +75,11 @@ Baseline change checks: formatting, linting, static type analysis, unit tests, d
 
 ## 6. Pull request and migration process
 - Branch changes from the current intended base and avoid overwriting parallel work.
-- PR titles/descriptions identify milestone and owner; changes to OpenAPI/schema require consumer review.
+- New PR titles/descriptions identify milestone and **phase** (e.g. `M2 · Phase 3 · Business authentication`) and the accountable contributor; changes to OpenAPI/schema require consumer review. Do not rewrite historical Developer-named branches, PRs, acceptance records or Git author attribution. Phase naming applies to future work.
 - Database migration PRs include intent, version, destructive-change assessment, forward compatibility, and evidence of migration/rollback or mitigation.
 - External providers use signed/verified callbacks and repeat-safe effects; sensitive files remain private.
 - Existing customer Flutter code is imported with repository provenance and review; the original source repository is not modified.
-- Maintain `docs/engineering/MILESTONES.md` as delivery requirements and PR/evidence links as status, rather than marking planning tasks complete prematurely.
+- Maintain `docs/engineering/MILESTONES.md` as delivery requirements, [four-phase allocation](../roadmap/FOUR_PHASE_MODEL.md) as ownership, and PR/evidence links as status, rather than marking planning tasks complete prematurely.
 
 ## 7. Definition of done
 A task is done only when committed code/docs exist, affected tests pass, error paths and authorization are covered, developer setup is repeatable, contract changes are documented, and the relevant milestone acceptance gate is evidenced. A milestone is not complete merely because its implementation plan is published.
