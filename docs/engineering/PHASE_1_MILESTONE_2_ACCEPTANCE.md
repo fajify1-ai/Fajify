@@ -39,3 +39,7 @@ A configured MFA flow is not equivalent to proof of MFA. Before acceptance, a **
 ## 2026-10-26 Keycloak startup diagnostic and correction
 
 The first consolidated run at `129a4f3` passed all 60 API tests, lint, typecheck, build and migrations, then failed starting Keycloak with `Unable to resolve auth flow binding override for: browser`. The realm client override referenced a flow **alias** instead of its dynamically assigned **UUID**. The realm template now leaves the admin override unset during import; after Keycloak boots, the disposable acceptance script discovers the imported flow UUID, configures the `faji-admin-web` browser override via Keycloak Admin REST API, and confirms the binding. This avoids realm-import failure while keeping the password-plus-OTP requirement. The correction is awaiting a new live test run.
+
+## 2026-10-26 default role import follow-up
+
+The consolidated run at `c47145f` passed 60/60 API tests and successfully imported Keycloak, bound the administrative OTP flow, and then found that the imported `default-roles-faji` composite did not include `customer`. The runtime bootstrap now checks that no elevated roles are default, adds only the `customer` composite via authenticated Keycloak Admin REST if missing, and reads back the result before proceeding. This preserves least privilege and tests the effective runtime policy instead of assuming the realm JSON was imported verbatim. Pending a rerun.

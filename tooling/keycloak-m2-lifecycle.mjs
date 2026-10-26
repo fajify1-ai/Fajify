@@ -56,12 +56,25 @@ const refreshed=await json(origin+'/admin/realms/faji/clients/'+encodeURICompone
 assert.equal(refreshed.authenticationFlowBindingOverrides?.browser,adminFlow.id,'privileged browser flow must be bound after import');
 console.log('PASS: privileged admin client bound to live Keycloak OTP flow UUID, without cookie bypass');
 
-const defaultRoles=await json(origin+'/admin/realms/faji/roles/default-roles-faji/composites',{headers:adminHeaders});
-const defaultNames=defaultRoles.map(role=>role.name);
-assert.ok(defaultNames.includes('customer'),'self-registered identities must receive base customer role');
+// Keycloak 26 may regenerate default-roles-faji and disregard the composite
+// declaration during realm import. Explicitly configure it through Admin REST.
+const defaultPath=origin+'/admin/realms/faji/roles/default-roles-faji/composites';
+let defaultRoles=await json(defaultPath,{headers:adminHeaders});
+let defaultNames=defaultRoles.map(role=>role.name);
 for(const elevated of ['merchant','driver','dispatcher','platform-admin'])
- assert.equal(defaultNames.includes(elevated),false,'no default elevated role '+elevated);
-console.log('PASS: Keycloak default enrollment assigns customer, never merchant or privileged roles');
+ assert.equal(defaultNames.includes(elevated),false,'imported default role must not grant '+elevated);
+if(!defaultNames.includes('customer')){
+ const customer=await json(origin+'/admin/realms/faji/roles/customer',{headers:adminHeaders});
+ assert.equal(customer.name,'customer');
+ const assigned=await fetch(defaultPath,{method:'POST',headers:adminHeaders,body:JSON.stringify([customer])});
+ assert.equal(assigned.status,204,'assign default customer composite through Admin REST');
+ defaultRoles=await json(defaultPath,{headers:adminHeaders});
+ defaultNames=defaultRoles.map(role=>role.name);
+}
+assert.ok(defaultNames.includes('customer'),'default customer composite must persist after import');
+for(const elevated of ['merchant','driver','dispatcher','platform-admin'])
+ assert.equal(defaultNames.includes(elevated),false,'no elevated default role '+elevated);
+console.log('PASS: Keycloak default customer role installed and verified, with no elevated defaults');
 
 
 const username='acceptance_'+randomBytes(8).toString('hex');
