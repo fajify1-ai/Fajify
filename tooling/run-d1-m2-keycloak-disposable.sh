@@ -63,6 +63,30 @@ CREATE ROLE m2_keycloak_identity LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSW
 CREATE DATABASE m2_keycloak_identity OWNER m2_keycloak_identity;
 REVOKE ALL ON DATABASE m2_keycloak_identity FROM PUBLIC;
 SQL
+export FAJI_APP_MIGRATION_PASSWORD="$(rand)"
+export FAJI_APP_RUNTIME_PASSWORD="$(rand)"
+"$pg_bin/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
+\getenv app_mig FAJI_APP_MIGRATION_PASSWORD
+\getenv app_run FAJI_APP_RUNTIME_PASSWORD
+CREATE ROLE m2_faji_migrator LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD :'app_mig';
+CREATE ROLE m2_faji_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD :'app_run';
+CREATE DATABASE m2_faji_application OWNER m2_faji_migrator;
+REVOKE ALL ON DATABASE m2_faji_application FROM PUBLIC;
+GRANT CONNECT ON DATABASE m2_faji_application TO m2_faji_runtime;
+SQL
+PGDATABASE=m2_faji_application "$pg_bin/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
+CREATE EXTENSION IF NOT EXISTS postgis;
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+GRANT USAGE ON SCHEMA public TO m2_faji_runtime;
+SQL
+export FAJI_DATABASE_URL="postgresql://m2_faji_migrator:$FAJI_APP_MIGRATION_PASSWORD@127.0.0.1:$pg_port/m2_faji_application"
+export FAJI_RUNTIME_DATABASE_URL="postgresql://m2_faji_runtime:$FAJI_APP_RUNTIME_PASSWORD@127.0.0.1:$pg_port/m2_faji_application"
+export FAJI_DISPOSABLE_DATABASE=m2_faji_application
+corepack pnpm install --frozen-lockfile
+corepack pnpm --filter @faji/database migrate
+PGDATABASE=m2_faji_application "$pg_bin/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
+GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events TO m2_faji_runtime;
+SQL
 # Keycloak's server distribution is shared but its configuration, working data and DB are isolated.
 mkdir -p "$root/kc/data/import" "$root/kc/conf"
 # Prefer a private copy of the distribution to avoid writing cache/build state to a shared installation.
@@ -114,6 +138,8 @@ for(const key of ['authorization_endpoint','token_endpoint','jwks_uri','end_sess
 console.log('PASS: live Keycloak 26 OIDC discovery and realm import');
 NODE
 export FAJI_KC_ORIGIN="http://127.0.0.1:$kc_port"
+export KEYCLOAK_ISSUER="$FAJI_KC_ORIGIN/realms/faji"
+export KEYCLOAK_AUDIENCE=faji-api
 node tooling/keycloak-m2-lifecycle.mjs
 node tooling/keycloak-m2-privileged-acceptance.mjs
 node tooling/keycloak-m2-email-acceptance.mjs
