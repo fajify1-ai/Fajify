@@ -40,12 +40,16 @@ test('unapproved identity denied then privileges remain scoped to verified resou
  await assert.rejects(runtime!.query('CREATE TABLE m2_privilege_escape(id integer)'),{code:'42501'});
  await assert.rejects(runtime!.query('UPDATE _faji_migrations SET checksum=$1',['tamper']),{code:'42501'});
  await access.setMembership(actor,subject,'business',resource,'manager',true);
+ assert.equal(await access.member(subject,'business',resource,['manager']),false,'pending account cannot use membership');
+ await access.setSuspended(actor,subject,false);
  assert.equal(await access.member(subject,'business',resource,['manager']),true);
  assert.equal(await access.member('other-user','business',resource,['manager']),false);
  assert.equal(await access.member(subject,'branch',resource,['manager']),false);
  assert.equal(await access.member(subject,'business',randomUUID(),['manager']),false);
  await access.setMembership(actor,subject,'business',resource,'manager',false);
  assert.equal(await access.member(subject,'business',resource,['manager']),false);
+ await access.setSuspended(actor,subject,true);
+ assert.equal(await access.member(subject,'business',resource,['manager']),false,'suspended account cannot use membership');
 });
 test('suspension sets revocation cutoff and audit trail exists',async()=>{
  const access=new AccessService(runtime!);

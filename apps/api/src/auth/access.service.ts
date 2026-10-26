@@ -21,7 +21,7 @@ export class AccessService {
  }
  async member(subject:string,type:ResourceType,id:string,roles:readonly string[]):Promise<boolean>{
   if(!validTypes.has(type)||!roles.length||roles.some(r=>!validRoles.has(r as ResourceRole)))return false;
-  const result=await this.pool.query('SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type=$2 AND resource_id=$3::uuid AND role=ANY($4::varchar[]) AND active=true LIMIT 1',[subject,type,id,roles]);
+  const result=await this.pool.query('SELECT 1 FROM resource_memberships m JOIN account_access a ON a.identity_subject=m.identity_subject JOIN user_profiles p ON p.identity_subject=m.identity_subject WHERE m.identity_subject=$1 AND m.resource_type=$2 AND m.resource_id=$3::uuid AND m.role=ANY($4::varchar[]) AND m.active=true AND a.suspended=false AND p.suspended=false LIMIT 1',[subject,type,id,roles]);
   return result.rowCount===1;
  }
  /** Trusted identity event handler. Default is suspended until an authorized onboarding decision. */

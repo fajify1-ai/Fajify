@@ -1,6 +1,6 @@
 import {Body,Controller,Param,Post,Req,UseGuards,BadRequestException} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
-import {IsBoolean,IsUUID} from 'class-validator';
+import {IsBoolean} from 'class-validator';
 import {IdentityGuard} from './identity.guard';
 import {AccountGuard} from './account.guard';
 import {PrivilegedGuard} from './privileged.guard';
