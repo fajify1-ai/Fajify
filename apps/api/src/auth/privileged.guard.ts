@@ -13,6 +13,7 @@ export class PrivilegedGuard implements CanActivate {
   const identity=context.switchToHttp().getRequest<{identity?:VerifiedIdentity}>().identity;
   const now=this.now();
   if(!identity||!identity.roles.includes('platform-admin')||
+     identity.authorizedParty!=='faji-admin-web'||
      identity.authContext!==this.requiredAcr||!identity.authTime||
      !Number.isInteger(identity.authTime)||identity.authTime>now||
      now-identity.authTime>300)throw new ForbiddenException('Privileged authentication required');
