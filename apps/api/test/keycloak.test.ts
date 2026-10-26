@@ -31,3 +31,16 @@ test('rejects expiration, future not-before, unsupported algorithm and invalid k
 test('rejects malformed and non-JWT input',async()=>{
  for(const t of ['', 'a.b', 'Bearer abc', 'e30.e30.e30'])await assert.rejects(verifier().verifyAccessToken(t),{status:401});
 });
+
+test('signed access token preserves authorized client and privileged assurance claims',async()=>{
+ const v=verifier();
+ const id=await v.verifyAccessToken(token({azp:'faji-admin-web',acr:'faji-mfa',auth_time:now-10,realm_access:{roles:['platform-admin']}}));
+ assert.equal(id.authorizedParty,'faji-admin-web');
+ assert.equal(id.authContext,'faji-mfa');
+ assert.equal(id.authTime,now-10);
+ assert.ok(id.roles.includes('platform-admin'));
+});
+test('ordinary mobile-issued JWT cannot impersonate admin authorized party',async()=>{
+ const id=await verifier().verifyAccessToken(token({azp:'faji-customer-mobile',acr:'faji-mfa',auth_time:now-10}));
+ assert.equal(id.authorizedParty,'faji-customer-mobile');
+});
