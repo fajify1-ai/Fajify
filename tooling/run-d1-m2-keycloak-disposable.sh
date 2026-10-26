@@ -144,4 +144,4 @@ node tooling/keycloak-m2-lifecycle.mjs
 node tooling/keycloak-m2-privileged-acceptance.mjs
 node tooling/keycloak-m2-email-acceptance.mjs
 echo "SOURCE: $(git rev-parse HEAD)"
-echo 'LIMITATION: signed Keycloak access-token HTTP revocation and integrated onboarding acceptance remain pending.'
+echo 'PENDING REVIEW: Keycloak session-level revocation, domain onboarding approvals, distributed throttling and final cross-tenant acceptance.'
