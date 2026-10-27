@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {randomBytes,createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 
 const origin=process.env.FAJI_KC_ORIGIN;
 const adminPassword=process.env.KC_BOOTSTRAP_ADMIN_PASSWORD;
@@ -169,10 +170,29 @@ const refresh=await json(tokenUrl,{method:'POST',headers:{'content-type':'applic
  body:form({grant_type:'refresh_token',client_id:'faji-customer-mobile',refresh_token:tokens.refresh_token})});
 assert.ok(refresh.access_token&&refresh.refresh_token);
 console.log('PASS: Keycloak refresh grant');
+// Verify a *real Keycloak-signed* customer bearer through NestJS + PostgreSQL:
+// API revocation must deny the bearer, while IdP logout is still required
+// to invalidate the refresh token. The helper does not print credentials.
+assert.equal(typeof jwt.sid,'string','Keycloak customer access token must include sid');
+const api=spawnSync('corepack',['pnpm','--filter','@faji/api','exec','tsx','test/keycloak-session-http-acceptance.ts'],{
+ env:process.env,input:JSON.stringify({token:tokens.access_token,subject:jwt.sub,sessionId:jwt.sid}),
+ encoding:'utf8',maxBuffer:1024*1024,timeout:120000
+});
+if(api.status!==0)throw Error('Customer API session revocation check failed (exit '+String(api.status)+'): '+String(api.stderr??'').slice(0,800));
+assert.match(api.stdout,/PASS: real Keycloak customer token denied by application session revocation/);
+console.log('PASS: real Keycloak-signed customer access token revoked at NestJS API boundary');
+// Application-level token revocation does not impersonate IdP logout:
+// prove that refresh still works, then perform the required OIDC end-session.
+const beforeLogout=await fetch(tokenUrl,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},
+ body:form({grant_type:'refresh_token',client_id:'faji-customer-mobile',refresh_token:refresh.refresh_token})});
+assert.equal(beforeLogout.status,200,'API-only revocation does not itself terminate Keycloak refresh session');
+const refreshedAgain=await beforeLogout.json();
+assert.ok(refreshedAgain.refresh_token,'rotated refresh token required');
+
 const logout=await fetch(realm+'/protocol/openid-connect/logout',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},
- body:form({client_id:'faji-customer-mobile',refresh_token:refresh.refresh_token})});
+ body:form({client_id:'faji-customer-mobile',refresh_token:refreshedAgain.refresh_token})});
 assert.equal(logout.status,204);
 const revoked=await fetch(tokenUrl,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},
- body:form({grant_type:'refresh_token',client_id:'faji-customer-mobile',refresh_token:refresh.refresh_token})});
+ body:form({grant_type:'refresh_token',client_id:'faji-customer-mobile',refresh_token:refreshedAgain.refresh_token})});
 assert.equal(revoked.status,400,'refresh token must be rejected after logout');
 console.log('PASS: logout invalidates refresh token');
