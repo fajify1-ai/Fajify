@@ -184,4 +184,3 @@ const combined=spawnSync('corepack',['pnpm','--filter','@faji/api','exec','tsx',
 if(combined.status!==0)throw Error('Live privileged JWT-to-PostgreSQL API acceptance failed (exit '+String(combined.status)+'): '+String(combined.stderr??'').slice(0,1000));
 assert.match(combined.stdout,/PASS: real Keycloak-signed OTP bearer authorizes API approval/);
 console.log('PASS: Keycloak-signed admin OTP token verified by NestJS and PostgreSQL account state');
-
