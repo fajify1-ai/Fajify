@@ -18,6 +18,7 @@ export class ResourceGuard implements CanActivate {
   try{
    const state=await this.access.state(request.identity.subject);
    if(state.suspended||state.revokedAfter&&state.revokedAfter.getTime()/1000>=request.identity.issuedAt)return false;
+   if(request.identity.sessionId&&await this.access.sessionRevoked(request.identity.subject,request.identity.sessionId))return false;
    return await this.access.member(request.identity.subject,policy.type,id,policy.roles);
   }
   catch{return false;}
