@@ -138,3 +138,12 @@ test("runtime stays unavailable without approved configuration and storage, with
   assert.equal(await createCustomerWebRuntime({ FAJI_CUSTOMER_WEB_AUTH_ENABLED: "true" }, null, discover), null);
   assert.equal(calls, 0);
 });
+
+test("pool connection failures redact driver details before reaching callers", async () => {
+  const records = new PostgresAuthRecords({ async connect() { throw new Error("fixture-credential-in-driver-error"); } }, cipher());
+  let calls = 0;
+  await assert.rejects(records.use("credential", "a".repeat(43), async () => {
+    calls++; return { next: null, result: undefined };
+  }), { message: "Authentication storage unavailable" });
+  assert.equal(calls, 0);
+});

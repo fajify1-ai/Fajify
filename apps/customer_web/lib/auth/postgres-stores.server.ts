@@ -28,7 +28,9 @@ export class PostgresAuthRecords {
     const digest = createHash("sha256").update(id).digest("hex");
     const context = `${kind}:${digest}`;
     const lock = createHash("sha256").update(context).digest().readBigInt64BE().toString();
-    const client = await this.pool.connect();
+    let client: AuthSqlClient;
+    try { client = await this.pool.connect(); }
+    catch { throw new Error("Authentication storage unavailable"); }
     let failure: Error | undefined;
     try {
       // The read after a waiting lock must see the preceding holder's commit,

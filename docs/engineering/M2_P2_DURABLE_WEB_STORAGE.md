@@ -1,5 +1,9 @@
 # M2-P2 durable web storage — 2026-10-27
 
+Follow-up: real isolated PostgreSQL verification is recorded in
+[M2_P2_POSTGRES_VERIFICATION.md](M2_P2_POSTGRES_VERIFICATION.md).
+The fixture-only limitations below describe this original implementation milestone.
+
 Continues `c082430` and `a594a78`. Live authentication remains disabled in
 `apps/customer_web/lib/auth/customer.server.ts`. No UI, application routes,
 backend policies, branding or production configuration were changed.

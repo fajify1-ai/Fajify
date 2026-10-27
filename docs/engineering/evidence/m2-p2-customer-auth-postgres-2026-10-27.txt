@@ -1,0 +1,71 @@
+TAP version 13
+# Subtest: real isolated PostgreSQL authentication storage
+    # Subtest: schema applied and runtime role has DML without schema creation
+    ok 1 - schema applied and runtime role has DML without schema creation
+      ---
+      duration_ms: 745.6936
+      ...
+    # Subtest: session create/read/replacement/delete/expiry use real persistent records
+    ok 2 - session create/read/replacement/delete/expiry use real persistent records
+      ---
+      duration_ms: 132.9763
+      ...
+    # Subtest: provider records are encrypted at rest and key rotation survives across pools
+    ok 3 - provider records are encrypted at rest and key rotation survives across pools
+      ---
+      duration_ms: 26.315
+      ...
+    # Subtest: concurrent OIDC consumers on independent connections yield exactly one transaction
+    ok 4 - concurrent OIDC consumers on independent connections yield exactly one transaction
+      ---
+      duration_ms: 22.844
+      ...
+    # Subtest: refresh then logout serializes across independent connections and cannot resurrect credentials
+    ok 5 - refresh then logout serializes across independent connections and cannot resurrect credentials
+      ---
+      duration_ms: 42.6913
+      ...
+    # Subtest: rollback preserves previous credentials after failed operation
+    ok 6 - rollback preserves previous credentials after failed operation
+      ---
+      duration_ms: 319.0707
+      ...
+    # Subtest: logout before refresh leaves no credentials for a later connection to refresh
+    ok 7 - logout before refresh leaves no credentials for a later connection to refresh
+      ---
+      duration_ms: 193.5472
+      ...
+    # Subtest: real database authentication failures are redacted without leaking driver messages
+    ok 8 - real database authentication failures are redacted without leaking driver messages
+      ---
+      duration_ms: 212.7167
+      ...
+    # Subtest: record swapping and expiry tampering deny access with generic HTTP errors
+    ok 9 - record swapping and expiry tampering deny access with generic HTTP errors
+      ---
+      duration_ms: 274.7572
+      ...
+    # Subtest: sessions restore after creator process exits and a new application process starts
+    ok 10 - sessions restore after creator process exits and a new application process starts
+      ---
+      duration_ms: 5104.3025
+      ...
+    # Subtest: PostgreSQL server logs contain no generated passwords, keys or provider tokens
+    ok 11 - PostgreSQL server logs contain no generated passwords, keys or provider tokens
+      ---
+      duration_ms: 9.1282
+      ...
+    1..11
+ok 1 - real isolated PostgreSQL authentication storage
+  ---
+  duration_ms: 10809.4372
+  ...
+1..1
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 12515.3831
