@@ -163,3 +163,20 @@ test('revoked signed session stays denied across independent service instances',
  await admin!.query('DELETE FROM account_access WHERE identity_subject=$1',[subjectId]);
  await admin!.query('DELETE FROM user_profiles WHERE identity_subject=$1',[subjectId]);
 });
+
+test('privileged request budget is enforced across concurrent service instances',async()=>{
+ const quotaActor='m2_rate_'+randomUUID();
+ const a=new AccessService(runtime!);
+ const b=new AccessService(runtime!);
+ try{
+  const results=await Promise.all(Array.from({length:30},(_,i)=>
+   (i%2===0?a:b).allowPrivilegedRequest(quotaActor)));
+  assert.equal(results.filter(Boolean).length,20,'shared PostgreSQL advisory lock must bound accepted requests');
+  assert.equal(results.filter(value=>!value).length,10);
+  const count=await admin!.query<{total:string}>(
+   "SELECT COUNT(*)::text AS total FROM identity_security_events WHERE actor_subject=$1 AND event_type='admin_request'",[quotaActor]);
+  assert.equal(Number(count.rows[0]?.total),20,'exactly 20 accepted requests audited');
+ }finally{
+  await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=$1',[quotaActor]);
+ }
+});
