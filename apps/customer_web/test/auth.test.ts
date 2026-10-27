@@ -178,6 +178,21 @@ test("new sign-in rotates the opaque ID and invalidates the previous ID", async 
   assert.ok(await sessions.read(next));
 });
 
+test("session replacement retires old provider credentials and denies replacement on revocation failure", async () => {
+  let revoked = 0;
+  const { sessions } = fixture(async () => { revoked++; });
+  const previous = cookieId((await sessions.create(session())).cookie);
+  await sessions.create(session(), previous);
+  assert.equal(revoked, 1);
+  assert.equal(await sessions.read(previous), null);
+
+  const failing = fixture(async () => { throw new Error("revocation unavailable"); });
+  const old = cookieId((await failing.sessions.create(session())).cookie);
+  await assert.rejects(failing.sessions.create(session(), old), /revocation unavailable/);
+  assert.equal(await failing.sessions.read(old), null);
+  assert.equal(failing.store.records.size, 0);
+});
+
 test("logout deletes the local session even when provider revocation fails", async () => {
   const { sessions } = fixture(async () => { throw new Error("fixture remote failure"); });
   const id = cookieId((await sessions.create(session())).cookie);

@@ -83,8 +83,10 @@ export class SessionService {
         (!validId(session.providerSessionId) || !this.validator))) {
       throw new Error("Session is not authorized");
     }
-    // Invalidate an existing browser session before issuing a fresh opaque ID.
-    if (validId(previousId)) await this.store.delete(digest(previousId));
+    // Invalidate the previous browser session AND retire its provider vault
+    // entry before issuing a fresh ID. Deleting only the cookie record would
+    // leave the old refresh credentials orphaned until their absolute expiry.
+    if (validId(previousId)) await this.logout(previousId);
     const id = randomBytes(32).toString("base64url");
     await this.store.put(digest(id), session);
     return { cookie: sessionCookie(id, session.expiresAt) };
