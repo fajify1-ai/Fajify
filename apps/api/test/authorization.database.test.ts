@@ -5,6 +5,7 @@ import {Pool} from 'pg';
 import {randomUUID,generateKeyPairSync,createPublicKey,sign} from 'node:crypto';
 import {KeycloakAccessTokenVerifier} from '../src/auth/keycloak.verifier';
 import {AccessService} from '../src/auth/access.service';
+import {BusinessApprovalService} from '../src/auth/business-approval.service';
 import {Test} from '@nestjs/testing';
 import {VersioningType} from '@nestjs/common';
 import request from 'supertest';
@@ -178,5 +179,40 @@ test('privileged request budget is enforced across concurrent service instances'
   assert.equal(Number(count.rows[0]?.total),20,'exactly 20 accepted requests audited');
  }finally{
   await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=$1',[quotaActor]);
+ }
+});
+
+test('business application stays pending, approval creates only its own scoped ownership',async()=>{
+ const applicant='m2_business_'+randomUUID(),second='m2_business_'+randomUUID();
+ const access=new AccessService(runtime!),business=new BusinessApprovalService(runtime!);
+ await access.provisionSubject(applicant);
+ await access.provisionSubject(second);
+ await access.setSuspended(actor,applicant,false);
+ await access.setSuspended(actor,second,false);
+ const first=await business.apply(applicant,'Fajify Synthetic Vendor');
+ const other=await business.apply(second,'Fajify Separate Vendor');
+ try{
+  assert.equal(first.status,'pending');
+  assert.equal(await business.approvedMember(applicant,first.id,['owner']),false);
+  assert.equal(await business.approvedMember(second,first.id,['owner']),false);
+  await business.review(actor,first.id,'approved');
+  assert.equal(await business.approvedMember(applicant,first.id,['owner']),true);
+  assert.equal(await business.approvedMember(applicant,other.id,['owner']),false);
+  assert.equal(await business.approvedMember(second,first.id,['owner']),false);
+  await assert.rejects(business.review(actor,first.id,'approved'),{status:409});
+  await business.review(actor,other.id,'rejected');
+  assert.equal(await business.approvedMember(second,other.id,['owner']),false);
+  await access.setSuspended(actor,applicant,true);
+  assert.equal(await business.approvedMember(applicant,first.id,['owner']),false);
+  const events=await admin!.query<{event_type:string}>(
+   "SELECT event_type FROM identity_security_events WHERE actor_subject=$1 AND event_type LIKE 'business_%'",[actor]);
+  assert.ok(events.rows.some(x=>x.event_type==='business_approved'));
+  assert.ok(events.rows.some(x=>x.event_type==='business_rejected'));
+ }finally{
+  await admin!.query('DELETE FROM resource_memberships WHERE resource_id=ANY($1::uuid[])',[[first.id,other.id]]);
+  await admin!.query('DELETE FROM business_onboarding WHERE id=ANY($1::uuid[])',[[first.id,other.id]]);
+  await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[applicant,second,actor]]);
+  await admin!.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
+  await admin!.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
  }
 });
