@@ -17,7 +17,10 @@ async function main(){
  const parts:Buffer[]=[];
  for await(const chunk of process.stdin)parts.push(Buffer.from(chunk));
  const fixture=JSON.parse(Buffer.concat(parts).toString('utf8')) as {token:string;subject:string;sessionId:string};
- assert.ok(fixture.token&&fixture.subject&&fixture.sessionId);
+ for(const field of ['token','subject','sessionId'] as const){
+  assert.equal(typeof fixture[field],'string','session fixture field '+field+' must be a string');
+  assert.ok(fixture[field].length>0,'session fixture field '+field+' must be nonempty');
+ }
  const pool=new Pool({connectionString:process.env.FAJI_RUNTIME_DATABASE_URL,max:2});
  const access=new AccessService(pool);
  const verifier=new KeycloakAccessTokenVerifier(process.env.KEYCLOAK_ISSUER!,'faji-api');

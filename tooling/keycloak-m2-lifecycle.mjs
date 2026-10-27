@@ -174,6 +174,8 @@ console.log('PASS: Keycloak refresh grant');
 // API revocation must deny the bearer, while IdP logout is still required
 // to invalidate the refresh token. The helper does not print credentials.
 assert.equal(typeof jwt.sid,'string','Keycloak customer access token must include sid');
+assert.equal(typeof jwt.sub,'string','Keycloak customer access token must include sub');
+assert.ok(jwt.sid.length>0&&jwt.sub.length>0,'Signed customer claims must be nonempty');
 const api=spawnSync('node',['--import','tsx','test/keycloak-session-http-acceptance.ts'],{
  cwd:process.cwd()+'/apps/api',
  env:process.env,input:JSON.stringify({token:tokens.access_token,subject:jwt.sub,sessionId:jwt.sid}),
