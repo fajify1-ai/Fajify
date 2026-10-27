@@ -42,3 +42,11 @@ test('account guard fails closed when database state is unavailable',async()=>{
  const context={switchToHttp:()=>({getRequest:()=>({identity})})} as any;
  assert.equal(await new AccountGuard(access).canActivate(context),false);
 });
+
+test('revoked Keycloak session is rejected, other sessions remain valid',async()=>{
+ const sid='session-123';
+ const access={state:async()=>({suspended:false,revokedAfter:null}),sessionRevoked:async(_subject:string,id:string)=>id===sid} as unknown as AccessService;
+ const context=(id:string)=>({switchToHttp:()=>({getRequest:()=>({identity:{...identity,sessionId:id}})})}) as any;
+ assert.equal(await new AccountGuard(access).canActivate(context(sid)),false);
+ assert.equal(await new AccountGuard(access).canActivate(context('other-session')),true);
+});
