@@ -40,7 +40,8 @@ test('HTTP scoped business endpoint blocks cross-tenant access and revoked membe
    subject===identity.subject&&type==='business'&&roles.includes('manager')&&memberships.has(id)
  };
  const module=await Test.createTestingModule({controllers:[SecuredBusinessFixture],providers:[
-  Reflector,IdentityGuard,AccountGuard,ResourceGuard,
+  Reflector,IdentityGuard,AccountGuard,
+  {provide:ResourceGuard,useFactory:(reflector:Reflector,access:AccessService)=>new ResourceGuard(reflector,access),inject:[Reflector,AccessService]},
   {provide:IDENTITY_VERIFIER,useValue:verifier},{provide:AccessService,useValue:access}
  ]}).compile();
  const app=module.createNestApplication();
