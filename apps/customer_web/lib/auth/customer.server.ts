@@ -4,21 +4,20 @@ import { redirect } from "next/navigation";
 
 import { AuthenticationUnavailable } from "./oidc.server";
 import { SESSION_COOKIE_NAME, type ServerSession } from "./session.server";
+import { getCustomerWebRuntime } from "./deployment.server";
 
-/** Production composition is deliberately disabled. BLOCKED BY PHASE 1:
- * approved web OIDC configuration and encrypted persistent session/credential/
- * transaction stores. OpenIdClientAdapter is implemented independently; no
- * test store or fake identity is used at runtime.
- */
+/** Live deployment remains blocked until approved configuration is supplied.
+ * Routes and Server Components share the same gated persistent runtime. */
 export const customerIdentityIntegration = {
   status: "blocked",
   reason: "BLOCKED BY PHASE 1",
 } as const;
 
 export async function readCustomerSession(): Promise<ServerSession | null> {
-  // A forged cookie cannot activate an incomplete provider.
-  (await cookies()).get(SESSION_COOKIE_NAME);
-  return null;
+  const runtime = await getCustomerWebRuntime();
+  if (!runtime) return null;
+  try { return await runtime.sessions.read((await cookies()).get(SESSION_COOKIE_NAME)?.value); }
+  catch { return null; }
 }
 
 /** Call in each protected Server Component/action and next to data access.
@@ -30,6 +29,8 @@ export async function requireCustomerSession(): Promise<ServerSession> {
   return session;
 }
 
+/** Initiation must POST to /api/auth/login through the exact-Origin guard.
+ * This legacy helper is not an alternate Server Action or GET login endpoint. */
 export async function beginCustomerSignIn(): Promise<never> {
   throw new AuthenticationUnavailable();
 }
