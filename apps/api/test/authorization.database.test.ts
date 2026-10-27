@@ -211,7 +211,7 @@ test('business application stays pending, approval creates only its own scoped o
  }finally{
   await admin!.query('DELETE FROM resource_memberships WHERE resource_id=ANY($1::uuid[])',[[first.id,other.id]]);
   await admin!.query('DELETE FROM business_onboarding WHERE id=ANY($1::uuid[])',[[first.id,other.id]]);
-  await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[applicant,second,actor]]);
+  await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[applicant,second]]);
   await admin!.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
   await admin!.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
  }
