@@ -14,13 +14,18 @@ import {IDENTITY_VERIFIER,type IdentityVerifier} from '../src/auth/identity.type
 const tenantA='ae5d7bce-c422-4eae-bf45-e68e46c06c11';
 const tenantB='ae5d7bce-c422-4eae-bf45-e68e46c06c12';
 
-@Controller({path:'security-test/businesses',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,ResourceGuard)
 class SecuredBusinessFixture {
- @Get(':businessId')
- @RequireResource('business','businessId','owner','manager')
  read(){return {allowed:true};}
 }
+// The Node tsx test loader emits standard decorators; Nest's route decorators
+// require legacy descriptors. Register equivalent metadata imperatively here.
+Controller({path:'security-test/businesses',version:'1'})(SecuredBusinessFixture);
+UseGuards(IdentityGuard,AccountGuard,ResourceGuard)(SecuredBusinessFixture);
+const method=Object.getOwnPropertyDescriptor(SecuredBusinessFixture.prototype,'read')!;
+Get(':businessId')(SecuredBusinessFixture.prototype,'read',method);
+RequireResource('business','businessId','owner','manager')(
+ SecuredBusinessFixture.prototype,'read',method
+);
 
 test('HTTP scoped business endpoint blocks cross-tenant access and revoked membership',async()=>{
  let suspended=false,revoked=false;
