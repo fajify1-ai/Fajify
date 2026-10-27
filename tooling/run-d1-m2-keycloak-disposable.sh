@@ -85,7 +85,7 @@ export FAJI_DISPOSABLE_DATABASE=m2_faji_application
 corepack pnpm install --frozen-lockfile
 corepack pnpm --filter @faji/database migrate
 PGDATABASE=m2_faji_application "$pg_bin/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
-GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events,revoked_identity_sessions TO m2_faji_runtime;
+GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events,revoked_identity_sessions,business_onboarding TO m2_faji_runtime;
 SQL
 # Keycloak's server distribution is shared but its configuration, working data and DB are isolated.
 mkdir -p "$root/kc/data/import" "$root/kc/conf"

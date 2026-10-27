@@ -50,7 +50,7 @@ corepack pnpm --filter @faji/api lint
 corepack pnpm --filter @faji/api build
 corepack pnpm --filter @faji/database migrate
 PGDATABASE="$FAJI_DISPOSABLE_DATABASE" "$pg_bin/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
-GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events,revoked_identity_sessions TO m2_runtime;
+GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events,revoked_identity_sessions,business_onboarding TO m2_runtime;
 SQL
 # The API test glob includes authorization.database.test.ts; run only after migration and runtime grants.
 corepack pnpm --filter @faji/api test
