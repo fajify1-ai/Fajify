@@ -2,7 +2,7 @@
 # Phase 1 Milestone 2 consolidated local gate. Runs once after engineering freeze.
 set -Eeuo pipefail
 cd "$(dirname "$0")/.."
-[[ "$(git branch --show-current)" == "feat/m2-d1-keycloak-auth-authorization" ]] || { echo 'BLOCKED: wrong source branch' >&2; exit 2; }
+[[ "$(git branch --show-current)" == "feat/m2-p1-session-security-hardening" ]] || { echo 'BLOCKED: wrong source branch' >&2; exit 2; }
 [[ -z "$(git status --porcelain --untracked-files=no)" ]] || { echo 'BLOCKED: tracked worktree modifications' >&2; exit 2; }
 source_sha="$(git rev-parse HEAD)"
 echo "PHASE 1 — MILESTONE 2 | SOURCE: $source_sha"
@@ -14,4 +14,4 @@ echo '=== 3/3: Disposable identity PostgreSQL and Keycloak lifecycle ==='
 FAJI_KEYCLOAK_HOME="${FAJI_KEYCLOAK_HOME:?Set FAJI_KEYCLOAK_HOME to Keycloak 26.8.1}" bash tooling/run-d1-m2-keycloak-disposable.sh
 [[ "$(git rev-parse HEAD)" == "$source_sha" ]] || { echo 'BLOCKED: source commit changed during acceptance' >&2; exit 3; }
 echo "PASS: scoped M2 automated gates at $source_sha"
-echo 'REMAINS: Keycloak session-level revocation, domain-specific onboarding approvals, distributed throttling and real cross-tenant authorization acceptance before final milestone sign-off.'
+echo 'REMAINS: live Keycloak end-session coordination, domain onboarding approvals, multi-instance throttling acceptance and cross-tenant endpoint acceptance before final sign-off.'

@@ -3,7 +3,7 @@
 # Requires a preinstalled Keycloak distribution; no Docker or persistent DB.
 set -Eeuo pipefail
 cd "$(dirname "$0")/.."
-[[ "$(git branch --show-current)" == "feat/m2-d1-keycloak-auth-authorization" ]] || { echo 'BLOCKED: wrong branch' >&2; exit 2; }
+[[ "$(git branch --show-current)" == "feat/m2-p1-session-security-hardening" ]] || { echo 'BLOCKED: wrong branch' >&2; exit 2; }
 [[ -z "$(git status --porcelain --untracked-files=no)" ]] || { echo 'BLOCKED: tracked worktree modifications' >&2; exit 2; }
 for bin in node curl; do command -v "$bin" >/dev/null || { echo "Missing $bin" >&2; exit 2; }; done
 echo '=== PREFLIGHT: JavaScript syntax ==='
@@ -85,7 +85,7 @@ export FAJI_DISPOSABLE_DATABASE=m2_faji_application
 corepack pnpm install --frozen-lockfile
 corepack pnpm --filter @faji/database migrate
 PGDATABASE=m2_faji_application "$pg_bin/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
-GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events TO m2_faji_runtime;
+GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events,revoked_identity_sessions TO m2_faji_runtime;
 SQL
 # Keycloak's server distribution is shared but its configuration, working data and DB are isolated.
 mkdir -p "$root/kc/data/import" "$root/kc/conf"
