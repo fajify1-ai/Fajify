@@ -147,3 +147,19 @@ test('real RSA signature verifier and PostgreSQL reject the same bearer across s
   assert.equal((await get()).status,403,'previously valid signed bearer must stay invalid');
  }finally{await app.close();}
 });
+
+test('revoked signed session stays denied across independent service instances',async()=>{
+ const subjectId='m2_'+randomUUID(),sessionId=randomUUID();
+ const first=new AccessService(runtime!);
+ const second=new AccessService(runtime!);
+ await first.provisionSubject(subjectId);
+ await first.setSuspended(actor,subjectId,false);
+ assert.equal(await second.sessionRevoked(subjectId,sessionId),false);
+ await first.revokeSession(subjectId,sessionId);
+ assert.equal(await second.sessionRevoked(subjectId,sessionId),true);
+ assert.equal(await second.sessionRevoked(subjectId,randomUUID()),false);
+ await admin!.query('DELETE FROM revoked_identity_sessions WHERE identity_subject=$1',[subjectId]);
+ await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=$1',[subjectId]);
+ await admin!.query('DELETE FROM account_access WHERE identity_subject=$1',[subjectId]);
+ await admin!.query('DELETE FROM user_profiles WHERE identity_subject=$1',[subjectId]);
+});
