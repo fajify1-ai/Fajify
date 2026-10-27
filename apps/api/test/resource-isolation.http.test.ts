@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {Controller,Get,Param,UseGuards,VersioningType} from '@nestjs/common';
+import {Controller,Get,UseGuards,VersioningType} from '@nestjs/common';
 import {Test} from '@nestjs/testing';
 import {Reflector} from '@nestjs/core';
 import request from 'supertest';
@@ -19,7 +19,7 @@ const tenantB='ae5d7bce-c422-4eae-bf45-e68e46c06c12';
 class SecuredBusinessFixture {
  @Get(':businessId')
  @RequireResource('business','businessId','owner','manager')
- read(@Param('businessId') businessId:string){return {businessId};}
+ read(){return {allowed:true};}
 }
 
 test('HTTP scoped business endpoint blocks cross-tenant access and revoked membership',async()=>{
