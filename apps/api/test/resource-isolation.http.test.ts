@@ -20,7 +20,7 @@ class SecuredBusinessFixture {
 // The Node tsx test loader emits standard decorators; Nest's route decorators
 // require legacy descriptors. Register equivalent metadata imperatively here.
 Controller({path:'security-test/businesses',version:'1'})(SecuredBusinessFixture);
-UseGuards(IdentityGuard,AccountGuard,ResourceGuard)(SecuredBusinessFixture);
+// Guard instances are attached inside the test after creating fixture dependencies.
 const method=Object.getOwnPropertyDescriptor(SecuredBusinessFixture.prototype,'read')!;
 Get(':businessId')(SecuredBusinessFixture.prototype,'read',method);
 RequireResource('business','businessId','owner','manager')(
@@ -39,6 +39,7 @@ test('HTTP scoped business endpoint blocks cross-tenant access and revoked membe
   member:async(subject:string,type:string,id:string,roles:readonly string[])=>
    subject===identity.subject&&type==='business'&&roles.includes('manager')&&memberships.has(id)
  };
+ UseGuards(new IdentityGuard(verifier),new AccountGuard(access as AccessService),new ResourceGuard(new Reflector(),access as AccessService))(SecuredBusinessFixture);
  const module=await Test.createTestingModule({controllers:[SecuredBusinessFixture],providers:[
   Reflector,IdentityGuard,AccountGuard,
   {provide:ResourceGuard,useFactory:(reflector:Reflector,access:AccessService)=>new ResourceGuard(reflector,access),inject:[Reflector,AccessService]},
