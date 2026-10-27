@@ -64,7 +64,8 @@
         "acr",
         "roles",
         "profile",
-        "email"
+        "email",
+        "basic"
       ],
       "protocolMappers": [
         {
@@ -108,7 +109,15 @@
       "attributes": {
         "pkce.code.challenge.method": "S256"
       },
-      "serviceAccountsEnabled": false
+      "serviceAccountsEnabled": false,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "email",
+        "basic"
+      ]
     },
     {
       "clientId": "faji-ride-mobile",
@@ -135,7 +144,15 @@
       "attributes": {
         "pkce.code.challenge.method": "S256"
       },
-      "serviceAccountsEnabled": false
+      "serviceAccountsEnabled": false,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "email",
+        "basic"
+      ]
     },
     {
       "clientId": "faji-admin-web",
