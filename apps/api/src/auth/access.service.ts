@@ -39,7 +39,7 @@ export class AccessService {
  }
  async member(subject:string,type:ResourceType,id:string,roles:readonly string[]):Promise<boolean>{
   if(!validTypes.has(type)||!roles.length||roles.some(r=>!validRoles.has(r as ResourceRole)))return false;
-  const result=await this.pool.query('SELECT 1 FROM resource_memberships m JOIN account_access a ON a.identity_subject=m.identity_subject JOIN user_profiles p ON p.identity_subject=m.identity_subject WHERE m.identity_subject=$1 AND m.resource_type=$2 AND m.resource_id=$3::uuid AND m.role=ANY($4::varchar[]) AND m.active=true AND a.suspended=false AND p.suspended=false AND (m.resource_type<>'business' OR EXISTS (SELECT 1 FROM business_onboarding b WHERE b.id=m.resource_id AND b.status='approved')) LIMIT 1',[subject,type,id,roles]);
+  const result=await this.pool.query(`SELECT 1 FROM resource_memberships m JOIN account_access a ON a.identity_subject=m.identity_subject JOIN user_profiles p ON p.identity_subject=m.identity_subject WHERE m.identity_subject=$1 AND m.resource_type=$2 AND m.resource_id=$3::uuid AND m.role=ANY($4::varchar[]) AND m.active=true AND a.suspended=false AND p.suspended=false AND (m.resource_type<>'business' OR EXISTS (SELECT 1 FROM business_onboarding b WHERE b.id=m.resource_id AND b.status='approved')) LIMIT 1`,[subject,type,id,roles]);
   return result.rowCount===1;
  }
  /** Trusted identity event handler. Default is suspended until an authorized onboarding decision. */
