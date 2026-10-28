@@ -20,6 +20,7 @@ for(const c of r.clients){
  assert.equal(c.directAccessGrantsEnabled,false);
  assert.notEqual(c.implicitFlowEnabled,true);
  if(expected.has(c.clientId)){
+  assert.ok(c.defaultClientScopes?.includes('basic'),c.clientId+' requires Keycloak subject mapper via default basic scope');
   assert.equal(c.publicClient,true);
   assert.equal(c.standardFlowEnabled,true);
   assert.equal(c.attributes?.['pkce.code.challenge.method'],'S256');

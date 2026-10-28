@@ -10,6 +10,7 @@ export class AccountGuard implements CanActivate {
   try{
    const state=await this.access.state(identity.subject);
    if(state.suspended||state.revokedAfter && state.revokedAfter.getTime()/1000>=identity.issuedAt)return false;
+   if(identity.sessionId&&await this.access.sessionRevoked(identity.subject,identity.sessionId))return false;
    return true;
   }catch{return false;}
  }
