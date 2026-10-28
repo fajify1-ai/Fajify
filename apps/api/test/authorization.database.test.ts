@@ -19,7 +19,7 @@ const migrationUrl=process.env.FAJI_DATABASE_URL;
 const enabled=Boolean(url&&migrationUrl&&process.env.FAJI_DISPOSABLE_DATABASE);
 const runtime=enabled?new Pool({connectionString:url,max:2}):undefined;
 const admin=enabled?new Pool({connectionString:migrationUrl,max:2}):undefined;
-const subject='m2_'+randomUUID(),actor='admin_'+randomUUID(),resource=randomUUID(),liveSubject='m2_'+randomUUID(),signedSubject='m2_'+randomUUID();
+const subject='m2_'+randomUUID(),actor='admin_'+randomUUID(),liveSubject='m2_'+randomUUID(),signedSubject='m2_'+randomUUID();
 before(async()=>{
  if(!enabled||!admin||!runtime)throw Error('M2 database integration requires explicitly disposable migration/runtime URLs');
  const {assertDisposable}=await import('../../../packages/database/scripts/disposable-target');
@@ -30,6 +30,7 @@ after(async()=>{
  if(admin){
   await admin.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[subject,actor,liveSubject,signedSubject]]);
   await admin.query('DELETE FROM resource_memberships WHERE identity_subject=$1',[subject]);
+  await admin.query('DELETE FROM business_onboarding WHERE applicant_subject=$1',[subject]);
   await admin.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[subject,liveSubject,signedSubject]]);
   await admin.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[subject,liveSubject]]);
  }
@@ -38,9 +39,14 @@ after(async()=>{
 test('unapproved identity denied then privileges remain scoped to verified resource',async()=>{
  const access=new AccessService(runtime!);
  await access.provisionSubject(subject);
+ const business=new BusinessApprovalService(runtime!);
+ const registration=await business.apply(subject,'Fajify Scoped Fixture');
+ const resource=registration.id;
  assert.equal((await access.state(subject)).suspended,true);
  await assert.rejects(runtime!.query('CREATE TABLE m2_privilege_escape(id integer)'),{code:'42501'});
  await assert.rejects(runtime!.query('UPDATE _faji_migrations SET checksum=$1',['tamper']),{code:'42501'});
+ await assert.rejects(access.setMembership(actor,subject,'business',resource,'manager',true),/approved/);
+ await business.review(actor,resource,'approved');
  await access.setMembership(actor,subject,'business',resource,'manager',true);
  assert.equal(await access.member(subject,'business',resource,['manager']),false,'pending account cannot use membership');
  await access.setSuspended(actor,subject,false);

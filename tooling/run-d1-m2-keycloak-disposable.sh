@@ -144,4 +144,4 @@ node tooling/keycloak-m2-lifecycle.mjs
 node tooling/keycloak-m2-privileged-acceptance.mjs
 node tooling/keycloak-m2-email-acceptance.mjs
 echo "SOURCE: $(git rev-parse HEAD)"
-echo 'PENDING REVIEW: Keycloak session-level revocation, domain onboarding approvals, distributed throttling and final cross-tenant acceptance.'
+echo 'PENDING FINAL SIGN-OFF: actual Business-domain endpoint integration and release readiness.'
