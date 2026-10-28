@@ -264,9 +264,9 @@ test('actual Business workspace HTTP route rejects pending, rejected, foreign an
   active=foreign;
   assert.equal((await get(approved.id)).status,403,'other owner cannot cross tenant boundary');
   active=first;
+  assert.equal((await get('not-a-uuid')).status,400,'active account receives malformed business ID validation');
   await access.setSuspended(actor,first,true);
   assert.equal((await get(approved.id)).status,403,'suspension denies workspace');
-  assert.equal((await get('not-a-uuid')).status,400);
  }finally{
   await app.close();
   await admin!.query('DELETE FROM resource_memberships WHERE resource_id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
