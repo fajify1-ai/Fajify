@@ -8,6 +8,9 @@ import {AccessService} from '../src/auth/access.service';
 import {BusinessApprovalService} from '../src/auth/business-approval.service';
 import {Test} from '@nestjs/testing';
 import {VersioningType} from '@nestjs/common';
+import {Reflector} from '@nestjs/core';
+import {ResourceGuard} from '../src/auth/resource.guard';
+import {BusinessApprovalController} from '../src/auth/business-approval.controller';
 import request from 'supertest';
 import {SessionController} from '../src/auth/session.controller';
 import {IdentityGuard} from '../src/auth/identity.guard';
@@ -220,5 +223,55 @@ test('business application stays pending, approval creates only its own scoped o
   await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[applicant,second]]);
   await admin!.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
   await admin!.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
+ }
+});
+
+test('actual Business workspace HTTP route rejects pending, rejected, foreign and suspended identities',async()=>{
+ const access=new AccessService(runtime!),business=new BusinessApprovalService(runtime!);
+ const first='m2_workspace_'+randomUUID(),foreign='m2_workspace_'+randomUUID();
+ await access.provisionSubject(first);await access.provisionSubject(foreign);
+ await access.setSuspended(actor,first,false);await access.setSuspended(actor,foreign,false);
+ const pending=await business.apply(first,'Pending Workspace');
+ const approved=await business.apply(first,'Approved Workspace');
+ const rejected=await business.apply(first,'Rejected Workspace');
+ const foreignWorkspace=await business.apply(foreign,'Foreign Workspace');
+ await business.review(actor,approved.id,'approved');
+ await business.review(actor,rejected.id,'rejected');
+ await business.review(actor,foreignWorkspace.id,'approved');
+ let active=first;
+ const verifier:IdentityVerifier={verifyAccessToken:async()=>({
+  subject:active,issuer:'https://issuer.example/realms/faji',audience:['faji-api'],
+  issuedAt:Math.floor(Date.now()/1000)+1,expiresAt:Math.floor(Date.now()/1000)+300,
+  roles:['customer'],sessionId:'workspace-session'
+ })};
+ const module=await Test.createTestingModule({controllers:[BusinessApprovalController],providers:[
+  Reflector,IdentityGuard,AccountGuard,ResourceGuard,
+  {provide:IDENTITY_VERIFIER,useValue:verifier},
+  {provide:AccessService,useValue:access},
+  {provide:BusinessApprovalService,useValue:business}
+ ]}).compile();
+ const app=module.createNestApplication();
+ app.setGlobalPrefix('api');app.enableVersioning({type:VersioningType.URI,defaultVersion:'1'});
+ await app.init();
+ try{
+  const get=(id:string)=>request(app.getHttpServer()).get('/api/v1/business/onboarding/'+id+'/workspace')
+   .set('Authorization','Bearer signed.workspace.token');
+  assert.equal((await get(pending.id)).status,403,'pending application cannot access workspace');
+  assert.equal((await get(rejected.id)).status,403,'rejected application cannot access workspace');
+  assert.equal((await get(approved.id)).status,200,'approved owner accesses own workspace');
+  assert.equal((await get(foreignWorkspace.id)).status,403,'owner cannot access foreign workspace');
+  active=foreign;
+  assert.equal((await get(approved.id)).status,403,'other owner cannot cross tenant boundary');
+  active=first;
+  await access.setSuspended(actor,first,true);
+  assert.equal((await get(approved.id)).status,403,'suspension denies workspace');
+  assert.equal((await get('not-a-uuid')).status,400);
+ }finally{
+  await app.close();
+  await admin!.query('DELETE FROM resource_memberships WHERE resource_id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
+  await admin!.query('DELETE FROM business_onboarding WHERE id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
+  await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[first,foreign]]);
+  await admin!.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[first,foreign]]);
+  await admin!.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[first,foreign]]);
  }
 });
