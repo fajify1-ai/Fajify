@@ -24,6 +24,13 @@ export class BusinessApprovalService {
   if(!r.rowCount)throw new NotFoundException('Business application not found');
   return r.rows[0];
  }
+ async getOwnWorkspace(subject:string,id:string){
+  const result=await this.pool.query(
+   "SELECT id,display_name,status FROM business_onboarding WHERE id=$1::uuid AND status='approved'",
+   [id]);
+  if(!result.rowCount)throw new NotFoundException('Business workspace unavailable');
+  return result.rows[0];
+ }
  async review(actor:string,id:string,decision:'approved'|'rejected'){
   if(!actor||!id||!['approved','rejected'].includes(decision))throw new BadRequestException('Invalid review');
   const client=await this.pool.connect();

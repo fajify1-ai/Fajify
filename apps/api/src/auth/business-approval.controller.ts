@@ -6,6 +6,7 @@ import {AccountGuard} from './account.guard';
 import {PrivilegedGuard} from './privileged.guard';
 import {AdminRateGuard} from './admin-rate.guard';
 import {BusinessApprovalService} from './business-approval.service';
+import {ResourceGuard,RequireResource} from './resource.guard';
 import type {VerifiedIdentity} from './identity.types';
 
 class ApplyInput {@IsString() @Length(2,120) displayName!:string;}
@@ -25,6 +26,14 @@ export class BusinessApprovalController{
  @UseGuards(IdentityGuard,AccountGuard)
  own(@Req() req:{identity:VerifiedIdentity},@Param('id') id:string){
   return this.business.getOwn(req.identity.subject,id);
+ }
+ /** Protected business-domain read: no data is returned on pending, rejected,
+  * suspended, revoked, or cross-tenant memberships. */
+ @Get(':id/workspace')
+ @UseGuards(IdentityGuard,AccountGuard,ResourceGuard)
+ @RequireResource('business','id','owner','manager','staff')
+ workspace(@Req() req:{identity:VerifiedIdentity},@Param('id') id:string){
+  return this.business.getOwnWorkspace(req.identity.subject,id);
  }
  @Post(':id/review')
  @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
