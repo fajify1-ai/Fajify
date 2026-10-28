@@ -245,7 +245,8 @@ test('actual Business workspace HTTP route rejects pending, rejected, foreign an
   roles:['customer'],sessionId:'workspace-session'
  })};
  const module=await Test.createTestingModule({controllers:[BusinessApprovalController],providers:[
-  Reflector,IdentityGuard,AccountGuard,ResourceGuard,
+  Reflector,IdentityGuard,AccountGuard,
+  {provide:ResourceGuard,useFactory:()=>new ResourceGuard(new Reflector(),access)},
   {provide:IDENTITY_VERIFIER,useValue:verifier},
   {provide:AccessService,useValue:access},
   {provide:BusinessApprovalService,useValue:business}
