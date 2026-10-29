@@ -22,7 +22,8 @@ export class BusinessService {
   if(state.suspended)throw new ForbiddenException();
   const approval=await client.query("SELECT id FROM business_onboarding WHERE id=$1::uuid AND status='approved' FOR SHARE",[businessId]);
   if(approval.rowCount!==1)throw new ForbiddenException('Business not approved');
-  const membership=await client.query(`SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true ORDER BY CASE role WHEN 'owner' THEN 0 WHEN 'manager' THEN 1 ELSE 2 END LIMIT 1`,[subject,businessId,roles]);
+  // Lock granted membership rows until the transaction commits; revocation cannot overtake a write.
+  const membership=await client.query(`SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true ORDER BY CASE role WHEN 'owner' THEN 0 WHEN 'manager' THEN 1 ELSE 2 END LIMIT 1 FOR SHARE`,[subject,businessId,roles]);
   if(branchId){const found=await client.query('SELECT 1 FROM business_branches WHERE id=$1 AND business_id=$2 AND active',[branchId,businessId]);if(found.rowCount!==1)throw new NotFoundException('Branch unavailable');}
   const branch=branchId?await client.query("SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type='branch' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1",[subject,branchId]):null;
   // An owner/manager has business-wide authority. Staff require both a business membership and branch grant.
@@ -83,7 +84,7 @@ export class BusinessService {
  async placeOrder(subject:string,businessId:string,branchId:string,input:{customerSubject:string;items:{catalogueId:string;quantity:number}[];requestKey?:string}){
   if(!input.customerSubject||input.customerSubject.length>255||!Array.isArray(input.items)||!input.items.length||input.items.length>100||new Set(input.items.map(i=>i.catalogueId)).size!==input.items.length)throw new BadRequestException('Invalid order items');
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
-   if(input.items.some(i=>!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>10000))throw new BadRequestException('Invalid quantity');
+   if(input.items.some(i=>!i||!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>10000))throw new BadRequestException('Invalid quantity');
    if(input.requestKey){
     await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[businessId+':order:'+input.customerSubject+':'+input.requestKey]);
     const prior=await c.query<{id:string}>('SELECT id FROM business_orders WHERE business_id=$1 AND branch_id=$2 AND customer_subject=$3 AND request_key=$4',[businessId,branchId,input.customerSubject,input.requestKey]);
