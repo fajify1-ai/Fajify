@@ -13,7 +13,7 @@ export class ManagementService {
  private async owner(c:PoolClient,actor:string,business:string,allowManager=false){
   const state=await this.access.state(actor);if(state.suspended)throw new ForbiddenException();
   const roles=allowManager?['owner','manager']:['owner'];
-  const found=await c.query(`SELECT 1 FROM business_onboarding b JOIN resource_memberships m ON m.resource_type='business' AND m.resource_id=b.id AND m.identity_subject=$2 AND m.active AND m.role=ANY($3::varchar[]) WHERE b.id=$1 AND b.status='approved' FOR SHARE OF b`,[business,actor,roles]);
+  const found=await c.query(`SELECT 1 FROM business_onboarding b JOIN resource_memberships m ON m.resource_type='business' AND m.resource_id=b.id AND m.identity_subject=$2 AND m.active AND m.role=ANY($3::varchar[]) WHERE b.id=$1 AND b.status='approved' FOR SHARE OF b,m`,[business,actor,roles]);
   if(found.rowCount!==1)throw new ForbiddenException('Approved merchant authority required');
  }
  async grant(actor:string,business:string,subject:string,role:'manager'|'staff',branch?:string){
