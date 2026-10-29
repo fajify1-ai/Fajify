@@ -3,7 +3,7 @@
 # No existing database, system cluster, main branch, or production service is touched.
 set -Eeuo pipefail
 cd "$(dirname "$0")/.."
-[[ "$(git branch --show-current)" == "feat/m3-p1-business-backend" ]] || { echo 'Wrong branch' >&2; exit 2; }
+[[ "$(git branch --show-current)" == "test/m3-p1-final-closure" ]] || { echo 'Wrong branch' >&2; exit 2; }
 [[ -z "$(git status --porcelain)" ]] || { echo 'Dirty source; commit before acceptance' >&2; exit 2; }
 [[ "$(id -u)" -ne 0 ]] || { echo 'Run as an unprivileged user' >&2; exit 2; }
 pg_bin="${FAJI_PG_BIN:-/usr/lib/postgresql/16/bin}"
