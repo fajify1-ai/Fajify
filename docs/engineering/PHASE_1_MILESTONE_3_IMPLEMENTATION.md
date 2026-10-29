@@ -90,3 +90,17 @@ The backend's merchant tables, domain services, versioned controllers, staff per
 ## OpenAPI generation contract
 
 Merchant DTOs now carry explicit `@ApiProperty` and `@ApiPropertyOptional` Swagger metadata, including nested order lines, package lines and weekly operating-hours arrays. The `apps/api/scripts/export-openapi.ts` exporter now fails closed when any of the 25 expected merchant operations, a Keycloak bearer security declaration, or a write request-body schema is missing. Existing health-route assertions remain in place. The generated artifact is `packages/api_contracts/openapi.json` and must be generated with `pnpm --filter @faji/api contracts`, reviewed and committed before acceptance. No generated snapshot has been claimed without executing NestJS.
+
+## Consolidated acceptance: 29 October 2026 first execution
+
+Initial isolated M3 run against `09703c34`: PostgreSQL 16 target validation, database/API typechecks and lint passed; 86 of 96 API tests passed, 10 failed. Eight inherited M2 database tests stopped because their distinct runtime-connection and disposable marker requirements were not configured; the two M3 failures were missing strict HTTP DTO validation in the `tsx` test runtime and a staff-lock assertion that incorrectly used an owner fixture.
+
+Corrective branch work adds explicit validation pipes for merchant request bodies, updates the M3 staff test fixture, broadens the *same strict* disposable-target marker check to M3, and introduces `tooling/run-m3-p1-disposable.sh` with a private PostgreSQL 16/PostGIS cluster and separate migration/runtime users. The consolidated runner applies migrations and grants the runtime role narrowly scoped table DML **before** executing the M2/M3 API database tests. No historical migrations or M2 auth behavior were weakened. The new run is not yet executed and remains a hard acceptance gate.
+
+Run from a clean `feat/m3-p1-business-backend` worktree:
+
+```bash
+bash tooling/run-m3-p1-disposable.sh
+```
+
+Do not reuse the older `/tmp/fajify-m3-acceptance.sh` launcher: it creates only a single database administrator and cannot satisfy the inherited least-privilege M2 integration checks.
