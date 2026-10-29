@@ -102,3 +102,14 @@ test('malformed order line is rejected before opening a transaction',async()=>{
  await assert.rejects(()=>service.placeOrder('actor',business,branch,{customerSubject:'customer',items:[null as unknown as {catalogueId:string;quantity:number}]}));
  assert.equal(sql.length,0);
 });
+
+test('reservation replay performs a scoped full-record lookup',async()=>{
+ const {service,sql}=fixture();
+ await service.reserve('actor',business,branch,{availabilityId:branch,customerSubject:'customer',guests:1,requestKey:'retry-record-001'});
+ assert.ok(sql.some(q=>q.includes('request_key')));
+});
+test('reservation cancellation scopes seat release to business and branch',async()=>{
+ const {service,sql}=fixture();
+ await service.reservationStatus('actor',business,branch,branch,'cancelled');
+ assert.ok(sql.some(q=>q.includes('UPDATE business_availability SET reserved=reserved-$4 WHERE id=$1 AND business_id=$2 AND branch_id=$3')));
+});
