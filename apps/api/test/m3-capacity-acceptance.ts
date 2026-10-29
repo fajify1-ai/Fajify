@@ -34,9 +34,20 @@ async function main(){
   const winner=attempts.find(x=>x.status==='fulfilled');if(!winner||winner.status!=='fulfilled')throw new Error('No accepted reservation');
   await service.reservationStatus(subject,business,branch,(winner.value as {id:string}).id,'cancelled');
   const released=await pool.query<{reserved:number}>('SELECT reserved FROM business_availability WHERE id=$1',[slot]);assert.equal(released.rows[0].reserved,0);
+  const retryKey='m3-reserve-retry-001';
+  const retrySlot=(await service.createSlot(subject,business,branch,{catalogueId:item,startsAt:start,endsAt:end,capacity:1})).id as string;
+  const first=await service.reserve(subject,business,branch,{availabilityId:retrySlot,customerSubject:'retry-customer',guests:1,requestKey:retryKey});
+  const second=await service.reserve(subject,business,branch,{availabilityId:retrySlot,customerSubject:'retry-customer',guests:1,requestKey:retryKey});
+  assert.equal(first.id,second.id,'identical retry must return one reservation');
+  await assert.rejects(()=>service.reserve(subject,business,branch,{availabilityId:retrySlot,customerSubject:'retry-customer',guests:2,requestKey:retryKey}));
+  const orderInput={customerSubject:'order-customer',items:[{catalogueId:item,quantity:2}],requestKey:'m3-order-retry-001'};
+  const order1=await service.placeOrder(subject,business,branch,orderInput);
+  const order2=await service.placeOrder(subject,business,branch,orderInput);
+  assert.equal(order1.id,order2.id,'identical retry must not create another order');
+  await assert.rejects(()=>service.placeOrder(subject,business,branch,{...orderInput,items:[{catalogueId:item,quantity:3}]}));
   await pool.query('UPDATE business_catalogue SET published=false WHERE id=$1',[item]);
   await assert.rejects(()=>service.reserve(subject,business,branch,{availabilityId:slot,customerSubject:'customer-C',guests:1}));
-  console.log('PASS: M3 capacity contention, cancellation release, unpublished-item blocking');
+  console.log('PASS: M3 capacity contention, cancellation release, retry idempotency, unpublished-item blocking');
  }finally{await pool.end();}
 }
 main().catch(e=>{console.error('FAIL: M3 database acceptance:',e instanceof Error?e.message:'unknown');process.exitCode=1;});
