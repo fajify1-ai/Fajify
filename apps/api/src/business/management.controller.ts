@@ -25,6 +25,9 @@ class CatalogueUpdate{
  @IsOptional() @IsBoolean() active?:boolean;
 }
 class SlotUpdate{@IsBoolean() active!:boolean;}
+class EventConfig{@IsString() startsAt!:string; @IsString() endsAt!:string; @IsInt() @Min(1) @Max(1000000) maxGuests!:number;}
+class PackageLine{@IsUUID() catalogueId!:string; @IsInt() @Min(1) @Max(10000) quantity!:number;}
+class PackageConfig{@IsArray() @ArrayMaxSize(50) @ValidateNested({each:true}) @Type(()=>PackageLine) components!:PackageLine[];}
 class WeeklyHour{@IsInt() @Min(0) @Max(6) weekday!:number; @IsInt() @Min(0) @Max(1439) opensMinute!:number; @IsInt() @Min(1) @Max(1440) closesMinute!:number;}
 class WeeklyHours{@IsArray() @ArrayMaxSize(70) @ValidateNested({each:true}) @Type(()=>WeeklyHour) slots!:WeeklyHour[];}
 @ApiTags('merchant-administration') @ApiBearerAuth('keycloak')
@@ -36,6 +39,10 @@ export class ManagementController{
  hours(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string){return this.service.hours(r.identity.subject,b,v);}
  @Patch('branches/:branchId/hours') @RequireResource('business','businessId','owner','manager')
  setHours(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body()i:WeeklyHours){return this.service.replaceHours(r.identity.subject,b,v,i.slots);}
+ @Patch('branches/:branchId/events/:itemId') @RequireResource('business','businessId','owner','manager')
+ event(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('itemId',new ParseUUIDPipe())id:string,@Body()i:EventConfig){return this.service.configureEvent(r.identity.subject,b,v,id,i);}
+ @Patch('branches/:branchId/packages/:itemId') @RequireResource('business','businessId','owner','manager')
+ package(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('itemId',new ParseUUIDPipe())id:string,@Body()i:PackageConfig){return this.service.replacePackage(r.identity.subject,b,v,id,i.components);}
  @Get('overview') @RequireResource('business','businessId','owner','manager')
  overview(@Req()r:Request,@Param('businessId')b:string){return this.service.overview(r.identity.subject,b);}
  @Get('staff') @RequireResource('business','businessId','owner','manager')
