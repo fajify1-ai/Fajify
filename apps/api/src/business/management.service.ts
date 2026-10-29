@@ -93,6 +93,31 @@ export class ManagementService {
   });
  }
 
+ async configureEvent(actor:string,business:string,branch:string,item:string,input:{startsAt:string;endsAt:string;maxGuests:number}){
+  const start=Date.parse(input.startsAt),end=Date.parse(input.endsAt);
+  if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start||!Number.isSafeInteger(input.maxGuests)||input.maxGuests<1)throw new BadRequestException('Invalid event configuration');
+  return this.transaction(async c=>{await this.owner(c,actor,business,true);
+   const matching=await c.query("SELECT 1 FROM business_catalogue WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND kind='event' AND active",[item,business,branch]);
+   if(matching.rowCount!==1)throw new NotFoundException('Event catalogue item unavailable');
+   const updated=await c.query(`INSERT INTO business_event_config(catalogue_id,business_id,branch_id,starts_at,ends_at,max_guests) VALUES($1,$2,$3,$4,$5,$6)
+    ON CONFLICT(catalogue_id) DO UPDATE SET starts_at=EXCLUDED.starts_at,ends_at=EXCLUDED.ends_at,max_guests=EXCLUDED.max_guests
+    RETURNING *`,[item,business,branch,input.startsAt,input.endsAt,input.maxGuests]);
+   await this.audit(c,actor,'merchant_event_updated',item);return updated.rows[0];
+  });
+ }
+ async replacePackage(actor:string,business:string,branch:string,item:string,components:{catalogueId:string;quantity:number}[]){
+  if(!components.length||components.length>50||components.some(v=>!Number.isSafeInteger(v.quantity)||v.quantity<1||v.catalogueId===item)||new Set(components.map(v=>v.catalogueId)).size!==components.length)throw new BadRequestException('Invalid package components');
+  return this.transaction(async c=>{await this.owner(c,actor,business,true);
+   const pack=await c.query("SELECT 1 FROM business_catalogue WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND kind='package' AND active FOR UPDATE",[item,business,branch]);
+   if(pack.rowCount!==1)throw new NotFoundException('Package unavailable');
+   const products=await c.query("SELECT id FROM business_catalogue WHERE business_id=$1 AND branch_id=$2 AND id=ANY($3::uuid[]) AND kind<>'package' AND active FOR SHARE",[business,branch,components.map(v=>v.catalogueId)]);
+   if(products.rowCount!==components.length)throw new ConflictException('Invalid or foreign package component');
+   await c.query('DELETE FROM business_package_components WHERE business_id=$1 AND branch_id=$2 AND package_id=$3',[business,branch,item]);
+   for(const line of components)await c.query('INSERT INTO business_package_components(business_id,branch_id,package_id,component_id,quantity) VALUES($1,$2,$3,$4,$5)',[business,branch,item,line.catalogueId,line.quantity]);
+   await this.audit(c,actor,'merchant_package_updated',item);return {packageId:item,components};
+  });
+ }
+
  async overview(actor:string,business:string){
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
    const r=await c.query(`SELECT (SELECT COUNT(*)::int FROM business_branches WHERE business_id=$1 AND active) AS branches,
