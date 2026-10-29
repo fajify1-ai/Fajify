@@ -58,3 +58,24 @@ test('duplicate catalogue lines and invalid time windows rejected',async()=>{
  await assert.rejects(()=>service.placeOrder('actor',business,branch,{customerSubject:'customer',items:[{catalogueId:branch,quantity:1},{catalogueId:branch,quantity:1}]}));
  await assert.rejects(()=>service.createSlot('actor',business,branch,{catalogueId:branch,startsAt:'2026-12-01T12:00:00Z',endsAt:'2026-12-01T11:00:00Z',capacity:1}));
 });
+
+test('reservation retries serialize on request key before attempting capacity mutation',async()=>{
+ const {service,sql}=fixture();
+ await service.reserve('actor',business,branch,{availabilityId:branch,customerSubject:'customer',guests:1,requestKey:'retry-unique-001'});
+ const lock=sql.findIndex(q=>q.includes('pg_advisory_xact_lock'));
+ const capacity=sql.findIndex(q=>q.includes('UPDATE business_availability SET reserved')||q.includes('UPDATE business_availability a SET reserved'));
+ assert.ok(lock>=0&&capacity>lock);
+ assert.ok(sql.some(q=>q.includes('request_key')));
+});
+test('order retries serialize before published catalogue lookup',async()=>{
+ const {service,sql}=fixture();
+ await service.placeOrder('actor',business,branch,{customerSubject:'customer',items:[{catalogueId:branch,quantity:2}],requestKey:'retry-unique-002'});
+ const lock=sql.findIndex(q=>q.includes('pg_advisory_xact_lock'));
+ const catalogue=sql.findIndex(q=>q.includes('price_minor::text'));
+ assert.ok(lock>=0&&catalogue>lock);
+});
+test('invalid retry key is rejected before any database writes',async()=>{
+ const {service,sql}=fixture();
+ await assert.rejects(()=>service.reserve('actor',business,branch,{availabilityId:branch,customerSubject:'customer',guests:1,requestKey:'bad'}));
+ assert.equal(sql.length,0);
+});
