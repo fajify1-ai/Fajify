@@ -25,7 +25,7 @@ export class BusinessService {
   // Lock granted membership rows until the transaction commits; revocation cannot overtake a write.
   const membership=await client.query(`SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true ORDER BY CASE role WHEN 'owner' THEN 0 WHEN 'manager' THEN 1 ELSE 2 END LIMIT 1 FOR SHARE`,[subject,businessId,roles]);
   if(branchId){const found=await client.query('SELECT 1 FROM business_branches WHERE id=$1 AND business_id=$2 AND active',[branchId,businessId]);if(found.rowCount!==1)throw new NotFoundException('Branch unavailable');}
-  const branch=branchId?await client.query("SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type='branch' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1 FOR SHARE",[subject,branchId]):null;
+  const branch=branchId?await client.query("SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type='branch' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1 FOR SHARE",[subject,branchId,['staff']]):null;
   // An owner/manager has business-wide authority. Staff require both a business membership and branch grant.
   if(membership.rowCount!==1 || (branchId&&!['owner','manager'].includes(membership.rows[0].role as string)&&branch?.rowCount!==1))throw new ForbiddenException();
  }
