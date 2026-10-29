@@ -80,3 +80,14 @@ test('invalid retry key is rejected before any database writes',async()=>{
  await assert.rejects(()=>service.reserve('actor',business,branch,{availabilityId:branch,customerSubject:'customer',guests:1,requestKey:'bad'}));
  assert.equal(sql.length,0);
 });
+
+test('authorization membership reads are row locked against concurrent revocation',async()=>{
+ const {service,sql}=fixture();
+ await service.branches('actor',business);
+ assert.ok(sql.some(q=>q.includes('FROM resource_memberships')&&q.includes('FOR SHARE')));
+});
+test('invalid request key in order is rejected without SQL writes',async()=>{
+ const {service,sql}=fixture();
+ await assert.rejects(()=>service.placeOrder('actor',business,branch,{customerSubject:'customer',items:[{catalogueId:branch,quantity:1}],requestKey:'bad'}));
+ assert.equal(sql.length,0);
+});
