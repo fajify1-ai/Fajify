@@ -13,6 +13,9 @@ export class BusinessService {
   const client=await this.pool.connect();try{await client.query('BEGIN');const value=await fn(client);await client.query('COMMIT');return value;}
   catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
  }
+ private async emit(client:PoolClient,eventType:string,businessId:string,resourceId:string){
+  await client.query('INSERT INTO outbox_events(event_type,payload) VALUES($1,$2)',[eventType,JSON.stringify({businessId,resourceId})]);
+ }
  private async authorized(client:PoolClient,subject:string,businessId:string,roles:readonly string[],branchId?:string){
   // Lock the approval row so a revocation or review cannot race the business mutation.
   const state=await this.access.state(subject);
@@ -57,7 +60,7 @@ export class BusinessService {
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
    const updated=await c.query("UPDATE business_availability SET reserved=reserved+$4 WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND active AND starts_at>now() AND reserved+$4<=capacity RETURNING id",[input.availabilityId,businessId,branchId,input.guests]);
    if(!updated.rowCount)throw new ConflictException('Slot unavailable or capacity exhausted');
-   const r=await c.query("INSERT INTO business_reservations(business_id,branch_id,availability_id,customer_subject,guests) VALUES($1,$2,$3,$4,$5) RETURNING *",[businessId,branchId,input.availabilityId,input.customerSubject,input.guests]);return r.rows[0];});
+   const r=await c.query("INSERT INTO business_reservations(business_id,branch_id,availability_id,customer_subject,guests) VALUES($1,$2,$3,$4,$5) RETURNING *",[businessId,branchId,input.availabilityId,input.customerSubject,input.guests]);await this.emit(c,'business.reservation.confirmed',businessId,r.rows[0].id);return r.rows[0];});
  }
  async reservations(subject:string,businessId:string,branchId:string){
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
@@ -69,7 +72,7 @@ export class BusinessService {
    if(!previous.rowCount)throw new NotFoundException('Reservation not found');
    const from=previous.rows[0];if(!reservationNext[from.status].includes(to))throw new ConflictException('Illegal reservation transition');
    if(to==='cancelled')await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1',[from.availability_id,from.guests]);
-   const r=await c.query('UPDATE business_reservations SET status=$2,updated_at=now() WHERE id=$1 RETURNING *',[id,to]);return r.rows[0];});
+   const r=await c.query('UPDATE business_reservations SET status=$2,updated_at=now() WHERE id=$1 RETURNING *',[id,to]);await this.emit(c,'business.reservation.'+to,businessId,id);return r.rows[0];});
  }
  async placeOrder(subject:string,businessId:string,branchId:string,input:{customerSubject:string;items:{catalogueId:string;quantity:number}[]}){
   if(!Array.isArray(input.items)||!input.items.length||input.items.length>100||new Set(input.items.map(i=>i.catalogueId)).size!==input.items.length)throw new BadRequestException('Invalid order items');
@@ -84,7 +87,7 @@ export class BusinessService {
    if(total>9223372036854775807n)throw new BadRequestException('Order total overflow');
    const order=await c.query("INSERT INTO business_orders(business_id,branch_id,customer_subject,total_minor,currency) VALUES($1,$2,$3,$4,$5) RETURNING *",[businessId,branchId,input.customerSubject,total.toString(),products.rows[0].currency]);
    for(const item of input.items)await c.query("INSERT INTO business_order_items(business_id,branch_id,order_id,catalogue_id,quantity,unit_price_minor) VALUES($1,$2,$3,$4,$5,$6)",[businessId,branchId,order.rows[0].id,item.catalogueId,item.quantity,byId.get(item.catalogueId)!.price_minor]);
-   return order.rows[0];});
+   await this.emit(c,'business.order.placed',businessId,order.rows[0].id);return order.rows[0];});
  }
  async orders(subject:string,businessId:string,branchId:string){
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
@@ -95,6 +98,6 @@ export class BusinessService {
    const current=await c.query<{status:OrderState}>('SELECT status FROM business_orders WHERE id=$1 AND business_id=$2 AND branch_id=$3 FOR UPDATE',[id,businessId,branchId]);
    if(!current.rowCount)throw new NotFoundException('Order not found');
    if(!orderNext[current.rows[0].status].includes(to))throw new ConflictException('Illegal order transition');
-   return (await c.query('UPDATE business_orders SET status=$2,updated_at=now() WHERE id=$1 RETURNING *',[id,to])).rows[0];});
+   const updated=await c.query('UPDATE business_orders SET status=$2,updated_at=now() WHERE id=$1 RETURNING *',[id,to]);await this.emit(c,'business.order.'+to,businessId,id);return updated.rows[0];});
  }
 }
