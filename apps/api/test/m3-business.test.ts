@@ -7,12 +7,12 @@ import type {Pool} from 'pg';
 import type {AccessService} from '../src/auth/access.service';
 const business='ae5d7bce-c422-4eae-bf45-e68e46c06c11';
 const branch='ae5d7bce-c422-4eae-bf45-e68e46c06c12';
-function fixture(options:{approved?:boolean;member?:boolean;capacity?:boolean;state?:string;suspended?:boolean}={}){
+function fixture(options:{approved?:boolean;member?:boolean;capacity?:boolean;state?:string;suspended?:boolean;role?:'staff'|'owner'}={}){
  const sql:string[]=[];
  const client={query:async(q:string,params?:unknown[])=>{
   sql.push(q);
   if(q.includes('FROM business_onboarding'))return {rowCount:options.approved===false?0:1,rows:[{id:business}]};
-  if(q.includes('FROM resource_memberships'))return {rowCount:options.member===false?0:1,rows:[{role:'owner'}]};
+  if(q.includes('FROM resource_memberships'))return {rowCount:options.member===false?0:1,rows:[{role:options.role??'owner'}]};
   if(q.startsWith('SELECT id,availability_id,guests FROM business_reservations')||q.startsWith('SELECT id FROM business_orders WHERE'))return {rowCount:0,rows:[]};
   if(q.startsWith('UPDATE business_availability a SET reserved='))return {rowCount:options.capacity===false?0:1,rows:[{id:branch}]};
   if(q.startsWith('SELECT status FROM business_orders'))return {rowCount:1,rows:[{status:options.state??'placed'}]};
@@ -93,7 +93,7 @@ test('invalid request key in order is rejected without SQL writes',async()=>{
 });
 
 test('staff branch membership is checked under a share lock',async()=>{
- const {service,sql}=fixture();
+ const {service,sql}=fixture({role:'staff'});
  await service.items('actor',business,branch);
  assert.ok(sql.some(q=>q.includes("resource_type='branch'")&&q.includes('FOR SHARE')));
 });
