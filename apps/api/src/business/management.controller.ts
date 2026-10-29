@@ -1,5 +1,5 @@
 import {Body,Controller,Get,Inject,Param,Patch,Post,Req,UseGuards,ParseUUIDPipe} from '@nestjs/common';
-import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth,ApiTags,ApiProperty,ApiPropertyOptional} from '@nestjs/swagger';
 import {Type} from 'class-transformer';
 import {IsBoolean,IsEmail,IsIn,IsInt,IsOptional,IsString,IsUUID,Length,Max,Min,IsISO8601,IsArray,ArrayMaxSize,ValidateNested} from 'class-validator';
 import {IdentityGuard} from '../auth/identity.guard';
@@ -9,27 +9,27 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {ManagementService} from './management.service';
 type Request={identity:VerifiedIdentity};
 class Grant{
- @IsString() @Length(1,255) subject!:string;
- @IsIn(['manager','staff']) role!:'manager'|'staff';
- @IsOptional() @IsUUID() branchId?:string;
+ @ApiPropertyOptional() @ApiProperty() @IsString() @Length(1,255) subject:string;
+ @ApiProperty() @IsIn(['manager','staff']) role:'manager'|'staff';
+ @ApiPropertyOptional() @IsOptional() @IsUUID() branchId?:string;
 }
 class BranchUpdate{
- @IsOptional() @IsString() @Length(2,120) name?:string;
- @IsOptional() @IsBoolean() active?:boolean;
- @IsOptional() @IsEmail() contactEmail?:string;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsString() @Length(2,120) name?:string;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsBoolean() active?:boolean;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsEmail() contactEmail?:string;
 }
 class CatalogueUpdate{
- @IsOptional() @IsString() @Length(2,160) name?:string;
- @IsOptional() @IsInt() @Min(0) @Max(Number.MAX_SAFE_INTEGER) priceMinor?:number;
- @IsOptional() @IsBoolean() published?:boolean;
- @IsOptional() @IsBoolean() active?:boolean;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsString() @Length(2,160) name?:string;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Max(Number.MAX_SAFE_INTEGER) priceMinor?:number;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsBoolean() published?:boolean;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsBoolean() active?:boolean;
 }
-class SlotUpdate{@IsBoolean() active!:boolean;}
-class EventConfig{@IsISO8601({strict:true}) startsAt!:string; @IsISO8601({strict:true}) endsAt!:string; @IsInt() @Min(1) @Max(1000000) maxGuests!:number;}
-class PackageLine{@IsUUID() catalogueId!:string; @IsInt() @Min(1) @Max(10000) quantity!:number;}
-class PackageConfig{@IsArray() @ArrayMaxSize(50) @ValidateNested({each:true}) @Type(()=>PackageLine) components!:PackageLine[];}
-class WeeklyHour{@IsInt() @Min(0) @Max(6) weekday!:number; @IsInt() @Min(0) @Max(1439) opensMinute!:number; @IsInt() @Min(1) @Max(1440) closesMinute!:number;}
-class WeeklyHours{@IsArray() @ArrayMaxSize(70) @ValidateNested({each:true}) @Type(()=>WeeklyHour) slots!:WeeklyHour[];}
+class SlotUpdate{@ApiProperty() @IsBoolean() active:boolean;}
+class EventConfig{@ApiProperty() @ApiProperty() @IsISO8601({strict:true}) startsAt:string; @ApiProperty() @IsISO8601({strict:true}) endsAt:string; @ApiProperty() @IsInt() @Min(1) @Max(1000000) maxGuests:number;}
+class PackageLine{@ApiProperty() @IsUUID() catalogueId:string; @ApiProperty() @IsInt() @Min(1) @Max(10000) quantity:number;}
+class PackageConfig{@ApiProperty() @ApiProperty() @IsArray() @ArrayMaxSize(50) @ValidateNested({each:true}) @Type(()=>PackageLine) components:PackageLine[];}
+class WeeklyHour{@ApiProperty() @IsInt() @Min(0) @Max(6) weekday:number; @ApiProperty() @IsInt() @Min(0) @Max(1439) opensMinute:number; @ApiProperty() @IsInt() @Min(1) @Max(1440) closesMinute:number;}
+class WeeklyHours{@ApiProperty() @ApiProperty() @IsArray() @ArrayMaxSize(70) @ValidateNested({each:true}) @Type(()=>WeeklyHour) slots:WeeklyHour[];}
 @ApiTags('merchant-administration') @ApiBearerAuth('keycloak')
 @Controller({path:'businesses/:businessId',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,ResourceGuard)
