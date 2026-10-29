@@ -1,7 +1,7 @@
 import {Body,Controller,Get,Inject,Param,Patch,Post,Req,UseGuards,ParseUUIDPipe} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
 import {Type} from 'class-transformer';
-import {IsBoolean,IsEmail,IsIn,IsInt,IsOptional,IsString,IsUUID,Length,Max,Min,IsArray,ArrayMaxSize,ValidateNested} from 'class-validator';
+import {IsBoolean,IsEmail,IsIn,IsInt,IsOptional,IsString,IsUUID,Length,Max,Min,IsISO8601,IsArray,ArrayMaxSize,ValidateNested} from 'class-validator';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
 import {ResourceGuard,RequireResource} from '../auth/resource.guard';
@@ -25,7 +25,7 @@ class CatalogueUpdate{
  @IsOptional() @IsBoolean() active?:boolean;
 }
 class SlotUpdate{@IsBoolean() active!:boolean;}
-class EventConfig{@IsString() startsAt!:string; @IsString() endsAt!:string; @IsInt() @Min(1) @Max(1000000) maxGuests!:number;}
+class EventConfig{@IsISO8601({strict:true}) startsAt!:string; @IsISO8601({strict:true}) endsAt!:string; @IsInt() @Min(1) @Max(1000000) maxGuests!:number;}
 class PackageLine{@IsUUID() catalogueId!:string; @IsInt() @Min(1) @Max(10000) quantity!:number;}
 class PackageConfig{@IsArray() @ArrayMaxSize(50) @ValidateNested({each:true}) @Type(()=>PackageLine) components!:PackageLine[];}
 class WeeklyHour{@IsInt() @Min(0) @Max(6) weekday!:number; @IsInt() @Min(0) @Max(1439) opensMinute!:number; @IsInt() @Min(1) @Max(1440) closesMinute!:number;}
@@ -42,7 +42,7 @@ export class ManagementController{
  @Patch('branches/:branchId/events/:itemId') @RequireResource('business','businessId','owner','manager')
  event(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('itemId',new ParseUUIDPipe())id:string,@Body()i:EventConfig){return this.service.configureEvent(r.identity.subject,b,v,id,i);}
  @Patch('branches/:branchId/packages/:itemId') @RequireResource('business','businessId','owner','manager')
- package(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('itemId',new ParseUUIDPipe())id:string,@Body()i:PackageConfig){return this.service.replacePackage(r.identity.subject,b,v,id,i.components);}
+ packageConfig(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('itemId',new ParseUUIDPipe())id:string,@Body()i:PackageConfig){return this.service.replacePackage(r.identity.subject,b,v,id,i.components);}
  @Get('overview') @RequireResource('business','businessId','owner','manager')
  overview(@Req()r:Request,@Param('businessId')b:string){return this.service.overview(r.identity.subject,b);}
  @Get('staff') @RequireResource('business','businessId','owner','manager')
