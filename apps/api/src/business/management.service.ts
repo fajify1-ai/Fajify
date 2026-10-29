@@ -118,6 +118,19 @@ export class ManagementService {
   });
  }
 
+ async event(actor:string,business:string,branch:string,item:string){
+  return this.transaction(async c=>{await this.owner(c,actor,business,true);
+   const result=await c.query('SELECT e.* FROM business_event_config e JOIN business_catalogue i ON i.id=e.catalogue_id AND i.business_id=e.business_id AND i.branch_id=e.branch_id WHERE e.catalogue_id=$1 AND e.business_id=$2 AND e.branch_id=$3 AND i.kind=\'event\'',[item,business,branch]);
+   if(result.rowCount!==1)throw new NotFoundException('Event configuration unavailable');return result.rows[0];});
+ }
+ async packageComponents(actor:string,business:string,branch:string,item:string){
+  return this.transaction(async c=>{await this.owner(c,actor,business,true);
+   const exists=await c.query("SELECT 1 FROM business_catalogue WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND kind='package'",[item,business,branch]);
+   if(exists.rowCount!==1)throw new NotFoundException('Package unavailable');
+   return (await c.query('SELECT component_id,quantity FROM business_package_components WHERE package_id=$1 AND business_id=$2 AND branch_id=$3 ORDER BY component_id',[item,business,branch])).rows;
+  });
+ }
+
  async overview(actor:string,business:string){
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
    const r=await c.query(`SELECT (SELECT COUNT(*)::int FROM business_branches WHERE business_id=$1 AND active) AS branches,
