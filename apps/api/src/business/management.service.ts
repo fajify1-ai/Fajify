@@ -79,7 +79,7 @@ export class ManagementService {
   });
  }
  async replaceHours(actor:string,business:string,branch:string,slots:{weekday:number;opensMinute:number;closesMinute:number}[]){
-  if(slots.length>70||slots.some(v=>!Number.isInteger(v.weekday)||v.weekday<0||v.weekday>6||!Number.isInteger(v.opensMinute)||!Number.isInteger(v.closesMinute)||v.opensMinute<0||v.closesMinute>1440||v.opensMinute>=v.closesMinute))throw new BadRequestException('Invalid operating hours');
+  if(!Array.isArray(slots)||slots.length>70||slots.some(v=>!Number.isInteger(v.weekday)||v.weekday<0||v.weekday>6||!Number.isInteger(v.opensMinute)||!Number.isInteger(v.closesMinute)||v.opensMinute<0||v.closesMinute>1440||v.opensMinute>=v.closesMinute))throw new BadRequestException('Invalid operating hours');
   const sorted=[...slots].sort((a,b)=>a.weekday-b.weekday||a.opensMinute-b.opensMinute);
   for(let i=1;i<sorted.length;i++)if(sorted[i].weekday===sorted[i-1].weekday&&sorted[i].opensMinute<sorted[i-1].closesMinute)throw new ConflictException('Overlapping branch hours');
   return this.transaction(async c=>{
@@ -97,7 +97,7 @@ export class ManagementService {
   const start=Date.parse(input.startsAt),end=Date.parse(input.endsAt);
   if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start||!Number.isSafeInteger(input.maxGuests)||input.maxGuests<1)throw new BadRequestException('Invalid event configuration');
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
-   const matching=await c.query("SELECT 1 FROM business_catalogue WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND kind='event' AND active",[item,business,branch]);
+   const matching=await c.query("SELECT 1 FROM business_catalogue WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND kind='event' AND active FOR UPDATE",[item,business,branch]);
    if(matching.rowCount!==1)throw new NotFoundException('Event catalogue item unavailable');
    const updated=await c.query(`INSERT INTO business_event_config(catalogue_id,business_id,branch_id,starts_at,ends_at,max_guests) VALUES($1,$2,$3,$4,$5,$6)
     ON CONFLICT(catalogue_id) DO UPDATE SET starts_at=EXCLUDED.starts_at,ends_at=EXCLUDED.ends_at,max_guests=EXCLUDED.max_guests
@@ -106,7 +106,7 @@ export class ManagementService {
   });
  }
  async replacePackage(actor:string,business:string,branch:string,item:string,components:{catalogueId:string;quantity:number}[]){
-  if(!components.length||components.length>50||components.some(v=>!Number.isSafeInteger(v.quantity)||v.quantity<1||v.catalogueId===item)||new Set(components.map(v=>v.catalogueId)).size!==components.length)throw new BadRequestException('Invalid package components');
+  if(!Array.isArray(components)||!components.length||components.length>50||components.some(v=>!Number.isSafeInteger(v.quantity)||v.quantity<1||v.catalogueId===item)||new Set(components.map(v=>v.catalogueId)).size!==components.length)throw new BadRequestException('Invalid package components');
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
    const pack=await c.query("SELECT 1 FROM business_catalogue WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND kind='package' AND active FOR UPDATE",[item,business,branch]);
    if(pack.rowCount!==1)throw new NotFoundException('Package unavailable');
