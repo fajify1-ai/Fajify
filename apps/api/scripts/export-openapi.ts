@@ -5,7 +5,7 @@ import {NestFactory} from '@nestjs/core';
 import {AppModule} from '../src/app.module';
 import {apiDocument,setupApi} from '../src/main';
 async function run(){
- const app=await NestFactory.create(AppModule,{logger:false});
+ const app=await NestFactory.create(AppModule,{logger:['error','warn']});
  try{
   setupApi(app);await app.init();
   const doc=apiDocument(app);
