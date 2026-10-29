@@ -35,7 +35,7 @@ test('rejects unapproved and foreign tenant membership; rolls back',async()=>{
 test('capacity exhaustion cannot create a reservation',async()=>{
  const {service,sql}=fixture({capacity:false});
  await assert.rejects(()=>service.reserve('actor',business,branch,{availabilityId:branch,customerSubject:'customer',guests:2}),ConflictException);
- assert.ok(sql.some(q=>q.includes('reserved+$4<=capacity')));
+ assert.ok(sql.some(q=>q.includes('reserved+$4<=a.capacity')));
  assert.ok(!sql.some(q=>q.startsWith('INSERT INTO business_reservations')));
  assert.ok(sql.includes('ROLLBACK'));
 });
