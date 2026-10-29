@@ -70,7 +70,7 @@ export class BusinessService {
    const r=await c.query('UPDATE business_reservations SET status=$2,updated_at=now() WHERE id=$1 RETURNING *',[id,to]);return r.rows[0];});
  }
  async placeOrder(subject:string,businessId:string,branchId:string,input:{customerSubject:string;items:{catalogueId:string;quantity:number}[]}){
-  if(!input.items.length||input.items.length>100||new Set(input.items.map(i=>i.catalogueId)).size!==input.items.length)throw new BadRequestException('Invalid order items');
+  if(!Array.isArray(input.items)||!input.items.length||input.items.length>100||new Set(input.items.map(i=>i.catalogueId)).size!==input.items.length)throw new BadRequestException('Invalid order items');
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
    if(input.items.some(i=>!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>10000))throw new BadRequestException('Invalid quantity');
    const ids=input.items.map(i=>i.catalogueId);
