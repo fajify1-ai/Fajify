@@ -82,3 +82,7 @@ Membership reads in merchant transactions use PostgreSQL row-level share locks. 
 The branch-level staff membership query is now explicitly locked with `FOR SHARE` through the transaction, just like the parent merchant membership. This prevents a branch access revocation from overtaking a transaction that already passed authorization. The SQL acceptance harness includes two branches under one merchant and verifies a staff member can list only their assigned branch, then loses access after revocation.
 
 No claim of passing tests, migration success, published OpenAPI snapshot or production readiness is made until the consolidated gates have actually run.
+
+## Final integration status
+
+The backend's merchant tables, domain services, versioned controllers, staff permission operations, state transitions, idempotent requests, event/package configuration, outbox writes and negative/acceptance test harnesses are committed. The outstanding gate is **verification**, not authorization to merge: database and API TypeScript checks, lint, complete test execution, real PostgreSQL migrations and concurrency, OpenAPI regeneration and review. A generated OpenAPI diff is an expected blocker to resolve and commit before recording the final accepted SHA. No approval of Phase 2–4 changes or production credentials is needed to run disposable local acceptance.
