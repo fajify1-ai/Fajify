@@ -39,6 +39,10 @@ export class ManagementController{
  hours(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string){return this.service.hours(r.identity.subject,b,v);}
  @Patch('branches/:branchId/hours') @RequireResource('business','businessId','owner','manager')
  setHours(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body()i:WeeklyHours){return this.service.replaceHours(r.identity.subject,b,v,i.slots);}
+ @Get('branches/:branchId/events/:itemId') @RequireResource('business','businessId','owner','manager')
+ eventDetails(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('itemId',new ParseUUIDPipe())id:string){return this.service.event(r.identity.subject,b,v,id);}
+ @Get('branches/:branchId/packages/:itemId') @RequireResource('business','businessId','owner','manager')
+ packageDetails(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('itemId',new ParseUUIDPipe())id:string){return this.service.packageComponents(r.identity.subject,b,v,id);}
  @Patch('branches/:branchId/events/:itemId') @RequireResource('business','businessId','owner','manager')
  event(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('itemId',new ParseUUIDPipe())id:string,@Body()i:EventConfig){return this.service.configureEvent(r.identity.subject,b,v,id,i);}
  @Patch('branches/:branchId/packages/:itemId') @RequireResource('business','businessId','owner','manager')
