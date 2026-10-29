@@ -25,7 +25,11 @@ Future<BusinessController> merchant(
   await tester.pumpWidget(
     MediaQuery(
       data: MediaQueryData(size: size, textScaler: TextScaler.linear(scale)),
-      child: BusinessApp(controller: c, initialLocation: route),
+      child: BusinessApp(
+        controller: c,
+        initialLocation: route,
+        config: const BusinessConfig(),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -41,7 +45,11 @@ void main() {
       repository: MockBusinessRepository(delay: Duration.zero),
     );
     await tester.pumpWidget(
-      BusinessApp(controller: c, initialLocation: '/orders/order-1'),
+      BusinessApp(
+        controller: c,
+        initialLocation: '/orders/order-1',
+        config: const BusinessConfig(),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('Welcome to Faji Business'), findsOneWidget);
@@ -60,10 +68,14 @@ void main() {
       repository: MockBusinessRepository(delay: Duration.zero),
     );
     await tester.pumpWidget(
-      BusinessApp(controller: c, initialLocation: '/login'),
+      BusinessApp(
+        controller: c,
+        initialLocation: '/login',
+        config: const BusinessConfig(),
+      ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Test role without merchant access'));
+    await tester.tap(find.text('Test account without merchant access'));
     await tester.pumpAndSettle();
     expect(find.text('Merchant access required'), findsOneWidget);
     await tester.tap(find.text('Return to login'));
@@ -178,11 +190,32 @@ void main() {
     await tester.pumpWidget(
       const BusinessApp(config: BusinessConfig(useMocks: false)),
     );
+    expect(find.textContaining('Configure OIDC_ISSUER'), findsOneWidget);
+    expect(find.byKey(const ValueKey('enter-demo')), findsNothing);
+  });
+  testWidgets('business identity registration never grants sample access', (
+    tester,
+  ) async {
+    final controller = BusinessController(
+      repository: MockBusinessRepository(delay: Duration.zero),
+    );
+    await tester.pumpWidget(
+      BusinessApp(
+        controller: controller,
+        initialLocation: '/register',
+        config: const BusinessConfig(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Register Your Business'), findsOneWidget);
     expect(
-      find.textContaining('supports development mock services only'),
+      find.textContaining('does not register, approve, or grant access'),
       findsOneWidget,
     );
-    expect(find.byKey(const ValueKey('enter-demo')), findsNothing);
+    expect(find.text('Continue to secure identity'), findsNothing);
+    expect(controller.session, SessionStatus.signedOut);
+    await tester.pumpWidget(const SizedBox());
+    controller.dispose();
   });
   testWidgets('broken menu image uses a bundled-free category placeholder', (
     tester,

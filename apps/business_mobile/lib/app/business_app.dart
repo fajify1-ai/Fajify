@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/business_controller.dart';
 import '../core/config.dart';
+import '../core/keycloak_identity_service.dart';
 import '../core/models.dart';
 import '../core/services.dart';
 import '../features/account.dart';
@@ -65,7 +68,7 @@ GoRouter businessRouter(
     overridePlatformDefaultLocation: embedded,
     routerNeglect: embedded,
     refreshListenable: controller,
-    redirect: (context, state) {
+    redirect: (context, state) async {
       final path = state.uri.path;
       final public =
           path == '/onboarding' || path == '/login' || path == '/register';
@@ -79,6 +82,20 @@ GoRouter businessRouter(
       }
       if (controller.session == SessionStatus.denied) {
         return path == '/access-denied' ? null : '/access-denied';
+      }
+      if (controller.session == SessionStatus.merchant) {
+        if (path == '/access-denied') {
+          return safeDestination(state.uri.queryParameters['from']);
+        }
+        if (public || path == '/') {
+          return safeDestination(state.uri.queryParameters['from']);
+        }
+        if (!await controller.revalidateBusinessAccess(destination: path)) {
+          return controller.session == SessionStatus.signedOut
+              ? '/login'
+              : '/access-denied';
+        }
+        return null;
       }
       if (public || path == '/' || path == '/access-denied') {
         return safeDestination(state.uri.queryParameters['from']);
@@ -105,10 +122,9 @@ GoRouter businessRouter(
       page('/login', (_) => LoginPage(controller: controller, onExit: onExit)),
       page(
         '/register',
-        (_) => Scaffold(
-          body: SafeArea(
-            child: BusinessSetupPage(registration: true, onExit: onExit),
-          ),
+        (_) => IdentityHandoffPage(
+          controller: controller,
+          onExit: onExit,
         ),
       ),
       page(
@@ -117,7 +133,8 @@ GoRouter businessRouter(
           body: SafeArea(
             child: PageBody(
               title: 'Merchant access required',
-              subtitle: 'This sample role has no merchant access.',
+              subtitle: controller.error ??
+                  'Your Faji identity is valid, but no merchant access was confirmed.',
               children: [
                 FilledButton(
                   onPressed: controller.logout,
@@ -232,8 +249,14 @@ class BusinessApp extends StatefulWidget {
   State<BusinessApp> createState() => _BusinessAppState();
 }
 
-class _BusinessAppState extends State<BusinessApp> {
-  late final controller = widget.controller ?? BusinessController();
+class _BusinessAppState extends State<BusinessApp> with WidgetsBindingObserver {
+  late final controller =
+      widget.controller ??
+      BusinessController(
+        identity: widget.config.useMocks
+            ? MockIdentityService()
+            : KeycloakIdentityService(widget.config),
+      );
   late final router = businessRouter(
     controller,
     initialLocation: widget.initialLocation,
@@ -242,6 +265,22 @@ class _BusinessAppState extends State<BusinessApp> {
   );
   final _heroes = MaterialApp.createMaterialHeroController();
   bool _leaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    if (widget.config.problem == null) {
+      unawaited(controller.restoreSession());
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(controller.revalidateBusinessAccess(force: true));
+    }
+  }
 
   Future<void> _exit() async {
     if (_leaving) return;
@@ -281,6 +320,7 @@ class _BusinessAppState extends State<BusinessApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     router.dispose();
     if (widget.controller == null) controller.dispose();
     super.dispose();
@@ -380,17 +420,17 @@ class BusinessShell extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: PopupMenuButton<String>(
-                      tooltip: 'Switch sample business',
+                      tooltip: 'Switch sample data',
                       enabled: !controller.busy,
                       onSelected: controller.selectBusiness,
                       itemBuilder: (_) => const [
                         PopupMenuItem(
                           value: 'demo-lagos',
-                          child: Text('Demo Lagos'),
+                          child: Text('Sample · Lagos'),
                         ),
                         PopupMenuItem(
                           value: 'demo-island',
-                          child: Text('Demo Island'),
+                          child: Text('Sample · Island'),
                         ),
                       ],
                       child: Column(
@@ -413,7 +453,7 @@ class BusinessShell extends StatelessWidget {
                               Icon(Icons.circle, size: 6, color: good),
                               SizedBox(width: 4),
                               Text(
-                                'Open for business',
+                                'Sample data',
                                 style: TextStyle(color: good, fontSize: 11),
                               ),
                             ],
