@@ -6,7 +6,7 @@
 
 ## Scope and data ownership
 
-Migrations `0006_m3_business_operations.sql` and `0007_m3_branch_hours.sql` extend (never replaces) the M2 `business_onboarding` approval root. Branch, catalogue, slot, reservation and order tables use tenant/branch composite foreign keys. Prices are integer minor units; order line snapshots preserve the price at creation. All business-specific operations use the account/session guards inherited from M2 and verified business membership. Permission and status checks remain server authoritative.
+Migrations `0006_m3_business_operations.sql`, `0007_m3_branch_hours.sql` and `0008_m3_event_packages.sql` extend (never replaces) the M2 `business_onboarding` approval root. Branch, catalogue, slot, reservation and order tables use tenant/branch composite foreign keys. Prices are integer minor units; order line snapshots preserve the price at creation. All business-specific operations use the account/session guards inherited from M2 and verified business membership. Permission and status checks remain server authoritative.
 
 - Owner: all merchant operations, staff grant/revoke (except self actions).
 - Manager: branch, catalogue, schedule and operational management, no access grants.
@@ -32,6 +32,8 @@ All routes are under `/api/v1/businesses/:businessId`, require signed bearer tok
 | PATCH | `branches/:branchId/reservations/:id/status` | owner/manager/scoped staff | Confirmed → checked-in → completed; confirmed → cancelled |
 | GET/POST | `branches/:branchId/orders` | owner/manager/scoped staff | List/create merchant-assisted order and price snapshots |
 | PATCH | `branches/:branchId/orders/:id/status` | owner/manager/scoped staff | Placed → accepted → preparing → ready → fulfilled; cancellation until terminal |
+| PATCH | `branches/:branchId/events/:itemId` | owner/manager | Configure event timing and maximum guest count (no ticket issuance) |
+| PATCH | `branches/:branchId/packages/:itemId` | owner/manager | Atomically replace same-branch package components |
 | GET | `staff` | owner/manager | List scoped active grants |
 | POST | `staff/grants` | owner | Activate existing identity, manager or branch-staff |
 | POST | `staff/revocations` | owner | Revoke existing manager or branch-staff grants |
@@ -53,7 +55,7 @@ A prepared but **not executed** consolidated script is at `tooling/verify-m3-p1-
 
 1. `pnpm install --frozen-lockfile` in a disposable checkout with Node >= 20 and pnpm 9.15.9.
 2. `pnpm --filter @faji/api typecheck && pnpm --filter @faji/api lint && pnpm --filter @faji/api test && pnpm --filter @faji/api build`.
-3. On isolated PostgreSQL, apply migrations 0001–0007 via the existing migration command. Verify schema constraints and repeat application idempotence. No shared or production database.
+3. On isolated PostgreSQL, apply migrations 0001–0008 via the existing migration command. Verify schema constraints and repeat application idempotence. No shared or production database.
 4. Verify HTTP guards: missing bearer, suspended/revoked sessions, pending/rejected merchant, cross-tenant business/branch, disallowed staff actions, invalid DTO/UUIDs.
 5. Run `apps/api/test/m3-capacity-acceptance.ts` (included in consolidated script) with simultaneous reservations at exactly one remaining seat, cancellation releasing capacity, foreign catalogue item/order reference, duplicate/illegal status transitions and rollbacks.
 6. `pnpm --filter @faji/api contracts`, review and commit the generated OpenAPI snapshot; check new business endpoints and existing M2 routes for regressions.
