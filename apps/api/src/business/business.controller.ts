@@ -23,8 +23,8 @@ class ItemInput{
 }
 class SlotInput{
  @ApiProperty({type:String}) @IsUUID() catalogueId!:string;
- @ApiProperty({type:String}) @IsISO8601({strict:true}) startsAt:string;
- @ApiProperty({type:String}) @IsISO8601({strict:true}) endsAt:string;
+ @ApiProperty({type:String}) @IsISO8601({strict:true}) startsAt!:string;
+ @ApiProperty({type:String}) @IsISO8601({strict:true}) endsAt!:string;
  @ApiProperty({type:Number}) @IsInt() @Min(1) @Max(1000000) capacity!:number;
 }
 class ReservationInput{
