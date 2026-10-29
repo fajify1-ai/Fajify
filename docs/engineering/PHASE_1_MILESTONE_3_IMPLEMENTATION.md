@@ -6,7 +6,7 @@
 
 ## Scope and data ownership
 
-Migration `0006_m3_business_operations.sql` extends (never replaces) the M2 `business_onboarding` approval root. Branch, catalogue, slot, reservation and order tables use tenant/branch composite foreign keys. Prices are integer minor units; order line snapshots preserve the price at creation. All business-specific operations use the account/session guards inherited from M2 and verified business membership. Permission and status checks remain server authoritative.
+Migrations `0006_m3_business_operations.sql` and `0007_m3_branch_hours.sql` extend (never replaces) the M2 `business_onboarding` approval root. Branch, catalogue, slot, reservation and order tables use tenant/branch composite foreign keys. Prices are integer minor units; order line snapshots preserve the price at creation. All business-specific operations use the account/session guards inherited from M2 and verified business membership. Permission and status checks remain server authoritative.
 
 - Owner: all merchant operations, staff grant/revoke (except self actions).
 - Manager: branch, catalogue, schedule and operational management, no access grants.
@@ -21,6 +21,7 @@ All routes are under `/api/v1/businesses/:businessId`, require signed bearer tok
 
 | Method | Route suffix | Roles | Purpose |
 |---|---|---|---|
+| GET/PATCH | `branches/:branchId/hours` | owner/manager | List/replace weekly operating windows (0=Sunday, minutes from midnight; local branch timezone) |
 | GET/POST | `branches` | owner/manager (GET staff filtered) | List/create branches |
 | PATCH | `branches/:branchId` | owner/manager | Update name, contact or activation |
 | GET/POST | `branches/:branchId/catalogue` | read staff, write owner/manager | List/create products, services, packages, events |
@@ -50,7 +51,7 @@ Required body fields: branch `name`; catalogue `name,kind,priceMinor`; slot `cat
 
 1. `pnpm install --frozen-lockfile` in a disposable checkout with Node >= 20 and pnpm 9.15.9.
 2. `pnpm --filter @faji/api typecheck && pnpm --filter @faji/api lint && pnpm --filter @faji/api test && pnpm --filter @faji/api build`.
-3. On isolated PostgreSQL, apply migrations 0001–0006 via the existing migration command. Verify schema constraints and repeat application idempotence. No shared or production database.
+3. On isolated PostgreSQL, apply migrations 0001–0007 via the existing migration command. Verify schema constraints and repeat application idempotence. No shared or production database.
 4. Verify HTTP guards: missing bearer, suspended/revoked sessions, pending/rejected merchant, cross-tenant business/branch, disallowed staff actions, invalid DTO/UUIDs.
 5. Run integration tests with simultaneous reservations at exactly one remaining seat, cancellation releasing capacity, foreign catalogue item/order reference, duplicate/illegal status transitions and rollbacks.
 6. `pnpm --filter @faji/api contracts`, review and commit the generated OpenAPI snapshot; check new business endpoints and existing M2 routes for regressions.
