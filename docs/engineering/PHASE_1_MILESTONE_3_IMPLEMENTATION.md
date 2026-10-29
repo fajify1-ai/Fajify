@@ -49,6 +49,8 @@ Required body fields: branch `name`; catalogue `name,kind,priceMinor`; slot `cat
 
 ## Acceptance to run once implementation is frozen
 
+A prepared but **not executed** consolidated script is at `tooling/verify-m3-p1-consolidated.sh`; it requires a uniquely named `fajify_m3_test_*` PostgreSQL 16 database with the `fajify:m3:disposable` database comment. The preflight lives under `packages/database/scripts/verify-m3-p1-target.ts` and does not alter existing M1/M2 database safeguards.
+
 1. `pnpm install --frozen-lockfile` in a disposable checkout with Node >= 20 and pnpm 9.15.9.
 2. `pnpm --filter @faji/api typecheck && pnpm --filter @faji/api lint && pnpm --filter @faji/api test && pnpm --filter @faji/api build`.
 3. On isolated PostgreSQL, apply migrations 0001–0007 via the existing migration command. Verify schema constraints and repeat application idempotence. No shared or production database.
