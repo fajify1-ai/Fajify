@@ -1,6 +1,7 @@
 import {Body,Controller,Get,Inject,Param,Patch,Post,Req,UseGuards,ParseUUIDPipe} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
-import {IsBoolean,IsEmail,IsIn,IsInt,IsOptional,IsString,IsUUID,Length,Max,Min} from 'class-validator';
+import {Type} from 'class-transformer';
+import {IsBoolean,IsEmail,IsIn,IsInt,IsOptional,IsString,IsUUID,Length,Max,Min,IsArray,ArrayMaxSize,ValidateNested} from 'class-validator';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
 import {ResourceGuard,RequireResource} from '../auth/resource.guard';
@@ -24,11 +25,17 @@ class CatalogueUpdate{
  @IsOptional() @IsBoolean() active?:boolean;
 }
 class SlotUpdate{@IsBoolean() active!:boolean;}
+class WeeklyHour{@IsInt() @Min(0) @Max(6) weekday!:number; @IsInt() @Min(0) @Max(1439) opensMinute!:number; @IsInt() @Min(1) @Max(1440) closesMinute!:number;}
+class WeeklyHours{@IsArray() @ArrayMaxSize(70) @ValidateNested({each:true}) @Type(()=>WeeklyHour) slots!:WeeklyHour[];}
 @ApiTags('merchant-administration') @ApiBearerAuth('keycloak')
 @Controller({path:'businesses/:businessId',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,ResourceGuard)
 export class ManagementController{
  constructor(@Inject(ManagementService)private readonly service:ManagementService){}
+ @Get('branches/:branchId/hours') @RequireResource('business','businessId','owner','manager')
+ hours(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string){return this.service.hours(r.identity.subject,b,v);}
+ @Patch('branches/:branchId/hours') @RequireResource('business','businessId','owner','manager')
+ setHours(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body()i:WeeklyHours){return this.service.replaceHours(r.identity.subject,b,v,i.slots);}
  @Get('overview') @RequireResource('business','businessId','owner','manager')
  overview(@Req()r:Request,@Param('businessId')b:string){return this.service.overview(r.identity.subject,b);}
  @Get('staff') @RequireResource('business','businessId','owner','manager')
