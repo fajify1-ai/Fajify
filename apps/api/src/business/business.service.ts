@@ -20,6 +20,7 @@ export class BusinessService {
   const approval=await client.query("SELECT id FROM business_onboarding WHERE id=$1::uuid AND status='approved' FOR SHARE",[businessId]);
   if(approval.rowCount!==1)throw new ForbiddenException('Business not approved');
   const membership=await client.query(`SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true ORDER BY CASE role WHEN 'owner' THEN 0 WHEN 'manager' THEN 1 ELSE 2 END LIMIT 1`,[subject,businessId,roles]);
+  if(branchId){const found=await client.query('SELECT 1 FROM business_branches WHERE id=$1 AND business_id=$2 AND active',[branchId,businessId]);if(found.rowCount!==1)throw new NotFoundException('Branch unavailable');}
   const branch=branchId?await client.query("SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type='branch' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1",[subject,branchId]):null;
   // An owner/manager has business-wide authority. Staff require both a business membership and branch grant.
   if(membership.rowCount!==1 || (branchId&&!['owner','manager'].includes(membership.rows[0].role as string)&&branch?.rowCount!==1))throw new ForbiddenException();
@@ -29,7 +30,8 @@ export class BusinessService {
    const r=await c.query("INSERT INTO business_branches(business_id,name,contact_email,address,timezone) VALUES($1,$2,$3,$4,$5) RETURNING *",[businessId,input.name.trim(),input.contactEmail??null,input.address??null,input.timezone??'Africa/Lagos']);return r.rows[0];});
  }
  async branches(subject:string,businessId:string){
-  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff']);return (await c.query('SELECT * FROM business_branches WHERE business_id=$1 ORDER BY created_at,id',[businessId])).rows;});
+  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff']);const permissions=await c.query("SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2 AND active AND role IN ('owner','manager') LIMIT 1",[subject,businessId]);
+   return (await c.query(permissions.rowCount?'SELECT * FROM business_branches WHERE business_id=$1 ORDER BY created_at,id':"SELECT b.* FROM business_branches b JOIN resource_memberships m ON m.resource_type='branch' AND m.resource_id=b.id AND m.identity_subject=$2 AND m.active AND m.role='staff' WHERE b.business_id=$1 ORDER BY b.created_at,b.id",permissions.rowCount?[businessId]:[businessId,subject])).rows;});
  }
  async createItem(subject:string,businessId:string,branchId:string,input:{name:string;description?:string;kind:string;priceMinor:number;currency?:string;published?:boolean}){
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager'],branchId);
