@@ -52,3 +52,18 @@ test('revoke one branch checks other active branch grants before removing busine
  assert.ok(queries.some(q=>q.sql.includes('business_branches b')&&q.sql.includes("m.role='staff'")));
  assert.equal(queries.at(-1)?.sql,'COMMIT');
 });
+
+test('operating hours reject overlap and invalid local minute intervals before writes',async()=>{
+ const {service,queries}=fixture();
+ await assert.rejects(()=>service.replaceHours('owner',business,branch,[{weekday:1,opensMinute:540,closesMinute:780},{weekday:1,opensMinute:720,closesMinute:900}]),ConflictException);
+ await assert.rejects(()=>service.replaceHours('owner',business,branch,[{weekday:1,opensMinute:900,closesMinute:540}]),BadRequestException);
+ assert.equal(queries.length,0);
+});
+test('weekly hours replacement deletes and inserts within one transaction',async()=>{
+ const {service,queries}=fixture();
+ const result=await service.replaceHours('owner',business,branch,[{weekday:2,opensMinute:600,closesMinute:1080}]);
+ assert.equal(result.slots.length,1);
+ assert.ok(queries.some(q=>q.sql.startsWith('DELETE FROM business_branch_hours')));
+ assert.ok(queries.some(q=>q.sql.startsWith('INSERT INTO business_branch_hours')));
+ assert.equal(queries.at(-1)?.sql,'COMMIT');
+});
