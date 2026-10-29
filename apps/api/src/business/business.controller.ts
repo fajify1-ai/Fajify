@@ -1,4 +1,4 @@
-import {Body,Controller,Get,Inject,Param,Patch,Post,Req,UseGuards,ParseUUIDPipe} from '@nestjs/common';
+import {Body,Controller,Get,Inject,Param,Patch,Post,Req,UseGuards,ParseUUIDPipe,ValidationPipe} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags,ApiProperty,ApiPropertyOptional,ApiBody} from '@nestjs/swagger';
 import {IsArray,ArrayMaxSize,ArrayMinSize,IsBoolean,IsEmail,IsIn,IsInt,IsISO8601,IsOptional,IsString,IsUUID,Length,Matches,Max,Min,ValidateNested} from 'class-validator';
 import {Type} from 'class-transformer';
@@ -52,33 +52,33 @@ export class BusinessController{
  constructor(@Inject(BusinessService)private readonly service:BusinessService){}
  @Post('branches') @RequireResource('business','businessId','owner','manager')
  @ApiBody({type:BranchInput})
- branch(@Req()r:Request,@Param('businessId')b:string,@Body()i:BranchInput){return this.service.createBranch(r.identity.subject,b,i);}
+ branch(@Req()r:Request,@Param('businessId')b:string,@Body(new ValidationPipe({expectedType:BranchInput,whitelist:true,forbidNonWhitelisted:true,transform:true}))i:BranchInput){return this.service.createBranch(r.identity.subject,b,i);}
  @Get('branches') @RequireResource('business','businessId','owner','manager','staff')
  branches(@Req()r:Request,@Param('businessId')b:string){return this.service.branches(r.identity.subject,b);}
  @Post('branches/:branchId/catalogue') @RequireResource('business','businessId','owner','manager')
  @ApiBody({type:ItemInput})
- item(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body()i:ItemInput){return this.service.createItem(r.identity.subject,b,v,i);}
+ item(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body(new ValidationPipe({expectedType:ItemInput,whitelist:true,forbidNonWhitelisted:true,transform:true}))i:ItemInput){return this.service.createItem(r.identity.subject,b,v,i);}
  @Get('branches/:branchId/catalogue') @RequireResource('business','businessId','owner','manager','staff')
  items(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string){return this.service.items(r.identity.subject,b,v);}
  @Post('branches/:branchId/availability') @RequireResource('business','businessId','owner','manager')
  @ApiBody({type:SlotInput})
- slot(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body()i:SlotInput){return this.service.createSlot(r.identity.subject,b,v,i);}
+ slot(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body(new ValidationPipe({expectedType:SlotInput,whitelist:true,forbidNonWhitelisted:true,transform:true}))i:SlotInput){return this.service.createSlot(r.identity.subject,b,v,i);}
  @Get('branches/:branchId/availability') @RequireResource('business','businessId','owner','manager','staff')
  slots(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string){return this.service.slots(r.identity.subject,b,v);}
  @Post('branches/:branchId/reservations') @RequireResource('business','businessId','owner','manager','staff')
  @ApiBody({type:ReservationInput})
- reserve(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body()i:ReservationInput){return this.service.reserve(r.identity.subject,b,v,i);}
+ reserve(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body(new ValidationPipe({expectedType:ReservationInput,whitelist:true,forbidNonWhitelisted:true,transform:true}))i:ReservationInput){return this.service.reserve(r.identity.subject,b,v,i);}
  @Get('branches/:branchId/reservations') @RequireResource('business','businessId','owner','manager','staff')
  reservations(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string){return this.service.reservations(r.identity.subject,b,v);}
  @Patch('branches/:branchId/reservations/:id/status') @RequireResource('business','businessId','owner','manager','staff')
  @ApiBody({type:ReservationTransition})
- reservationStatus(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('id',new ParseUUIDPipe())id:string,@Body()i:ReservationTransition){return this.service.reservationStatus(r.identity.subject,b,v,id,i.status);}
+ reservationStatus(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('id',new ParseUUIDPipe())id:string,@Body(new ValidationPipe({expectedType:ReservationTransition,whitelist:true,forbidNonWhitelisted:true,transform:true}))i:ReservationTransition){return this.service.reservationStatus(r.identity.subject,b,v,id,i.status);}
  @Post('branches/:branchId/orders') @RequireResource('business','businessId','owner','manager','staff')
  @ApiBody({type:OrderInput})
- placeOrder(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body()i:OrderInput){return this.service.placeOrder(r.identity.subject,b,v,i);}
+ placeOrder(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body(new ValidationPipe({expectedType:OrderInput,whitelist:true,forbidNonWhitelisted:true,transform:true}))i:OrderInput){return this.service.placeOrder(r.identity.subject,b,v,i);}
  @Get('branches/:branchId/orders') @RequireResource('business','businessId','owner','manager','staff')
  orders(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string){return this.service.orders(r.identity.subject,b,v);}
  @Patch('branches/:branchId/orders/:id/status') @RequireResource('business','businessId','owner','manager','staff')
  @ApiBody({type:OrderTransition})
- orderStatus(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('id',new ParseUUIDPipe())id:string,@Body()i:OrderTransition){return this.service.orderStatus(r.identity.subject,b,v,id,i.status);}
+ orderStatus(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('id',new ParseUUIDPipe())id:string,@Body(new ValidationPipe({expectedType:OrderTransition,whitelist:true,forbidNonWhitelisted:true,transform:true}))i:OrderTransition){return this.service.orderStatus(r.identity.subject,b,v,id,i.status);}
 }
