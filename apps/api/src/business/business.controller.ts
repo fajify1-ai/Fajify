@@ -8,42 +8,42 @@ import {ResourceGuard,RequireResource} from '../auth/resource.guard';
 import {BusinessService} from './business.service';
 import type {VerifiedIdentity} from '../auth/identity.types';
 class BranchInput{
- @ApiPropertyOptional() @ApiProperty() @IsString() @Length(2,120) name:string;
+ @ApiProperty() @IsString() @Length(2,120) name!:string;
  @ApiPropertyOptional() @IsOptional() @IsEmail() contactEmail?:string;
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsString() @Length(1,2000) address?:string;
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z_]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?$/) timezone?:string;
+ @ApiPropertyOptional() @IsOptional() @IsString() @Length(1,2000) address?:string;
+ @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z_]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?$/) timezone?:string;
 }
 class ItemInput{
- @ApiPropertyOptional() @ApiProperty() @IsString() @Length(2,160) name:string;
+ @ApiProperty() @IsString() @Length(2,160) name!:string;
  @ApiPropertyOptional() @IsOptional() @IsString() @Length(0,4000) description?:string;
- @ApiPropertyOptional() @ApiProperty() @IsIn(['product','service','package','event']) kind:string;
- @ApiProperty() @IsInt() @Min(0) @Max(9007199254740991) priceMinor:number;
+ @ApiProperty() @IsIn(['product','service','package','event']) kind!:string;
+ @ApiProperty() @IsInt() @Min(0) @Max(9007199254740991) priceMinor!:number;
  @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Z]{3}$/) currency?:string;
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsBoolean() published?:boolean;
+ @ApiPropertyOptional() @IsOptional() @IsBoolean() published?:boolean;
 }
 class SlotInput{
- @ApiProperty() @ApiProperty() @IsUUID() catalogueId:string;
- @ApiProperty() @IsISO8601({strict:true}) startsAt:string;
- @ApiProperty() @ApiProperty() @IsISO8601({strict:true}) endsAt:string;
- @ApiProperty() @IsInt() @Min(1) @Max(1000000) capacity:number;
+ @ApiProperty() @IsUUID() catalogueId!:string;
+ @ApiProperty() @IsISO8601({strict!:true}) startsAt:string;
+ @ApiProperty() @IsISO8601({strict!:true}) endsAt:string;
+ @ApiProperty() @IsInt() @Min(1) @Max(1000000) capacity!:number;
 }
 class ReservationInput{
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
- @ApiProperty() @IsUUID() availabilityId:string;
- @ApiProperty() @IsString() @Length(1,255) customerSubject:string;
- @ApiProperty() @IsInt() @Min(1) @Max(10000) guests:number;
+ @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
+ @ApiProperty() @IsUUID() availabilityId!:string;
+ @ApiProperty() @IsString() @Length(1,255) customerSubject!:string;
+ @ApiProperty() @IsInt() @Min(1) @Max(10000) guests!:number;
 }
 class OrderLine{
- @ApiProperty() @IsUUID() catalogueId:string;
- @ApiProperty() @IsInt() @Min(1) @Max(10000) quantity:number;
+ @ApiProperty() @IsUUID() catalogueId!:string;
+ @ApiProperty() @IsInt() @Min(1) @Max(10000) quantity!:number;
 }
 class OrderInput{
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
- @ApiProperty() @ApiProperty() @IsString() @Length(1,255) customerSubject:string;
- @ApiProperty() @IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @ValidateNested({each:true}) @Type(()=>OrderLine) items:OrderLine[];
+ @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
+ @ApiProperty() @IsString() @Length(1,255) customerSubject!:string;
+ @ApiProperty({type:()=>[OrderLine]}) @IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @ValidateNested({each!:true}) @Type(()=>OrderLine) items:OrderLine[];
 }
-class OrderTransition{@ApiProperty() @IsIn(['accepted','preparing','ready','fulfilled','cancelled']) status:'accepted'|'preparing'|'ready'|'fulfilled'|'cancelled';}
-class ReservationTransition{@ApiProperty() @IsIn(['checked_in','completed','cancelled']) status:'checked_in'|'completed'|'cancelled';}
+@ApiProperty() class OrderTransition{@IsIn(['accepted','preparing','ready','fulfilled','cancelled']) status:'accepted'|'preparing'|'ready'|'fulfilled'|'cancelled';}
+@ApiProperty() class ReservationTransition{@IsIn(['checked_in','completed','cancelled']) status:'checked_in'|'completed'|'cancelled';}
 type Request={identity:VerifiedIdentity};
 @ApiTags('merchant-operations') @ApiBearerAuth('keycloak')
 @Controller({path:'businesses/:businessId',version:'1'})
