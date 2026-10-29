@@ -86,3 +86,7 @@ No claim of passing tests, migration success, published OpenAPI snapshot or prod
 ## Final integration status
 
 The backend's merchant tables, domain services, versioned controllers, staff permission operations, state transitions, idempotent requests, event/package configuration, outbox writes and negative/acceptance test harnesses are committed. The outstanding gate is **verification**, not authorization to merge: database and API TypeScript checks, lint, complete test execution, real PostgreSQL migrations and concurrency, OpenAPI regeneration and review. A generated OpenAPI diff is an expected blocker to resolve and commit before recording the final accepted SHA. No approval of Phase 2–4 changes or production credentials is needed to run disposable local acceptance.
+
+## OpenAPI generation contract
+
+Merchant DTOs now carry explicit `@ApiProperty` and `@ApiPropertyOptional` Swagger metadata, including nested order lines, package lines and weekly operating-hours arrays. The `apps/api/scripts/export-openapi.ts` exporter now fails closed when any of the 25 expected merchant operations, a Keycloak bearer security declaration, or a write request-body schema is missing. Existing health-route assertions remain in place. The generated artifact is `packages/api_contracts/openapi.json` and must be generated with `pnpm --filter @faji/api contracts`, reviewed and committed before acceptance. No generated snapshot has been claimed without executing NestJS.
