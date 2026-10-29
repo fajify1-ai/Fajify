@@ -1,5 +1,5 @@
 import {Body,Controller,Get,Inject,Param,Patch,Post,Req,UseGuards,ParseUUIDPipe} from '@nestjs/common';
-import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth,ApiTags,ApiProperty,ApiPropertyOptional} from '@nestjs/swagger';
 import {IsArray,ArrayMaxSize,ArrayMinSize,IsBoolean,IsEmail,IsIn,IsInt,IsISO8601,IsOptional,IsString,IsUUID,Length,Matches,Max,Min,ValidateNested} from 'class-validator';
 import {Type} from 'class-transformer';
 import {IdentityGuard} from '../auth/identity.guard';
@@ -8,42 +8,42 @@ import {ResourceGuard,RequireResource} from '../auth/resource.guard';
 import {BusinessService} from './business.service';
 import type {VerifiedIdentity} from '../auth/identity.types';
 class BranchInput{
- @IsString() @Length(2,120) name!:string;
- @IsOptional() @IsEmail() contactEmail?:string;
- @IsOptional() @IsString() @Length(1,2000) address?:string;
- @IsOptional() @Matches(/^[A-Za-z_]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?$/) timezone?:string;
+ @ApiPropertyOptional() @ApiProperty() @IsString() @Length(2,120) name:string;
+ @ApiPropertyOptional() @IsOptional() @IsEmail() contactEmail?:string;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsString() @Length(1,2000) address?:string;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z_]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?$/) timezone?:string;
 }
 class ItemInput{
- @IsString() @Length(2,160) name!:string;
- @IsOptional() @IsString() @Length(0,4000) description?:string;
- @IsIn(['product','service','package','event']) kind!:string;
- @IsInt() @Min(0) @Max(9007199254740991) priceMinor!:number;
- @IsOptional() @Matches(/^[A-Z]{3}$/) currency?:string;
- @IsOptional() @IsBoolean() published?:boolean;
+ @ApiPropertyOptional() @ApiProperty() @IsString() @Length(2,160) name:string;
+ @ApiPropertyOptional() @IsOptional() @IsString() @Length(0,4000) description?:string;
+ @ApiPropertyOptional() @ApiProperty() @IsIn(['product','service','package','event']) kind:string;
+ @ApiProperty() @IsInt() @Min(0) @Max(9007199254740991) priceMinor:number;
+ @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Z]{3}$/) currency?:string;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsBoolean() published?:boolean;
 }
 class SlotInput{
- @IsUUID() catalogueId!:string;
- @IsISO8601({strict:true}) startsAt!:string;
- @IsISO8601({strict:true}) endsAt!:string;
- @IsInt() @Min(1) @Max(1000000) capacity!:number;
+ @ApiProperty() @ApiProperty() @IsUUID() catalogueId:string;
+ @ApiProperty() @IsISO8601({strict:true}) startsAt:string;
+ @ApiProperty() @ApiProperty() @IsISO8601({strict:true}) endsAt:string;
+ @ApiProperty() @IsInt() @Min(1) @Max(1000000) capacity:number;
 }
 class ReservationInput{
- @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
- @IsUUID() availabilityId!:string;
- @IsString() @Length(1,255) customerSubject!:string;
- @IsInt() @Min(1) @Max(10000) guests!:number;
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
+ @ApiProperty() @IsUUID() availabilityId:string;
+ @ApiProperty() @IsString() @Length(1,255) customerSubject:string;
+ @ApiProperty() @IsInt() @Min(1) @Max(10000) guests:number;
 }
 class OrderLine{
- @IsUUID() catalogueId!:string;
- @IsInt() @Min(1) @Max(10000) quantity!:number;
+ @ApiProperty() @IsUUID() catalogueId:string;
+ @ApiProperty() @IsInt() @Min(1) @Max(10000) quantity:number;
 }
 class OrderInput{
- @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
- @IsString() @Length(1,255) customerSubject!:string;
- @IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @ValidateNested({each:true}) @Type(()=>OrderLine) items!:OrderLine[];
+ @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
+ @ApiProperty() @ApiProperty() @IsString() @Length(1,255) customerSubject:string;
+ @ApiProperty() @IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @ValidateNested({each:true}) @Type(()=>OrderLine) items:OrderLine[];
 }
-class OrderTransition{@IsIn(['accepted','preparing','ready','fulfilled','cancelled']) status!:'accepted'|'preparing'|'ready'|'fulfilled'|'cancelled';}
-class ReservationTransition{@IsIn(['checked_in','completed','cancelled']) status!:'checked_in'|'completed'|'cancelled';}
+class OrderTransition{@ApiProperty() @IsIn(['accepted','preparing','ready','fulfilled','cancelled']) status:'accepted'|'preparing'|'ready'|'fulfilled'|'cancelled';}
+class ReservationTransition{@ApiProperty() @IsIn(['checked_in','completed','cancelled']) status:'checked_in'|'completed'|'cancelled';}
 type Request={identity:VerifiedIdentity};
 @ApiTags('merchant-operations') @ApiBearerAuth('keycloak')
 @Controller({path:'businesses/:businessId',version:'1'})
