@@ -67,3 +67,16 @@ test('weekly hours replacement deletes and inserts within one transaction',async
  assert.ok(queries.some(q=>q.sql.startsWith('INSERT INTO business_branch_hours')));
  assert.equal(queries.at(-1)?.sql,'COMMIT');
 });
+
+test('event configuration rejects inverted timestamps before persistence',async()=>{
+ const {service,queries}=fixture();
+ await assert.rejects(()=>service.configureEvent('owner',business,branch,branch,{startsAt:'2026-12-02T10:00:00Z',endsAt:'2026-12-02T09:00:00Z',maxGuests:10}),BadRequestException);
+ assert.equal(queries.length,0);
+});
+test('package configuration rejects duplicates, self references and empty contents',async()=>{
+ const {service,queries}=fixture();
+ await assert.rejects(()=>service.replacePackage('owner',business,branch,branch,[]),BadRequestException);
+ await assert.rejects(()=>service.replacePackage('owner',business,branch,branch,[{catalogueId:branch,quantity:1}]),BadRequestException);
+ await assert.rejects(()=>service.replacePackage('owner',business,branch,'ae5d7bce-c422-4eae-bf45-e68e46c06c13',[{catalogueId:branch,quantity:1},{catalogueId:branch,quantity:2}]),BadRequestException);
+ assert.equal(queries.length,0);
+});
