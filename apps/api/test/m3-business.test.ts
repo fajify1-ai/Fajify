@@ -13,7 +13,8 @@ function fixture(options:{approved?:boolean;member?:boolean;capacity?:boolean;st
   sql.push(q);
   if(q.includes('FROM business_onboarding'))return {rowCount:options.approved===false?0:1,rows:[{id:business}]};
   if(q.includes('FROM resource_memberships'))return {rowCount:options.member===false?0:1,rows:[{role:'owner'}]};
-  if(q.startsWith('UPDATE business_availability SET reserved=reserved+'))return {rowCount:options.capacity===false?0:1,rows:[{id:branch}]};
+  if(q.startsWith('SELECT id,availability_id,guests FROM business_reservations')||q.startsWith('SELECT id FROM business_orders WHERE'))return {rowCount:0,rows:[]};
+  if(q.startsWith('UPDATE business_availability a SET reserved='))return {rowCount:options.capacity===false?0:1,rows:[{id:branch}]};
   if(q.startsWith('SELECT status FROM business_orders'))return {rowCount:1,rows:[{status:options.state??'placed'}]};
   if(q.startsWith('SELECT status,guests'))return {rowCount:1,rows:[{status:options.state??'confirmed',guests:2,availability_id:branch}]};
   if(q.startsWith('SELECT id,price_minor'))return {rowCount:1,rows:[{id:branch,price_minor:'2500',currency:'NGN'}]};
