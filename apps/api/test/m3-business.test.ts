@@ -12,7 +12,7 @@ function fixture(options:{approved?:boolean;member?:boolean;capacity?:boolean;st
  const client={query:async(q:string,params?:unknown[])=>{
   sql.push(q);
   if(q.includes('FROM business_onboarding'))return {rowCount:options.approved===false?0:1,rows:[{id:business}]};
-  if(q.includes('FROM resource_memberships'))return {rowCount:options.member===false?0:1,rows:[{}]};
+  if(q.includes('FROM resource_memberships'))return {rowCount:options.member===false?0:1,rows:[{role:'owner'}]};
   if(q.startsWith('UPDATE business_availability SET reserved=reserved+'))return {rowCount:options.capacity===false?0:1,rows:[{id:branch}]};
   if(q.startsWith('SELECT status FROM business_orders'))return {rowCount:1,rows:[{status:options.state??'placed'}]};
   if(q.startsWith('SELECT status,guests'))return {rowCount:1,rows:[{status:options.state??'confirmed',guests:2,availability_id:branch}]};
