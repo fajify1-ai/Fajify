@@ -72,3 +72,7 @@ A prepared but **not executed** consolidated script is at `tooling/verify-m3-p1-
 - Event configuration stores schedules/maximum guests; event ticket inventory/QR and verified payment remain excluded from M3-P1.
 - Package component reads and writes are restricted to approved-merchant owner/manager roles and same-branch items.
 - The OpenAPI snapshot must be regenerated as an artifact of the consolidated run. The PR cannot be marked accepted on documentation alone.
+
+## Concurrency review note
+
+Membership reads in merchant transactions use PostgreSQL row-level share locks. Revocation updates cannot commit ahead of an in-flight authorized operation after the membership read, and future transactions see the deactivated membership. The consolidated database acceptance must still exercise this race to establish behavior against PostgreSQL, not only mocked query expectations. Order retry keys are validated before opening a transaction.
