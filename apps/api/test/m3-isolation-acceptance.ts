@@ -33,13 +33,17 @@ async function main(){
   const management=new ManagementService(pool,new AccessService(pool));
   const a=(await operations.createBranch(owner,ids[0],{name:'Branch A'})).id as string;
   const b=(await operations.createBranch(owner,ids[1],{name:'Branch B'})).id as string;
+  const otherBranch=(await operations.createBranch(owner,ids[0],{name:'Other Branch'})).id as string;
   const product=(await operations.createItem(owner,ids[0],a,{name:'Scoped Test',kind:'product',priceMinor:900,published:true})).id as string;
   await assert.rejects(()=>operations.createItem(owner,ids[1],a,{name:'Wrong Tenant',kind:'product',priceMinor:200}),/Branch/);
   await assert.rejects(()=>operations.placeOrder(owner,ids[1],b,{customerSubject:'customer',items:[{catalogueId:product,quantity:1}]}),/Catalogue/);
   await management.grant(owner,ids[0],staff,'staff',a);
   await assert.rejects(()=>operations.createBranch(staff,ids[0],{name:'Unauthorised'}));
   await assert.rejects(()=>operations.items(staff,ids[0],b));
+  await assert.rejects(()=>operations.items(staff,ids[0],otherBranch));
   assert.equal((await operations.items(staff,ids[0],a)).length,1);
+  const before=(await operations.branches(staff,ids[0])) as {id:string}[];
+  assert.deepEqual(before.map(x=>x.id),[a],'staff must not list unassigned branches');
   await management.revoke(owner,ids[0],staff,'staff',a);
   await assert.rejects(()=>operations.items(staff,ids[0],a));
   console.log('PASS: merchant/branch isolation, staff least-privilege and immediate revocation');
