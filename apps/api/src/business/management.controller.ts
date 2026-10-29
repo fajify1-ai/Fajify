@@ -1,4 +1,4 @@
-import {Body,Controller,Get,Inject,Param,Patch,Post,Req,UseGuards} from '@nestjs/common';
+import {Body,Controller,Get,Inject,Param,Patch,Post,Req,UseGuards,ParseUUIDPipe} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
 import {IsBoolean,IsEmail,IsIn,IsInt,IsOptional,IsString,IsUUID,Length,Max,Min} from 'class-validator';
 import {IdentityGuard} from '../auth/identity.guard';
@@ -38,9 +38,9 @@ export class ManagementController{
  @Post('staff/revocations') @RequireResource('business','businessId','owner')
  revoke(@Req()r:Request,@Param('businessId')b:string,@Body()i:Grant){return this.service.revoke(r.identity.subject,b,i.subject,i.role,i.branchId);}
  @Patch('branches/:branchId') @RequireResource('business','businessId','owner','manager')
- branch(@Req()r:Request,@Param('businessId')b:string,@Param('branchId')v:string,@Body()i:BranchUpdate){return this.service.setBranch(r.identity.subject,b,v,i);}
+ branch(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Body()i:BranchUpdate){return this.service.setBranch(r.identity.subject,b,v,i);}
  @Patch('branches/:branchId/catalogue/:itemId') @RequireResource('business','businessId','owner','manager')
- catalogue(@Req()r:Request,@Param('businessId')b:string,@Param('branchId')v:string,@Param('itemId')id:string,@Body()i:CatalogueUpdate){return this.service.setCatalogue(r.identity.subject,b,v,id,i);}
+ catalogue(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('itemId',new ParseUUIDPipe())id:string,@Body()i:CatalogueUpdate){return this.service.setCatalogue(r.identity.subject,b,v,id,i);}
  @Patch('branches/:branchId/availability/:slotId') @RequireResource('business','businessId','owner','manager')
- slot(@Req()r:Request,@Param('businessId')b:string,@Param('branchId')v:string,@Param('slotId')id:string,@Body()i:SlotUpdate){return this.service.setSlot(r.identity.subject,b,v,id,i);}
+ slot(@Req()r:Request,@Param('businessId')b:string,@Param('branchId',new ParseUUIDPipe())v:string,@Param('slotId',new ParseUUIDPipe())id:string,@Body()i:SlotUpdate){return this.service.setSlot(r.identity.subject,b,v,id,i);}
 }
