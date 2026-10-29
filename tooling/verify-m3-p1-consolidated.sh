@@ -12,9 +12,15 @@ pnpm --filter @faji/database exec tsx scripts/verify-m3-p1-target.ts
 pnpm --filter @faji/database typecheck
 pnpm --filter @faji/api typecheck
 pnpm --filter @faji/api lint
-pnpm --filter @faji/api test
 pnpm --filter @faji/api build
 pnpm --filter @faji/database migrate
+# M2's database integration tests require distinct, unprivileged runtime credentials.
+: "${FAJI_RUNTIME_DATABASE_URL:?Runtime database URL required for M2 security acceptance}"
+: "${PGUSER:?Isolated PostgreSQL administrator required for runtime grants}"
+PGDATABASE="$FAJI_DISPOSABLE_DATABASE" psql -X -v ON_ERROR_STOP=1 <<'SQL'
+GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events,revoked_identity_sessions,business_onboarding,outbox_events,business_branches,business_catalogue,business_availability,business_reservations,business_orders,business_order_items,business_branch_hours,business_event_config,business_package_components TO m3_runtime;
+SQL
+pnpm --filter @faji/api test
 pnpm --filter @faji/api exec tsx test/m3-capacity-acceptance.ts
 pnpm --filter @faji/api exec tsx test/m3-isolation-acceptance.ts
 pnpm --filter @faji/api contracts
