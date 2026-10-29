@@ -8,7 +8,7 @@ test -z "$(git status --porcelain)" || { echo "Dirty tree; evidence must referen
 echo "M3-P1 source: $(git rev-parse HEAD)"
 : "${FAJI_DATABASE_URL:?FAJI_DATABASE_URL must point at marked disposable database}"
 : "${FAJI_DISPOSABLE_DATABASE:?M3 disposable database name required}"
-node --import tsx tooling/verify-m3-p1-database-target.ts
+pnpm --filter @faji/database exec tsx scripts/verify-m3-p1-target.ts
 pnpm --filter @faji/api typecheck
 pnpm --filter @faji/api lint
 pnpm --filter @faji/api test
