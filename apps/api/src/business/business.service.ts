@@ -83,7 +83,7 @@ export class BusinessService {
  }
  async placeOrder(subject:string,businessId:string,branchId:string,input:{customerSubject:string;items:{catalogueId:string;quantity:number}[];requestKey?:string}){
   if(input.requestKey!==undefined&&!/^[A-Za-z0-9_-]{8,100}$/.test(input.requestKey))throw new BadRequestException('Invalid request key');
-  if(!input.customerSubject||input.customerSubject.length>255||!Array.isArray(input.items)||!input.items.length||input.items.length>100||new Set(input.items.map(i=>i.catalogueId)).size!==input.items.length)throw new BadRequestException('Invalid order items');
+  if(!input.customerSubject||input.customerSubject.length>255||!Array.isArray(input.items)||!input.items.length||input.items.length>100||input.items.some(i=>!i||typeof i.catalogueId!=='string')||new Set(input.items.map(i=>i.catalogueId)).size!==input.items.length)throw new BadRequestException('Invalid order items');
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
    if(input.items.some(i=>!i||!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>10000))throw new BadRequestException('Invalid quantity');
    if(input.requestKey){
