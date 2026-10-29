@@ -19,10 +19,10 @@ export class BusinessService {
   if(state.suspended)throw new ForbiddenException();
   const approval=await client.query("SELECT id FROM business_onboarding WHERE id=$1::uuid AND status='approved' FOR SHARE",[businessId]);
   if(approval.rowCount!==1)throw new ForbiddenException('Business not approved');
-  const membership=await client.query(`SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1`,[subject,businessId,roles]);
+  const membership=await client.query(`SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1`,[subject,businessId,roles]);
   const branch=branchId?await client.query("SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type='branch' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1",[subject,branchId]):null;
   // An owner/manager has business-wide authority. Staff require both a business membership and branch grant.
-  if(membership.rowCount!==1 || (branchId&&!roles.some(r=>r==='owner'||r==='manager')&&branch?.rowCount!==1))throw new ForbiddenException();
+  if(membership.rowCount!==1 || (branchId&&!['owner','manager'].includes(membership.rows[0].role as string)&&branch?.rowCount!==1))throw new ForbiddenException();
  }
  async createBranch(subject:string,businessId:string,input:{name:string;contactEmail?:string;address?:string;timezone?:string}){
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager']);
@@ -51,6 +51,7 @@ export class BusinessService {
    return (await c.query('SELECT * FROM business_availability WHERE business_id=$1 AND branch_id=$2 ORDER BY starts_at',[businessId,branchId])).rows;});
  }
  async reserve(subject:string,businessId:string,branchId:string,input:{availabilityId:string;customerSubject:string;guests:number}){
+  if(!Number.isSafeInteger(input.guests)||input.guests<1||input.guests>10000)throw new BadRequestException('Invalid guest count');
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
    const updated=await c.query("UPDATE business_availability SET reserved=reserved+$4 WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND active AND starts_at>now() AND reserved+$4<=capacity RETURNING id",[input.availabilityId,businessId,branchId,input.guests]);
    if(!updated.rowCount)throw new ConflictException('Slot unavailable or capacity exhausted');
@@ -71,6 +72,7 @@ export class BusinessService {
  async placeOrder(subject:string,businessId:string,branchId:string,input:{customerSubject:string;items:{catalogueId:string;quantity:number}[]}){
   if(!input.items.length||input.items.length>100||new Set(input.items.map(i=>i.catalogueId)).size!==input.items.length)throw new BadRequestException('Invalid order items');
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
+   if(input.items.some(i=>!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>10000))throw new BadRequestException('Invalid quantity');
    const ids=input.items.map(i=>i.catalogueId);
    const products=await c.query<{id:string;price_minor:string;currency:string}>("SELECT id,price_minor::text,currency FROM business_catalogue WHERE business_id=$1 AND branch_id=$2 AND id=ANY($3::uuid[]) AND active AND published FOR SHARE",[businessId,branchId,ids]);
    if(products.rowCount!==ids.length)throw new ConflictException('Catalogue item unavailable');
