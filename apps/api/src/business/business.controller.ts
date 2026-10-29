@@ -23,8 +23,8 @@ class ItemInput{
 }
 class SlotInput{
  @ApiProperty() @IsUUID() catalogueId!:string;
- @ApiProperty() @IsISO8601({strict!:true}) startsAt:string;
- @ApiProperty() @IsISO8601({strict!:true}) endsAt:string;
+ @ApiProperty() @IsISO8601({strict:true}) startsAt:string;
+ @ApiProperty() @IsISO8601({strict:true}) endsAt:string;
  @ApiProperty() @IsInt() @Min(1) @Max(1000000) capacity!:number;
 }
 class ReservationInput{
@@ -40,7 +40,7 @@ class OrderLine{
 class OrderInput{
  @ApiPropertyOptional() @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
  @ApiProperty() @IsString() @Length(1,255) customerSubject!:string;
- @ApiProperty({type:()=>[OrderLine]}) @IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @ValidateNested({each!:true}) @Type(()=>OrderLine) items:OrderLine[];
+ @ApiProperty({type:()=>[OrderLine]}) @IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @ValidateNested({each:true}) @Type(()=>OrderLine) items!:OrderLine[];
 }
 class OrderTransition { @ApiProperty({enum:['accepted','preparing','ready','fulfilled','cancelled']}) @IsIn(['accepted','preparing','ready','fulfilled','cancelled']) status!:'accepted'|'preparing'|'ready'|'fulfilled'|'cancelled'; }
 class ReservationTransition { @ApiProperty({enum:['checked_in','completed','cancelled']}) @IsIn(['checked_in','completed','cancelled']) status!:'checked_in'|'completed'|'cancelled'; }
