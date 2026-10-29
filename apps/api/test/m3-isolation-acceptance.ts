@@ -44,9 +44,31 @@ async function main(){
   assert.equal((await operations.items(staff,ids[0],a)).length,1);
   const before=(await operations.branches(staff,ids[0])) as {id:string}[];
   assert.deepEqual(before.map(x=>x.id),[a],'staff must not list unassigned branches');
+  // Real two-connection revocation race: an authorized operation holds a
+  // branch grant's share lock until commit; a concurrent revoke must not overtake it.
+  const inFlight=await pool.connect();
+  const revoker=await pool.connect();
+  try{
+   await inFlight.query('BEGIN');
+   const held=await inFlight.query("SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type='branch' AND resource_id=$2::uuid AND role='staff' AND active=true FOR SHARE",[staff,a]);
+   assert.equal(held.rowCount,1,'staff grant must be held by the active transaction');
+   await revoker.query('BEGIN');
+   await revoker.query("SET LOCAL lock_timeout='250ms'");
+   await assert.rejects(
+    ()=>revoker.query("UPDATE resource_memberships SET active=false WHERE identity_subject=$1 AND resource_type='branch' AND resource_id=$2::uuid AND role='staff'",[staff,a]),
+    (error:unknown)=>{assert.equal((error as {code?:string}).code,'55P03');return true;},
+    'concurrent staff revocation must block on the in-flight grant share lock'
+   );
+   await revoker.query('ROLLBACK');
+   await inFlight.query('COMMIT');
+  }finally{
+   await inFlight.query('ROLLBACK').catch(()=>{});
+   await revoker.query('ROLLBACK').catch(()=>{});
+   inFlight.release();revoker.release();
+  }
   await management.revoke(owner,ids[0],staff,'staff',a);
   await assert.rejects(()=>operations.items(staff,ids[0],a));
-  console.log('PASS: merchant/branch isolation, staff least-privilege and immediate revocation');
+  console.log('PASS: merchant/branch isolation, concurrent revocation lock, staff least-privilege and immediate revocation');
  }finally{await pool.end();}
 }
 main().catch(e=>{console.error('FAIL: M3 isolation acceptance:',e instanceof Error?e.message:'unknown');process.exitCode=1;});
