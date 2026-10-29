@@ -9,6 +9,7 @@ export class ManagementService {
   const c=await this.pool.connect();try{await c.query('BEGIN');const value=await run(c);await c.query('COMMIT');return value;}
   catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
  }
+ private async audit(c:PoolClient,actor:string,type:string,id:string){await c.query('INSERT INTO identity_security_events(actor_subject,event_type,details) VALUES($1,$2,$3)',[actor,type,id]);}
  private async owner(c:PoolClient,actor:string,business:string,allowManager=false){
   const state=await this.access.state(actor);if(state.suspended)throw new ForbiddenException();
   const roles=allowManager?['owner','manager']:['owner'];
@@ -58,17 +59,17 @@ export class ManagementService {
  async setBranch(actor:string,business:string,branch:string,input:{name?:string;active?:boolean;contactEmail?:string}){
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
    const result=await c.query('UPDATE business_branches SET name=COALESCE($3,name),active=COALESCE($4,active),contact_email=COALESCE($5,contact_email) WHERE id=$1 AND business_id=$2 RETURNING *',[branch,business,input.name??null,input.active??null,input.contactEmail??null]);
-   if(!result.rowCount)throw new NotFoundException('Branch unavailable');return result.rows[0];});
+   if(!result.rowCount)throw new NotFoundException('Branch unavailable');await this.audit(c,actor,'merchant_branch_updated',branch);return result.rows[0];});
  }
  async setCatalogue(actor:string,business:string,branch:string,item:string,input:{name?:string;priceMinor?:number;published?:boolean;active?:boolean}){
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
    const result=await c.query(`UPDATE business_catalogue SET name=COALESCE($4,name),price_minor=COALESCE($5,price_minor),published=COALESCE($6,published),active=COALESCE($7,active) WHERE id=$1 AND business_id=$2 AND branch_id=$3 RETURNING *`,[item,business,branch,input.name??null,input.priceMinor??null,input.published??null,input.active??null]);
-   if(!result.rowCount)throw new NotFoundException('Catalogue item unavailable');return result.rows[0];});
+   if(!result.rowCount)throw new NotFoundException('Catalogue item unavailable');await this.audit(c,actor,'merchant_catalogue_updated',item);return result.rows[0];});
  }
  async setSlot(actor:string,business:string,branch:string,slot:string,input:{active:boolean}){
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
    const result=await c.query('UPDATE business_availability SET active=$4 WHERE id=$1 AND business_id=$2 AND branch_id=$3 RETURNING *',[slot,business,branch,input.active]);
-   if(!result.rowCount)throw new NotFoundException('Slot unavailable');return result.rows[0];});
+   if(!result.rowCount)throw new NotFoundException('Slot unavailable');await this.audit(c,actor,'merchant_slot_updated',slot);return result.rows[0];});
  }
  async hours(actor:string,business:string,branch:string){
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
@@ -87,6 +88,7 @@ export class ManagementService {
    if(valid.rowCount!==1)throw new NotFoundException('Branch unavailable');
    await c.query('DELETE FROM business_branch_hours WHERE business_id=$1 AND branch_id=$2',[business,branch]);
    for(const slot of sorted)await c.query('INSERT INTO business_branch_hours(business_id,branch_id,weekday,opens_minute,closes_minute) VALUES($1,$2,$3,$4,$5)',[business,branch,slot.weekday,slot.opensMinute,slot.closesMinute]);
+   await this.audit(c,actor,'merchant_hours_updated',branch);
    return {branchId:branch,slots:sorted};
   });
  }
