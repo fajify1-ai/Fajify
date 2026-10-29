@@ -55,7 +55,7 @@ A prepared but **not executed** consolidated script is at `tooling/verify-m3-p1-
 2. `pnpm --filter @faji/api typecheck && pnpm --filter @faji/api lint && pnpm --filter @faji/api test && pnpm --filter @faji/api build`.
 3. On isolated PostgreSQL, apply migrations 0001–0007 via the existing migration command. Verify schema constraints and repeat application idempotence. No shared or production database.
 4. Verify HTTP guards: missing bearer, suspended/revoked sessions, pending/rejected merchant, cross-tenant business/branch, disallowed staff actions, invalid DTO/UUIDs.
-5. Run integration tests with simultaneous reservations at exactly one remaining seat, cancellation releasing capacity, foreign catalogue item/order reference, duplicate/illegal status transitions and rollbacks.
+5. Run `apps/api/test/m3-capacity-acceptance.ts` (included in consolidated script) with simultaneous reservations at exactly one remaining seat, cancellation releasing capacity, foreign catalogue item/order reference, duplicate/illegal status transitions and rollbacks.
 6. `pnpm --filter @faji/api contracts`, review and commit the generated OpenAPI snapshot; check new business endpoints and existing M2 routes for regressions.
 7. Record environment, precise head SHA, commands, pass/fail counts and any skipped cases in the PR. Keep draft until verified.
 
