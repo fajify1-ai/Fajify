@@ -55,12 +55,18 @@ export class BusinessService {
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
    return (await c.query('SELECT * FROM business_availability WHERE business_id=$1 AND branch_id=$2 ORDER BY starts_at',[businessId,branchId])).rows;});
  }
- async reserve(subject:string,businessId:string,branchId:string,input:{availabilityId:string;customerSubject:string;guests:number}){
+ async reserve(subject:string,businessId:string,branchId:string,input:{availabilityId:string;customerSubject:string;guests:number;requestKey?:string}){
+  if(input.requestKey!==undefined&&!/^[A-Za-z0-9_-]{8,100}$/.test(input.requestKey))throw new BadRequestException('Invalid request key');
   if(!input.customerSubject||input.customerSubject.length>255||!Number.isSafeInteger(input.guests)||input.guests<1||input.guests>10000)throw new BadRequestException('Invalid guest count');
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
+   if(input.requestKey){
+    await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[businessId+':reservation:'+input.customerSubject+':'+input.requestKey]);
+    const prior=await c.query<{id:string;availability_id:string;guests:number}>('SELECT id,availability_id,guests FROM business_reservations WHERE business_id=$1 AND branch_id=$2 AND customer_subject=$3 AND request_key=$4',[businessId,branchId,input.customerSubject,input.requestKey]);
+    if(prior.rowCount){if(prior.rows[0].availability_id!==input.availabilityId||prior.rows[0].guests!==input.guests)throw new ConflictException('Idempotency key reused with different reservation');return prior.rows[0];}
+   }
    const updated=await c.query("UPDATE business_availability a SET reserved=a.reserved+$4 WHERE a.id=$1 AND a.business_id=$2 AND a.branch_id=$3 AND a.active AND a.starts_at>now() AND a.reserved+$4<=a.capacity AND EXISTS(SELECT 1 FROM business_catalogue i WHERE i.id=a.catalogue_id AND i.business_id=a.business_id AND i.branch_id=a.branch_id AND i.active AND i.published) RETURNING a.id",[input.availabilityId,businessId,branchId,input.guests]);
    if(!updated.rowCount)throw new ConflictException('Slot unavailable or capacity exhausted');
-   const r=await c.query("INSERT INTO business_reservations(business_id,branch_id,availability_id,customer_subject,guests) VALUES($1,$2,$3,$4,$5) RETURNING *",[businessId,branchId,input.availabilityId,input.customerSubject,input.guests]);await this.emit(c,'business.reservation.confirmed',businessId,r.rows[0].id);return r.rows[0];});
+   const r=await c.query("INSERT INTO business_reservations(business_id,branch_id,availability_id,customer_subject,guests,request_key) VALUES($1,$2,$3,$4,$5,$6) RETURNING *",[businessId,branchId,input.availabilityId,input.customerSubject,input.guests,input.requestKey??null]);await this.emit(c,'business.reservation.confirmed',businessId,r.rows[0].id);return r.rows[0];});
  }
  async reservations(subject:string,businessId:string,branchId:string){
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
@@ -74,10 +80,20 @@ export class BusinessService {
    if(to==='cancelled')await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1',[from.availability_id,from.guests]);
    const r=await c.query('UPDATE business_reservations SET status=$2,updated_at=now() WHERE id=$1 RETURNING *',[id,to]);await this.emit(c,'business.reservation.'+to,businessId,id);return r.rows[0];});
  }
- async placeOrder(subject:string,businessId:string,branchId:string,input:{customerSubject:string;items:{catalogueId:string;quantity:number}[]}){
+ async placeOrder(subject:string,businessId:string,branchId:string,input:{customerSubject:string;items:{catalogueId:string;quantity:number}[];requestKey?:string}){
   if(!input.customerSubject||input.customerSubject.length>255||!Array.isArray(input.items)||!input.items.length||input.items.length>100||new Set(input.items.map(i=>i.catalogueId)).size!==input.items.length)throw new BadRequestException('Invalid order items');
   return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
    if(input.items.some(i=>!Number.isSafeInteger(i.quantity)||i.quantity<1||i.quantity>10000))throw new BadRequestException('Invalid quantity');
+   if(input.requestKey){
+    await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[businessId+':order:'+input.customerSubject+':'+input.requestKey]);
+    const prior=await c.query<{id:string}>('SELECT id FROM business_orders WHERE business_id=$1 AND branch_id=$2 AND customer_subject=$3 AND request_key=$4',[businessId,branchId,input.customerSubject,input.requestKey]);
+    if(prior.rowCount){
+     const previous=await c.query<{catalogue_id:string;quantity:number}>('SELECT catalogue_id,quantity FROM business_order_items WHERE order_id=$1 AND business_id=$2 AND branch_id=$3',[prior.rows[0].id,businessId,branchId]);
+     const expected=new Map(input.items.map(i=>[i.catalogueId,i.quantity]));
+     if(previous.rows.length!==expected.size||previous.rows.some(i=>expected.get(i.catalogue_id)!==i.quantity))throw new ConflictException('Idempotency key reused with different order');
+     return (await c.query('SELECT * FROM business_orders WHERE id=$1',[prior.rows[0].id])).rows[0];
+    }
+   }
    const ids=input.items.map(i=>i.catalogueId);
    const products=await c.query<{id:string;price_minor:string;currency:string}>("SELECT id,price_minor::text,currency FROM business_catalogue WHERE business_id=$1 AND branch_id=$2 AND id=ANY($3::uuid[]) AND active AND published FOR SHARE",[businessId,branchId,ids]);
    if(products.rowCount!==ids.length)throw new ConflictException('Catalogue item unavailable');
@@ -85,7 +101,7 @@ export class BusinessService {
    const byId=new Map(products.rows.map(p=>[p.id,p]));
    const total=input.items.reduce((sum,i)=>sum+BigInt(byId.get(i.catalogueId)!.price_minor)*BigInt(i.quantity),0n);
    if(total>9223372036854775807n)throw new BadRequestException('Order total overflow');
-   const order=await c.query("INSERT INTO business_orders(business_id,branch_id,customer_subject,total_minor,currency) VALUES($1,$2,$3,$4,$5) RETURNING *",[businessId,branchId,input.customerSubject,total.toString(),products.rows[0].currency]);
+   const order=await c.query("INSERT INTO business_orders(business_id,branch_id,customer_subject,total_minor,currency,request_key) VALUES($1,$2,$3,$4,$5,$6) RETURNING *",[businessId,branchId,input.customerSubject,total.toString(),products.rows[0].currency,input.requestKey??null]);
    for(const item of input.items)await c.query("INSERT INTO business_order_items(business_id,branch_id,order_id,catalogue_id,quantity,unit_price_minor) VALUES($1,$2,$3,$4,$5,$6)",[businessId,branchId,order.rows[0].id,item.catalogueId,item.quantity,byId.get(item.catalogueId)!.price_minor]);
    await this.emit(c,'business.order.placed',businessId,order.rows[0].id);return order.rows[0];});
  }
