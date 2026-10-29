@@ -31,7 +31,7 @@ test('merchant HTTP routes require active scoped JWT, reject foreign tenant and 
  try{
   const url='/api/v1/businesses/'+a+'/branches';
   assert.equal((await request(app.getHttpServer()).get(url)).status,401);
-  const auth=(r:request.Test)=>r.set('Authorization','Bearer signed.jwt.token');
+  const auth=(r:import('supertest').Test)=>r.set('Authorization','Bearer signed.jwt.token');
   assert.equal((await auth(request(app.getHttpServer()).get(url))).status,200);
   assert.equal((await auth(request(app.getHttpServer()).get('/api/v1/businesses/'+b+'/branches'))).status,403);
   assert.equal((await auth(request(app.getHttpServer()).get('/api/v1/businesses/garbage/branches'))).status,400);
