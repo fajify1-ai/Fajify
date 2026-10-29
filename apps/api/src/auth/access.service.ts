@@ -4,6 +4,7 @@ import {DATABASE_POOL} from '../tokens';
 export type ResourceType='business'|'branch'|'dispatch_area';
 export type ResourceRole='owner'|'manager'|'staff'|'driver'|'dispatcher';
 export interface AccessState {suspended:boolean;revokedAfter:Date|null;}
+export interface ApprovedBusinessMembership {resourceType:'business';resourceId:string;role:ResourceRole;status:'approved';}
 const validTypes=new Set<ResourceType>(['business','branch','dispatch_area']);
 const validRoles=new Set<ResourceRole>(['owner','manager','staff','driver','dispatcher']);
 @Injectable()
@@ -36,6 +37,18 @@ export class AccessService {
    await client.query("INSERT INTO identity_security_events(actor_subject,event_type) VALUES($1,'session_revoked')",[subject]);
    await client.query('COMMIT');
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
+ }
+ /** Only verified, active account memberships for approved businesses are exposed.
+  * No Keycloak realm role can independently grant a business scope. */
+ async approvedBusinessMemberships(subject:string):Promise<ApprovedBusinessMembership[]>{
+  const result=await this.pool.query<{resource_id:string;role:ResourceRole}>(`
+   SELECT DISTINCT m.resource_id,m.role FROM resource_memberships m
+   JOIN business_onboarding b ON b.id=m.resource_id AND b.status='approved'
+   JOIN account_access a ON a.identity_subject=m.identity_subject AND a.suspended=false
+   JOIN user_profiles p ON p.identity_subject=m.identity_subject AND p.suspended=false
+   WHERE m.identity_subject=$1 AND m.resource_type='business' AND m.active=true
+   ORDER BY m.resource_id,m.role`,[subject]);
+  return result.rows.map(m=>({resourceType:'business',resourceId:m.resource_id,role:m.role,status:'approved'}));
  }
  async member(subject:string,type:ResourceType,id:string,roles:readonly string[]):Promise<boolean>{
   if(!validTypes.has(type)||!roles.length||roles.some(r=>!validRoles.has(r as ResourceRole)))return false;
