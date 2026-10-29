@@ -1,8 +1,14 @@
 # M3-P1 — Merchant backend delivery and acceptance handoff
 
-**Branch:** `feat/m3-p1-business-backend` — draft PR #10, based on PR #9 merged into `main`.
-**Status:** Code committed; consolidated tests and database acceptance deliberately deferred until development is complete. Do not merge.
+**Original implementation:** PR #10, merged into `main` at `728fd1ca457f838e4e8a365e963420bce7b49bac`.
+**Status:** Implemented, merged, automated consolidated acceptance passed on `0a0a116490cce5599856983fdad4114e3915ee90` (96/96 API tests, PostgreSQL integration, build/typecheck/lint, OpenAPI). Follow-up security-race and migration-replay evidence is scoped to `test/m3-p1-final-closure` and must pass before that follow-up PR is merged.
 **Sources:** [architecture](../architecture/SYSTEM_ARCHITECTURE.md), [milestones](MILESTONES.md), [phase ownership](../roadmap/FOUR_PHASE_MODEL.md), [security contracts](PHASE_1_MILESTONE_2_AUTH_CONTRACTS.md).
+
+## Closure follow-up (29 October 2026)
+
+The original Phase 1 code was merged in PR #10, commit `728fd1ca457f838e4e8a365e963420bce7b49bac`. All 96 API tests, migrations 0001–0009, local PostgreSQL capacity contention and isolation, and OpenAPI snapshot consistency passed on source SHA `0a0a116490cce5599856983fdad4114e3915ee90`. The former “do not merge / not executed” wording in the historical development handover below describes the **pre-merge state** and must not be read as current status.
+
+A narrow follow-up on `test/m3-p1-final-closure` adds (1) a real PostgreSQL two-connection `FOR SHARE` vs concurrent membership revocation contention test expecting SQLSTATE `55P03` under `lock_timeout`; (2) a second migration application with checksum/history equality; and (3) an updated handover. These follow-up checks are **pending execution**, not already accepted. Run on a clean checkout of that branch with `bash tooling/run-m3-p1-disposable.sh`. Keep its PR unmerged until evidence is reviewed. Production deployment and external service acceptance remain out of scope.
 
 ## Scope and data ownership
 
