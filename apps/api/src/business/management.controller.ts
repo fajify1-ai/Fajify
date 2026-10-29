@@ -24,12 +24,12 @@ class CatalogueUpdate{
  @ApiPropertyOptional() @IsOptional() @IsBoolean() published?:boolean;
  @ApiPropertyOptional() @IsOptional() @IsBoolean() active?:boolean;
 }
-@ApiProperty() class SlotUpdate{@IsBoolean() active:boolean;}
-@ApiProperty() class EventConfig{@IsISO8601({strict:true}) startsAt:string; @IsISO8601({strict:true}) endsAt:string; @IsInt() @Min(1) @Max(1000000) maxGuests:number;}
-@ApiProperty() class PackageLine{@IsUUID() catalogueId:string; @IsInt() @Min(1) @Max(10000) quantity:number;}
-@ApiProperty() class PackageConfig{@IsArray() @ArrayMaxSize(50) @ValidateNested({each:true}) @Type(()=>PackageLine) components:PackageLine[];}
-@ApiProperty() class WeeklyHour{@IsInt() @Min(0) @Max(6) weekday:number; @IsInt() @Min(0) @Max(1439) opensMinute:number; @IsInt() @Min(1) @Max(1440) closesMinute:number;}
-@ApiProperty() class WeeklyHours{@IsArray() @ArrayMaxSize(70) @ValidateNested({each:true}) @Type(()=>WeeklyHour) slots:WeeklyHour[];}
+class SlotUpdate { @ApiProperty() @IsBoolean() active!:boolean; }
+class EventConfig { @ApiProperty() @IsISO8601({strict:true}) startsAt!:string; @ApiProperty() @IsISO8601({strict:true}) endsAt!:string; @ApiProperty() @IsInt() @Min(1) @Max(1000000) maxGuests!:number; }
+class PackageLine { @ApiProperty() @IsUUID() catalogueId!:string; @ApiProperty() @IsInt() @Min(1) @Max(10000) quantity!:number; }
+class PackageConfig { @ApiProperty({type:()=>[PackageLine]}) @IsArray() @ArrayMaxSize(50) @ValidateNested({each:true}) @Type(()=>PackageLine) components!:PackageLine[]; }
+class WeeklyHour { @ApiProperty() @IsInt() @Min(0) @Max(6) weekday!:number; @ApiProperty() @IsInt() @Min(0) @Max(1439) opensMinute!:number; @ApiProperty() @IsInt() @Min(1) @Max(1440) closesMinute!:number; }
+class WeeklyHours { @ApiProperty({type:()=>[WeeklyHour]}) @IsArray() @ArrayMaxSize(70) @ValidateNested({each:true}) @Type(()=>WeeklyHour) slots!:WeeklyHour[]; }
 @ApiTags('merchant-administration') @ApiBearerAuth('keycloak')
 @Controller({path:'businesses/:businessId',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,ResourceGuard)
