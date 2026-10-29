@@ -9,27 +9,27 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {ManagementService} from './management.service';
 type Request={identity:VerifiedIdentity};
 class Grant{
- @ApiPropertyOptional() @ApiProperty() @IsString() @Length(1,255) subject:string;
- @ApiProperty() @IsIn(['manager','staff']) role:'manager'|'staff';
+ @ApiProperty() @IsString() @Length(1,255) subject!:string;
+ @ApiProperty() @IsIn(['manager','staff']) role!:'manager'|'staff';
  @ApiPropertyOptional() @IsOptional() @IsUUID() branchId?:string;
 }
 class BranchUpdate{
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsString() @Length(2,120) name?:string;
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsBoolean() active?:boolean;
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsEmail() contactEmail?:string;
+ @ApiPropertyOptional() @IsOptional() @IsString() @Length(2,120) name?:string;
+ @ApiPropertyOptional() @IsOptional() @IsBoolean() active?:boolean;
+ @ApiPropertyOptional() @IsOptional() @IsEmail() contactEmail?:string;
 }
 class CatalogueUpdate{
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsString() @Length(2,160) name?:string;
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Max(Number.MAX_SAFE_INTEGER) priceMinor?:number;
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsBoolean() published?:boolean;
- @ApiPropertyOptional() @ApiPropertyOptional() @IsOptional() @IsBoolean() active?:boolean;
+ @ApiPropertyOptional() @IsOptional() @IsString() @Length(2,160) name?:string;
+ @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Max(Number.MAX_SAFE_INTEGER) priceMinor?:number;
+ @ApiPropertyOptional() @IsOptional() @IsBoolean() published?:boolean;
+ @ApiPropertyOptional() @IsOptional() @IsBoolean() active?:boolean;
 }
-class SlotUpdate{@ApiProperty() @IsBoolean() active:boolean;}
-class EventConfig{@ApiProperty() @ApiProperty() @IsISO8601({strict:true}) startsAt:string; @ApiProperty() @IsISO8601({strict:true}) endsAt:string; @ApiProperty() @IsInt() @Min(1) @Max(1000000) maxGuests:number;}
-class PackageLine{@ApiProperty() @IsUUID() catalogueId:string; @ApiProperty() @IsInt() @Min(1) @Max(10000) quantity:number;}
-class PackageConfig{@ApiProperty() @ApiProperty() @IsArray() @ArrayMaxSize(50) @ValidateNested({each:true}) @Type(()=>PackageLine) components:PackageLine[];}
-class WeeklyHour{@ApiProperty() @IsInt() @Min(0) @Max(6) weekday:number; @ApiProperty() @IsInt() @Min(0) @Max(1439) opensMinute:number; @ApiProperty() @IsInt() @Min(1) @Max(1440) closesMinute:number;}
-class WeeklyHours{@ApiProperty() @ApiProperty() @IsArray() @ArrayMaxSize(70) @ValidateNested({each:true}) @Type(()=>WeeklyHour) slots:WeeklyHour[];}
+@ApiProperty() class SlotUpdate{@IsBoolean() active:boolean;}
+@ApiProperty() class EventConfig{@IsISO8601({strict:true}) startsAt:string; @IsISO8601({strict:true}) endsAt:string; @IsInt() @Min(1) @Max(1000000) maxGuests:number;}
+@ApiProperty() class PackageLine{@IsUUID() catalogueId:string; @IsInt() @Min(1) @Max(10000) quantity:number;}
+@ApiProperty() class PackageConfig{@IsArray() @ArrayMaxSize(50) @ValidateNested({each:true}) @Type(()=>PackageLine) components:PackageLine[];}
+@ApiProperty() class WeeklyHour{@IsInt() @Min(0) @Max(6) weekday:number; @IsInt() @Min(0) @Max(1439) opensMinute:number; @IsInt() @Min(1) @Max(1440) closesMinute:number;}
+@ApiProperty() class WeeklyHours{@IsArray() @ArrayMaxSize(70) @ValidateNested({each:true}) @Type(()=>WeeklyHour) slots:WeeklyHour[];}
 @ApiTags('merchant-administration') @ApiBearerAuth('keycloak')
 @Controller({path:'businesses/:businessId',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,ResourceGuard)
