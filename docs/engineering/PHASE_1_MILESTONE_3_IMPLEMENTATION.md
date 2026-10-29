@@ -1,0 +1,106 @@
+# M3-P1 — Merchant backend delivery and acceptance handoff
+
+**Branch:** `feat/m3-p1-business-backend` — draft PR #10, based on PR #9 merged into `main`.
+**Status:** Code committed; consolidated tests and database acceptance deliberately deferred until development is complete. Do not merge.
+**Sources:** [architecture](../architecture/SYSTEM_ARCHITECTURE.md), [milestones](MILESTONES.md), [phase ownership](../roadmap/FOUR_PHASE_MODEL.md), [security contracts](PHASE_1_MILESTONE_2_AUTH_CONTRACTS.md).
+
+## Scope and data ownership
+
+Migrations `0006_m3_business_operations.sql`, `0007_m3_branch_hours.sql` and `0008_m3_event_packages.sql` plus `0009_m3_operation_idempotency.sql` extend (never replaces) the M2 `business_onboarding` approval root. Branch, catalogue, slot, reservation and order tables use tenant/branch composite foreign keys. Prices are integer minor units; order line snapshots preserve the price at creation. All business-specific operations use the account/session guards inherited from M2 and verified business membership. Permission and status checks remain server authoritative.
+
+- Owner: all merchant operations, staff grant/revoke (except self actions).
+- Manager: branch, catalogue, schedule and operational management, no access grants.
+- Staff: only explicitly granted branches; read catalogue/slots and manage reservations/orders. Staff without a branch grant cannot operate another branch.
+- Non-approved merchant, suspended/revoked identity, foreign tenant, invalid identifier, illegal state transition: denied.
+
+Manager/staff onboarding uses *existing* active Keycloak subject IDs. Creating/inviting new identities and sending invitation emails are separate approved identity/notification flows; client-side role assignment is forbidden. No production payment or ticket/dispatch mutations are introduced.
+
+## API v1 contracts
+
+All routes are under `/api/v1/businesses/:businessId`, require signed bearer token and JSON for writes.
+
+| Method | Route suffix | Roles | Purpose |
+|---|---|---|---|
+| GET/PATCH | `branches/:branchId/hours` | owner/manager | List/replace weekly operating windows (0=Sunday, minutes from midnight; local branch timezone) |
+| GET/POST | `branches` | owner/manager (GET staff filtered) | List/create branches |
+| PATCH | `branches/:branchId` | owner/manager | Update name, contact or activation |
+| GET/POST | `branches/:branchId/catalogue` | read staff, write owner/manager | List/create products, services, packages, events |
+| PATCH | `branches/:branchId/catalogue/:itemId` | owner/manager | Publish/disable/update item |
+| GET/POST | `branches/:branchId/availability` | read staff, write owner/manager | List/create capacity slots |
+| PATCH | `branches/:branchId/availability/:slotId` | owner/manager | Enable/disable slot |
+| GET/POST | `branches/:branchId/reservations` | owner/manager/scoped staff | List/create merchant-assisted reservations |
+| PATCH | `branches/:branchId/reservations/:id/status` | owner/manager/scoped staff | Confirmed → checked-in → completed; confirmed → cancelled |
+| GET/POST | `branches/:branchId/orders` | owner/manager/scoped staff | List/create merchant-assisted order and price snapshots |
+| PATCH | `branches/:branchId/orders/:id/status` | owner/manager/scoped staff | Placed → accepted → preparing → ready → fulfilled; cancellation until terminal |
+| GET/PATCH | `branches/:branchId/events/:itemId` | owner/manager | Configure event timing and maximum guest count (no ticket issuance) |
+| GET/PATCH | `branches/:branchId/packages/:itemId` | owner/manager | Atomically replace same-branch package components |
+| GET | `staff` | owner/manager | List scoped active grants |
+| POST | `staff/grants` | owner | Activate existing identity, manager or branch-staff |
+| POST | `staff/revocations` | owner | Revoke existing manager or branch-staff grants |
+| GET | `overview` | owner/manager | Basic operational counts, fulfilled *order* totals (not payment revenue) |
+
+Reservation/order creation optionally accepts `requestKey` (8–100 ASCII letters, numbers, underscore or hyphen). The same key for the same merchant, branch and customer returns the prior creation only when the payload matches; mismatched retries are rejected. Database uniqueness and transactional advisory locks prevent double booking/order creation on concurrent replay. The request key is not a payment idempotency contract.\n\nRequired body fields: branch `name`; catalogue `name,kind,priceMinor`; slot `catalogueId,startsAt,endsAt,capacity`; reservation `availabilityId,customerSubject,guests`; order `customerSubject,items:[{catalogueId,quantity}]`; state transition `status`. Inputs use strict DTO validation and UUID params are checked before querying.
+
+**Concurrency:** availability reservation uses a conditional atomic `UPDATE ... WHERE reserved + guests <= capacity` in a transaction. Reservation/order transition state is row-locked. Order lines are priced exclusively by reading published catalogue rows in the same transaction. Reservation and order transitions append events to the existing transactional outbox; no event consumer or external side effects are enabled here.
+
+## Cross-phase contracts
+
+- **M3-P2 Customer:** these are operator-authenticated routes. Public discovery, customer self-booking and checkout are **not** exposed here; use M4 approved customer contracts later.
+- **M3-P3 Business Flutter:** consume the endpoints through a typed client; show server validation/state errors, do not invent permissions from a signed-in UI. Role grants require an existing active account and approval.
+- **M3-P4 Admin:** retain existing M2 business approval API; merchant review/admin UI is owned by Phase 4. Avoid direct database writes.
+
+## Acceptance to run once implementation is frozen
+
+A prepared but **not executed** consolidated script is at `tooling/verify-m3-p1-consolidated.sh`; it requires a uniquely named `fajify_m3_test_*` PostgreSQL 16 database with the `fajify:m3:disposable` database comment. The preflight lives under `packages/database/scripts/verify-m3-p1-target.ts` and does not alter existing M1/M2 database safeguards.
+
+1. `pnpm install --frozen-lockfile` in a disposable checkout with Node >= 20 and pnpm 9.15.9.
+2. `pnpm --filter @faji/api typecheck && pnpm --filter @faji/api lint && pnpm --filter @faji/api test && pnpm --filter @faji/api build`.
+3. On isolated PostgreSQL, apply migrations 0001–0009 via the existing migration command. Verify schema constraints and repeat application idempotence. No shared or production database.
+4. Verify HTTP guards: missing bearer, suspended/revoked sessions, pending/rejected merchant, cross-tenant business/branch, disallowed staff actions, invalid DTO/UUIDs.
+5. Run `apps/api/test/m3-capacity-acceptance.ts` and `apps/api/test/m3-isolation-acceptance.ts` (both included in the consolidated script) with simultaneous reservations at exactly one remaining seat, cancellation releasing capacity, foreign catalogue item/order reference, duplicate/illegal status transitions and rollbacks.
+6. `pnpm --filter @faji/api contracts`, review and commit the generated OpenAPI snapshot; check new business endpoints and existing M2 routes for regressions.
+7. Record environment, precise head SHA, commands, pass/fail counts and any skipped cases in the PR. Keep draft until verified.
+
+**Not part of M3-P1:** frontend modifications; real payments/refunds; public catalogue/search; push/SMS/email delivery; event ticket issuance; order dispatch; production deployment; modifying other milestone branches.
+
+
+## Development freeze checks (before consolidated execution)
+
+- Existing identity and business approval contract is the sole source of merchant eligibility; Phase 1 does not supply a second login/invite flow.
+- New reservations are disallowed if a related catalogue item is unpublished, even when a slot remains active. M3 transaction contention acceptance verifies this.
+- Business reporting totals count **fulfilled order value**, not settled revenue; payments and revenue reconciliation belong to M5.
+- Event configuration stores schedules/maximum guests; event ticket inventory/QR and verified payment remain excluded from M3-P1.
+- Package component reads and writes are restricted to approved-merchant owner/manager roles and same-branch items.
+- The OpenAPI snapshot must be regenerated as an artifact of the consolidated run. The PR cannot be marked accepted on documentation alone.
+
+## Concurrency review note
+
+Membership reads in merchant transactions use PostgreSQL row-level share locks. Revocation updates cannot commit ahead of an in-flight authorized operation after the membership read, and future transactions see the deactivated membership. The consolidated database acceptance must still exercise this race to establish behavior against PostgreSQL, not only mocked query expectations. Order retry keys are validated before opening a transaction.
+
+## Final pre-acceptance security checks
+
+The branch-level staff membership query is now explicitly locked with `FOR SHARE` through the transaction, just like the parent merchant membership. This prevents a branch access revocation from overtaking a transaction that already passed authorization. The SQL acceptance harness includes two branches under one merchant and verifies a staff member can list only their assigned branch, then loses access after revocation.
+
+No claim of passing tests, migration success, published OpenAPI snapshot or production readiness is made until the consolidated gates have actually run.
+
+## Final integration status
+
+The backend's merchant tables, domain services, versioned controllers, staff permission operations, state transitions, idempotent requests, event/package configuration, outbox writes and negative/acceptance test harnesses are committed. The outstanding gate is **verification**, not authorization to merge: database and API TypeScript checks, lint, complete test execution, real PostgreSQL migrations and concurrency, OpenAPI regeneration and review. A generated OpenAPI diff is an expected blocker to resolve and commit before recording the final accepted SHA. No approval of Phase 2–4 changes or production credentials is needed to run disposable local acceptance.
+
+## OpenAPI generation contract
+
+Merchant DTOs now carry explicit `@ApiProperty` and `@ApiPropertyOptional` Swagger metadata, including nested order lines, package lines and weekly operating-hours arrays. The `apps/api/scripts/export-openapi.ts` exporter now fails closed when any of the 25 expected merchant operations, a Keycloak bearer security declaration, or a write request-body schema is missing. Existing health-route assertions remain in place. The generated artifact is `packages/api_contracts/openapi.json` and must be generated with `pnpm --filter @faji/api contracts`, reviewed and committed before acceptance. No generated snapshot has been claimed without executing NestJS.
+
+## Consolidated acceptance: 29 October 2026 first execution
+
+Initial isolated M3 run against `09703c34`: PostgreSQL 16 target validation, database/API typechecks and lint passed; 86 of 96 API tests passed, 10 failed. Eight inherited M2 database tests stopped because their distinct runtime-connection and disposable marker requirements were not configured; the two M3 failures were missing strict HTTP DTO validation in the `tsx` test runtime and a staff-lock assertion that incorrectly used an owner fixture.
+
+Corrective branch work adds explicit validation pipes for merchant request bodies, updates the M3 staff test fixture, broadens the *same strict* disposable-target marker check to M3, and introduces `tooling/run-m3-p1-disposable.sh` with a private PostgreSQL 16/PostGIS cluster and separate migration/runtime users. The consolidated runner applies migrations and grants the runtime role narrowly scoped table DML **before** executing the M2/M3 API database tests. No historical migrations or M2 auth behavior were weakened. The new run is not yet executed and remains a hard acceptance gate.
+
+Run from a clean `feat/m3-p1-business-backend` worktree:
+
+```bash
+bash tooling/run-m3-p1-disposable.sh
+```
+
+Do not reuse the older `/tmp/fajify-m3-acceptance.sh` launcher: it creates only a single database administrator and cannot satisfy the inherited least-privilege M2 integration checks.

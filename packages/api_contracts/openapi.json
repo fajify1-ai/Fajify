@@ -47,6 +47,789 @@
           "health"
         ]
       }
+    },
+    "/api/v1/auth/sessions/revoke-current": {
+      "post": {
+        "operationId": "SessionController_revokeCurrent_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Revoke this Keycloak session at the Faji API; clients must also end the Keycloak session to invalidate refresh tokens",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "operationId": "SessionController_me_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Get validated identity and active-account status",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/admin/accounts/{subject}/suspension": {
+      "post": {
+        "operationId": "AdminAccessController_setSuspension_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "identity-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/accounts/{subject}/memberships": {
+      "post": {
+        "operationId": "AdminAccessController_setMembership_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "identity-admin"
+        ]
+      }
+    },
+    "/api/v1/auth/enroll": {
+      "post": {
+        "operationId": "OnboardingController_enroll_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Register verified Keycloak subject for approval (pending by default)",
+        "tags": [
+          "identity"
+        ]
+      }
+    },
+    "/api/v1/business/onboarding": {
+      "post": {
+        "operationId": "BusinessApprovalController_apply_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "business-onboarding"
+        ]
+      }
+    },
+    "/api/v1/business/onboarding/{id}": {
+      "get": {
+        "operationId": "BusinessApprovalController_own_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "business-onboarding"
+        ]
+      }
+    },
+    "/api/v1/business/onboarding/{id}/workspace": {
+      "get": {
+        "operationId": "BusinessApprovalController_workspace_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "business-onboarding"
+        ]
+      }
+    },
+    "/api/v1/business/onboarding/{id}/review": {
+      "post": {
+        "operationId": "BusinessApprovalController_review_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "business-onboarding"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches": {
+      "post": {
+        "operationId": "BusinessController_branch_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      },
+      "get": {
+        "operationId": "BusinessController_branches_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/catalogue": {
+      "post": {
+        "operationId": "BusinessController_item_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      },
+      "get": {
+        "operationId": "BusinessController_items_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/availability": {
+      "post": {
+        "operationId": "BusinessController_slot_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlotInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      },
+      "get": {
+        "operationId": "BusinessController_slots_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/reservations": {
+      "post": {
+        "operationId": "BusinessController_reserve_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      },
+      "get": {
+        "operationId": "BusinessController_reservations_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/reservations/{id}/status": {
+      "patch": {
+        "operationId": "BusinessController_reservationStatus_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservationTransition"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/orders": {
+      "post": {
+        "operationId": "BusinessController_placeOrder_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      },
+      "get": {
+        "operationId": "BusinessController_orders_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/orders/{id}/status": {
+      "patch": {
+        "operationId": "BusinessController_orderStatus_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderTransition"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-operations"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/hours": {
+      "get": {
+        "operationId": "ManagementController_hours_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      },
+      "patch": {
+        "operationId": "ManagementController_setHours_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WeeklyHours"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/events/{itemId}": {
+      "get": {
+        "operationId": "ManagementController_eventDetails_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      },
+      "patch": {
+        "operationId": "ManagementController_event_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/packages/{itemId}": {
+      "get": {
+        "operationId": "ManagementController_packageDetails_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      },
+      "patch": {
+        "operationId": "ManagementController_packageConfig_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PackageConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/overview": {
+      "get": {
+        "operationId": "ManagementController_overview_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/staff": {
+      "get": {
+        "operationId": "ManagementController_staff_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/staff/grants": {
+      "post": {
+        "operationId": "ManagementController_grant_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Grant"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/staff/revocations": {
+      "post": {
+        "operationId": "ManagementController_revoke_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Grant"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}": {
+      "patch": {
+        "operationId": "ManagementController_branch_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/catalogue/{itemId}": {
+      "patch": {
+        "operationId": "ManagementController_catalogue_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogueUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/availability/{slotId}": {
+      "patch": {
+        "operationId": "ManagementController_slot_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlotUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-administration"
+        ]
+      }
     }
   },
   "info": {
@@ -73,6 +856,310 @@
       "ReadyStatus": {
         "type": "object",
         "properties": {}
+      },
+      "BranchInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ItemInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "priceMinor": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "published": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "kind",
+          "priceMinor"
+        ]
+      },
+      "SlotInput": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string"
+          },
+          "endsAt": {
+            "type": "string"
+          },
+          "capacity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "startsAt",
+          "endsAt",
+          "capacity"
+        ]
+      },
+      "ReservationInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string"
+          },
+          "availabilityId": {
+            "type": "string"
+          },
+          "customerSubject": {
+            "type": "string"
+          },
+          "guests": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "availabilityId",
+          "customerSubject",
+          "guests"
+        ]
+      },
+      "ReservationTransition": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "checked_in",
+              "completed",
+              "cancelled"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "OrderLine": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity"
+        ]
+      },
+      "OrderInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string"
+          },
+          "customerSubject": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLine"
+            }
+          }
+        },
+        "required": [
+          "customerSubject",
+          "items"
+        ]
+      },
+      "OrderTransition": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "preparing",
+              "ready",
+              "fulfilled",
+              "cancelled"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "WeeklyHour": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "number"
+          },
+          "opensMinute": {
+            "type": "number"
+          },
+          "closesMinute": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "weekday",
+          "opensMinute",
+          "closesMinute"
+        ]
+      },
+      "WeeklyHours": {
+        "type": "object",
+        "properties": {
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeeklyHour"
+            }
+          }
+        },
+        "required": [
+          "slots"
+        ]
+      },
+      "EventConfig": {
+        "type": "object",
+        "properties": {
+          "startsAt": {
+            "type": "string"
+          },
+          "endsAt": {
+            "type": "string"
+          },
+          "maxGuests": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "startsAt",
+          "endsAt",
+          "maxGuests"
+        ]
+      },
+      "PackageLine": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity"
+        ]
+      },
+      "PackageConfig": {
+        "type": "object",
+        "properties": {
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PackageLine"
+            }
+          }
+        },
+        "required": [
+          "components"
+        ]
+      },
+      "Grant": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "role"
+        ]
+      },
+      "BranchUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "contactEmail": {
+            "type": "string"
+          }
+        }
+      },
+      "CatalogueUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "priceMinor": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SlotUpdate": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "active"
+        ]
       }
     }
   }
