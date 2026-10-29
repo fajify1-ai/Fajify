@@ -91,3 +91,14 @@ test('invalid request key in order is rejected without SQL writes',async()=>{
  await assert.rejects(()=>service.placeOrder('actor',business,branch,{customerSubject:'customer',items:[{catalogueId:branch,quantity:1}],requestKey:'bad'}));
  assert.equal(sql.length,0);
 });
+
+test('staff branch membership is checked under a share lock',async()=>{
+ const {service,sql}=fixture();
+ await service.items('actor',business,branch);
+ assert.ok(sql.some(q=>q.includes("resource_type='branch'")&&q.includes('FOR SHARE')));
+});
+test('malformed order line is rejected before opening a transaction',async()=>{
+ const {service,sql}=fixture();
+ await assert.rejects(()=>service.placeOrder('actor',business,branch,{customerSubject:'customer',items:[null as unknown as {catalogueId:string;quantity:number}]}));
+ assert.equal(sql.length,0);
+});
