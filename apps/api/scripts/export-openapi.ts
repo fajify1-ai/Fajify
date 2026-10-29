@@ -36,7 +36,7 @@ async function run(){
    if(hasBody&&!operation.requestBody)
     throw new Error('Missing M3 request body schema: '+verb+' '+suffix);
   }
-  writeFileSync(resolve(__dirname,'../../../packages/api_contracts/openapi.json'),JSON.stringify(doc,null,2)+'\\n');
+  writeFileSync(resolve(__dirname,'../../../packages/api_contracts/openapi.json'),JSON.stringify(doc,null,2)+"\n");
  }finally{await app.close();}
 }
 run().catch(err=>{console.error(err);process.exitCode=1;});
