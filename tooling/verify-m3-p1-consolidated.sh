@@ -15,6 +15,7 @@ pnpm --filter @faji/api test
 pnpm --filter @faji/api build
 pnpm --filter @faji/database migrate
 pnpm --filter @faji/api exec tsx test/m3-capacity-acceptance.ts
+pnpm --filter @faji/api exec tsx test/m3-isolation-acceptance.ts
 pnpm --filter @faji/api contracts
 test -z "$(git status --porcelain)" || { echo "Generated files differ; commit/review before acceptance" >&2; exit 1; }
 echo "M3-P1 code and migration verification gates completed; manual contention/security acceptance still required"
