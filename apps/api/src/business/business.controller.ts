@@ -28,6 +28,7 @@ class SlotInput{
  @IsInt() @Min(1) @Max(1000000) capacity!:number;
 }
 class ReservationInput{
+ @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
  @IsUUID() availabilityId!:string;
  @IsString() @Length(1,255) customerSubject!:string;
  @IsInt() @Min(1) @Max(10000) guests!:number;
@@ -37,6 +38,7 @@ class OrderLine{
  @IsInt() @Min(1) @Max(10000) quantity!:number;
 }
 class OrderInput{
+ @IsOptional() @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey?:string;
  @IsString() @Length(1,255) customerSubject!:string;
  @IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @ValidateNested({each:true}) @Type(()=>OrderLine) items!:OrderLine[];
 }
