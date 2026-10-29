@@ -42,8 +42,8 @@ class OrderInput{
  @ApiProperty() @IsString() @Length(1,255) customerSubject!:string;
  @ApiProperty({type:()=>[OrderLine]}) @IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @ValidateNested({each!:true}) @Type(()=>OrderLine) items:OrderLine[];
 }
-@ApiProperty() class OrderTransition{@IsIn(['accepted','preparing','ready','fulfilled','cancelled']) status:'accepted'|'preparing'|'ready'|'fulfilled'|'cancelled';}
-@ApiProperty() class ReservationTransition{@IsIn(['checked_in','completed','cancelled']) status:'checked_in'|'completed'|'cancelled';}
+class OrderTransition { @ApiProperty({enum:['accepted','preparing','ready','fulfilled','cancelled']}) @IsIn(['accepted','preparing','ready','fulfilled','cancelled']) status!:'accepted'|'preparing'|'ready'|'fulfilled'|'cancelled'; }
+class ReservationTransition { @ApiProperty({enum:['checked_in','completed','cancelled']}) @IsIn(['checked_in','completed','cancelled']) status!:'checked_in'|'completed'|'cancelled'; }
 type Request={identity:VerifiedIdentity};
 @ApiTags('merchant-operations') @ApiBearerAuth('keycloak')
 @Controller({path:'businesses/:businessId',version:'1'})
