@@ -32,8 +32,8 @@ All routes are under `/api/v1/businesses/:businessId`, require signed bearer tok
 | PATCH | `branches/:branchId/reservations/:id/status` | owner/manager/scoped staff | Confirmed → checked-in → completed; confirmed → cancelled |
 | GET/POST | `branches/:branchId/orders` | owner/manager/scoped staff | List/create merchant-assisted order and price snapshots |
 | PATCH | `branches/:branchId/orders/:id/status` | owner/manager/scoped staff | Placed → accepted → preparing → ready → fulfilled; cancellation until terminal |
-| PATCH | `branches/:branchId/events/:itemId` | owner/manager | Configure event timing and maximum guest count (no ticket issuance) |
-| PATCH | `branches/:branchId/packages/:itemId` | owner/manager | Atomically replace same-branch package components |
+| GET/PATCH | `branches/:branchId/events/:itemId` | owner/manager | Configure event timing and maximum guest count (no ticket issuance) |
+| GET/PATCH | `branches/:branchId/packages/:itemId` | owner/manager | Atomically replace same-branch package components |
 | GET | `staff` | owner/manager | List scoped active grants |
 | POST | `staff/grants` | owner | Activate existing identity, manager or branch-staff |
 | POST | `staff/revocations` | owner | Revoke existing manager or branch-staff grants |
@@ -62,3 +62,13 @@ A prepared but **not executed** consolidated script is at `tooling/verify-m3-p1-
 7. Record environment, precise head SHA, commands, pass/fail counts and any skipped cases in the PR. Keep draft until verified.
 
 **Not part of M3-P1:** frontend modifications; real payments/refunds; public catalogue/search; push/SMS/email delivery; event ticket issuance; order dispatch; production deployment; modifying other milestone branches.
+
+
+## Development freeze checks (before consolidated execution)
+
+- Existing identity and business approval contract is the sole source of merchant eligibility; Phase 1 does not supply a second login/invite flow.
+- New reservations are disallowed if a related catalogue item is unpublished, even when a slot remains active. M3 transaction contention acceptance verifies this.
+- Business reporting totals count **fulfilled order value**, not settled revenue; payments and revenue reconciliation belong to M5.
+- Event configuration stores schedules/maximum guests; event ticket inventory/QR and verified payment remain excluded from M3-P1.
+- Package component reads and writes are restricted to approved-merchant owner/manager roles and same-branch items.
+- The OpenAPI snapshot must be regenerated as an artifact of the consolidated run. The PR cannot be marked accepted on documentation alone.
