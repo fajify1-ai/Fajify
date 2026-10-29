@@ -19,7 +19,7 @@ export class BusinessService {
   if(state.suspended)throw new ForbiddenException();
   const approval=await client.query("SELECT id FROM business_onboarding WHERE id=$1::uuid AND status='approved' FOR SHARE",[businessId]);
   if(approval.rowCount!==1)throw new ForbiddenException('Business not approved');
-  const membership=await client.query(`SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1`,[subject,businessId,roles]);
+  const membership=await client.query(`SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true ORDER BY CASE role WHEN 'owner' THEN 0 WHEN 'manager' THEN 1 ELSE 2 END LIMIT 1`,[subject,businessId,roles]);
   const branch=branchId?await client.query("SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type='branch' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1",[subject,branchId]):null;
   // An owner/manager has business-wide authority. Staff require both a business membership and branch grant.
   if(membership.rowCount!==1 || (branchId&&!['owner','manager'].includes(membership.rows[0].role as string)&&branch?.rowCount!==1))throw new ForbiddenException();
