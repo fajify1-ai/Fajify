@@ -70,6 +70,27 @@ export class ManagementService {
    const result=await c.query('UPDATE business_availability SET active=$4 WHERE id=$1 AND business_id=$2 AND branch_id=$3 RETURNING *',[slot,business,branch,input.active]);
    if(!result.rowCount)throw new NotFoundException('Slot unavailable');return result.rows[0];});
  }
+ async hours(actor:string,business:string,branch:string){
+  return this.transaction(async c=>{await this.owner(c,actor,business,true);
+   const valid=await c.query('SELECT 1 FROM business_branches WHERE id=$1 AND business_id=$2',[branch,business]);
+   if(valid.rowCount!==1)throw new NotFoundException('Branch unavailable');
+   return (await c.query('SELECT weekday,opens_minute,closes_minute FROM business_branch_hours WHERE business_id=$1 AND branch_id=$2 ORDER BY weekday,opens_minute',[business,branch])).rows;
+  });
+ }
+ async replaceHours(actor:string,business:string,branch:string,slots:{weekday:number;opensMinute:number;closesMinute:number}[]){
+  if(slots.length>70||slots.some(v=>!Number.isInteger(v.weekday)||v.weekday<0||v.weekday>6||!Number.isInteger(v.opensMinute)||!Number.isInteger(v.closesMinute)||v.opensMinute<0||v.closesMinute>1440||v.opensMinute>=v.closesMinute))throw new BadRequestException('Invalid operating hours');
+  const sorted=[...slots].sort((a,b)=>a.weekday-b.weekday||a.opensMinute-b.opensMinute);
+  for(let i=1;i<sorted.length;i++)if(sorted[i].weekday===sorted[i-1].weekday&&sorted[i].opensMinute<sorted[i-1].closesMinute)throw new ConflictException('Overlapping branch hours');
+  return this.transaction(async c=>{
+   await this.owner(c,actor,business,true);
+   const valid=await c.query('SELECT id FROM business_branches WHERE id=$1 AND business_id=$2 FOR UPDATE',[branch,business]);
+   if(valid.rowCount!==1)throw new NotFoundException('Branch unavailable');
+   await c.query('DELETE FROM business_branch_hours WHERE business_id=$1 AND branch_id=$2',[business,branch]);
+   for(const slot of sorted)await c.query('INSERT INTO business_branch_hours(business_id,branch_id,weekday,opens_minute,closes_minute) VALUES($1,$2,$3,$4,$5)',[business,branch,slot.weekday,slot.opensMinute,slot.closesMinute]);
+   return {branchId:branch,slots:sorted};
+  });
+ }
+
  async overview(actor:string,business:string){
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
    const r=await c.query(`SELECT (SELECT COUNT(*)::int FROM business_branches WHERE business_id=$1 AND active) AS branches,
