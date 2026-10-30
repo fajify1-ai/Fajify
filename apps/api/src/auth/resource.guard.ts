@@ -1,4 +1,4 @@
-import {CanActivate,ExecutionContext,ForbiddenException,Injectable,SetMetadata,BadRequestException} from '@nestjs/common';
+import {CanActivate,ExecutionContext,ForbiddenException,Inject,Injectable,SetMetadata,BadRequestException} from '@nestjs/common';
 import {Reflector} from '@nestjs/core';
 import {AccessService,type ResourceType} from './access.service';
 import type {VerifiedIdentity} from './identity.types';
@@ -7,7 +7,7 @@ export type ResourcePolicy={type:ResourceType;param:string;roles:readonly string
 export const RequireResource=(type:ResourceType,param:string,...roles:string[])=>SetMetadata(RESOURCE_POLICY,{type,param,roles} satisfies ResourcePolicy);
 @Injectable()
 export class ResourceGuard implements CanActivate {
- constructor(private readonly reflector:Reflector,private readonly access:AccessService){}
+ constructor(@Inject(Reflector) private readonly reflector:Reflector,@Inject(AccessService) private readonly access:AccessService){}
  async canActivate(ctx:ExecutionContext):Promise<boolean>{
   const policy=this.reflector.getAllAndOverride<ResourcePolicy>(RESOURCE_POLICY,[ctx.getHandler(),ctx.getClass()]);
   if(!policy)return true;
@@ -18,6 +18,7 @@ export class ResourceGuard implements CanActivate {
   try{
    const state=await this.access.state(request.identity.subject);
    if(state.suspended||state.revokedAfter&&state.revokedAfter.getTime()/1000>=request.identity.issuedAt)return false;
+   if(request.identity.sessionId&&await this.access.sessionRevoked(request.identity.subject,request.identity.sessionId))return false;
    return await this.access.member(request.identity.subject,policy.type,id,policy.roles);
   }
   catch{return false;}

@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  faji_business:
+    path: ../business_mobile
   flutter:
     sdk: flutter
 
@@ -38,6 +40,8 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   flutter_appauth: 12.1.0
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   flutter_test:
     sdk: flutter
 

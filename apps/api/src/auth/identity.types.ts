@@ -6,6 +6,8 @@ export interface VerifiedIdentity {
  /** Authenticator assurance details supplied by the signed Keycloak access token. */
  authContext?:string;
  authTime?:number;
+ /** Signed Keycloak session identifier, used for per-session API revocation. */
+ sessionId?:string;
 }
 export interface IdentityVerifier {verifyAccessToken(token:string):Promise<VerifiedIdentity>;}
 export const IDENTITY_VERIFIER=Symbol('IDENTITY_VERIFIER');

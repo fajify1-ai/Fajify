@@ -43,3 +43,22 @@ test('revoked access token is denied by issued-at cutoff',async()=>{
 test('invalid JWT denied before account lookup',async()=>{
  assert.equal((await run({suspended:false,revokedAfter:null},false)).status,401);
 });
+
+test('revoking current signed Keycloak session blocks reuse of the bearer',async()=>{
+ const identity={...verified,sessionId:'signed-sid-1'};
+ let revoked=false;
+ const access={state:async()=>({suspended:false,revokedAfter:null}),sessionRevoked:async()=>revoked,
+  revokeSession:async(subject:string,sid:string)=>{assert.equal(subject,verified.subject);assert.equal(sid,identity.sessionId);revoked=true;}};
+ const verifier:IdentityVerifier={verifyAccessToken:async()=>identity};
+ const module=await Test.createTestingModule({controllers:[SessionController],providers:[
+  IdentityGuard,AccountGuard,{provide:IDENTITY_VERIFIER,useValue:verifier},{provide:AccessService,useValue:access}
+ ]}).compile();
+ const app=module.createNestApplication();app.setGlobalPrefix('api');
+ app.enableVersioning({type:VersioningType.URI,defaultVersion:'1'});await app.init();
+ try{
+  const auth=(r:request.Test)=>r.set('Authorization','Bearer signed.token.value');
+  assert.equal((await auth(request(app.getHttpServer()).get('/api/v1/auth/me'))).status,200);
+  assert.equal((await auth(request(app.getHttpServer()).post('/api/v1/auth/sessions/revoke-current'))).status,201);
+  assert.equal((await auth(request(app.getHttpServer()).get('/api/v1/auth/me'))).status,403);
+ }finally{await app.close();}
+});
