@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/theme/faji_colors.dart';
 import '../../../plans/data/models/plan_option.dart';
 import '../../data/models/booking_draft.dart';
-import '../../data/models/confirmed_booking.dart';
 import '../../data/repositories/booking_repository.dart';
 import '../../domain/services/booking_pricing_service.dart';
-import '../../domain/services/mock_booking_payment_service.dart';
 import '../screens/add_payment_card_screen.dart';
-import '../screens/booking_confirmation_screen.dart';
 import '../widgets/booking_date_sheet.dart';
 import '../widgets/booking_time_sheet.dart';
 
@@ -26,7 +22,6 @@ class BookingReservationScreen extends StatefulWidget {
 
 class _BookingReservationScreenState extends State<BookingReservationScreen> {
   final _pricing = BookingPricingService();
-  final _payment = MockBookingPaymentService();
   late BookingDraft _draft;
   late int _guestCount;
   BookingPricing? _price;
@@ -111,31 +106,8 @@ class _BookingReservationScreenState extends State<BookingReservationScreen> {
   }
 
   Future<void> _bookReservation() async {
-    final method = _draft.paymentMethod;
-    if (method == null || _price == null) return;
-    final charged = await _payment.charge(draft: _draft);
-    if (!mounted || !charged) return;
-    final now = DateTime.now();
-    final booking = ConfirmedBooking(
-      id: 'FJ-${now.millisecondsSinceEpoch}',
-      userId: FirebaseAuth.instance.currentUser?.uid ?? '',
-      plan: _draft.plan,
-      bookingDate: _draft.bookingDate,
-      bookingTimePeriod: _draft.bookingTimePeriod!,
-      guestCount: _guestCount,
-      rideSelected: _draft.rideSelected,
-      ridePrice: _price!.ridePrice,
-      totalPrice: _price!.total,
-      paymentMethod: method,
-      createdAt: now,
-      qrToken: 'placeholder-${now.millisecondsSinceEpoch}',
-      bookingStatus: 'upcoming',
-    );
-    BookingRepository.instance.add(booking);
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => BookingConfirmationScreen(booking: booking),
-      ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(BookingRepository.unavailable.message)),
     );
   }
 

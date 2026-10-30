@@ -41,16 +41,41 @@ class BookingTicketScreen extends StatelessWidget {
                   const Expanded(
                     child: Text(
                       'FAJI BOOKING TICKET',
-                      style: TextStyle(color: FajiColors.primary, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1),
+                      style: TextStyle(
+                        color: FajiColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1,
+                      ),
                     ),
                   ),
-                  Text(booking.id, style: const TextStyle(color: FajiColors.textSecondaryDark, fontSize: 11)),
+                  Text(
+                    booking.id,
+                    style: const TextStyle(
+                      color: FajiColors.textSecondaryDark,
+                      fontSize: 11,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 18),
-              Text(booking.plan.title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+              Text(
+                booking.plan.title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 5),
-              Text(booking.plan.businessName, style: const TextStyle(color: FajiColors.textSecondaryDark, fontSize: 14)),
+              Text(
+                booking.plan.businessName,
+                style: const TextStyle(
+                  color: FajiColors.textSecondaryDark,
+                  fontSize: 14,
+                ),
+              ),
               const SizedBox(height: 18),
               BookingQrCode(booking: booking),
               const SizedBox(height: 18),
@@ -60,7 +85,14 @@ class BookingTicketScreen extends StatelessWidget {
               _TicketRow(label: 'Location', value: booking.plan.location),
               _TicketRow(label: 'Amount', value: '₦${booking.totalPrice}'),
               const SizedBox(height: 10),
-              const Text('Placeholder QR — verify this ticket with Faji before entry.', textAlign: TextAlign.center, style: TextStyle(color: FajiColors.textSecondaryDark, fontSize: 11)),
+              const Text(
+                'Placeholder QR — verify this ticket with Faji before entry.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: FajiColors.textSecondaryDark,
+                  fontSize: 11,
+                ),
+              ),
             ],
           ),
         ),
@@ -77,13 +109,29 @@ class _TicketRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 10),
-        child: Row(
-          children: [
-            Text(label, style: const TextStyle(color: FajiColors.textSecondaryDark, fontSize: 13)),
-            const Spacer(),
-            Flexible(child: Text(value, textAlign: TextAlign.right, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600))),
-          ],
+    padding: const EdgeInsets.only(top: 10),
+    child: Row(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: FajiColors.textSecondaryDark,
+            fontSize: 13,
+          ),
         ),
-      );
+        const Spacer(),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }

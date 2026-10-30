@@ -103,37 +103,37 @@ class _FloatingHomeNavState extends State<FloatingHomeNav>
               right: 26,
               bottom: 90,
               child: Material(
-              color: const Color(0xff202020),
-              elevation: 8,
-              shadowColor: Colors.black87,
-              shape: const CircleBorder(),
-              child: InkWell(
-                onTap: _toggle,
-                customBorder: const CircleBorder(),
-                child: AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) => Transform.rotate(
-                    angle: _animation.value * .785,
-                    child: child,
-                  ),
-                  child: SizedBox(
-                    width: 68,
-                    height: 68,
-                    child: DecoratedBox(
-                      decoration: const ShapeDecoration(
-                        shape: CircleBorder(
-                          side: BorderSide(color: Color(0xff363636)),
+                color: const Color(0xff202020),
+                elevation: 8,
+                shadowColor: Colors.black87,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  onTap: _toggle,
+                  customBorder: const CircleBorder(),
+                  child: AnimatedBuilder(
+                    animation: _animation,
+                    builder: (context, child) => Transform.rotate(
+                      angle: _animation.value * .785,
+                      child: child,
+                    ),
+                    child: SizedBox(
+                      width: 68,
+                      height: 68,
+                      child: DecoratedBox(
+                        decoration: const ShapeDecoration(
+                          shape: CircleBorder(
+                            side: BorderSide(color: Color(0xff363636)),
+                          ),
                         ),
-                      ),
-                      child: Icon(
-                        _open ? Icons.close : Icons.add,
-                        color: FajiColors.primary,
-                        size: 31,
+                        child: Icon(
+                          _open ? Icons.close : Icons.add,
+                          color: FajiColors.primary,
+                          size: 31,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
               ),
             ),
         ],

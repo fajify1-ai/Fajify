@@ -1,30 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../../../../core/data/service_unavailable.dart';
 import '../models/home_business.dart';
 
-class HomeBusinessRepository {
-  HomeBusinessRepository({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+abstract interface class CustomerDiscoveryRepository {
+  Future<List<HomeBusiness>> loadBusinesses();
+  Future<List<HomeBusiness>> loadHomeBusinesses();
+}
 
-  final FirebaseFirestore _firestore;
-
-  Future<List<HomeBusiness>> loadBusinesses() async {
-    try {
-      final snapshot = await _firestore
-          .collection('businesses')
-          .where('isApproved', isEqualTo: true)
-          .get();
-      return snapshot.docs
-          .map((doc) => HomeBusiness.fromFirestore(doc.id, doc.data()))
-          .where((business) => business.isActive)
-          .toList();
-    } catch (_) {
-      return <HomeBusiness>[];
-    }
-  }
-
-  Future<List<HomeBusiness>> loadHomeBusinesses() async {
-    final realBusinesses = await loadBusinesses();
-    return realBusinesses.isNotEmpty ? realBusinesses : placeholderBusinesses;
-  }
+/// Replace at composition with an adapter for reviewed discovery contracts.
+class HomeBusinessRepository implements CustomerDiscoveryRepository {
+  @override
+  Future<List<HomeBusiness>> loadBusinesses() async =>
+      throw const ServiceUnavailable('Discovery');
+  @override
+  Future<List<HomeBusiness>> loadHomeBusinesses() => loadBusinesses();
 }

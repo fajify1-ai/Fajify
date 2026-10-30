@@ -6,18 +6,25 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:routes-http": "node --import tsx --test test/routes-http.test.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "node --conditions=react-server --import tsx --test test/auth.test.ts test/openid-client.test.ts test/journey-http.test.ts test/postgres-stores.test.ts test/routes.test.ts"
   },
   "dependencies": {
     "next": "^15.0.0",
+    "openid-client": "6",
+    "pg": "8.23.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "@types/pg": "8.23.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.8.0"
   }
 }

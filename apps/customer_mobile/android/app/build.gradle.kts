@@ -1,8 +1,6 @@
 plugins {
     id("com.android.application")
 
-    // Firebase / Google Services
-    id("com.google.gms.google-services")
 
     // The Flutter Gradle Plugin must be applied after the Android plugin.
     id("dev.flutter.flutter-gradle-plugin")
@@ -20,8 +18,10 @@ android {
 
     defaultConfig {
         applicationId = "com.faji.app"
+        // Published Phase 1 mobile callback; issuer/client activation is separate.
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.faji.customer"
 
-        minSdk = flutter.minSdkVersion
+        minSdk = maxOf(flutter.minSdkVersion, 23)
         targetSdk = flutter.targetSdkVersion
 
         versionCode = flutter.versionCode
