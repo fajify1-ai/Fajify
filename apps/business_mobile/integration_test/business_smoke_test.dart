@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:faji_business/app/business_app.dart';
+import 'package:faji_business/core/config.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets('merchant demo opens all five workspaces and logs out', (
     tester,
   ) async {
-    await tester.pumpWidget(const BusinessApp(initialLocation: '/login'));
+    await tester.pumpWidget(
+      const BusinessApp(
+        initialLocation: '/login',
+        config: BusinessConfig(),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('enter-demo')));
     await tester.pumpAndSettle();

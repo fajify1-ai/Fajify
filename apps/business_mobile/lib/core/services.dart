@@ -10,15 +10,50 @@ abstract interface class BusinessRepository {
 
 /// M2 seam. No password collection, fake JWT or client secret in the scaffold.
 abstract interface class IdentityService {
-  Future<void> signIn();
+  Future<BusinessIdentity?> restoreSession();
+  Future<BusinessIdentity?> validateSession();
+  Future<BusinessIdentity> signIn();
   Future<void> signOut();
 }
 
+class BusinessIdentity {
+  const BusinessIdentity({
+    required this.subject,
+    required this.roles,
+    this.businessMemberships = const {},
+  });
+
+  final String subject;
+  final Set<String> roles;
+  final Set<String> businessMemberships;
+
+  bool get canAccessBusiness =>
+      roles.contains('merchant') && businessMemberships.isNotEmpty;
+}
+
 class MockIdentityService implements IdentityService {
+  BusinessIdentity? _identity;
+
   @override
-  Future<void> signIn() async {}
+  Future<BusinessIdentity?> restoreSession() async => null;
+
   @override
-  Future<void> signOut() async {}
+  Future<BusinessIdentity?> validateSession() async => _identity;
+
+  @override
+  Future<BusinessIdentity> signIn() async {
+    _identity = const BusinessIdentity(
+      subject: 'demo-subject',
+      roles: {'merchant'},
+      businessMemberships: {'demo-lagos'},
+    );
+    return _identity!;
+  }
+
+  @override
+  Future<void> signOut() async {
+    _identity = null;
+  }
 }
 
 class DemoFailure implements Exception {

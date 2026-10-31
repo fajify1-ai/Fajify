@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'models.dart';
 import 'services.dart';
+import 'keycloak_identity_service.dart';
 
 enum SessionStatus { signedOut, merchant, denied }
 
@@ -19,11 +20,16 @@ class BusinessController extends ChangeNotifier {
       businessId == 'demo-island' ? 'Demo Island' : 'Demo Lagos';
   LoadState state = LoadState.loading;
   BusinessSnapshot data = BusinessSnapshot.empty;
+  BusinessIdentity? account;
   String? error;
   bool busy = false;
   bool signingIn = false;
   int _generation = 0;
+  int _authGeneration = 0;
   bool _disposed = false;
+  String? _lastValidatedDestination;
+  Future<bool>? _accessCheck;
+  int? _accessCheckGeneration;
   final Set<String> checkedIn = {};
   final Set<String> verifiedOrders = {};
   String profileContact = 'merchant@example.test';
@@ -37,18 +43,81 @@ class BusinessController extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
+  Future<void> restoreSession() async {
+    final generation = ++_generation;
+    _authGeneration++;
+    try {
+      final restored = await identity.restoreSession();
+      if (_disposed || generation != _generation || restored == null) return;
+      account = restored;
+      session = restored.canAccessBusiness
+          ? SessionStatus.merchant
+          : SessionStatus.denied;
+      _lastValidatedDestination = null;
+      if (session == SessionStatus.merchant) {
+        await reload();
+      } else {
+        error = 'The backend did not confirm an approved business membership.';
+        _emit();
+      }
+    } on Exception catch (exception) {
+      if (_disposed || generation != _generation) return;
+      error = _identityError(exception);
+      _emit();
+    }
+  }
+
+  Future<void> signIn() => _authenticate();
+
+  Future<void> _authenticate() async {
+    if (signingIn) return;
+    signingIn = true;
+    error = null;
+    final generation = ++_generation;
+    _authGeneration++;
+    _emit();
+    try {
+      final authenticated = await identity.signIn();
+      if (_disposed || generation != _generation) return;
+      account = authenticated;
+      session = authenticated.canAccessBusiness
+          ? SessionStatus.merchant
+          : SessionStatus.denied;
+      _lastValidatedDestination = null;
+      if (session == SessionStatus.merchant) {
+        signingIn = false;
+        _emit();
+        await reload();
+      } else {
+        error =
+            'Your identity is verified, but the backend did not confirm an approved business membership.';
+      }
+    } on IdentityCancelled {
+      error = null;
+    } on Exception catch (exception) {
+      error = _identityError(exception);
+    } finally {
+      if (!_disposed && generation == _generation) {
+        signingIn = false;
+        _emit();
+      }
+    }
+  }
+
   Future<void> enterDemo({bool merchant = true}) async {
     if (signingIn) return;
     signingIn = true;
     error = null;
-    final generation = _generation;
+    final generation = ++_generation;
+    _authGeneration++;
     _emit();
     try {
-      await identity.signIn();
+      final authenticated = await identity.signIn();
       if (_disposed || generation != _generation) return;
+      account = authenticated;
       session = merchant ? SessionStatus.merchant : SessionStatus.denied;
-    } catch (_) {
-      error = 'Demo sign-in failed. Please try again.';
+    } on Exception catch (exception) {
+      error = _identityError(exception);
     } finally {
       if (!_disposed && generation == _generation) {
         signingIn = false;
@@ -60,14 +129,17 @@ class BusinessController extends ChangeNotifier {
 
   Future<void> logout() async {
     _generation++;
+    _authGeneration++;
     session = SessionStatus.signedOut;
     data = BusinessSnapshot.empty;
     state = LoadState.loading;
     busy = false;
     signingIn = false;
     error = null;
+    _lastValidatedDestination = null;
     businessId = 'demo-lagos';
     profileContact = 'merchant@example.test';
+    account = null;
     calendarMonth = DateTime(2026, 8);
     selectedDate = DateTime(2026, 8, 30);
     calendarView = true;
@@ -78,7 +150,82 @@ class BusinessController extends ChangeNotifier {
       (repository as MockBusinessRepository).reset();
     }
     _emit();
-    await identity.signOut();
+    try {
+      await identity.signOut();
+    } on Exception catch (exception) {
+      error = _identityError(exception);
+      _emit();
+    }
+  }
+
+  Future<bool> revalidateBusinessAccess({
+    String? destination,
+    bool force = false,
+  }) async {
+    if (session != SessionStatus.merchant) return false;
+    if (!force &&
+        destination != null &&
+        destination == _lastValidatedDestination) {
+      return true;
+    }
+    final authGeneration = _authGeneration;
+    final existingCheck = _accessCheck;
+    if (existingCheck != null &&
+        _accessCheckGeneration == authGeneration) {
+      return existingCheck;
+    }
+
+    final check = _performAccessCheck(destination, authGeneration);
+    _accessCheck = check;
+    _accessCheckGeneration = authGeneration;
+    try {
+      return await check;
+    } finally {
+      if (identical(_accessCheck, check)) {
+        _accessCheck = null;
+        _accessCheckGeneration = null;
+      }
+    }
+  }
+
+  Future<bool> _performAccessCheck(
+    String? destination,
+    int authGeneration,
+  ) async {
+    try {
+      final validated = await identity.validateSession();
+      if (_disposed ||
+          authGeneration != _authGeneration ||
+          session != SessionStatus.merchant) {
+        return false;
+      }
+      account = validated;
+      if (validated == null || !validated.canAccessBusiness) {
+        session = SessionStatus.denied;
+        error = 'Your account no longer has an approved business membership.';
+        data = BusinessSnapshot.empty;
+        state = LoadState.loading;
+        checkedIn.clear();
+        verifiedOrders.clear();
+        _emit();
+        return false;
+      }
+      _lastValidatedDestination = destination;
+      return true;
+    } on Exception catch (exception) {
+      if (!_disposed &&
+          authGeneration == _authGeneration &&
+          session == SessionStatus.merchant) {
+        session = SessionStatus.denied;
+        error = _identityError(exception);
+        data = BusinessSnapshot.empty;
+        state = LoadState.loading;
+        checkedIn.clear();
+        verifiedOrders.clear();
+        _emit();
+      }
+      return false;
+    }
   }
 
   Future<void> selectBusiness(String id) async {
@@ -210,4 +357,8 @@ class BusinessController extends ChangeNotifier {
     _generation++;
     super.dispose();
   }
+
+  String _identityError(Exception exception) => exception is IdentityFailure
+      ? exception.message
+      : 'Authentication could not be completed. Please try again.';
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:faji_business/app/business_app.dart';
 import 'package:faji_business/core/business_controller.dart';
+import 'package:faji_business/core/config.dart';
 import 'package:faji_business/core/services.dart';
 
 Future<void> openHost(WidgetTester tester, BusinessController c) async {
@@ -20,6 +21,7 @@ Future<void> openHost(WidgetTester tester, BusinessController c) async {
                   controller: c,
                   embedded: true,
                   initialLocation: '/orders/order-1',
+                  config: const BusinessConfig(),
                   onExit: () => Navigator.of(host).pop(),
                 ),
               ),
