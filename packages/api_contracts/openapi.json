@@ -872,6 +872,80 @@
           "payments"
         ]
       }
+    },
+    "/api/v1/customer/payments/{id}": {
+      "get": {
+        "operationId": "CustomerPaymentsController_payment_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentStatusResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Get the current customer's payment status; this does not assert booking confirmation",
+        "tags": [
+          "customer-payments"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/payments/{id}/reconciliation": {
+      "get": {
+        "operationId": "FinancePaymentsController_reconciliation_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureReconciliationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Audit internal capture consistency; provider statements and settlement are not checked",
+        "tags": [
+          "finance-admin"
+        ]
+      }
     }
   },
   "info": {
@@ -1201,6 +1275,143 @@
         },
         "required": [
           "active"
+        ]
+      },
+      "PaymentStatusResponse": {
+        "type": "object",
+        "properties": {
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "succeeded"
+            ]
+          },
+          "amountMinor": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Integer minor units, encoded as a decimal string"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "NGN"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "paymentIntentId",
+          "status",
+          "amountMinor",
+          "currency",
+          "createdAt",
+          "verifiedAt"
+        ]
+      },
+      "CaptureChecks": {
+        "type": "object",
+        "properties": {
+          "verification": {
+            "type": "boolean"
+          },
+          "receipt": {
+            "type": "boolean"
+          },
+          "journal": {
+            "type": "boolean"
+          },
+          "audit": {
+            "type": "boolean"
+          },
+          "outbox": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "verification",
+          "receipt",
+          "journal",
+          "audit",
+          "outbox"
+        ]
+      },
+      "CaptureReconciliationResponse": {
+        "type": "object",
+        "properties": {
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "succeeded"
+            ]
+          },
+          "amountMinor": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "NGN"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "internal_capture"
+            ]
+          },
+          "providerReconciliation": {
+            "type": "string",
+            "enum": [
+              "not_checked"
+            ]
+          },
+          "internalStatus": {
+            "type": "string",
+            "enum": [
+              "consistent",
+              "inconsistent"
+            ]
+          },
+          "checks": {
+            "$ref": "#/components/schemas/CaptureChecks"
+          },
+          "issues": {
+            "description": "Names of failed internal consistency checks",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "paymentIntentId",
+          "status",
+          "amountMinor",
+          "currency",
+          "scope",
+          "providerReconciliation",
+          "internalStatus",
+          "checks",
+          "issues"
         ]
       }
     }

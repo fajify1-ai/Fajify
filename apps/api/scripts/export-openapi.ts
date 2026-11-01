@@ -39,6 +39,12 @@ async function run(){
   const webhook=doc.paths['/api/v1/payments/webhooks/paystack']?.post;
   if(!webhook?.requestBody||!webhook.parameters?.some(p=>'name' in p&&p.name==='x-paystack-signature'&&p.required))
    throw new Error('Missing signed M5 payment webhook contract');
+  for(const path of ['/api/v1/customer/payments/{id}','/api/v1/admin/finance/payments/{id}/reconciliation']){
+   const operation=doc.paths[path]?.get;
+   if(!operation?.security?.some(v=>Object.hasOwn(v,'keycloak'))||!operation.responses?.['200']||
+    !operation.parameters?.some(p=>'name' in p&&p.name==='id'&&p.in==='path'&&p.required))
+    throw new Error('Missing protected M5 payment read contract: '+path);
+  }
   writeFileSync(resolve(__dirname,'../../../packages/api_contracts/openapi.json'),JSON.stringify(doc,null,2)+"\n");
  }finally{await app.close();}
 }

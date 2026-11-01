@@ -1,4 +1,5 @@
--- M5-P1 increment 1. Amounts are integer minor units; no client success callback grants value.
+-- M5-P1 increment 1. 0010 is reserved for the parallel M4 customer migration.
+-- Amounts are integer minor units; no client success callback grants value.
 CREATE TABLE payment_intents (
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
  customer_subject varchar(255) NOT NULL CHECK(length(btrim(customer_subject))>0),
@@ -78,4 +79,8 @@ CREATE CONSTRAINT TRIGGER payment_intents_reconcile AFTER INSERT OR UPDATE ON pa
 CREATE CONSTRAINT TRIGGER payment_receipts_reconcile AFTER INSERT ON payment_receipts DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION m5_check_posting();
 CREATE CONSTRAINT TRIGGER ledger_entries_reconcile AFTER INSERT ON ledger_entries DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION m5_check_posting();
 CREATE INDEX payment_intents_customer_idx ON payment_intents(customer_subject,created_at DESC);
+CREATE INDEX payment_capture_audit_idx ON audit_events(resource_id)
+ WHERE resource_type='payment_intent' AND action='payment.verified';
+CREATE INDEX payment_capture_outbox_idx ON outbox_events((payload::jsonb->>'paymentIntentId'))
+ WHERE event_type='payment.verified';
 REVOKE ALL ON payment_intents,payment_receipts,ledger_accounts,ledger_entries FROM PUBLIC;
