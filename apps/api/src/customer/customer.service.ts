@@ -55,10 +55,13 @@ export class CustomerService {
    ORDER BY a.starts_at,a.id LIMIT $2 OFFSET $3`,[id,input.limit+1,input.offset]);
   return page(result.rows,input);
  }
- private async transaction<T>(identity:VerifiedIdentity,run:(c:PoolClient)=>Promise<T>):Promise<T>{
+ async withAccountTransaction<T>(identity:VerifiedIdentity,run:(c:PoolClient)=>Promise<T>):Promise<T>{
   const c=await this.pool.connect();
   try {
    await c.query('BEGIN');
+   await c.query("SET LOCAL statement_timeout='5s'");
+   await c.query("SET LOCAL lock_timeout='3s'");
+   await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[JSON.stringify(['customer-account',identity.subject])]);
    // Guard checks precede this; locks serialize writes with account suspension/revocation.
    const account=await c.query(`SELECT a.suspended,a.revoked_after,p.suspended AS profile_suspended
     FROM account_access a JOIN user_profiles p USING(identity_subject)
@@ -73,7 +76,11 @@ export class CustomerService {
      throw new ForbiddenException('Session revoked');
    }
    const value=await run(c);await c.query('COMMIT');return value;
-  }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
+  }catch(e){
+   await c.query('ROLLBACK');
+   if(['55P03','40P01','40001'].includes((e as {code?:string}).code??''))throw new ConflictException('Concurrent change; retry with the same request key');
+   throw e;
+  }finally{c.release();}
  }
  private async retry(c:PoolClient,subject:string,operation:'order'|'reservation',key:string,input:unknown):Promise<{fingerprint:string;id?:string}>{
   if(!/^[A-Za-z0-9_-]{8,100}$/.test(key))throw new BadRequestException('Invalid request key');
@@ -95,7 +102,7 @@ export class CustomerService {
   return result.rows[0].business_id as string;
  }
  async reserve(identity:VerifiedIdentity,input:CustomerReservationInput){
-  return this.transaction(identity,async c=>{
+  return this.withAccountTransaction(identity,async c=>{
    const retry=await this.retry(c,identity.subject,'reservation',input.requestKey,{availabilityId:input.availabilityId.toLowerCase(),guests:input.guests,guestName:input.guestName.trim()});
    if(retry.id)return this.reservation(c,identity.subject,retry.id);
    const slot=await c.query('SELECT branch_id,catalogue_id FROM business_availability WHERE id=$1',[input.availabilityId]);
@@ -126,7 +133,7 @@ export class CustomerService {
  }
  async reservationDetail(subject:string,id:string){return this.reservation(this.pool,subject,id);}
  async cancelReservation(identity:VerifiedIdentity,id:string){
-  return this.transaction(identity,async c=>{
+  return this.withAccountTransaction(identity,async c=>{
    const current=await c.query(`SELECT status,availability_id,guests,business_id FROM business_reservations
     WHERE id=$1 AND customer_subject=$2 FOR UPDATE`,[id,identity.subject]);
    if(!current.rowCount)throw new NotFoundException('Reservation not found');
@@ -144,7 +151,7 @@ export class CustomerService {
  async placeOrder(identity:VerifiedIdentity,input:CustomerOrderInput){
   input={...input,branchId:input.branchId.toLowerCase(),items:input.items.map(line=>({catalogueId:line.catalogueId.toLowerCase(),quantity:line.quantity,expectedPriceMinor:line.expectedPriceMinor}))};
   if(new Set(input.items.map(i=>i.catalogueId)).size!==input.items.length)throw new BadRequestException('Duplicate catalogue items');
-  return this.transaction(identity,async c=>{
+  return this.withAccountTransaction(identity,async c=>{
    const canonical={branchId:input.branchId,items:[...input.items].sort((a,b)=>a.catalogueId.localeCompare(b.catalogueId))};
    const retry=await this.retry(c,identity.subject,'order',input.requestKey,canonical);
    if(retry.id)return this.order(c,identity.subject,retry.id);
@@ -183,7 +190,7 @@ export class CustomerService {
  }
  async orderDetail(subject:string,id:string){return this.order(this.pool,subject,id);}
  async cancelOrder(identity:VerifiedIdentity,id:string){
-  return this.transaction(identity,async c=>{
+  return this.withAccountTransaction(identity,async c=>{
    const current=await c.query('SELECT status,business_id FROM business_orders WHERE id=$1 AND customer_subject=$2 FOR UPDATE',[id,identity.subject]);
    if(!current.rowCount)throw new NotFoundException('Order not found');
    if(current.rows[0].status==='cancelled')return this.order(c,identity.subject,id);

@@ -4,7 +4,10 @@ import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {CustomerService} from './customer.service';
-import {CustomerOrderInput, CustomerReservationInput, DiscoveryQuery, OfferingPage, OfferingView, OrderDetail, OrderPage, PageQuery, ReservationPage, ReservationView, SlotPage} from './customer.dto';
+import {MarketplaceService} from './marketplace.service';
+import {OfferingDetail} from './marketplace.dto';
+import {CustomerWriteGuard} from './customer-write.guard';
+import {CustomerOrderInput, CustomerReservationInput, DiscoveryQuery, OfferingPage, OrderDetail, OrderPage, PageQuery, ReservationPage, ReservationView, SlotPage} from './customer.dto';
 
 const body=<T extends object>(type:new()=>T)=>new ValidationPipe({expectedType:type,whitelist:true,forbidNonWhitelisted:true,transform:true});
 const pagination=()=>applyDecorators(
@@ -17,21 +20,21 @@ type AuthenticatedRequest={identity:VerifiedIdentity};
 @ApiTags('customer-discovery')
 @Controller({path:'discovery',version:'1'})
 export class DiscoveryController {
- constructor(@Inject(CustomerService) private readonly service:CustomerService){}
+ constructor(@Inject(CustomerService) private readonly service:CustomerService,@Inject(MarketplaceService) private readonly marketplace:MarketplaceService){}
  @Get('offerings') @ApiOkResponse({type:OfferingPage}) @pagination()
  @ApiQuery({name:'q',required:false,schema:{type:'string',minLength:1,maxLength:120}})
  @ApiQuery({name:'location',required:false,description:'Literal branch address match; no radius search.',schema:{type:'string',minLength:1,maxLength:120}})
  @ApiQuery({name:'category',required:false,enum:['product','service','package','event']})
  @ApiQuery({name:'branchId',required:false,schema:{type:'string',format:'uuid'}})
  discover(@Query(body(DiscoveryQuery)) query:DiscoveryQuery){return this.service.discover(query);}
- @Get('offerings/:id') @ApiOkResponse({type:OfferingView}) @resourceId()
- detail(@Param('id',new ParseUUIDPipe()) id:string){return this.service.detail(id);}
+ @Get('offerings/:id') @ApiOkResponse({type:OfferingDetail}) @resourceId()
+ detail(@Param('id',new ParseUUIDPipe()) id:string){return this.marketplace.offering(id);}
  @Get('offerings/:id/availability') @ApiOkResponse({type:SlotPage}) @resourceId() @pagination()
  slots(@Param('id',new ParseUUIDPipe()) id:string,@Query(body(PageQuery)) query:PageQuery){return this.service.slots(id,query);}
 }
 
 @ApiTags('customer-workflows') @ApiBearerAuth('keycloak')
-@Controller({path:'customer',version:'1'}) @UseGuards(IdentityGuard,AccountGuard)
+@Controller({path:'customer',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class CustomerController {
  constructor(@Inject(CustomerService) private readonly service:CustomerService){}
  @Post('reservations') @ApiBody({type:CustomerReservationInput}) @ApiCreatedResponse({type:ReservationView})

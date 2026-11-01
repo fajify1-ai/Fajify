@@ -5,6 +5,8 @@ import {Test} from '@nestjs/testing';
 import request from 'supertest';
 import {CustomerController, DiscoveryController} from '../src/customer/customer.controller';
 import {CustomerService} from '../src/customer/customer.service';
+import {MarketplaceService} from '../src/customer/marketplace.service';
+import {CustomerWriteGuard} from '../src/customer/customer-write.guard';
 import {IdentityGuard} from '../src/auth/identity.guard';
 import {AccountGuard} from '../src/auth/account.guard';
 import {AccessService} from '../src/auth/access.service';
@@ -18,6 +20,8 @@ test('customer HTTP contract: public filters, strict input, signed ownership, re
  const service=Object.fromEntries(['discover','detail','slots','reserve','reservations','reservationDetail','cancelReservation','placeOrder','orders','orderDetail','cancelOrder'].map(method=>[method,(...args:unknown[])=>{calls.push({method,args});return {items:[],nextOffset:null};}]));
  const module=await Test.createTestingModule({controllers:[DiscoveryController,CustomerController],providers:[
   IdentityGuard,AccountGuard,{provide:CustomerService,useValue:service},
+  {provide:MarketplaceService,useValue:{offering:async()=>({id})}},
+  {provide:CustomerWriteGuard,useValue:{canActivate:()=>true}},
   {provide:IDENTITY_VERIFIER,useValue:{verifyAccessToken:async()=>identity}},
   {provide:AccessService,useValue:{state:async()=>({suspended,revokedAfter:null}),sessionRevoked:async()=>revoked}},
  ]}).compile();

@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {"noEmit": true, "rootDir": "../.."},
-  "include": ["src/**/*.ts", "test/m4-customer*.ts", "test/session-revocation.test.ts" ]
+  "include": ["src/**/*.ts", "scripts/export-openapi.ts", "test/m4-*.ts", "test/session-revocation.test.ts" ]
 }
