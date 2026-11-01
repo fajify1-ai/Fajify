@@ -4,7 +4,12 @@ import assert from 'node:assert/strict';
 import type {ExecutionContext} from '@nestjs/common';
 import type {Pool} from 'pg';
 import {CustomerWriteGuard} from '../src/customer/customer-write.guard';
-const context=(method:string,path:string,headers:Record<string,string>={})=>({switchToHttp:()=>({getRequest:()=>({method,route:{path},identity:{subject:'customer'}}),getResponse:()=>({setHeader:(name:string,value:string)=>{headers[name]=value;}})}) as unknown as ExecutionContext;
+const context=(method:string,path:string,headers:Record<string,string>={})=>({
+ switchToHttp:()=>({
+  getRequest:()=>({method,route:{path},identity:{subject:'customer'}}),
+  getResponse:()=>({setHeader:(name:string,value:string)=>{headers[name]=value;}}),
+ }),
+}) as unknown as ExecutionContext;
 test('write budget is shared by account, gives 429 with retry information, and exempts reads',async()=>{
  const sql:{query:string;values:unknown[]}[]=[];
  const guard=new CustomerWriteGuard({query:async(query:string,values:unknown[])=>{sql.push({query,values});return {rows:[{used:61}]};}} as unknown as Pool);
