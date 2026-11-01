@@ -21,10 +21,12 @@ test('customer HTTP contract: public filters, strict input, signed ownership, re
  const module=await Test.createTestingModule({controllers:[DiscoveryController,CustomerController],providers:[
   IdentityGuard,AccountGuard,{provide:CustomerService,useValue:service},
   {provide:MarketplaceService,useValue:{offering:async()=>({id})}},
-  {provide:CustomerWriteGuard,useValue:{canActivate:()=>true}},
   {provide:IDENTITY_VERIFIER,useValue:{verifyAccessToken:async()=>identity}},
   {provide:AccessService,useValue:{state:async()=>({suspended,revokedAfter:null}),sessionRevoked:async()=>revoked}},
- ]}).compile();
+ ]})
+  .overrideGuard(CustomerWriteGuard)
+  .useValue({canActivate:()=>true})
+  .compile();
  const app=module.createNestApplication();setupApi(app);await app.init();
  const http=app.getHttpServer();
  const auth=(r:import('supertest').Test)=>r.set('Authorization','Bearer signed.jwt.token');

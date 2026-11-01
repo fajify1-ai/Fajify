@@ -20,12 +20,15 @@ test('marketplace and account HTTP contracts validate public filters and preserv
  const mock=(names:string[])=>Object.fromEntries(names.map(method=>[method,(...args:unknown[])=>{calls.push({method,args});return {items:[],nextOffset:null};}]));
  const identity={subject:'customer-A',issuer:'https://example.invalid',audience:['faji-api'],roles:['customer'],issuedAt:1790000000,expiresAt:1990000000};
  const module=await Test.createTestingModule({controllers:[MarketplaceController,MerchantPublicController,CustomerAccountController],providers:[
-  IdentityGuard,AccountGuard,ResourceGuard,{provide:CustomerWriteGuard,useValue:{canActivate:()=>true}},
+  IdentityGuard,AccountGuard,ResourceGuard,
   {provide:IDENTITY_VERIFIER,useValue:{verifyAccessToken:async()=>identity}},
   {provide:AccessService,useValue:{state:async()=>({suspended:false,revokedAfter:null}),member:async()=>false}},
   {provide:MarketplaceService,useValue:mock(['venues','venue','reviews','plans','quote','publicProfile','replaceMedia','configurePackage'])},
   {provide:CustomerAccountService,useValue:mock(['profile','updateProfile','wishlist','save','unsave','review','reviews','withdrawReview','notifications','unread','readNotification','support','createSupport','supportDetail','messages','reply','closeSupport'])},
- ]}).compile();
+ ]})
+  .overrideGuard(CustomerWriteGuard)
+  .useValue({canActivate:()=>true})
+  .compile();
  const app=module.createNestApplication();setupApi(app);await app.init();const http=app.getHttpServer();
  const auth=(r:import('supertest').Test)=>r.set('Authorization','Bearer signed.jwt.token');
  try{
