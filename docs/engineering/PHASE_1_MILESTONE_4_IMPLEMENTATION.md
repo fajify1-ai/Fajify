@@ -86,3 +86,9 @@ The consolidated sequence covers source/database/test TypeScript checks; lint/bu
 Prepared database scenarios cover capacity contention, exactly-once retry effects/outbox records, cancellation release, ownership isolation, merchant inbox/status integration, paid/past-slot denial, revoked access, foreign/stale catalogue items, merchant public-content authorization, PostGIS radius selection, package guest/date/currency/budget/add-on rules, wishlist publication changes, completed-experience reviews and moderator suppression, notification privacy/idempotency, support retries/closure and shared write budgets across two API instances.
 
 No current acceptance count or successful migration claim is made until those local commands run at the final source commit and failures are resolved. Keep PR #16 draft until consolidated local results and P2/P3 contract review are recorded.
+
+## Local verification progress
+
+The local run at `a441dd1869fef68a3e48545133f251e632831e71` passed disposable-target validation, database/API/M4-test TypeScript checks, lint, build, all 11 migrations, runtime grants and all four reporter tests. Foundation database tests passed 10/11; the spatial-index fixture failed because it attempted temporary-table creation with the restricted runtime role. API tests, M4 acceptance, query-plan evidence, final contract equality and audit were not reached. The disposable cluster was stopped and removed.
+
+The fixture now exercises PostGIS calculations through the runtime role and performs temporary-table/index setup through the migration role. Runtime privileges are unchanged. This correction is pending the next consolidated local run; it is not a passing phase acceptance result.

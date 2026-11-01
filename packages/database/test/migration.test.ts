@@ -176,12 +176,14 @@ test('Drizzle rolls back profile, audit and outbox writes together',async()=>{
 });
 
 test('PostGIS geometry, geography, distance and GiST index work with synthetic coordinates',async()=>{
- const client=await runtime.connect();
+ // Application-role coverage is read-only. Fixture DDL belongs to the migrator,
+ // since the hardened disposable runtime deliberately has no TEMP privilege.
+ const spatial=await runtime.query("SELECT PostGIS_Version() AS version, ST_Distance(ST_Point(0,0),ST_Point(3,4)) AS planar, ST_Distance(ST_SetSRID(ST_Point(0,0),4326)::geography, ST_SetSRID(ST_Point(1,0),4326)::geography) AS metres");
+ assert.match(spatial.rows[0].version,/^\d+\.\d+/);assert.equal(spatial.rows[0].planar,5);
+ assert.ok(Math.abs(spatial.rows[0].metres-111319.490793)<1);
+ const client=await pool.connect();
  try{
   await client.query('BEGIN');
-  const spatial=await client.query("SELECT PostGIS_Version() AS version, ST_Distance(ST_Point(0,0),ST_Point(3,4)) AS planar, ST_Distance(ST_SetSRID(ST_Point(0,0),4326)::geography, ST_SetSRID(ST_Point(1,0),4326)::geography) AS metres");
-  assert.match(spatial.rows[0].version,/^\d+\.\d+/);assert.equal(spatial.rows[0].planar,5);
-  assert.ok(Math.abs(spatial.rows[0].metres-111319.490793)<1);
   await client.query('CREATE TEMP TABLE m1_spatial_fixture(position geometry(Point,4326)) ON COMMIT DROP');
   await client.query('INSERT INTO m1_spatial_fixture SELECT ST_SetSRID(ST_Point(n/1000.0,0),4326) FROM generate_series(1,1000) n');
   await client.query('CREATE INDEX m1_spatial_gist ON m1_spatial_fixture USING gist(position)');
@@ -205,3 +207,4 @@ test('runtime role is restricted and cannot connect to the isolated Keycloak sen
  await assert.rejects(runtime.query('CREATE TABLE public.m1_forbidden(id int)'),e=>code(e)==='42501');
  await assert.rejects(runtime.query("UPDATE _faji_migrations SET checksum='forbidden'"),e=>code(e)==='42501');
 });
+
