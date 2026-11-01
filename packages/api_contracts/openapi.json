@@ -946,6 +946,60 @@
           "finance-admin"
         ]
       }
+    },
+    "/api/v1/admin/finance/payments/{id}/provider-recheck": {
+      "post": {
+        "operationId": "PaymentRecoveryController_recheck_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRecheckResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Verified charge differs from local intent or receipt"
+          },
+          "503": {
+            "description": "Provider verification unavailable or transaction not successful; no capture posted"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Recover a missed notification by independently verifying the stored payment reference; no charge is initiated",
+        "tags": [
+          "finance-admin"
+        ]
+      }
     }
   },
   "info": {
@@ -1412,6 +1466,30 @@
           "internalStatus",
           "checks",
           "issues"
+        ]
+      },
+      "PaymentRecheckResponse": {
+        "type": "object",
+        "properties": {
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded"
+            ]
+          },
+          "replayed": {
+            "type": "boolean",
+            "description": "True when the matching capture was already posted"
+          }
+        },
+        "required": [
+          "paymentIntentId",
+          "status",
+          "replayed"
         ]
       }
     }

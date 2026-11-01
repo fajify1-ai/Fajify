@@ -3,6 +3,8 @@
 Status: proposed handoff contract while both Phase 1 workstreams are in progress.
 M4 branch inspected at `67ebc0add0ac0c402d706420a0eeca7bd1f7e8f0`;
 M5 foundation starts at `c493f9e71319e260bc01f9cd4432ac9b1fa34660`.
+M4 has since advanced to `92bc44b671e2a683283da6e3d3dcc680f41b95b2` independently;
+this M5 delivery does not merge or modify that branch.
 This document describes the integration to implement; it does not advertise a working
 checkout endpoint or authorize either branch to bypass the other's acceptance gate.
 
@@ -49,6 +51,13 @@ consume this event once, using a durable deduplication key. Raw provider payload
 browser redirects and a customer's `GET /customer/payments/{id}` response must never
 confirm bookings or issue tickets directly.
 
+The privileged M5 provider-recheck endpoint can emit that same event when it recovers
+a successful payment whose webhook was missed. It loads the existing intent's stored
+reference, independently verifies it and uses the same atomic capture rules. M4 must
+therefore consume the domain event based on the persisted purchase link regardless of
+whether the receipt's evidence source is `webhook` or `provider_recheck`. Repeated admin
+checks do not produce another capture event. No API accepts a claimed successful payment.
+
 When the hold is valid, lock its authoritative state and confirm once. Capture success
 does not imply that inventory is still available: if the hold expired, the order was
 cancelled, or eligibility was revoked, preserve the financial receipt and record a
@@ -67,6 +76,10 @@ renumbered to `0011_m5_payment_foundation.sql` before database acceptance. No M4
 or branch is changed by that adjustment. If an operator applied the older M5 draft
 filename in a disposable database, recreate that disposable database before rerunning;
 do not manually delete migration history or apply the renamed duplicate over it.
+M4 subsequently added `0011_m4_marketplace_accounts.sql`; the runner identifies and sorts
+the complete filenames, so both distinct 0011 files can coexist. M5 also adds
+`0012_m5_receipt_evidence.sql`. Preserve applied migration identities and verify the full
+combined migration set during integration rather than repeatedly renumbering drafts.
 
 When integrating, preserve both module registrations and both OpenAPI assertion sets,
 then regenerate the combined contract. Keep both M4 and M5 disposable markers supported

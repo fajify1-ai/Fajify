@@ -86,6 +86,29 @@ test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings 
   }finally{client.release();}
   assert.equal((await pool.query('SELECT status FROM payment_intents WHERE id=$1',[pending])).rows[0].status,'pending');
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM payment_receipts WHERE intent_id=$1',[pending])).rows[0].n,0);
+
+  // A missed webhook can be recovered; concurrent recovery and webhook attempts share one posting path.
+  const recoveryReference='faji_'+randomUUID();
+  const recoveryIntent=(await pool.query(`INSERT INTO payment_intents(customer_subject,business_id,request_key,provider_reference,environment,amount_minor,currency)
+   VALUES($1,$2,$3,$4,'test',12500,'NGN') RETURNING id`,[subject,business,randomUUID(),recoveryReference])).rows[0].id;
+  gateway.verify=async ref=>({...charge,id:(BigInt(charge.id)+1n).toString(),reference:ref});
+  const recoveryPayload=Buffer.from(JSON.stringify({event:'charge.success',data:{reference:recoveryReference}}));
+  const recoverySignature=createHmac('sha512',process.env.PAYSTACK_SECRET_KEY).update(recoveryPayload).digest('hex');
+  await Promise.all([
+   ...Array.from({length:6},()=>service.recheck('m5-admin-fixture',recoveryIntent)),
+   ...Array.from({length:6},()=>service.webhook(recoveryPayload,recoverySignature))
+  ]);
+  const recovered=(await pool.query(`SELECT r.evidence_source,r.verification_actor,
+   (SELECT count(*)::int FROM ledger_entries WHERE intent_id=r.intent_id) AS journals,
+   (SELECT count(*)::int FROM audit_events WHERE resource_id=r.intent_id AND action='payment.verified') AS captures,
+   (SELECT count(*)::int FROM audit_events WHERE resource_id=r.intent_id AND action='payment.provider_recheck_confirmed') AS rechecks
+   FROM payment_receipts r WHERE intent_id=$1`,[recoveryIntent])).rows[0];
+  assert.equal(recovered.journals,1);assert.equal(recovered.captures,1);assert.equal(recovered.rechecks,6);
+  assert.ok(['webhook','provider_recheck'].includes(recovered.evidence_source));
+  assert.equal(recovered.verification_actor,recovered.evidence_source==='webhook'?null:'m5-admin-fixture');
+  assert.equal((await reads.reconciliation('m5-admin-fixture',recoveryIntent)).internalStatus,'consistent');
+  for(const [source,actor] of [['provider_recheck',null],['webhook','untrusted-actor']])
+   await assert.rejects(pool.query("INSERT INTO payment_receipts(intent_id,provider_transaction_id,payload_sha256,evidence_source,verification_actor) VALUES($1,$2,repeat('b',64),$3,$4)",[pending,randomUUID(),source,actor]),{code:'23514'});
  }finally{await Promise.all([pool.end(),runtime.end()]);}
  // Preserve append-only evidence in this disposable database; discard the database after review.
 });

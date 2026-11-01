@@ -5,5 +5,6 @@ import {PaystackGateway} from './paystack.gateway';
 import {IdentityModule} from '../auth/identity.module';
 import {PaymentReadsService} from './payment-reads.service';
 import {CustomerPaymentsController,FinancePaymentsController} from './payment-reads.controller';
-@Module({imports:[IdentityModule],controllers:[PaymentsController,CustomerPaymentsController,FinancePaymentsController],providers:[PaymentsService,PaystackGateway,PaymentReadsService]})
+import {PaymentRecoveryController} from './payment-recovery.controller';
+@Module({imports:[IdentityModule],controllers:[PaymentsController,CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController],providers:[PaymentsService,PaystackGateway,PaymentReadsService]})
 export class PaymentsModule {}

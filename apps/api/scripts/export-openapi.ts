@@ -45,6 +45,10 @@ async function run(){
     !operation.parameters?.some(p=>'name' in p&&p.name==='id'&&p.in==='path'&&p.required))
     throw new Error('Missing protected M5 payment read contract: '+path);
   }
+  const recovery=doc.paths['/api/v1/admin/finance/payments/{id}/provider-recheck']?.post;
+  if(!recovery?.security?.some(v=>Object.hasOwn(v,'keycloak'))||!recovery.responses?.['200']||
+   !recovery.parameters?.some(p=>'name' in p&&p.name==='id'&&p.in==='path'&&p.required))
+   throw new Error('Missing privileged M5 provider-recheck contract');
   writeFileSync(resolve(__dirname,'../../../packages/api_contracts/openapi.json'),JSON.stringify(doc,null,2)+"\n");
  }finally{await app.close();}
 }

@@ -76,6 +76,35 @@ must be integrated before a checkout API is exposed. No customer/client amount i
   and the M5 database harness, and records the exact source commit. It refuses a dirty
   or wrong branch and refuses root. It is prepared and syntax-checked, not executed here.
 
+## Implemented in increment 3
+
+- `POST /api/v1/admin/finance/payments/{id}/provider-recheck` recovers a missed webhook
+  for an existing intent. It requires the same admin client, recent MFA, active/unrevoked
+  account and request quota as finance reconciliation. Its optional body must be empty;
+  client-provided references, prices, actors and success states are rejected.
+- The service loads the provider reference from the local intent and persists an attributed
+  request audit before contacting Paystack. Unknown intents or an unavailable audit store
+  prevent provider calls. This endpoint verifies an existing transaction and never initiates
+  a charge. An unsuccessful/unavailable provider response posts no capture.
+- Recovery and signed webhooks now share one locked capture transaction. The same reference,
+  amount, currency, environment and provider transaction identity rules apply to both paths.
+  A matching replay creates no additional receipt, journal or `payment.verified` event;
+  the admin recheck remains auditable. A failed confirmation audit rolls back the new capture.
+- Migration `0012_m5_receipt_evidence.sql` adds immutable receipt provenance. Webhook
+  receipts retain a digest of exact signed bytes; provider-recheck receipts retain a digest
+  of the normalized independently verified charge and require the authenticated admin actor.
+  Existing receipts default to webhook provenance. Original receipt evidence is never
+  overwritten by a later check. No card data or provider secret is stored in this evidence.
+- Unit/HTTP tests cover weak identities, client-supplied overrides, missing intents, provider
+  outages, mismatches, audit failures, successful recovery and repeat-safe results. The
+  PostgreSQL harness additionally prepares a race of six webhooks with six admin rechecks
+  and validates one capture plus consistent provenance; execution remains pending.
+
+This is on-demand capture recovery, not a scheduled reconciliation worker, provider-statement
+reconciliation, a refund/payout handler or a repair path for corrupted historical journals.
+Apply migration 0012 before deploying this API version. Older application code can ignore
+the additive columns; preserve existing receipts and migration history when rolling back.
+
 ## Configuration and provider contract
 
 Set `PAYSTACK_SECRET_KEY` through the deployment secret manager (`sk_test_...` for
@@ -110,8 +139,8 @@ financial actions. Do not infer a fee percentage or payout schedule from this fo
 
 ## Verification and acceptance limits
 
-Latest local verification: all 106 tests that do not require a database pass, including
-18 M5 unit/HTTP tests, with none skipped in that selected suite. API source and new-test
+Latest local verification: all 113 tests that do not require a database pass, including
+25 M5 unit/HTTP tests, with none skipped in that selected suite. API source and new-test
 typechecks, lint/build and database package typecheck pass. OpenAPI is regenerated
 through NestJS with required signed-webhook and protected read-contract assertions.
 The disposable launcher passes `bash -n`. Database checks are a separate gate.
@@ -150,6 +179,12 @@ Migration 0011 adds tables/functions/triggers without changing existing M3 data.
 draft was named `0010_m5_payment_foundation.sql`; it was renumbered before recorded database
 acceptance to reserve 0010 for M4. If that older draft was applied to a disposable target,
 recreate the target; do not apply the renamed duplicate over existing finance tables.
+M4 has since added its own `0011_m4_marketplace_accounts.sql` at branch head
+`92bc44b671e2a683283da6e3d3dcc680f41b95b2`. The migration runner keys and sorts complete
+filenames, so this distinct name does not collide with `0011_m5_payment_foundation.sql`.
+Retain both files and verify their combined ordering before integration; do not keep
+renumbering migrations that an operator may already have applied. The new M5 receipt
+provenance migration is `0012_m5_receipt_evidence.sql`.
 Keep this delivery as a draft until
 PostgreSQL acceptance and review pass. Runtime grants must be explicitly scoped; `PUBLIC`
 has no finance table privileges. Runtime roles must not own these tables or receive

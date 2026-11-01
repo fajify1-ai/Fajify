@@ -6,6 +6,8 @@ import request from 'supertest';
 import {NotFoundException} from '@nestjs/common';
 import {CustomerPaymentsController,FinancePaymentsController} from '../src/payments/payment-reads.controller';
 import {PaymentReadsService} from '../src/payments/payment-reads.service';
+import {PaymentRecoveryController} from '../src/payments/payment-recovery.controller';
+import {PaymentsService} from '../src/payments/payments.service';
 import {IdentityGuard} from '../src/auth/identity.guard';
 import {AccountGuard} from '../src/auth/account.guard';
 import {PrivilegedGuard} from '../src/auth/privileged.guard';
@@ -28,9 +30,10 @@ async function fixture(){
  };
  const access={state:async(subject:string)=>({suspended:subject==='suspended.jwt',revokedAfter:subject==='cutoff.jwt'?new Date(now*1000):null}),
   sessionRevoked:async(_subject:string,session:string)=>session==='revoked.jwt',allowPrivilegedRequest:async(subject:string)=>subject!=='limited.jwt'};
- const module=await Test.createTestingModule({controllers:[CustomerPaymentsController,FinancePaymentsController],providers:[
+ const recovery={recheck:async(subject:string,paymentId:string)=>{calls.push(['recheck',subject,paymentId]);return {paymentIntentId:paymentId,status:'succeeded',replayed:false};}};
+ const module=await Test.createTestingModule({controllers:[CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController],providers:[
   IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,{provide:IDENTITY_VERIFIER,useValue:verifier},
-  {provide:AccessService,useValue:access},{provide:PaymentReadsService,useValue:service}
+  {provide:AccessService,useValue:access},{provide:PaymentReadsService,useValue:service},{provide:PaymentsService,useValue:recovery}
  ]}).compile();
  const app=module.createNestApplication();setupApi(app);await app.init();
  return {app,calls};
@@ -72,5 +75,26 @@ test('M5 HTTP: read operations publish bearer-protected response and identifier 
   }
   assert.ok(doc.components?.schemas?.PaymentStatusResponse);
   assert.ok(doc.components?.schemas?.CaptureReconciliationResponse);
+  const recovery=doc.paths['/api/v1/admin/finance/payments/{id}/provider-recheck']?.post;
+  assert.ok(recovery?.security?.some(s=>Object.hasOwn(s,'keycloak')));assert.ok(recovery.responses?.['200']);
+  assert.ok(doc.components?.schemas?.PaymentRecheckResponse);
+ }finally{await app.close();}
+});
+
+test('M5 HTTP: provider recovery rejects weak identities, malformed IDs and client-supplied payment details',async()=>{
+ const {app,calls}=await fixture();const url='/api/v1/admin/finance/payments/'+id+'/provider-recheck';
+ const post=(token:string,path=url)=>request(app.getHttpServer()).post(path).set('Authorization','Bearer '+token);
+ try{
+  assert.equal((await request(app.getHttpServer()).post(url)).status,401);
+  for(const token of ['customer.jwt','nomfa.jwt','stalemfa.jwt','wrongclient.jwt','suspended.jwt','revoked.jwt','cutoff.jwt'])assert.equal((await post(token)).status,403);
+  assert.equal((await post('limited.jwt')).status,429);
+  assert.equal((await post('admin.jwt','/api/v1/admin/finance/payments/invalid/provider-recheck')).status,400);
+  for(const details of [{amountMinor:1},{reference:'untrusted'},{status:'succeeded'},{actor:'other-admin'}])
+   assert.equal((await post('admin.jwt').send(details)).status,400);
+  assert.equal(calls.length,0);
+  const result=await post('admin.jwt');assert.equal(result.status,200);
+  assert.equal(result.headers['cache-control'],'no-store');
+  assert.deepEqual(result.body,{paymentIntentId:id,status:'succeeded',replayed:false});
+  assert.deepEqual(calls,[['recheck','admin.jwt',id]]);
  }finally{await app.close();}
 });
