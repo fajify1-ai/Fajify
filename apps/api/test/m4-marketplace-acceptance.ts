@@ -127,7 +127,12 @@ test('customer data tables and helper functions do not grant access to PUBLIC',a
 });
 test('two API instances share one atomic write budget',async()=>{
  const one=new CustomerWriteGuard(runtime),two=new CustomerWriteGuard(runtime);
- const context={switchToHttp:()=>({getRequest:()=>({method:'POST',route:{path:'/customer/orders'},identity:identity(a)}),getResponse:()=>({setHeader:()=>{}})}) as unknown as ExecutionContext;
+ const context={
+  switchToHttp:()=>({
+   getRequest:()=>({method:'POST',route:{path:'/customer/orders'},identity:identity(a)}),
+   getResponse:()=>({setHeader:()=>{}}),
+  }),
+ } as unknown as ExecutionContext;
  for(let round=0;round<2;round++){
   await admin.query('DELETE FROM customer_request_buckets WHERE customer_subject=$1',[a]);
   const start=(await admin.query('SELECT floor(extract(epoch FROM clock_timestamp())/60)::text AS minute')).rows[0].minute;
