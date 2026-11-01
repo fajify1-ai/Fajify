@@ -830,6 +830,488 @@
           "merchant-administration"
         ]
       }
+    },
+    "/api/v1/discovery/offerings": {
+      "get": {
+        "operationId": "DiscoveryController_discover_v1",
+        "parameters": [
+          {
+            "name": "branchId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "product",
+                "service",
+                "package",
+                "event"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "location",
+            "required": false,
+            "in": "query",
+            "description": "Literal branch address match; no radius search.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferingPage"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/offerings/{id}": {
+      "get": {
+        "operationId": "DiscoveryController_detail_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferingView"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/offerings/{id}/availability": {
+      "get": {
+        "operationId": "DiscoveryController_slots_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlotPage"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/customer/reservations": {
+      "post": {
+        "operationId": "CustomerController_reserve_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerReservationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      },
+      "get": {
+        "operationId": "CustomerController_reservations_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/reservations/{id}": {
+      "get": {
+        "operationId": "CustomerController_reservation_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/reservations/{id}/cancellation": {
+      "post": {
+        "operationId": "CustomerController_cancelReservation_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/orders": {
+      "post": {
+        "operationId": "CustomerController_order_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerOrderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      },
+      "get": {
+        "operationId": "CustomerController_orders_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/orders/{id}": {
+      "get": {
+        "operationId": "CustomerController_orderDetail_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/orders/{id}/cancellation": {
+      "post": {
+        "operationId": "CustomerController_cancelOrder_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
     }
   },
   "info": {
@@ -1159,6 +1641,409 @@
         },
         "required": [
           "active"
+        ]
+      },
+      "OfferingView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "product",
+              "service",
+              "package",
+              "event"
+            ]
+          },
+          "priceMinor": {
+            "type": "string",
+            "description": "Integer minor units; string preserves bigint precision."
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "businessName",
+          "branchName",
+          "address",
+          "name",
+          "description",
+          "category",
+          "priceMinor",
+          "currency"
+        ]
+      },
+      "OfferingPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OfferingView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "SlotView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "catalogueId": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "remaining": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "catalogueId",
+          "startsAt",
+          "endsAt",
+          "remaining"
+        ]
+      },
+      "SlotPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlotView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "CustomerReservationInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "availabilityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "guests": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "guestName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "requestKey",
+          "availabilityId",
+          "guests",
+          "guestName"
+        ]
+      },
+      "ReservationView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "availabilityId": {
+            "type": "string"
+          },
+          "guests": {
+            "type": "number"
+          },
+          "guestName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "checked_in",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "availabilityId",
+          "guests",
+          "guestName",
+          "status",
+          "createdAt"
+        ]
+      },
+      "ReservationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "CustomerOrderLine": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "expectedPriceMinor": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,18})$",
+            "description": "Last displayed unit price, in minor units. Server rejects a changed price."
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity",
+          "expectedPriceMinor"
+        ]
+      },
+      "CustomerOrderInput": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerOrderLine"
+            }
+          }
+        },
+        "required": [
+          "branchId",
+          "requestKey",
+          "items"
+        ]
+      },
+      "OrderItemView": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPriceMinor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity",
+          "unitPriceMinor"
+        ]
+      },
+      "OrderDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "placed",
+              "accepted",
+              "preparing",
+              "ready",
+              "fulfilled",
+              "cancelled"
+            ]
+          },
+          "totalMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemView"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "status",
+          "totalMinor",
+          "currency",
+          "createdAt",
+          "items"
+        ]
+      },
+      "OrderView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "placed",
+              "accepted",
+              "preparing",
+              "ready",
+              "fulfilled",
+              "cancelled"
+            ]
+          },
+          "totalMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "status",
+          "totalMinor",
+          "currency",
+          "createdAt"
+        ]
+      },
+      "OrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
         ]
       }
     }
