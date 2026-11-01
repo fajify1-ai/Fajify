@@ -17,10 +17,11 @@ export function apiDocument(app:import('@nestjs/common').INestApplication){
 }
 async function bootstrap(){
  const {AppModule}=await import('./app.module');
- const app=await NestFactory.create(AppModule,{bufferLogs:true});
+ const app=await NestFactory.create(AppModule,{bufferLogs:true,rawBody:true});
  setupApi(app);
  if(process.env.NODE_ENV!=='production') SwaggerModule.setup('api/docs',app,apiDocument(app));
  app.enableShutdownHooks();
  await app.listen(Number(process.env.PORT??3001),'0.0.0.0');
 }
 if(require.main===module)bootstrap().catch(e=>{console.error('API bootstrap failed',e instanceof Error?e.message:'unknown');process.exitCode=1;});
+

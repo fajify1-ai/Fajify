@@ -36,7 +36,11 @@ async function run(){
    if(hasBody&&!operation.requestBody)
     throw new Error('Missing M3 request body schema: '+verb+' '+suffix);
   }
+  const webhook=doc.paths['/api/v1/payments/webhooks/paystack']?.post;
+  if(!webhook?.requestBody||!webhook.parameters?.some(p=>'name' in p&&p.name==='x-paystack-signature'&&p.required))
+   throw new Error('Missing signed M5 payment webhook contract');
   writeFileSync(resolve(__dirname,'../../../packages/api_contracts/openapi.json'),JSON.stringify(doc,null,2)+"\n");
  }finally{await app.close();}
 }
 run().catch(err=>{console.error(err);process.exitCode=1;});
+

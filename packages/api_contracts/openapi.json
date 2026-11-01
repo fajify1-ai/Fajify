@@ -830,6 +830,48 @@
           "merchant-administration"
         ]
       }
+    },
+    "/api/v1/payments/webhooks/paystack": {
+      "post": {
+        "operationId": "PaymentsController_webhook_v1",
+        "parameters": [
+          {
+            "name": "x-paystack-signature",
+            "in": "header",
+            "description": "HMAC-SHA512 over the exact raw request bytes",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event accepted or safely replayed"
+          },
+          "401": {
+            "description": "Signature rejected"
+          },
+          "503": {
+            "description": "Provider verification unavailable; retry notification"
+          }
+        },
+        "summary": "Signed Paystack notification; independently verified before posting funds",
+        "tags": [
+          "payments"
+        ]
+      }
     }
   },
   "info": {
