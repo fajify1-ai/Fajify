@@ -9,7 +9,9 @@ cd "$(dirname "$0")/.."
 : "${FAJI_KEYCLOAK_TEST_URL:?Isolated identity sentinel URL required}"
 [[ "${FAJI_DISPOSABLE_DATABASE:-}" =~ ^fajify_m4_test_[a-z0-9_]+$ ]] || { echo 'M4 disposable name required' >&2; exit 2; }
 source_commit="$(git rev-parse HEAD)"
-report_dir="$(mktemp -d /tmp/fajify-m4-report.XXXXXXXX)"
+report_dir="${FAJI_M4_REPORT_DIR:-}"
+if [[ -z "$report_dir" ]]; then report_dir="$(mktemp -d /tmp/fajify-m4-report.XXXXXXXX)"; fi
+[[ -d "$report_dir" ]] || { echo 'Report directory does not exist' >&2; exit 2; }
 finish(){
  status=$?
  trap - EXIT
@@ -35,10 +37,14 @@ run_check m4-test-types no corepack pnpm@9.15.9 --filter @faji/api exec tsc -p t
 run_check lint no corepack pnpm@9.15.9 --filter @faji/api lint
 run_check build no corepack pnpm@9.15.9 --filter @faji/api build
 run_check migrations no corepack pnpm@9.15.9 --filter @faji/database exec node --import tsx scripts/migrate.ts
+grant_runtime(){
 PGDATABASE="$FAJI_DISPOSABLE_DATABASE" "${FAJI_PG_BIN:-/usr/lib/postgresql/16/bin}/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
 GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,audit_events,account_access,resource_memberships,identity_security_events,revoked_identity_sessions,business_onboarding,outbox_events,business_branches,business_catalogue,business_availability,business_reservations,business_orders,business_order_items,business_branch_hours,business_event_config,business_package_components,customer_request_keys,business_public_profiles,business_public_media,business_public_packages,business_package_addons,customer_wishlist,customer_reviews,customer_notifications,customer_support_cases,customer_support_messages,customer_request_buckets TO m4_runtime;
 GRANT EXECUTE ON FUNCTION faji_customer_notification() TO m4_runtime;
 SQL
+}
+run_check runtime-grants no grant_runtime
+run_check report-tests yes node --test --test-reporter=tap tooling/m4-verification-report.test.mjs
 run_check database-tests yes bash -c 'cd packages/database; node --import tsx --test --test-reporter=tap test/*.test.ts'
 run_check api-tests yes bash -c 'cd apps/api; node --import tsx --test --test-reporter=tap test/*.test.ts'
 run_check m4-postgres-tests yes bash -c 'cd apps/api; node --import tsx --test --test-reporter=tap test/m4-customer-acceptance.ts test/m4-marketplace-acceptance.ts'
@@ -47,4 +53,7 @@ run_check contracts no corepack pnpm@9.15.9 --filter @faji/api contracts
 run_check contract-snapshot no git diff --exit-code -- packages/api_contracts/openapi.json
 run_check source-whitespace no git diff --check 728fd1ca457f838e4e8a365e963420bce7b49bac HEAD
 run_check dependency-audit no corepack pnpm@9.15.9 audit --audit-level high
-[[ "$(git rev-parse HEAD)" == "$source_commit" && -z "$(git status --porcelain)" ]] || { echo 'Source changed during verification' >&2; exit 2; }
+check_source(){
+ [[ "$(git rev-parse HEAD)" == "$source_commit" && -z "$(git status --porcelain)" ]] || { echo 'Source changed during verification' >&2; return 2; }
+}
+run_check source-unchanged no check_source

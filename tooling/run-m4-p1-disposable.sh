@@ -12,11 +12,38 @@ test -f /usr/share/postgresql/16/extension/postgis.control
 run_dir="$(mktemp -d /tmp/fajify-m4-acceptance.XXXXXXXX)"
 chmod 700 "$run_dir"
 cleanup(){
- status=$?
- if [[ -f "$run_dir/data/postmaster.pid" ]]; then "$pg_bin/pg_ctl" -D "$run_dir/data" -m immediate -w stop >/dev/null 2>&1 || true; fi
+ local status=$? remove_cluster=true
+ trap - EXIT
+ if [[ -f "$run_dir/data/postmaster.pid" ]]; then
+  if ! "$pg_bin/pg_ctl" -D "$run_dir/data" -m immediate -w stop >/dev/null 2>&1; then
+   echo "CLEANUP FAILED: PostgreSQL could not stop; preserve $run_dir for recovery" >&2
+   status=1
+   remove_cluster=false
+  fi
+ fi
  if [[ "$status" -ne 0 ]]; then tail -30 "$run_dir/postgres.log" 2>/dev/null || true; fi
- rm -rf -- "$run_dir"
- echo 'CLEANUP: disposable M4 PostgreSQL cluster removed'
+ if [[ "$remove_cluster" == true ]]; then
+  if rm -rf -- "$run_dir"; then
+   echo 'CLEANUP: disposable M4 PostgreSQL cluster removed'
+  else
+   status=1
+   remove_cluster=false
+   echo 'CLEANUP FAILED: disposable files could not be removed' >&2
+  fi
+ fi
+ if [[ -n "${FAJI_M4_REPORT_DIR:-}" && -f "$FAJI_M4_REPORT_DIR/acceptance.json" ]]; then
+  if ! node - "$FAJI_M4_REPORT_DIR/acceptance.json" "$remove_cluster" <<'JS'
+const fs=require('node:fs');
+const path=process.argv[2],clean=process.argv[3]==='true';
+const report=JSON.parse(fs.readFileSync(path,'utf8'));
+report.clusterCleanup={success:clean};
+if(!clean){report.result='FAIL';report.problems.push('Disposable cluster cleanup failed; operator recovery required');}
+fs.writeFileSync(path,JSON.stringify(report,null,2)+'\n');
+if(!clean)console.error('M4-P1 FAIL: disposable cluster cleanup did not complete');
+JS
+  then status=1; fi
+ fi
+ exit "$status"
 }
 trap cleanup EXIT
 rand(){ node -e 'process.stdout.write(require("node:crypto").randomBytes(16).toString("hex"))'; }
@@ -58,5 +85,6 @@ export S3_ENDPOINT="http://localhost:9000"
 export S3_BUCKET=faji
 echo "SOURCE: $(git rev-parse HEAD)"
 echo "DISPOSABLE DATABASE: $FAJI_DISPOSABLE_DATABASE"
+export FAJI_M4_REPORT_DIR="$(mktemp -d /tmp/fajify-m4-report.XXXXXXXX)"
 bash tooling/verify-m4-p1-consolidated.sh
 
