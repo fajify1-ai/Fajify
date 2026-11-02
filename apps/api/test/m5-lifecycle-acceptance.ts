@@ -134,7 +134,7 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
    await operations.cancelResource('order',o.order);assert.equal((await admin.query("SELECT amount_minor::text FROM finance_refunds WHERE intent_id=$1 AND request_key='system-unfulfilled'",[o.id])).rows[0].amount_minor,'7001');
   });
   await t.test('failed order retry keeps stable attempts and late old success never confirms a second purchase',async()=>{
-   const f=await fixture(),o=await order(f);await checkout(o.id);const p=(await admin.query('SELECT provider_reference FROM payment_intents WHERE id=$1',[o.id])).rows[0];fake.transactions.get(p.provider_reference).status='failed';
+   const f=await fixture(),o=await order(f);const foreign=await order(f),extra=await order(f);await assert.rejects(admin.query('INSERT INTO payment_order_attempts(intent_id,order_id,previous_intent_id) VALUES($1,$2,$3)',[extra.id,o.order,foreign.id]),/same unpaid order/);await checkout(o.id);const p=(await admin.query('SELECT provider_reference FROM payment_intents WHERE id=$1',[o.id])).rows[0];fake.transactions.get(p.provider_reference).status='failed';
    const key=randomUUID(),retry=await commerce.retryOrder(identity(a),o.order,o.id,key);assert.equal((await commerce.retryOrder(identity(a),o.order,o.id,key)).paymentIntentId,retry.paymentIntentId);await checkout(retry.paymentIntentId);await capture(retry.paymentIntentId);await capture(o.id);
    assert.equal((await admin.query('SELECT resolution FROM payment_terms WHERE intent_id=$1',[o.id])).rows[0].resolution,'refund_required');assert.equal((await admin.query('SELECT resolution FROM payment_terms WHERE intent_id=$1',[retry.paymentIntentId])).rows[0].resolution,'confirmed');
   });

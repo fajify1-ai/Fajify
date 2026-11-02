@@ -55,7 +55,7 @@ export class CommerceLifecycle {
  }
  async validatePurchase(c:PoolClient,p:FinanceIntent){
   const linked=(await c.query('SELECT order_id FROM finance_order_links WHERE intent_id=$1',[p.id])).rows[0];
-  if(linked){const current=(await c.query('SELECT intent_id FROM payment_order_current WHERE order_id=$1',[linked.order_id])).rows[0];if(current&&current.intent_id!==p.id)throw new ConflictException('Payment attempt was superseded');}
+  if(linked){const current=(await c.query('SELECT coalesce(n.intent_id,l.intent_id) AS intent_id FROM payment_order_links l LEFT JOIN payment_order_current n ON n.order_id=l.order_id WHERE l.order_id=$1',[linked.order_id])).rows[0];if(!current||current.intent_id!==p.id)throw new ConflictException('Payment attempt was superseded or is not the current order attempt');}
   if(linked){const order=(await c.query('SELECT status,business_id,branch_id FROM business_orders WHERE id=$1 FOR UPDATE',[linked.order_id])).rows[0];if(!order||order.status!=='placed')throw new ConflictException('Order no longer payable');
    if(!(await c.query("SELECT 1 FROM business_branches b JOIN business_onboarding m ON m.id=b.business_id WHERE b.id=$1 AND b.active AND m.status='approved' FOR SHARE OF b,m",[order.branch_id])).rowCount)throw new ConflictException('Merchant unavailable');return;
   }

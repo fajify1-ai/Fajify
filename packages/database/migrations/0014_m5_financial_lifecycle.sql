@@ -41,15 +41,34 @@ CREATE FUNCTION m5_current_order_guard() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE previous uuid; expected uuid;
 BEGIN
  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Current payment attempt cannot be removed'; END IF;
+ IF TG_OP='UPDATE' AND NEW.order_id<>OLD.order_id THEN RAISE EXCEPTION 'M5: Retry chain order is immutable'; END IF;
  IF TG_OP='UPDATE' THEN previous:=OLD.intent_id; ELSE SELECT intent_id INTO previous FROM payment_order_links WHERE order_id=NEW.order_id; END IF;
  SELECT previous_intent_id INTO expected FROM payment_order_attempts WHERE intent_id=NEW.intent_id AND order_id=NEW.order_id;
- IF expected IS NULL OR (previous<>NEW.intent_id AND expected<>previous) OR
+ IF expected IS NULL OR previous IS NULL OR (previous<>NEW.intent_id AND expected<>previous) OR
   (previous<>NEW.intent_id AND EXISTS(SELECT 1 FROM payment_intents WHERE id=previous AND status='succeeded'))
  THEN RAISE EXCEPTION 'Invalid or already paid order retry'; END IF;
  RETURN NEW;
 END;
 $$;
 CREATE TRIGGER payment_order_current_guard BEFORE INSERT OR UPDATE OR DELETE ON payment_order_current FOR EACH ROW EXECUTE FUNCTION m5_current_order_guard();
+CREATE FUNCTION m5_attempt_chain_guard() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ PERFORM 1 FROM payment_intents WHERE id=NEW.intent_id FOR UPDATE;
+ IF EXISTS(SELECT 1 FROM finance_order_links WHERE intent_id=NEW.intent_id) OR NOT EXISTS(SELECT 1 FROM payment_order_links l LEFT JOIN payment_order_current n ON n.order_id=l.order_id JOIN payment_intents p ON p.id=coalesce(n.intent_id,l.intent_id) WHERE l.order_id=NEW.order_id AND p.id=NEW.previous_intent_id AND p.status='pending')
+ THEN RAISE EXCEPTION 'M5: Retry parent must belong to the same unpaid order'; END IF;
+ RETURN NEW;
+END;
+$$;
+CREATE TRIGGER payment_order_attempt_chain BEFORE INSERT ON payment_order_attempts FOR EACH ROW EXECUTE FUNCTION m5_attempt_chain_guard();
+CREATE FUNCTION m5_root_intent_guard() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ PERFORM 1 FROM payment_intents WHERE id=NEW.intent_id FOR UPDATE;
+ IF EXISTS(SELECT 1 FROM finance_order_links WHERE intent_id=NEW.intent_id)
+ THEN RAISE EXCEPTION 'M5: An intent cannot belong to multiple order attempts'; END IF;
+ RETURN NEW;
+END;
+$$;
+CREATE TRIGGER payment_order_root_guard BEFORE INSERT ON payment_order_links FOR EACH ROW EXECUTE FUNCTION m5_root_intent_guard();
 CREATE FUNCTION m5_paid_order_transition() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE payment uuid;
 BEGIN
