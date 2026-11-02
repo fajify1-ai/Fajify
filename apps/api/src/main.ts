@@ -24,4 +24,3 @@ async function bootstrap(){
  await app.listen(Number(process.env.PORT??3001),'0.0.0.0');
 }
 if(require.main===module)bootstrap().catch(e=>{console.error('API bootstrap failed',e instanceof Error?e.message:'unknown');process.exitCode=1;});
-
