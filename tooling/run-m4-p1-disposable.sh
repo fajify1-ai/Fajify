@@ -87,4 +87,3 @@ echo "SOURCE: $(git rev-parse HEAD)"
 echo "DISPOSABLE DATABASE: $FAJI_DISPOSABLE_DATABASE"
 export FAJI_M4_REPORT_DIR="$(mktemp -d /tmp/fajify-m4-report.XXXXXXXX)"
 bash tooling/verify-m4-p1-consolidated.sh
-

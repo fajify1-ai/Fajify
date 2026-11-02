@@ -8,4 +8,3 @@ import {CustomerModule} from './customer/customer.module';
 import {validateEnvironment} from './config';
 @Module({imports:[ConfigModule.forRoot({isGlobal:true,validate:validateEnvironment}),DatabaseModule,IdentityModule,BusinessModule,CustomerModule],controllers:[HealthController]})
 export class AppModule {}
-

@@ -20,4 +20,3 @@ if(require.main===module){
   .catch(()=>{console.error('BLOCKED: disposable database preflight failed (connection details withheld)');process.exitCode=1;})
   .finally(()=>pool.end());
 }
-

@@ -23,4 +23,3 @@ test('session revocation rolls back if audit fails',async()=>{
  await assert.rejects(new AccessService(pool).revokeSession('subject-1','sid-1'),/audit down/);
  assert.equal(queries.at(-1),'ROLLBACK');
 });
-
