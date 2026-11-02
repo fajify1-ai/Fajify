@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {isDeepStrictEqual} from 'node:util';
+import {M5_OPERATIONS} from '../src/payments/m5-contracts';
 import {M4_OPERATIONS} from '../src/customer/customer-contracts';
 import {resolve} from 'node:path';
 import {NestFactory} from '@nestjs/core';
@@ -69,10 +70,20 @@ async function run(){
    if(!response||!('content' in response)||!response.content?.['application/json']?.schema)
     throw new Error('Missing M4 response schema: '+contract.method+' '+contract.path);
   }
+  for(const [path,method,body] of M5_OPERATIONS){
+   const op=doc.paths[path]?.[method];
+   if(!op?.security?.some(s=>Object.hasOwn(s,'keycloak')))throw new Error('Missing protected M5 lifecycle operation: '+method+' '+path);
+   if(body&&!op.requestBody)throw new Error('Missing M5 lifecycle body: '+path);
+   const response=op.responses['200'];
+   if(!response||!('content' in response)||!response.content?.['application/json']?.schema)throw new Error('Missing M5 lifecycle response: '+path);
+   if(method==='get'&&!op.parameters?.some(p=>'name' in p&&p.in==='query'&&p.name==='limit'))throw new Error('Missing M5 pagination: '+path);
+   for(const name of [...path.matchAll(/\{([^}]+)\}/g)].map(m=>m[1]))
+    if(!op.parameters?.some(p=>'name' in p&&p.name===name&&p.in==='path'&&p.required))throw new Error('Missing M5 lifecycle path parameter: '+path);
+  }
   const snapshot=resolve(__dirname,'../../../packages/api_contracts/openapi.json');
   const previous=JSON.parse(readFileSync(snapshot,'utf8')) as typeof doc;
   for(const [path,operation] of Object.entries(previous.paths))
-   if(!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!isDeepStrictEqual(doc.paths[path],operation))
+   if(!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!isDeepStrictEqual(doc.paths[path],operation))
     throw new Error('Existing identity/merchant contract changed: '+path);
   for(const [name,schema] of Object.entries(previous.components?.schemas??{}))
    if(!isDeepStrictEqual(doc.components?.schemas?.[name],schema))throw new Error('Existing schema changed: '+name);

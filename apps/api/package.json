@@ -11,7 +11,8 @@
     "test": "node --import tsx --test test/*.test.ts",
     "contracts": "node --import tsx scripts/export-openapi.ts",
     "test:database": "node --import tsx --test test/*.database.test.ts",
-    "test:m5:database": "node --import tsx --test test/m5-payment-acceptance.ts"
+    "test:m5:database": "node --import tsx --test --test-concurrency=1 test/m5-payment-acceptance.ts test/m5-lifecycle-acceptance.ts",
+    "worker:finance": "node dist/payments/m5-worker.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
@@ -41,4 +42,3 @@
     "typescript": "^5.8.0"
   }
 }
-

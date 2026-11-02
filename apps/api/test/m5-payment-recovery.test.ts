@@ -6,6 +6,7 @@ import type {Pool} from 'pg';
 import {ConflictException,NotFoundException,ServiceUnavailableException} from '@nestjs/common';
 import {PaystackGateway} from '../src/payments/paystack.gateway';
 import {PaymentsService} from '../src/payments/payments.service';
+import {captureDependencies} from './m5-capture-fixtures';
 
 const id='ae5d7bce-c422-4eae-bf45-e68e46c06c11',reference='faji_stored_reference';
 function fixture(options:{missing?:boolean;prior?:string;amount?:string;currency?:string;environment?:string;providerReference?:string;providerFails?:boolean;auditFails?:boolean;confirmedAuditFails?:boolean}={}){
@@ -14,6 +15,7 @@ function fixture(options:{missing?:boolean;prior?:string;amount?:string;currency
  const charge={id:'123',reference:options.providerReference??reference,amountMinor:12500,currency:'NGN',environment:'test' as const};
  const client={query:async(query:string,args?:unknown[])=>{
   calls.push({query,args});
+  if(query.startsWith('SELECT business_id FROM payment_intents'))return {rowCount:1,rows:[{business_id:id}]};
   if(query.startsWith('SELECT id,amount_minor'))return {rowCount:1,rows:[{id,amount_minor:options.amount??'12500',currency:options.currency??'NGN',environment:options.environment??'test',status:options.prior?'succeeded':'pending'}]};
   if(query.startsWith('SELECT provider_transaction_id'))return {rowCount:options.prior?1:0,rows:options.prior?[{provider_transaction_id:options.prior}]:[]};
   if(options.confirmedAuditFails&&query.includes('provider_recheck_confirmed'))throw Error('confirmation audit unavailable');
@@ -27,7 +29,7 @@ function fixture(options:{missing?:boolean;prior?:string;amount?:string;currency
  },connect:async()=>client} as unknown as Pool;
  const gateway=new PaystackGateway();
  gateway.verify=async(storedReference:string)=>{outbound++;assert.equal(storedReference,reference);if(options.providerFails)throw new ServiceUnavailableException();return charge;};
- return {service:new PaymentsService(pool,gateway),calls,charge,outbound:()=>outbound};
+ return {service:new PaymentsService(pool,gateway,...captureDependencies()),calls,charge,outbound:()=>outbound};
 }
 test('M5 recovery: selects stored reference, audits actor and posts normalized provider evidence',async()=>{
  const f=fixture();

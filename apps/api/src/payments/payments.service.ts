@@ -3,18 +3,23 @@ import {BadRequestException,ConflictException,Inject,Injectable,NotFoundExceptio
 import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 import {PaystackGateway,type VerifiedCharge} from './paystack.gateway';
+import {CommerceLifecycle} from './commerce-lifecycle.service';
+import {FinancialOperations} from './financial-operations.service';
+import {parseProviderJson} from './finance-provider';
+import type {FinanceIntent} from './finance-ledger.service';
 
-type Intent={id:string;amount_minor:string;currency:string;environment:'test'|'live';status:'pending'|'succeeded'};
+type Intent=FinanceIntent;
 @Injectable()
 export class PaymentsService {
- constructor(@Inject(DATABASE_POOL)private readonly pool:Pool,@Inject(PaystackGateway)private readonly gateway:PaystackGateway){}
+ constructor(@Inject(DATABASE_POOL)private readonly pool:Pool,@Inject(PaystackGateway)private readonly gateway:PaystackGateway,
+  @Inject(CommerceLifecycle)private readonly commerce:CommerceLifecycle,@Inject(FinancialOperations)private readonly operations:FinancialOperations){}
 
  async webhook(raw:Buffer,signature:unknown){
   this.gateway.verifySignature(raw,signature);
   let event:{event?:unknown;data?:{reference?:unknown}};
-  try{event=JSON.parse(raw.toString('utf8'));}catch{throw new BadRequestException('Invalid payment event');}
+  try{event=parseProviderJson(raw.toString('utf8'));}catch{throw new BadRequestException('Invalid payment event');}
   if(!event||typeof event!=='object'||Array.isArray(event))throw new BadRequestException('Invalid payment event');
-  if(event.event!=='charge.success')return {received:true};
+  if(event.event!=='charge.success'){await this.operations.providerEvent(event);return {received:true};}
   const reference=event.data?.reference;
   if(typeof reference!=='string'||! /^[A-Za-z0-9_-]{8,100}$/.test(reference))throw new BadRequestException('Invalid payment reference');
   // Look up before outbound verification; unknown references never create an intent.
@@ -43,7 +48,10 @@ export class PaymentsService {
   const client=await this.pool.connect();
   try{
    await client.query('BEGIN');
-   const result=await client.query<Intent>('SELECT id,amount_minor::text,currency,environment,status FROM payment_intents WHERE provider_reference=$1 FOR UPDATE',[reference]);
+   const scope=(await client.query('SELECT business_id FROM payment_intents WHERE provider_reference=$1',[reference])).rows[0];
+   if(!scope)throw new NotFoundException('Payment intent not found');
+   await this.commerce.ledger.lock(client,scope.business_id);
+   const result=await client.query<Intent>('SELECT id,amount_minor::text,currency,environment,status,business_id,customer_subject,provider_reference FROM payment_intents WHERE provider_reference=$1 FOR UPDATE',[reference]);
    const intent=result.rows[0];
    if(!intent)throw new NotFoundException('Payment intent not found');
    if(reference!==charge.reference||BigInt(intent.amount_minor)!==BigInt(charge.amountMinor)||intent.currency!==charge.currency||intent.environment!==charge.environment)
@@ -61,9 +69,14 @@ export class PaymentsService {
     WHERE d.code='gateway_clearing' AND c.code='customer_funds' AND d.currency=$2 AND c.currency=$2 RETURNING id`,[intent.id,intent.currency,intent.amount_minor]);
    if(journal.rowCount!==1)throw new ConflictException('Ledger accounts unavailable');
    await client.query("UPDATE payment_intents SET status='succeeded',verified_at=now() WHERE id=$1",[intent.id]);
+   const captured={...intent,status:'succeeded'};
+   await this.commerce.ledger.environment(client,intent.environment);
+   await this.commerce.ledger.fee(client,captured,charge.feeMinor);
+   await this.commerce.captured(client,captured);
    await client.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'payment.verified','payment_intent',$2)",[evidence.actor,intent.id]);
    await client.query("INSERT INTO outbox_events(event_type,payload) VALUES('payment.verified',$1)",[JSON.stringify({paymentIntentId:intent.id})]);
    if(evidence.actor)await this.auditRecheck(client,evidence.actor,intent.id);
+   await this.commerce.ledger.enqueue(client,'payment',intent.id,30);
    await client.query('COMMIT');
    return {paymentIntentId:intent.id,status:'succeeded' as const,replayed:false};
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}

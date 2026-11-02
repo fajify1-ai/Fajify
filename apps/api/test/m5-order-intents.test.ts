@@ -30,7 +30,7 @@ test('M5 order intents: persist server total, owner, reference and link without 
  assert.equal(result.checkoutEnabled,false);assert.equal(result.status,'pending');
  const created=f.queries.find(q=>q.sql.startsWith('INSERT INTO payment_intents'))!;
  assert.deepEqual(created.args?.slice(1,4),['customer',other,'retry_key']);
- assert.match(String(created.args?.[4]),/^faji_[a-f0-9-]+$/);
+ assert.match(String(created.args?.[4]),/^faji-[a-f0-9-]+$/);
  assert.equal(created.args?.[6],'9007199254740991');
  assert.ok(f.queries.some(q=>q.sql.startsWith('INSERT INTO payment_order_links')));
  assert.ok(f.queries.some(q=>q.sql.includes('payment.intent_prepared')));

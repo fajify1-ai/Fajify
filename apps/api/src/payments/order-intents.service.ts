@@ -40,7 +40,7 @@ export class OrderIntentsService {
     throw new ConflictException('Order is not eligible for payment preparation');
    const id=randomUUID();
    await c.query(`INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider_reference,environment,amount_minor,currency)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,[id,identity.subject,purchase.business_id,key,'faji_'+randomUUID(),environment,purchase.total_minor,purchase.currency]);
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,[id,identity.subject,purchase.business_id,key,'faji-'+randomUUID(),environment,purchase.total_minor,purchase.currency]);
    await c.query('INSERT INTO payment_order_links(order_id,intent_id) VALUES($1,$2)',[orderId,id]);
    await c.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'payment.intent_prepared','payment_intent',$2)",[identity.subject,id]);
    await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('payment.intent_prepared',$1)",[JSON.stringify({paymentIntentId:id,orderId:orderId.toLowerCase()})]);

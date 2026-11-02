@@ -1,237 +1,224 @@
 # M5 · Phase 1 · Payments, ticketing and financial operations
 
-## Baseline and delivery status
+Engineering implementation covers work packages 5.1–5.6 on
+`feat/m5-p1-payment-foundation`, based on the accepted M4-P1 merge
+`b393483066d01cda13b491d1eda89ad2dc4222a5`. PR: https://github.com/fajify1-ai/Fajify/pull/17.
+Consolidated local PostgreSQL acceptance and review are pending. This record does not
+mark M5 or its other phases accepted.
 
-### M4 integration — 2 November 2026
+## Delivered scope
 
-The user reported M4-P1 locally verified, accepted and merged. GitHub `main` is confirmed
-at `b393483066d01cda13b491d1eda89ad2dc4222a5`; M5 now integrates that exact merged
-foundation. Both customer/payment module registrations, all M4/M5 exporter assertions,
-M1–M5 disposable markers, Zod 4.6.6 and the Multer 2.5.0 security override are retained.
-The combined contract preserves every path and schema in both prior snapshots.
+| Package | Backend implementation | Primary verification |
+| --- | --- | --- |
+| 5.1 Gateway | Bound order intents; server-priced service/event holds; durable Paystack initialization; stable references; signed raw webhooks; independent capture verification; same-reference initialization recovery; explicit independently verified failed order retries | Existing capture/recovery tests; lifecycle HTTP tests; fake-provider adapter tests; PostgreSQL lifecycle scenarios |
+| 5.2 Ledger | Immutable capture evidence; balanced debit/credit transfers; merchant-owned payable/recovery accounts; explicit versioned commission and fee policies; purchase snapshots; fee allocation, audit, private balances | Exact BigInt conservation/rounding tests; immutable/scope checks and fee assertions in PostgreSQL acceptance |
+| 5.3 Paid bookings | Atomic shared capacity holds; checkout; confirm once inside capture transaction; expiration; policy-bound cancellation; late or superseded capture becomes a refund obligation | Concurrent seat/retry/expiry/capture/cancellation scenarios |
+| 5.4 Tickets | Merchant-configured event inventory; atomic holds and issuance; owned history; opaque signed QR tokens with retained key versions; branch-authorized single redemption and revocation | Signing/tamper/rotation tests; concurrent redemption and wrong-branch PostgreSQL scenarios |
+| 5.5 Refunds/disputes | Customer requests; privileged decisions; reserves before provider submission; canonical provider confirmation; compensating failure journals; ambiguous response discovery; external refund adoption; chargeback reserves and partial loss/win resolution | Lost-response/no-repeat-POST tests; partial/failed/excess refunds, disputes and compensating journals in PostgreSQL scenarios |
+| 5.6 Settlements | Verified recipient registration; actual fulfilment and delay eligibility; concurrent batch claims; explicit privileged batch approval; stable transfer reference; OTP; provider confirmation; payout fees, reversals and recovery-only batches | Concurrent batch, OTP, successful transfer, reversal, post-payout refund and receivable recovery scenarios |
+| Shared | Protected customer/merchant/admin APIs; complete OpenAPI; durable outbox consumption and leased financial jobs; periodic canonical provider reconciliation; bounded exception/job/audit views and privileged dead-job retry | Route inventory/HTTP tests; worker recovery/dead-letter scenarios; one consolidated exact-commit runner/report |
 
-`POST /api/v1/customer/orders/{id}/payment-intent` prepares one durable intent from an
-owned M4 order. Only a positive, bounded NGN order still in `placed` can create a new
-intent. Merchant approval and branch activity are locked/rechecked. It reuses M4's
-account transaction for suspension, expiry, session revocation and same-account write
-serialization, plus its customer write quota. The only body field is `requestKey`;
-customer subject, amount, currency, status and provider reference are server-owned.
+## Purchase and accounting rules
 
-Exact retries return the same linked intent with no new audit/outbox effects. Reusing
-the key for another order, environment or unbound legacy intent returns 409. A different
-key for an already-linked order is also rejected, preventing a second payment attempt
-from silently becoming a second charge. Store and reuse the original request key.
+Preparation (`POST /customer/orders/{id}/payment-intent`) creates one durable bound intent
+from an owned M4 order. Only its retry key is client supplied. Preparation returns
+`checkoutEnabled: false`; checkout is a separate action. No product stock guarantee is
+introduced where M4 has no stock model.
 
-Migration `0013_m5_order_intents.sql` adds immutable order/intent links. A database trigger
-checks matching customer, merchant, total and currency; linked order financial/ownership
-fields cannot subsequently change. Ordinary merchant order status transitions remain
-valid. The receipt/ledger is not changed by preparation, and an order is never marked paid.
+Paid services and tickets begin with `POST /customer/paid-holds`. `sourceId` identifies an
+availability slot for a reservation or an event catalogue item for tickets. Quantity,
+guest name and a customer-scoped retry key are accepted; price, business, currency,
+identity, reference and success are selected by the server. Identical retries reuse the
+snapshot. Holds share the existing reservation capacity counters. Event capacity cannot
+exceed the merchant's event maximum. Paid slot times and committed event schedules are
+protected from later edits.
 
-**Preparation is not checkout.** The response explicitly has `checkoutEnabled: false`.
-No gateway session, authorization URL or charge is created. A configured Paystack key is
-required to select the server's test/live environment. Gateway initialization/recovery,
-order-state changes during checkout, refunds for late/cancelled payments, paid reservation
-holds and ticket issuance remain separate deliveries. No inventory hold is claimed for
-M4's product orders. Replayed intent metadata does not renew purchase eligibility.
+Checkout accepts only a receipt email. Its HTTPS callback URL comes from server
+configuration. Email never establishes ownership. The initialization command is persisted
+before the outbound request; retries reuse its reference. A lost response remains uncertain.
+An administrator can retry initialization with the same reference after 30 seconds; a
+provider duplicate-reference error remains uncertain and does not mint another reference.
+A new order attempt requires a separate explicit retry command and canonical evidence
+that the prior reference failed or was abandoned. Late success on the superseded attempt
+is captured and refunded, without confirming a second purchase.
 
-The existing M4 phase acceptance is not a claim that the combined M4/M5 financial changes
-passed PostgreSQL verification. The M5 disposable harness now prepares concurrent order
-retries, ownership/snapshot checks and unchanged status transitions as additional gates.
+A browser redirect does not confirm anything. Only an independently verified successful
+provider transaction matching reference, integer amount, NGN currency, environment and
+transaction identity may create the receipt and capture journal. Purchase confirmation,
+capacity conversion/ticket issuance, audit and outbox commit in that same transaction.
+Expired, cancelled, disabled or superseded purchases retain their capture evidence and
+create a full remaining refund obligation. They cannot recreate inventory automatically.
 
-Started 1 November 2026 (Africa/Lagos), from `main` at
-`728fd1ca457f838e4e8a365e963420bce7b49bac` (merged M3-P1).
-Branch: `feat/m5-p1-payment-foundation`.
+Original capture debits `gateway_clearing` and credits `customer_funds`. Versioned approved
+policy snapshots split gross funds into merchant share and commission using integer
+arithmetic. Canonical provider fees are posted explicitly; unknown or mismatched fees
+block settlement through a reconciliation case. Merchant-borne fees exceeding earned
+funds create recovery debt. `finance_all_postings` unifies captures and compensating entries.
+Each row contains one debit and equal credit. No financial history is rewritten.
 
-This is the first backend increment, **not M5-P1 acceptance**. The canonical scope is
-[MILESTONES.md](MILESTONES.md), sections 5.1–5.6, with responsibilities in
-[FOUR_PHASE_MODEL.md](../roadmap/FOUR_PHASE_MODEL.md).
-Read alongside the system architecture and repository delivery standards.
+Refund approval reserves the remaining captured amount before contacting the provider.
+Commission reversals use cumulative rounding and actual prior surviving refund funding,
+including after a failed partial refund. Customer requests do not move money until approved.
+Ticket purchases require a full remaining refund; full approval revokes unused tickets or
+cancels an unfulfilled order/reservation. Already consumed resources can receive an explicit
+support refund, while their usage history remains intact. Customer cancellation also obeys
+the snapshotted refund window and start cutoff.
 
-At kickoff, connected GitHub `main` contains M3 merchant APIs, but no M4 customer
-checkout APIs; a branch-name search returned no M4 branch. M4 may be underway
-elsewhere. Coordinate its authoritative quote/hold contracts and migration numbers
-before integrating. Do not replace M3 merchant reservations with paid bookings.
+Paystack refund creation has no documented idempotency key. An ambiguous POST is never
+resent automatically. The worker searches the exact local `merchant_note` and transaction,
+or an administrator attaches a verified matching provider refund ID. A provider-dashboard
+refund can be adopted with its canonical transaction/amount/currency/environment checked.
+Pending refunds retain reserves; only canonical `processed` consumes them and canonical
+`failed` releases their original funding. A failed obligation needs a new explicit request
+and approval, not a rewrite of its terminal history.
 
-Follow-up: M4 branch `feat/m4-p1-customer-platform` is now visible at
-`67ebc0add0ac0c402d706420a0eeca7bd1f7e8f0`. Its documented reservation creation
-supports free services, while product orders do not imply payment. M5 work can continue
-in parallel; the proposed handoff is [M4/M5 payment boundary](../api/M4_M5_PAYMENT_BOUNDARY.md).
-M4 keeps migration 0010; M5's unaccepted foundation is renumbered to 0011.
+Disputes reserve exposure before settlement; only independently fetched final resolution
+releases it or records loss. A partial loss consumes only the verified amount. Open/lost
+dispute exposure blocks further refund approval to prevent overlapping compensation.
+After payout, merchant liabilities become recovery debt instead of negative available funds.
 
-## Implemented in increment 1
+Settlements use completed orders/reservations or ended events plus the configured delay.
+Outstanding refund requests, disputes, exceptions and claimed payouts exclude funds.
+Privileged batch creation is the approval action. It snapshots the verified recipient,
+environment and payout fee bearer. Funds are reserved before transfer submission, and
+only verified provider success clears the reserve. Transfers reuse one stable reference;
+OTP is sent only by a fresh-MFA administrator and is never stored. A confirmed reversal
+creates compensating entries and releases claims. Subsequent eligible funds first recover
+merchant debt; a zero-cash recovery-only batch persists that command idempotently.
 
-- Paystack is the initial provider behind a separate gateway class. No new dependency.
-- `POST /api/v1/payments/webhooks/paystack` verifies HMAC-SHA512 over exact raw bytes
-  using constant-time comparison, then independently verifies the reference with Paystack.
-- Only a successful verification with matching reference, amount, currency and test/live
-  domain can transition a known pending payment intent. NGN integer minor units only.
-  Browser returns and notification amount/status fields cannot mark a payment successful.
-- Unknown references never create intents. Invalid signatures perform no database or
-  provider work. Other signed event types are acknowledged without financial effects;
-  refund/dispute/transfer handlers are still pending.
-- Row locking, unique provider transaction identity, one receipt and one journal per
-  intent prevent repeat posting. A replay repeats independent verification, then performs
-  no financial/audit/outbox inserts. Provider failures return 503 for retry.
-- Receipt, journal, success transition, audit and outbox event are one transaction.
-- Migration `0011_m5_payment_foundation.sql` stores durable intents and receipts.
-  Each journal row explicitly pairs one debit with an equal credit. Account/currency
-  foreign keys and deferred reconciliation triggers enforce matching amounts at commit.
-  Receipt/journal/account mutation and successful intent rewrites are rejected.
-- Captured funds debit `gateway_clearing` and credit `customer_funds`. This records
-  gross funds awaiting allocation; it does **not** calculate merchant earnings, fees,
-  commission, settlement eligibility or available balances.
+## APIs and client integration
 
-There is intentionally no public intent-creation or browser-success endpoint in this
-increment. No application flow can yet create a payment intent. Database fixture inserts
-are test setup only. A trusted domain purchase/hold and authenticated customer ownership
-must be integrated before a checkout API is exposed. No customer/client amount is trusted.
+All paths below begin `/api/v1`; the full machine-readable schemas are in
+`packages/api_contracts/openapi.json`. Existing M1–M4 and prior M5 schemas/paths are preserved.
+Collections accept bounded `limit`/`offset`. Customer holds, refunds and tickets return
+`{items,nextOffset}`. Merchant/admin grouped collections use bounded arrays per section.
 
-## Implemented in increment 2
-
-- `GET /api/v1/customer/payments/{id}` requires a signed active account and scopes the
-  query to its subject. Missing and foreign IDs both return 404. The response explicitly
-  projects status, exact decimal minor-unit amount, currency and timestamps, without
-  exposing provider references, other customer identities or internal records. Reading
-  `succeeded` describes capture only; it does not assert booking or ticket confirmation.
-- `GET /api/v1/admin/finance/payments/{id}/reconciliation` requires the admin client,
-  platform-admin role, fresh MFA, active/unrevoked account and the existing database-backed
-  privileged request quota. It records an attributed read audit before returning data.
-- Reconciliation reads a single database snapshot and compares receipt, journal amount,
-  currency/account pair, verification timestamp and exactly one capture audit/outbox
-  event. Missing, mismatched or duplicate effects are reported without rewriting finance
-  history. `scope=internal_capture` and `providerReconciliation=not_checked` make clear
-  that this is not provider-statement, merchant-balance or payout reconciliation.
-- OpenAPI explicitly describes protected response schemas and UUID parameters. New tests
-  cover cross-customer reads, revoked/suspended identities, admin assurance/quota failures,
-  missing/duplicate evidence, maximum-safe exact money values and audit failure handling.
-- The guarded database harness now requires distinct migration/runtime roles. It runs
-  payment processing and reads through the runtime role, rejects DDL/TRUNCATE/migration
-  access, checks real ownership isolation and reports duplicate outbox effects.
-- `tooling/run-m5-p1-disposable.sh` creates and cleans an isolated loopback PostgreSQL
-  cluster with generated credentials, applies migrations, runs the inherited API tests
-  and the M5 database harness, and records the exact source commit. It refuses a dirty
-  or wrong branch and refuses root. If PostgreSQL cannot stop, it preserves the cluster
-  and fails instead of deleting live data. It is prepared and syntax-checked, not executed here.
-
-## Implemented in increment 3
-
-- `POST /api/v1/admin/finance/payments/{id}/provider-recheck` recovers a missed webhook
-  for an existing intent. It requires the same admin client, recent MFA, active/unrevoked
-  account and request quota as finance reconciliation. Its optional body must be empty;
-  client-provided references, prices, actors and success states are rejected.
-- The service loads the provider reference from the local intent and persists an attributed
-  request audit before contacting Paystack. Unknown intents or an unavailable audit store
-  prevent provider calls. This endpoint verifies an existing transaction and never initiates
-  a charge. An unsuccessful/unavailable provider response posts no capture.
-- Recovery and signed webhooks now share one locked capture transaction. The same reference,
-  amount, currency, environment and provider transaction identity rules apply to both paths.
-  A matching replay creates no additional receipt, journal or `payment.verified` event;
-  the admin recheck remains auditable. A failed confirmation audit rolls back the new capture.
-- Migration `0012_m5_receipt_evidence.sql` adds immutable receipt provenance. Webhook
-  receipts retain a digest of exact signed bytes; provider-recheck receipts retain a digest
-  of the normalized independently verified charge and require the authenticated admin actor.
-  Existing receipts default to webhook provenance. Original receipt evidence is never
-  overwritten by a later check. No card data or provider secret is stored in this evidence.
-- Unit/HTTP tests cover weak identities, client-supplied overrides, missing intents, provider
-  outages, mismatches, audit failures, successful recovery and repeat-safe results. The
-  PostgreSQL harness additionally prepares a race of six webhooks with six admin rechecks
-  and validates one capture plus consistent provenance; execution remains pending.
-
-This is on-demand capture recovery, not a scheduled reconciliation worker, provider-statement
-reconciliation, a refund/payout handler or a repair path for corrupted historical journals.
-Apply migration 0012 before deploying this API version. Older application code can ignore
-the additive columns; preserve existing receipts and migration history when rolling back.
-
-## Configuration and provider contract
-
-Set `PAYSTACK_SECRET_KEY` through the deployment secret manager (`sk_test_...` for
-sandbox, `sk_live_...` for live). An absent/invalid key makes the payment route unavailable;
-it does not prevent unrelated API routes from starting. No secret is committed or logged.
-Only the fixed HTTPS Paystack verification endpoint is called, with a 10-second timeout
-and redirects rejected. The adapter validates provider response shape and masks failures.
-
-Configure the versioned webhook URL in the matching Paystack environment only after
-the migration and integration checks pass. Raw body capture is enabled in API bootstrap.
-Custom test/server bootstraps using this controller must also use `{rawBody:true}`.
-
-Provider references:
-- https://paystack.com/docs/payments/webhooks/
-- https://paystack.com/docs/payments/verify-payments/
-- https://paystack.com/docs/api/transaction/
-
-## Remaining M5-P1 work
-
-| Work package | Required next delivery |
+| Caller | Operations |
 | --- | --- |
-| 5.1 Gateway | Gateway-session initialization using the bound order intent, timeout/recovery, revalidation before checkout and provider sandbox acceptance; order-owned intent preparation is implemented |
-| 5.2 Ledger | Account ownership model, commission/fees policy, merchant payables, balances, provider-statement reconciliation and execution of restricted runtime-role checks |
-| 5.3 Paid bookings | M4 capacity holds, immutable purchase snapshot, expiry/retry and late-payment resolution; confirm once only after verified capture |
-| 5.4 Tickets | Inventory reservation, opaque QR tokens, authorized atomic single-use redemption and concurrent redemption tests |
-| 5.5 Refunds/disputes | Authorized policy decisions, compensating journals, provider state/retries, chargebacks and reconciliation |
-| 5.6 Settlements | Eligibility, payout batches, privileged approval, provider confirmation, reversals and reconciliation |
-| Shared | Merchant finance/read contracts, integrated tenant-isolation acceptance, outbox consumers, provider reconciliation worker, monitoring and integrated exact-commit acceptance |
+| Customer | Prepare order intent; create/list/cancel paid holds; initialize checkout; explicit failed order retry; owned payment status/recheck; request/list refunds; list owned ticket QR tokens |
+| Merchant owner/manager | Finance policy/balance/payment/batch projection; configure event ticket inventory |
+| Merchant owner/manager or branch-granted staff | Redeem a signed ticket within its business, branch and event time window |
+| Finance administrator | Create/list policy versions; checkout retry; request/approve/reject/reconcile/link/adopt refunds; verify/disable recipient; approve/cancel/reconcile settlement; submit OTP; reconcile/resolve dispute; bounded operations/audit history; retry dead jobs |
+| Paystack | Exact-byte HMAC-SHA512 webhook; charge/refund/transfer/dispute events trigger independent provider reads |
 
-Resolve commercial commission, refund and settlement policies before enabling corresponding
-financial actions. Do not infer a fee percentage or payout schedule from this foundation.
+Customer/merchant routes require signed active, unrevoked identities and database-backed
+write budgets. Customer reads never expose another subject's purchase. Merchant finance
+requires current business membership; staff redemption also checks branch grant. Admin
+routes require platform-admin, `faji-admin-web`, the configured MFA ACR and authentication
+within five minutes, plus the privileged request budget. Client-selected amount/status/
+reference/actor overrides are rejected. QR tokens, access codes and OTP must not be logged.
+Payment reads describe capture; clients use hold/ticket/order state for fulfilment.
 
-## Verification and acceptance limits
+The authoritative boundaries are also documented in [M4/M5 payment boundary](../api/M4_M5_PAYMENT_BOUNDARY.md).
 
-Latest local verification: 130 tests that do not require a database pass, including 32
-M5 tests. The merged M4/M5 baseline also preserves all prior contract paths/schemas.
-API source and strict M4/M5 test
-typechecks, lint/build and database package typecheck pass. OpenAPI is regenerated
-through NestJS with required signed-webhook and protected read-contract assertions.
-The disposable launcher passes `bash -n`. Database checks are a separate gate.
-The dependency audit passes its high/critical gate; one low and three moderate findings
-remain. No GitHub Actions workflow is added or enabled.
+## Runtime configuration and worker
 
-The default API test command also includes eight existing M2 database cases. These fail
-without the explicitly marked migration/runtime databases; they are not skipped or
-reported as passing. No PostgreSQL server or Docker is available in this execution host,
-so the new migration, database constraints and concurrent real-database replay gate remain
-**unverified**. Unit mocks are not evidence of database concurrency correctness.
+| Variable | Requirement |
+| --- | --- |
+| `FAJI_DATABASE_URL` | API/finance worker restricted runtime role; separate from migration owner and Keycloak database |
+| `PAYSTACK_SECRET_KEY` | Secret manager value in matching test/live domain; missing key disables payment actions, not unrelated APIs |
+| `PAYMENT_CALLBACK_URL` | Operator-controlled HTTPS return page; never a success authority |
+| `TICKET_SIGNING_KEYS` | Secret JSON object of key ID to 64 hexadecimal characters; keep previous keys while issued tickets remain usable |
+| `TICKET_ACTIVE_KEY_ID` | Current key ID, 1–80 alphanumeric/underscore/hyphen characters |
+| `FINANCE_RECONCILE_INTERVAL_SECONDS` | Periodic successful payment/transfer recheck interval; default 900, bounded 30–86400 |
 
-Run from a clean checkout as an unprivileged user on a PostgreSQL 16/PostGIS machine:
+API/worker share the same provider domain and key ring. Test and live finances must use
+separate databases; a singleton environment guard rejects mixed captured environments.
+No production commission, refund window or settlement schedule is invented: an administrator
+must create a complete approved policy for each approved merchant. Policy values are
+immutable versions. Gateway-fee policy is snapshotted per purchase; payout-fee policy is
+snapshotted per settlement approval.
+
+Build the API, then run the HTTP process and financial worker as separate supervised processes:
+
+```bash
+corepack pnpm --filter @faji/api build
+corepack pnpm --filter @faji/api start
+# Separate process, using the same runtime configuration:
+corepack pnpm --filter @faji/api worker:finance
+```
+
+The financial worker uses PostgreSQL durable jobs, distinct from the existing notification
+worker. It consumes its own outbox markers without changing notification delivery markers.
+Leases use UUID fencing and expire after two minutes; each row's lease is renewed before
+execution. Errors back off and dead-letter after eight attempts; diagnostics retain only
+error class, never payload or secrets. Expected provider-pending states poll without using
+up the error budget. Successful payments/transfers remain on periodic reconciliation to
+detect external refunds, disputes, reversals and fee changes. SIGTERM/SIGINT finish the
+current tick and close the pool. `node apps/api/dist/payments/m5-worker.js --once` runs one
+tick and fails its process if maintenance fails.
+
+`GET /admin/finance/operations` exposes unresolved cases, pending/uncertain refunds, payout
+states and non-done/dead jobs. `GET /admin/finance/audit` exposes attributed operation events.
+Operators should alert on dead jobs, stale leases, long-pending/uncertain obligations, open
+reconciliation cases and worker `finance_worker_tick_failed` events. Dead-job retry is an
+audited admin action; it reuses the original financial operation identity. Never edit
+journals or clear reserves manually to make an exception disappear.
+
+## Migration, privileges and rollback
+
+Historical migrations `0011_m5_payment_foundation`, `0012_m5_receipt_evidence` and
+`0013_m5_order_intents` are unchanged. The additive lifecycle is migration
+`0014_m5_financial_lifecycle.sql`. M4's distinct `0011_m4_marketplace_accounts.sql` coexists;
+the runner orders full filenames and validates checksums. This new, unapplied migration
+must pass local acceptance before activation. If an earlier draft was applied to a
+disposable target, recreate the target; never edit checksums or duplicate renamed tables.
+New references use Paystack-compatible hyphens; legacy underscore references cannot be
+initialized. Existing captured evidence remains readable. Do not activate checkout on
+previous unaccepted fixture databases.
+
+Finance tables/views revoke PUBLIC privileges. Production runtime must not own tables or
+receive DDL/TRUNCATE/migration-history access. The enumerated permission matrix is in
+`packages/database/scripts/grant-m5-runtime.ts`; its executable intentionally refuses
+non-disposable targets. Apply equivalent explicit grants through the deployment's migration
+owner to the selected runtime role. Stateful finance tables permit SELECT/INSERT/UPDATE;
+append-only tables permit SELECT/INSERT; settlement claims alone need DELETE for release;
+financial views are SELECT only. Capture journals and snapshots also enforce immutable
+history in database triggers.
+
+Roll back by stopping checkout and finance workers and returning application code to the
+previous version while retaining finance data and migration history. Review in-flight
+provider obligations first. Do not delete financial records or automatically reverse
+provider funds as a code rollback.
+
+## Consolidated local verification
+
+On a clean checkout of this branch, as an unprivileged user, with Node 20+,
+repository-pinned pnpm 9.15.9 and PostgreSQL 16 with PostGIS and pg_trgm installed:
 
 ```bash
 corepack pnpm install --frozen-lockfile
 bash tooling/run-m5-p1-disposable.sh
 ```
 
-For an operator-managed disposable target, `test:m5:database` requires both
-`FAJI_DATABASE_URL` (migration owner) and `FAJI_RUNTIME_DATABASE_URL` (restricted role),
-plus a matching `FAJI_DISPOSABLE_DATABASE=fajify_m5_test_...` and database comment
-`fajify:m5:disposable`. Both URLs must identify the same marked PostgreSQL 16 database
-with different users. The acceptance harness grants scoped runtime privileges only in
-that explicit disposable database. Credentials must be supplied through the environment.
+Set `FAJI_PG_BIN` if PostgreSQL 16 binaries are outside `/usr/lib/postgresql/16/bin`.
+The launcher generates credentials, a loopback-only private cluster, distinct migration/
+runtime roles and a Keycloak sentinel database that runtime cannot access. It removes
+provider/ticket secrets from the acceptance environment; provider tests install synthetic
+credentials and a transport that cannot reach the network. It touches no existing cluster.
 
-The database command refuses an unmarked database, applies all migrations twice, checks
-12 concurrent replay attempts, checks exactly one receipt/journal/audit/outbox event,
-rejects historical rewrites, rejects success without a journal and rolls back a mismatched
-journal at commit. The harness retains synthetic immutable evidence in an operator-managed
-database; the launcher removes its entire temporary cluster on exit. Run full historical M2/M3 acceptance with their separate restricted
-runtime role and sentinel configuration as well. Real provider sandbox and live-money
-tests have not run.
+The consolidated gate checks disposable targeting; strict API/database/M4/M5 test types;
+lint/build; all migrations twice; enumerated runtime grants; reporter self-tests; foundation
+and inherited API database cases; M4 customer/marketplace acceptance; original M5 capture
+acceptance and the complete lifecycle scenarios; M4 query plans; full OpenAPI equality;
+whitespace; dependency high/critical gate; and unchanged source. M5 database files run
+sequentially to keep their shared worker fixtures deterministic. Fixture-only clock passage
+uses a migration-owner transaction in the marked disposable database and restores its
+guard before commit; production has no test-clock bypass.
 
-## Migration and review
+Logs and `acceptance.json` persist in `/tmp/fajify-m5-report.*`, with the exact source
+commit and per-check exit/TAP counts. Missing/duplicate checks, missing/empty TAP, failures,
+cancellations, skips or TODOs cannot produce PASS. Cluster cleanup is recorded; failed
+shutdown/removal forces FAIL and preserves the cluster for recovery. A red report is a
+verification failure to fix, not authorization to waive a financial check.
 
-Migration 0011 adds tables/functions/triggers without changing existing M3 data. The earlier
-draft was named `0010_m5_payment_foundation.sql`; it was renumbered before recorded database
-acceptance to reserve 0010 for M4. If that older draft was applied to a disposable target,
-recreate the target; do not apply the renamed duplicate over existing finance tables.
-M4 has since added its own `0011_m4_marketplace_accounts.sql` at branch head
-`92bc44b671e2a683283da6e3d3dcc680f41b95b2`. The migration runner keys and sorts complete
-filenames, so this distinct name does not collide with `0011_m5_payment_foundation.sql`.
-Retain both files and verify their combined ordering before integration; do not keep
-renumbering migrations that an operator may already have applied. The new M5 receipt
-provenance migration is `0012_m5_receipt_evidence.sql`.
-Keep this delivery as a draft until
-PostgreSQL acceptance and review pass. Runtime grants must be explicitly scoped; `PUBLIC`
-has no finance table privileges. Runtime roles must not own these tables or receive
-TRUNCATE/DDL privileges. Migration-owner acceptance alone is not least-privilege evidence.
+Engineering checks here cover static compilation, lint/build, isolated unit/HTTP/provider
+checks, contract compatibility and runner/reporter behavior. PostgreSQL 16 is unavailable
+in this execution host, so migrations and real-database concurrency remain unverified until
+the user's consolidated local run. Real Paystack sandbox/dashboard configuration and live
+money operations have not been executed. No deployment, provider registration, main merge
+or production acceptance is claimed. Keep PR #17 in draft pending that verification/review.
 
-Rollback an unactivated application deployment by returning to its previous version while
-retaining the new finance tables. Do not delete receipts or journal history. An applied
-migration must not be edited; correct defects in a subsequent migration. No deployment,
-provider registration, live charge, payout, merge or milestone acceptance is authorized
-by this implementation record.
+Provider contracts: https://paystack.com/docs/api/transaction/,
+https://paystack.com/docs/payments/webhooks/, https://paystack.com/docs/api/refund/,
+https://paystack.com/docs/api/transfer/, https://paystack.com/docs/api/dispute/.

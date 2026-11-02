@@ -7,7 +7,7 @@ import {assertDisposable} from '../../../packages/database/scripts/disposable-ta
 async function main(){
  const pool=new Pool({connectionString:process.env.FAJI_DATABASE_URL,max:1,connectionTimeoutMillis:3000});
  try{
-  assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m4_test_[a-z0-9_]+$/);await assertDisposable(pool);
+  assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m[45]_test_[a-z0-9_]+$/);await assertDisposable(pool);
   const c=await pool.connect();
   try{
    await c.query('BEGIN');await c.query("SET LOCAL statement_timeout='5s'");

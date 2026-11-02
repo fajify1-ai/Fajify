@@ -59,6 +59,7 @@ export class CustomerService {
   const c=await this.pool.connect();
   try {
    await c.query('BEGIN');
+   await c.query("SELECT set_config('faji.customer_actor',$1,true)",[identity.subject]);
    await c.query("SET LOCAL statement_timeout='5s'");
    await c.query("SET LOCAL lock_timeout='3s'");
    await c.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[JSON.stringify(['customer-account',identity.subject])]);

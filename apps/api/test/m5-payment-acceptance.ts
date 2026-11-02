@@ -11,6 +11,10 @@ import {PaymentReadsService} from '../src/payments/payment-reads.service';
 import {OrderIntentsService} from '../src/payments/order-intents.service';
 import {CustomerService} from '../src/customer/customer.service';
 import type {VerifiedIdentity} from '../src/auth/identity.types';
+import {FinanceLedger} from '../src/payments/finance-ledger.service';
+import {CommerceLifecycle} from '../src/payments/commerce-lifecycle.service';
+import {FinancialOperations} from '../src/payments/financial-operations.service';
+import {grantM5Runtime} from '../../../packages/database/scripts/grant-m5-runtime';
 
 test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings and atomic rollback',async()=>{
  assert.ok(process.env.FAJI_DATABASE_URL,'FAJI_DATABASE_URL required');
@@ -25,6 +29,7 @@ test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings 
  const subject='m5_'+randomUUID(),reference='faji_'+randomUUID(),key=randomUUID();
  try{
   await assertDisposable(pool);await assertDisposable(runtime);await applyMigrations(pool);await applyMigrations(pool);
+  await grantM5Runtime(pool,process.env.FAJI_RUNTIME_DATABASE_URL!);
   const role='"'+runtimeUrl.username+'"';
   await pool.query('GRANT USAGE ON SCHEMA public TO '+role);
   await pool.query('GRANT SELECT,INSERT,UPDATE ON payment_intents TO '+role);
@@ -49,7 +54,8 @@ test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings 
   gateway.verify=async()=>({id:BigInt('0x'+randomUUID().replaceAll('-','').slice(0,12)).toString(),reference,amountMinor:12500,currency:'NGN',environment:'test'});
   // Keep a stable provider transaction identity across concurrent callbacks.
   const charge=await gateway.verify(reference);gateway.verify=async()=>charge;
-  const service=new PaymentsService(runtime,gateway);
+  const ledger=new FinanceLedger(runtime),commerce=new CommerceLifecycle(ledger,new CustomerService(runtime),gateway),operations=new FinancialOperations(ledger,commerce,gateway);
+  const service=new PaymentsService(runtime,gateway,commerce,operations);
   const raw=Buffer.from(JSON.stringify({event:'charge.success',data:{reference}}));
   const signature=createHmac('sha512',process.env.PAYSTACK_SECRET_KEY).update(raw).digest('hex');
   await Promise.all(Array.from({length:12},()=>service.webhook(raw,signature)));
@@ -134,9 +140,9 @@ test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings 
   await assert.rejects(pool.query('UPDATE business_orders SET customer_subject=$2 WHERE id=$1',[order,'other-customer']),/immutable purchase snapshot/);
   await assert.rejects(pool.query('DELETE FROM payment_order_links WHERE order_id=$1',[order]),/append-only/);
   await assert.rejects(pool.query('INSERT INTO payment_order_links(order_id,intent_id) VALUES($1,$2)',[order,pending]),/snapshot do not match/);
-  // Ordinary M3/M4 status transitions retain their notification behavior.
-  await runtime.query("UPDATE business_orders SET status='accepted' WHERE id=$1",[order]);
-  assert.equal((await pool.query('SELECT status FROM business_orders WHERE id=$1',[order])).rows[0].status,'accepted');
+  // An order enrolled into paid checkout cannot be fulfilled before verified capture.
+  await assert.rejects(runtime.query("UPDATE business_orders SET status='accepted' WHERE id=$1",[order]));
+  assert.equal((await pool.query('SELECT status FROM business_orders WHERE id=$1',[order])).rows[0].status,'placed');
  }finally{await Promise.all([pool.end(),runtime.end()]);}
  // Preserve append-only evidence in this disposable database; discard the database after review.
 });

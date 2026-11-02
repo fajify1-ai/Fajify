@@ -6,6 +6,7 @@ import {BadRequestException,ConflictException,NotFoundException,ServiceUnavailab
 import type {Pool} from 'pg';
 import {PaystackGateway} from '../src/payments/paystack.gateway';
 import {PaymentsService} from '../src/payments/payments.service';
+import {captureDependencies} from './m5-capture-fixtures';
 
 const secret='sk_test_fixture123',reference='faji_fixture123';
 const payload=Buffer.from(JSON.stringify({event:'charge.success',data:{reference,amount:1,status:'failure'}}));
@@ -14,6 +15,7 @@ function fixture(options:{amount?:string;currency?:string;environment?:string;pr
  const queries:string[]=[];
  const client={query:async(q:string)=>{
   queries.push(q);
+  if(q.startsWith('SELECT business_id FROM payment_intents'))return {rows:[{business_id:'business-id'}],rowCount:1};
   if(q.startsWith('SELECT id,amount_minor'))return {rows:[{id:'intent-id',amount_minor:options.amount??'12500',currency:options.currency??'NGN',environment:options.environment??'test',status:options.prior?'succeeded':'pending'}],rowCount:1};
   if(q.startsWith('SELECT provider_transaction_id'))return {rows:options.prior?[{provider_transaction_id:options.prior}]:[],rowCount:options.prior?1:0};
   if(q.includes('INSERT INTO ledger_entries'))return {rows:[],rowCount:options.ledger===false?0:1};
@@ -23,7 +25,7 @@ function fixture(options:{amount?:string;currency?:string;environment?:string;pr
  let verifies=0;
  const gateway=new PaystackGateway();
  gateway.verify=async()=>{verifies++;if(options.fail)throw new ServiceUnavailableException();return {id:'123',reference,amountMinor:12500,currency:'NGN',environment:'test'};};
- return {service:new PaymentsService(pool,gateway),queries,verifies:()=>verifies};
+ return {service:new PaymentsService(pool,gateway,...captureDependencies()),queries,verifies:()=>verifies};
 }
 
 test('M5: raw signature is required and binds exact bytes before database or provider work',async()=>{

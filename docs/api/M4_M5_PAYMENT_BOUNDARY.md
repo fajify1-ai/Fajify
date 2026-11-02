@@ -1,104 +1,45 @@
 # M4 / M5 payment integration boundary
 
-Status: proposed handoff contract while both Phase 1 workstreams are in progress.
-Update, 2 November 2026: M4-P1 is user-confirmed locally accepted and merged at
-`b393483066d01cda13b491d1eda89ad2dc4222a5`. M5 now integrates that foundation and
-implements customer-owned order intent preparation. The remaining paid-hold and gateway
-session portions below are integration requirements, not completed checkout functionality.
-M4 branch inspected at `67ebc0add0ac0c402d706420a0eeca7bd1f7e8f0`;
-M5 foundation starts at `c493f9e71319e260bc01f9cd4432ac9b1fa34660`.
-M4 has since advanced to `92bc44b671e2a683283da6e3d3dcc680f41b95b2` independently;
-this M5 delivery does not merge or modify that branch.
-This document describes the integration to implement; it does not advertise a working
-checkout endpoint or authorize either branch to bypass the other's acceptance gate.
-
-## Ownership
+M4-P1 is accepted and merged at `b393483066d01cda13b491d1eda89ad2dc4222a5`.
+M5-P1 now implements the integrated backend on that foundation; consolidated local
+acceptance remains pending. See [M5 engineering/runbook](../engineering/PHASE_1_MILESTONE_5_IMPLEMENTATION.md)
+and the combined OpenAPI snapshot for complete routes and schemas.
 
 | Domain | Authority |
 | --- | --- |
-| M4 | Signed customer ownership, merchant/branch eligibility, immutable purchase price snapshot, reservation capacity hold or order eligibility, expiry/cancellation |
-| M5 | Payment intent and provider reference, independent capture verification, receipts, ledger, retry-safe financial transitions, refund/settlement state |
-| Shared integration | One purchase linked to its payment attempt, idempotent verified confirmation, late-payment handling, end-to-end acceptance |
+| M4 | Signed customer/account transactions, free reservations, server-priced orders, merchant/branch eligibility and normal fulfilment/status APIs |
+| M5 | Paid capacity/inventory holds, intent/reference and immutable policy snapshots, provider initialization/independent capture verification, receipts/journals, confirmation, ticket issuance/redemption, refunds/disputes and settlement |
+| Integration | Confirmation and capture share one transaction; existing cancellation/completion outbox events drive durable financial handling; local acceptance covers the combined migration/source set |
 
-M4's existing free-service reservations are already confirmed. Do not attach a gateway
-charge to them and imply that they followed a paid-hold workflow. Orders in `placed`
-have a server total but no paid status. Neither existing state is evidence of payment.
+M4 free-service reservations remain free and already confirmed. Paid service bookings use
+`POST /api/v1/customer/paid-holds` with `kind=reservation` and the availability ID. Ticket
+holds use `kind=ticket` and the event catalogue ID. Both are server-priced, customer-owned,
+expire under the approved policy, and share authoritative stock/capacity counters.
 
-## Trusted purchase snapshot required before initialization
+M4 orders enter `placed` with a persisted total. Preparing the order intent accepts only
+`requestKey` and returns `checkoutEnabled:false`; it does not charge or reserve product stock.
+An enrolled paid order cannot advance beyond `placed` until capture and purchase eligibility
+are confirmed. Unenrolled historical/free order behavior is retained. All checkout sessions
+use an existing owned intent and only accept a receipt email; URL/amount/reference/status/
+merchant/identity cannot be supplied by the caller.
 
-An internal domain service must load these values from persisted, ownership-checked
-records. The customer's HTTP request must not choose the amount, currency, merchant,
-customer subject, provider success state or a supposed signed quote object.
+A valid webhook signature triggers canonical provider verification. Receipt, balanced capture,
+resource confirmation or late-payment refund obligation, audit and `payment.verified` outbox
+commit atomically. Clients never confirm payment from a browser return or their own success
+state. Read capture via the existing owned payment status API; read hold/ticket/order state
+for fulfilment. Duplicate callbacks and provider-rechecks do not reissue resources.
 
-| Field | Contract to agree and persist |
-| --- | --- |
-| Purchase ID and type | Stable UUID and an explicit paid reservation, order or ticket purchase kind |
-| Customer subject | Immutable Keycloak subject matching the signed active caller |
-| Business and branch | Approved/active scope validated by M4 |
-| Amount | Positive canonical decimal string in minor units, at most `9007199254740991` for the initial provider adapter |
-| Currency | `NGN` for the current M5 implementation |
-| Price snapshot/version | Persisted source proving what was purchased; recalculating from mutable catalogue prices after capture is not valid |
-| Hold/eligibility | Authoritative purchase state and expiry; inventory/capacity ownership where required |
-| Retry key | Customer-scoped key bound to the same purchase and snapshot; changed meaning returns a conflict |
+Uncertain initialization retains its original reference. An explicit order retry requires
+independently verified failed/abandoned prior attempt and records a new immutable link chain.
+Late success on an old attempt is refunded. Expired/cancelled service/event holds never
+reacquire inventory just because money arrived. Paid times/schedules cannot be silently edited
+after a hold. Cancellation and refund approval revoke unused entitlement and follow configured
+windows/cutoffs; merchant completion establishes settlement eligibility after the policy delay.
 
-Zero-price reservations stay in the free path. A payment intent needs a unique purchase
-link and a defined policy for multiple attempts. Migration 0013 now provides a unique,
-immutable link for product orders, with matching customer/business/amount/currency and
-an immutable order price/ownership snapshot once linked. An order has one intent and
-must reuse its original customer-scoped request key. Reservation/ticket links remain
-pending. Initialization/recovery must reuse the persisted provider
-reference and prevent a timed-out attempt from silently becoming a second payment.
-
-The preparation endpoint is `POST /api/v1/customer/orders/{id}/payment-intent` with only
-`{requestKey}`. It uses M4's active account transaction and write quota. Creation requires
-an approved active merchant branch and a positive bounded NGN order still in `placed`.
-The response includes `paymentIntentId`, `orderId`, decimal `amountMinor`, `currency`,
-capture `status` and `checkoutEnabled: false`. It does not initialize a provider session,
-charge funds, hold stock or change order status. Before a later gateway-session request,
-revalidate the purchase state: merchant acceptance/cancellation can occur after preparation.
-
-## Verified capture and confirmation
-
-M5 currently emits `payment.verified` with `{paymentIntentId}` in the same transaction
-as its receipt and journal. M4 integration must resolve the persisted purchase link and
-consume this event once, using a durable deduplication key. Raw provider payloads,
-browser redirects and a customer's `GET /customer/payments/{id}` response must never
-confirm bookings or issue tickets directly.
-
-The privileged M5 provider-recheck endpoint can emit that same event when it recovers
-a successful payment whose webhook was missed. It loads the existing intent's stored
-reference, independently verifies it and uses the same atomic capture rules. M4 must
-therefore consume the domain event based on the persisted purchase link regardless of
-whether the receipt's evidence source is `webhook` or `provider_recheck`. Repeated admin
-checks do not produce another capture event. No API accepts a claimed successful payment.
-
-When the hold is valid, lock its authoritative state and confirm once. Capture success
-does not imply that inventory is still available: if the hold expired, the order was
-cancelled, or eligibility was revoked, preserve the financial receipt and record a
-resolution case. Refund/reallocation follows the agreed policy and separate idempotent
-financial workflow. Do not discard a late payment, recreate expired capacity without
-checking it, or pay the merchant before eligibility is established.
-
-## Parallel delivery and integration gate
-
-M5 can proceed independently with gateway validation, internal ledger reconciliation,
-private payment reads, ticket/refund/settlement foundations and synthetic tests.
-Live paid checkout needs the agreed persisted purchase/hold link and combined acceptance.
-
-M4 retains migration `0010_m4_customer_workflows.sql`; M5's unaccepted foundation is
-renumbered to `0011_m5_payment_foundation.sql` before database acceptance. No M4 source
-or branch is changed by that adjustment. If an operator applied the older M5 draft
-filename in a disposable database, recreate that disposable database before rerunning;
-do not manually delete migration history or apply the renamed duplicate over it.
-M4 subsequently added `0011_m4_marketplace_accounts.sql`; the runner identifies and sorts
-the complete filenames, so both distinct 0011 files can coexist. M5 also adds
-`0012_m5_receipt_evidence.sql`. Preserve applied migration identities and verify the full
-combined migration set during integration rather than repeatedly renumbering drafts.
-
-When integrating, preserve both module registrations and both OpenAPI assertion sets,
-then regenerate the combined contract. Keep both M4 and M5 disposable markers supported
-in `packages/database/scripts/disposable-target.ts`; do not overwrite either branch's
-shared-file changes wholesale. Verify customer/tenant isolation, price changes,
-concurrent retries, hold expiry versus capture, cancelled purchases, provider timeouts,
-duplicate events, single ticket redemption and reconciliation on one exact integrated
-commit. Passing each feature branch separately does not prove this combined workflow.
+Financial jobs independently consume cancellation/completion events with durable markers;
+they do not reuse or overwrite notification-worker delivery markers. Deploy the M5 finance
+worker alongside the HTTP process. Use distinct test/live financial databases, migration/runtime
+roles, an approved commercial policy, provider configuration and retained signing-key versions.
+All M1–M4 paths/schemas are preserved. The new lifecycle migration is 0014; both distinct M4/M5
+0011 filenames remain unchanged. Verify the complete integrated branch with the single
+`tooling/run-m5-p1-disposable.sh` command before acceptance or enabling provider checkout.

@@ -15,6 +15,7 @@ export class CustomerWriteGuard implements CanActivate {
   const path=req.route?.path??'';
   if(path.includes('support'))buckets.push(['support',10]);
   if(path.includes('review'))buckets.push(['review',10]);
+  if(path.includes('payment')||path.includes('paid-holds'))buckets.push(['payment',10]);
   for(const [name,limit] of buckets){
    let used:number;
    try{
