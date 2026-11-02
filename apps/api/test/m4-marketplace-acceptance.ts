@@ -24,7 +24,7 @@ const merchant=new BusinessService(runtime,new AccessService(runtime)),manage=ne
 let business:string,branch:string,product:string,service:string,pack:string;
 const originalHosts=process.env.PUBLIC_MEDIA_HOSTS;
 before(async()=>{
- assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m4_test_[a-z0-9_]+$/);
+ assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m[45]_test_[a-z0-9_]+$/);
  await assertDisposable(admin);await assertDisposable(runtime);
  for(const subject of [owner,a,b]){
   await admin.query('INSERT INTO user_profiles(identity_subject,suspended) VALUES($1,false)',[subject]);

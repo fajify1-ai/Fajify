@@ -8,5 +8,5 @@ import {CustomerAccountController} from './account.controller';
 import {MarketplaceController, MerchantPublicController} from './marketplace.controller';
 import {CustomerWriteGuard} from './customer-write.guard';
 
-@Module({imports:[IdentityModule],controllers:[DiscoveryController,CustomerController,MarketplaceController,MerchantPublicController,CustomerAccountController],providers:[CustomerService,MarketplaceService,CustomerAccountService,CustomerWriteGuard]})
+@Module({imports:[IdentityModule],controllers:[DiscoveryController,CustomerController,MarketplaceController,MerchantPublicController,CustomerAccountController],providers:[CustomerService,MarketplaceService,CustomerAccountService,CustomerWriteGuard],exports:[CustomerService,CustomerWriteGuard]})
 export class CustomerModule {}
