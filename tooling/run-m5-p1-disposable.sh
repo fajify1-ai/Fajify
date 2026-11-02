@@ -14,7 +14,10 @@ cleanup(){
  result=$?
  trap - EXIT
  if [[ -f "$run_dir/data/postmaster.pid" ]]; then
-  "$pg_bin/pg_ctl" -D "$run_dir/data" -m immediate -w stop >/dev/null 2>&1 || true
+  if ! "$pg_bin/pg_ctl" -D "$run_dir/data" -m immediate -w stop >/dev/null 2>&1; then
+   echo "FAILED: PostgreSQL did not stop; preserved cluster at $run_dir" >&2
+   exit 1
+  fi
  fi
  if [[ "$result" -ne 0 ]]; then tail -30 "$run_dir/postgres.log" 2>/dev/null || true; fi
  rm -rf -- "$run_dir"
@@ -60,6 +63,7 @@ PGUSER=m5_migrator PGPASSWORD="$FAJI_MIGRATION_PASSWORD" PGDATABASE="$FAJI_DISPO
 GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events,revoked_identity_sessions,business_onboarding TO m5_runtime;
 SQL
 corepack pnpm --filter @faji/api typecheck
+corepack pnpm --filter @faji/api exec tsc -p tsconfig.m5-tests.json
 corepack pnpm --filter @faji/database typecheck
 corepack pnpm --filter @faji/api lint
 corepack pnpm --filter @faji/api build

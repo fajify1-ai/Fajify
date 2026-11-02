@@ -6,5 +6,8 @@ import {IdentityModule} from '../auth/identity.module';
 import {PaymentReadsService} from './payment-reads.service';
 import {CustomerPaymentsController,FinancePaymentsController} from './payment-reads.controller';
 import {PaymentRecoveryController} from './payment-recovery.controller';
-@Module({imports:[IdentityModule],controllers:[PaymentsController,CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController],providers:[PaymentsService,PaystackGateway,PaymentReadsService]})
+import {CustomerModule} from '../customer/customer.module';
+import {OrderIntentsController} from './order-intents.controller';
+import {OrderIntentsService} from './order-intents.service';
+@Module({imports:[IdentityModule,CustomerModule],controllers:[PaymentsController,CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController,OrderIntentsController],providers:[PaymentsService,PaystackGateway,PaymentReadsService,OrderIntentsService]})
 export class PaymentsModule {}

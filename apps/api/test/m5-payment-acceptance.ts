@@ -8,6 +8,9 @@ import {applyMigrations} from '../../../packages/database/scripts/migrate';
 import {PaystackGateway} from '../src/payments/paystack.gateway';
 import {PaymentsService} from '../src/payments/payments.service';
 import {PaymentReadsService} from '../src/payments/payment-reads.service';
+import {OrderIntentsService} from '../src/payments/order-intents.service';
+import {CustomerService} from '../src/customer/customer.service';
+import type {VerifiedIdentity} from '../src/auth/identity.types';
 
 test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings and atomic rollback',async()=>{
  assert.ok(process.env.FAJI_DATABASE_URL,'FAJI_DATABASE_URL required');
@@ -27,6 +30,10 @@ test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings 
   await pool.query('GRANT SELECT,INSERT,UPDATE ON payment_intents TO '+role);
   await pool.query('GRANT SELECT,INSERT ON payment_receipts,ledger_entries,audit_events,outbox_events TO '+role);
   await pool.query('GRANT SELECT ON ledger_accounts TO '+role);
+  await pool.query('GRANT SELECT,INSERT ON payment_order_links,customer_notifications TO '+role);
+  await pool.query('GRANT SELECT,UPDATE ON business_orders,business_branches,business_onboarding,account_access,user_profiles TO '+role);
+  await pool.query('GRANT SELECT ON revoked_identity_sessions TO '+role);
+  await pool.query('GRANT EXECUTE ON FUNCTION faji_customer_notification() TO '+role);
   const privileges=(await runtime.query('SELECT rolsuper,rolcreaterole,rolcreatedb FROM pg_roles WHERE rolname=current_user')).rows[0];
   assert.deepEqual(privileges,{rolsuper:false,rolcreaterole:false,rolcreatedb:false});
   assert.equal((await runtime.query("SELECT count(*)::int AS n FROM pg_tables WHERE tablename IN ('payment_intents','payment_receipts','ledger_entries','ledger_accounts') AND tableowner=current_user")).rows[0].n,0);
@@ -109,6 +116,27 @@ test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings 
   assert.equal((await reads.reconciliation('m5-admin-fixture',recoveryIntent)).internalStatus,'consistent');
   for(const [source,actor] of [['provider_recheck',null],['webhook','untrusted-actor']])
    await assert.rejects(pool.query("INSERT INTO payment_receipts(intent_id,provider_transaction_id,payload_sha256,evidence_source,verification_actor) VALUES($1,$2,repeat('b',64),$3,$4)",[pending,randomUUID(),source,actor]),{code:'23514'});
+
+  await pool.query('INSERT INTO user_profiles(identity_subject) VALUES($1)',[subject]);
+  await pool.query("UPDATE business_onboarding SET status='approved',reviewer_subject='fixture-reviewer',reviewed_at=now() WHERE id=$1",[business]);
+  const branch=(await pool.query("INSERT INTO business_branches(business_id,name) VALUES($1,'M5 Checkout Fixture') RETURNING id",[business])).rows[0].id;
+  const order=(await pool.query("INSERT INTO business_orders(business_id,branch_id,customer_subject,total_minor,currency) VALUES($1,$2,$3,12500,'NGN') RETURNING id",[business,branch,subject])).rows[0].id;
+  const now=Math.floor(Date.now()/1000);
+  const identity:VerifiedIdentity={subject,issuer:'https://identity.example.invalid',audience:['faji-api'],roles:['customer'],issuedAt:now,expiresAt:now+600};
+  const preparations=new OrderIntentsService(new CustomerService(runtime),gateway);
+  const orderKey=randomUUID();
+  const prepared=await Promise.all(Array.from({length:6},()=>preparations.prepare(identity,order,orderKey)));
+  assert.equal(new Set(prepared.map(p=>p.paymentIntentId)).size,1);assert.equal(prepared[0].amountMinor,'12500');
+  assert.equal(prepared[0].checkoutEnabled,false);
+  await assert.rejects(()=>preparations.prepare(identity,order,randomUUID()),{status:409});
+  await assert.rejects(()=>preparations.prepare(identity,randomUUID(),randomUUID()),{status:404});
+  await assert.rejects(pool.query('UPDATE business_orders SET total_minor=1 WHERE id=$1',[order]),/immutable purchase snapshot/);
+  await assert.rejects(pool.query('UPDATE business_orders SET customer_subject=$2 WHERE id=$1',[order,'other-customer']),/immutable purchase snapshot/);
+  await assert.rejects(pool.query('DELETE FROM payment_order_links WHERE order_id=$1',[order]),/append-only/);
+  await assert.rejects(pool.query('INSERT INTO payment_order_links(order_id,intent_id) VALUES($1,$2)',[order,pending]),/snapshot do not match/);
+  // Ordinary M3/M4 status transitions retain their notification behavior.
+  await runtime.query("UPDATE business_orders SET status='accepted' WHERE id=$1",[order]);
+  assert.equal((await pool.query('SELECT status FROM business_orders WHERE id=$1',[order])).rows[0].status,'accepted');
  }finally{await Promise.all([pool.end(),runtime.end()]);}
  // Preserve append-only evidence in this disposable database; discard the database after review.
 });

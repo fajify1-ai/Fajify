@@ -2,6 +2,42 @@
 
 ## Baseline and delivery status
 
+### M4 integration — 2 November 2026
+
+The user reported M4-P1 locally verified, accepted and merged. GitHub `main` is confirmed
+at `b393483066d01cda13b491d1eda89ad2dc4222a5`; M5 now integrates that exact merged
+foundation. Both customer/payment module registrations, all M4/M5 exporter assertions,
+M1–M5 disposable markers, Zod 4.6.6 and the Multer 2.5.0 security override are retained.
+The combined contract preserves every path and schema in both prior snapshots.
+
+`POST /api/v1/customer/orders/{id}/payment-intent` prepares one durable intent from an
+owned M4 order. Only a positive, bounded NGN order still in `placed` can create a new
+intent. Merchant approval and branch activity are locked/rechecked. It reuses M4's
+account transaction for suspension, expiry, session revocation and same-account write
+serialization, plus its customer write quota. The only body field is `requestKey`;
+customer subject, amount, currency, status and provider reference are server-owned.
+
+Exact retries return the same linked intent with no new audit/outbox effects. Reusing
+the key for another order, environment or unbound legacy intent returns 409. A different
+key for an already-linked order is also rejected, preventing a second payment attempt
+from silently becoming a second charge. Store and reuse the original request key.
+
+Migration `0013_m5_order_intents.sql` adds immutable order/intent links. A database trigger
+checks matching customer, merchant, total and currency; linked order financial/ownership
+fields cannot subsequently change. Ordinary merchant order status transitions remain
+valid. The receipt/ledger is not changed by preparation, and an order is never marked paid.
+
+**Preparation is not checkout.** The response explicitly has `checkoutEnabled: false`.
+No gateway session, authorization URL or charge is created. A configured Paystack key is
+required to select the server's test/live environment. Gateway initialization/recovery,
+order-state changes during checkout, refunds for late/cancelled payments, paid reservation
+holds and ticket issuance remain separate deliveries. No inventory hold is claimed for
+M4's product orders. Replayed intent metadata does not renew purchase eligibility.
+
+The existing M4 phase acceptance is not a claim that the combined M4/M5 financial changes
+passed PostgreSQL verification. The M5 disposable harness now prepares concurrent order
+retries, ownership/snapshot checks and unchanged status transitions as additional gates.
+
 Started 1 November 2026 (Africa/Lagos), from `main` at
 `728fd1ca457f838e4e8a365e963420bce7b49bac` (merged M3-P1).
 Branch: `feat/m5-p1-payment-foundation`.
@@ -74,7 +110,8 @@ must be integrated before a checkout API is exposed. No customer/client amount i
 - `tooling/run-m5-p1-disposable.sh` creates and cleans an isolated loopback PostgreSQL
   cluster with generated credentials, applies migrations, runs the inherited API tests
   and the M5 database harness, and records the exact source commit. It refuses a dirty
-  or wrong branch and refuses root. It is prepared and syntax-checked, not executed here.
+  or wrong branch and refuses root. If PostgreSQL cannot stop, it preserves the cluster
+  and fails instead of deleting live data. It is prepared and syntax-checked, not executed here.
 
 ## Implemented in increment 3
 
@@ -126,7 +163,7 @@ Provider references:
 
 | Work package | Required next delivery |
 | --- | --- |
-| 5.1 Gateway | Authenticated intent initialization from a persisted server quote, ownership checks, request-key conflict checks, initialization timeout/recovery and provider sandbox acceptance |
+| 5.1 Gateway | Gateway-session initialization using the bound order intent, timeout/recovery, revalidation before checkout and provider sandbox acceptance; order-owned intent preparation is implemented |
 | 5.2 Ledger | Account ownership model, commission/fees policy, merchant payables, balances, provider-statement reconciliation and execution of restricted runtime-role checks |
 | 5.3 Paid bookings | M4 capacity holds, immutable purchase snapshot, expiry/retry and late-payment resolution; confirm once only after verified capture |
 | 5.4 Tickets | Inventory reservation, opaque QR tokens, authorized atomic single-use redemption and concurrent redemption tests |
@@ -139,11 +176,14 @@ financial actions. Do not infer a fee percentage or payout schedule from this fo
 
 ## Verification and acceptance limits
 
-Latest local verification: all 113 tests that do not require a database pass, including
-25 M5 unit/HTTP tests, with none skipped in that selected suite. API source and new-test
+Latest local verification: 130 tests that do not require a database pass, including 32
+M5 tests. The merged M4/M5 baseline also preserves all prior contract paths/schemas.
+API source and strict M4/M5 test
 typechecks, lint/build and database package typecheck pass. OpenAPI is regenerated
 through NestJS with required signed-webhook and protected read-contract assertions.
 The disposable launcher passes `bash -n`. Database checks are a separate gate.
+The dependency audit passes its high/critical gate; one low and three moderate findings
+remain. No GitHub Actions workflow is added or enabled.
 
 The default API test command also includes eight existing M2 database cases. These fail
 without the explicitly marked migration/runtime databases; they are not skipped or

@@ -17,6 +17,7 @@ export class PaystackGateway {
   const expected=createHmac('sha512',secret).update(raw).digest();
   if(!timingSafeEqual(expected,Buffer.from(signature,'hex')))throw new UnauthorizedException('Invalid payment signature');
  }
+ environment(){return this.config().environment;}
  async verify(reference:string,transport:typeof fetch=fetch):Promise<VerifiedCharge>{
   const {secret,environment}=this.config();
   try{

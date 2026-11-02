@@ -69,6 +69,7 @@ test('M5 HTTP: read operations publish bearer-protected response and identifier 
   const doc=apiDocument(app);
   for(const url of ['/api/v1/customer/payments/{id}','/api/v1/admin/finance/payments/{id}/reconciliation']){
    const operation=doc.paths[url]?.get;
+   assert.ok(operation);
    assert.ok(operation?.security?.some(s=>Object.hasOwn(s,'keycloak')));
    assert.ok(operation.responses?.['200']);
    assert.ok(operation.parameters?.some(p=>'in' in p&&p.in==='path'&&p.name==='id'&&p.required));
@@ -76,6 +77,7 @@ test('M5 HTTP: read operations publish bearer-protected response and identifier 
   assert.ok(doc.components?.schemas?.PaymentStatusResponse);
   assert.ok(doc.components?.schemas?.CaptureReconciliationResponse);
   const recovery=doc.paths['/api/v1/admin/finance/payments/{id}/provider-recheck']?.post;
+  assert.ok(recovery);
   assert.ok(recovery?.security?.some(s=>Object.hasOwn(s,'keycloak')));assert.ok(recovery.responses?.['200']);
   assert.ok(doc.components?.schemas?.PaymentRecheckResponse);
  }finally{await app.close();}

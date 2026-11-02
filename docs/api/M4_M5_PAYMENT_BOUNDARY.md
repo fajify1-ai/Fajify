@@ -1,6 +1,10 @@
 # M4 / M5 payment integration boundary
 
 Status: proposed handoff contract while both Phase 1 workstreams are in progress.
+Update, 2 November 2026: M4-P1 is user-confirmed locally accepted and merged at
+`b393483066d01cda13b491d1eda89ad2dc4222a5`. M5 now integrates that foundation and
+implements customer-owned order intent preparation. The remaining paid-hold and gateway
+session portions below are integration requirements, not completed checkout functionality.
 M4 branch inspected at `67ebc0add0ac0c402d706420a0eeca7bd1f7e8f0`;
 M5 foundation starts at `c493f9e71319e260bc01f9cd4432ac9b1fa34660`.
 M4 has since advanced to `92bc44b671e2a683283da6e3d3dcc680f41b95b2` independently;
@@ -38,10 +42,20 @@ customer subject, provider success state or a supposed signed quote object.
 | Retry key | Customer-scoped key bound to the same purchase and snapshot; changed meaning returns a conflict |
 
 Zero-price reservations stay in the free path. A payment intent needs a unique purchase
-link and a defined policy for multiple attempts; the current foundation schema does not
-yet contain that link. Add it in the integration migration rather than accepting unbound
-customer-created intents. Initialization/recovery must reuse the persisted provider
+link and a defined policy for multiple attempts. Migration 0013 now provides a unique,
+immutable link for product orders, with matching customer/business/amount/currency and
+an immutable order price/ownership snapshot once linked. An order has one intent and
+must reuse its original customer-scoped request key. Reservation/ticket links remain
+pending. Initialization/recovery must reuse the persisted provider
 reference and prevent a timed-out attempt from silently becoming a second payment.
+
+The preparation endpoint is `POST /api/v1/customer/orders/{id}/payment-intent` with only
+`{requestKey}`. It uses M4's active account transaction and write quota. Creation requires
+an approved active merchant branch and a positive bounded NGN order still in `placed`.
+The response includes `paymentIntentId`, `orderId`, decimal `amountMinor`, `currency`,
+capture `status` and `checkoutEnabled: false`. It does not initialize a provider session,
+charge funds, hold stock or change order status. Before a later gateway-session request,
+revalidate the purchase state: merchant acceptance/cancellation can occur after preparation.
 
 ## Verified capture and confirmation
 
