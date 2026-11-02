@@ -207,4 +207,3 @@ test('runtime role is restricted and cannot connect to the isolated Keycloak sen
  await assert.rejects(runtime.query('CREATE TABLE public.m1_forbidden(id int)'),e=>code(e)==='42501');
  await assert.rejects(runtime.query("UPDATE _faji_migrations SET checksum='forbidden'"),e=>code(e)==='42501');
 });
-

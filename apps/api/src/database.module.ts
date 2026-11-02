@@ -12,4 +12,3 @@ class DatabaseShutdown implements OnApplicationShutdown {
  DatabaseShutdown
 ],exports:[DATABASE_POOL]})
 export class DatabaseModule {}
-
