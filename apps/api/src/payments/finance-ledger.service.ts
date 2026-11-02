@@ -18,7 +18,9 @@ export class FinanceLedger {
  async environment(c:PoolClient,environment:string){
   if((await c.query('SELECT 1 FROM payment_receipts r JOIN payment_intents p ON p.id=r.intent_id WHERE p.environment<>$1 LIMIT 1',[environment])).rowCount)throw new ConflictException('Financial environments must use separate databases');
   await c.query('INSERT INTO finance_environment(environment) VALUES($1) ON CONFLICT DO NOTHING',[environment]);
-  const row=(await c.query('SELECT environment FROM finance_environment FOR SHARE')).rows[0];if(row.environment!==environment)throw new ConflictException('Financial environment differs from this database');
+  // This singleton is immutable. INSERT's unique conflict check serializes first use;
+  // reading it requires no row lock (or UPDATE grant on append-only configuration).
+  const row=(await c.query('SELECT environment FROM finance_environment')).rows[0];if(row.environment!==environment)throw new ConflictException('Financial environment differs from this database');
  }
  async tx<T>(businessId:string,run:(c:PoolClient)=>Promise<T>){
   const c=await this.pool.connect();try{await c.query('BEGIN');await c.query("SET LOCAL lock_timeout='5s'");await this.lock(c,businessId);const result=await run(c);await c.query('COMMIT');return result;}

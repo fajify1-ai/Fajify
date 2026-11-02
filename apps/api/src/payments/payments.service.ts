@@ -65,8 +65,8 @@ export class PaymentsService {
    if(intent.status!=='pending')throw new ConflictException('Invalid payment transition');
    await client.query('INSERT INTO payment_receipts(intent_id,provider_transaction_id,payload_sha256,evidence_source,verification_actor) VALUES($1,$2,$3,$4,$5)',[intent.id,charge.id,evidence.hash,evidence.source,evidence.actor]);
    const journal=await client.query(`INSERT INTO ledger_entries(intent_id,debit_account_id,credit_account_id,currency,amount_minor)
-    SELECT $1,d.id,c.id,$2,$3 FROM ledger_accounts d,ledger_accounts c
-    WHERE d.code='gateway_clearing' AND c.code='customer_funds' AND d.currency=$2 AND c.currency=$2 RETURNING id`,[intent.id,intent.currency,intent.amount_minor]);
+    SELECT $1::uuid,d.id,c.id,d.currency,$3::bigint FROM ledger_accounts d,ledger_accounts c
+    WHERE d.code='gateway_clearing' AND c.code='customer_funds' AND d.currency=$2::varchar(3) AND c.currency=d.currency RETURNING id`,[intent.id,intent.currency,intent.amount_minor]);
    if(journal.rowCount!==1)throw new ConflictException('Ledger accounts unavailable');
    await client.query("UPDATE payment_intents SET status='succeeded',verified_at=now() WHERE id=$1",[intent.id]);
    const captured={...intent,status:'succeeded'};

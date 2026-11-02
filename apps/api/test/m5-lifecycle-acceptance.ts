@@ -74,6 +74,13 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
    for(const sql of ['CREATE TABLE m5_escape(id int)','TRUNCATE ledger_entries','UPDATE _faji_migrations SET checksum=checksum'])await assert.rejects(runtime.query(sql),{code:'42501'});
    assert.equal((await runtime.query("SELECT has_database_privilege(current_user,'keycloak_m1_sentinel','CONNECT') AS allowed")).rows[0].allowed,false);
   });
+  await t.test('immutable environment initializes concurrently with SELECT/INSERT only and rejects a different provider domain',async()=>{
+   assert.equal((await runtime.query("SELECT has_table_privilege(current_user,'finance_environment','UPDATE') AS allowed")).rows[0].allowed,false);
+   await Promise.all(Array.from({length:4},()=>ledger.tx(randomUUID(),c=>ledger.environment(c,'test'))));
+   assert.deepEqual((await runtime.query('SELECT environment FROM finance_environment')).rows,[{environment:'test'}]);
+   await assert.rejects(()=>ledger.tx(randomUUID(),c=>ledger.environment(c,'live')),{status:409});
+   await assert.rejects(runtime.query("UPDATE finance_environment SET environment='live'"),{code:'42501'});
+  });
   await t.test('server-priced checkout persists once, capture allocates exact fee and policy snapshots and gates fulfilment',async()=>{
    const f=await fixture(),o=await order(f);await assert.rejects(()=>merchant.orderStatus(owner,f.business,f.branch,o.order,'accepted'));
    const init=await checkout(o.id),count=fake.count('POST','/transaction/initialize');const replay=await checkout(o.id);assert.equal(replay.authorizationUrl,init.authorizationUrl);
