@@ -7117,6 +7117,1386 @@
           "ride-fare-policy"
         ]
       }
+    },
+    "/api/v1/customer/support-notifications": {
+      "get": {
+        "operationId": "CustomerSupportNotificationsController_list_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSupportNoticePage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-support-notifications"
+        ]
+      }
+    },
+    "/api/v1/customer/support-notifications/{id}/read": {
+      "put": {
+        "operationId": "CustomerSupportNotificationsController_read_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSupportNoticeView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-support-notifications"
+        ]
+      }
+    },
+    "/api/v1/customer/integrations/booking-rides": {
+      "post": {
+        "operationId": "CustomerBookingRideController_bind_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerBookingRideInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerBookingRideView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-booking-ride"
+        ]
+      },
+      "get": {
+        "operationId": "CustomerBookingRideController_list_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerBookingRidePage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-booking-ride"
+        ]
+      }
+    },
+    "/api/v1/customer/integrations/booking-rides/{id}/unlink": {
+      "put": {
+        "operationId": "CustomerBookingRideController_unlink_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerBookingRideView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-booking-ride"
+        ]
+      }
+    },
+    "/api/v1/admin/operations/overview": {
+      "get": {
+        "operationId": "AdminOperationsController_overview_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOverviewView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-operations"
+        ]
+      }
+    },
+    "/api/v1/admin/operations/audit": {
+      "get": {
+        "operationId": "AdminOperationsController_audit_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAuditPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-operations"
+        ]
+      }
+    },
+    "/api/v1/admin/governance/approvals": {
+      "get": {
+        "operationId": "AdminGovernanceController_applications_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPagedResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-governance"
+        ]
+      }
+    },
+    "/api/v1/admin/governance/reviews": {
+      "get": {
+        "operationId": "AdminGovernanceController_reviews_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPagedResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-governance"
+        ]
+      }
+    },
+    "/api/v1/admin/governance/restrictions": {
+      "get": {
+        "operationId": "AdminGovernanceController_restrictions_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPagedResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-governance"
+        ]
+      }
+    },
+    "/api/v1/admin/governance/reviews/{id}/moderation": {
+      "post": {
+        "operationId": "AdminGovernanceController_moderate_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminModerateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminModerationResultView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-governance"
+        ]
+      }
+    },
+    "/api/v1/admin/governance/branches/{id}/restriction": {
+      "post": {
+        "operationId": "AdminGovernanceController_branch_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRestrictionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRestrictionResultView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-governance"
+        ]
+      }
+    },
+    "/api/v1/admin/governance/catalogue/{id}/restriction": {
+      "post": {
+        "operationId": "AdminGovernanceController_catalogue_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRestrictionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRestrictionResultView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-governance"
+        ]
+      }
+    },
+    "/api/v1/admin/support/cases": {
+      "get": {
+        "operationId": "AdminSupportController_cases_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "open",
+                "closed"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPagedResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-support"
+        ]
+      }
+    },
+    "/api/v1/admin/support/cases/{id}": {
+      "get": {
+        "operationId": "AdminSupportController_detail_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSupportDetailView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-support"
+        ]
+      }
+    },
+    "/api/v1/admin/support/cases/{id}/assignment": {
+      "post": {
+        "operationId": "AdminSupportController_assign_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminAssignInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSupportAssignmentView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-support"
+        ]
+      }
+    },
+    "/api/v1/admin/support/cases/{id}/messages": {
+      "post": {
+        "operationId": "AdminSupportController_reply_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReplyInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSupportMessageView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-support"
+        ]
+      }
+    },
+    "/api/v1/admin/support/cases/{id}/status": {
+      "post": {
+        "operationId": "AdminSupportController_status_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSupportStatusInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSupportStatusView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-support"
+        ]
+      }
+    },
+    "/api/v1/admin/incidents": {
+      "get": {
+        "operationId": "AdminIncidentController_list_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPagedResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-incidents"
+        ]
+      },
+      "post": {
+        "operationId": "AdminIncidentController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminIncidentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminIncidentView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-incidents"
+        ]
+      }
+    },
+    "/api/v1/admin/incidents/{id}/status": {
+      "post": {
+        "operationId": "AdminIncidentController_transition_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminIncidentTransitionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminIncidentStatusView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-incidents"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/summary": {
+      "get": {
+        "operationId": "AdminInsightsController_finance_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminFinanceSummary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
+    },
+    "/api/v1/admin/reports/overview": {
+      "get": {
+        "operationId": "AdminInsightsController_report_v1",
+        "parameters": [
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 90,
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminReportSummary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
+    },
+    "/api/v1/admin/reports/businesses/{id}": {
+      "get": {
+        "operationId": "AdminInsightsController_business_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminBusinessReportView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
+    },
+    "/api/v1/admin/integrations/consistency": {
+      "get": {
+        "operationId": "AdminInsightsController_consistency_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminConsistencyView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
+    },
+    "/api/v1/admin/monitoring/status": {
+      "get": {
+        "operationId": "AdminInsightsController_status_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminMonitoringSummary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
+    },
+    "/api/v1/admin/monitoring/check": {
+      "post": {
+        "operationId": "AdminInsightsController_check_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "checkedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "opened": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "cleared": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
+    },
+    "/api/v1/admin/monitoring/alerts": {
+      "get": {
+        "operationId": "AdminInsightsController_alerts_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAlertPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
+    },
+    "/api/v1/admin/monitoring/alerts/{id}/acknowledgement": {
+      "post": {
+        "operationId": "AdminInsightsController_acknowledge_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminCommandKey"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminChangedView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
+    },
+    "/api/v1/admin/operations/command-audit": {
+      "get": {
+        "operationId": "AdminInsightsController_actionAudit_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCommandAuditPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
+    },
+    "/api/v1/admin/integrations/customers/{subject}/activity": {
+      "get": {
+        "operationId": "AdminInsightsController_activity_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          },
+          {
+            "name": "subject",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPagedResult"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "admin-finance-reports"
+        ]
+      }
     }
   },
   "info": {
@@ -10364,6 +11744,1044 @@
           "quantity",
           "status",
           "expiresAt"
+        ]
+      },
+      "CustomerSupportNoticeView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "caseId",
+          "title",
+          "readAt",
+          "createdAt"
+        ]
+      },
+      "CustomerSupportNoticePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerSupportNoticeView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "CustomerBookingRideInput": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rideId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "consent": {
+            "type": "boolean",
+            "description": "Explicit consent to associate an existing ride with this reservation. Does not create or pay for a ride."
+          }
+        },
+        "required": [
+          "reservationId",
+          "rideId",
+          "requestKey",
+          "consent"
+        ]
+      },
+      "CustomerBookingRideView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rideId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "cancelled"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cancelledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "reservationId",
+          "rideId",
+          "status",
+          "createdAt",
+          "cancelledAt"
+        ]
+      },
+      "CustomerBookingRidePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerBookingRideView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "AdminOverviewView": {
+        "type": "object",
+        "properties": {
+          "pendingBusinessApprovals": {
+            "type": "number"
+          },
+          "openSupportCases": {
+            "type": "number"
+          },
+          "hiddenReviews": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "pendingBusinessApprovals",
+          "openSupportCases",
+          "hiddenReviews"
+        ]
+      },
+      "AdminAuditEventView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorSubject": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "actorSubject",
+          "eventType",
+          "occurredAt"
+        ]
+      },
+      "AdminAuditPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminAuditEventView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "AdminPagedResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "AdminModerateInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 500
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "visible",
+              "hidden"
+            ]
+          }
+        },
+        "required": [
+          "requestKey",
+          "reason",
+          "visibility"
+        ]
+      },
+      "AdminModerationResultView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "moderationStatus": {
+            "type": "string",
+            "enum": [
+              "visible",
+              "hidden"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "changed",
+          "moderationStatus"
+        ]
+      },
+      "AdminRestrictionInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 500
+          },
+          "restricted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "requestKey",
+          "reason",
+          "restricted"
+        ]
+      },
+      "AdminRestrictionResultView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "restricted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "changed",
+          "resourceType",
+          "restricted"
+        ]
+      },
+      "AdminSupportMessageView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "body",
+          "createdAt"
+        ]
+      },
+      "AdminSupportMessagePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminSupportMessageView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "AdminSupportDetailView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "customerSubject": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "subject": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "assignedTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "messages": {
+            "$ref": "#/components/schemas/AdminSupportMessagePage"
+          }
+        },
+        "required": [
+          "id",
+          "customerSubject",
+          "category",
+          "resourceId",
+          "subject",
+          "status",
+          "assignedTo",
+          "priority",
+          "createdAt",
+          "updatedAt",
+          "messages"
+        ]
+      },
+      "AdminAssignInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 500
+          },
+          "assignee": {
+            "type": "string",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "normal",
+              "high",
+              "urgent"
+            ]
+          }
+        },
+        "required": [
+          "requestKey",
+          "reason",
+          "priority"
+        ]
+      },
+      "AdminSupportAssignmentView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "assignedTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "priority": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "changed",
+          "assignedTo",
+          "priority"
+        ]
+      },
+      "AdminReplyInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "requestKey",
+          "message"
+        ]
+      },
+      "AdminSupportStatusInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 500
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ]
+          }
+        },
+        "required": [
+          "requestKey",
+          "reason",
+          "status"
+        ]
+      },
+      "AdminSupportStatusView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "changed",
+          "status"
+        ]
+      },
+      "AdminIncidentInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "incidentType": {
+            "type": "string",
+            "enum": [
+              "booking",
+              "order",
+              "ride",
+              "provider",
+              "security",
+              "platform"
+            ]
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 200
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          }
+        },
+        "required": [
+          "requestKey",
+          "incidentType",
+          "summary",
+          "severity"
+        ]
+      },
+      "AdminIncidentView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "incidentType": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "assignedTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "incidentType",
+          "resourceId",
+          "summary",
+          "severity",
+          "state",
+          "assignedTo",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AdminIncidentTransitionInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 500
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "open",
+              "investigating",
+              "mitigated",
+              "resolved"
+            ]
+          }
+        },
+        "required": [
+          "requestKey",
+          "reason",
+          "state"
+        ]
+      },
+      "AdminIncidentStatusView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "changed",
+          "state"
+        ]
+      },
+      "AdminFinanceSummary": {
+        "type": "object",
+        "properties": {
+          "capturedMinor": {
+            "type": "string"
+          },
+          "refundedMinor": {
+            "type": "string"
+          },
+          "settledMinor": {
+            "type": "string"
+          },
+          "openReconciliationCases": {
+            "type": "number"
+          },
+          "openDisputes": {
+            "type": "number"
+          },
+          "uncertainRefunds": {
+            "type": "number"
+          },
+          "reconciledRideDriverPayoutMinor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "capturedMinor",
+          "refundedMinor",
+          "settledMinor",
+          "openReconciliationCases",
+          "openDisputes",
+          "uncertainRefunds",
+          "reconciledRideDriverPayoutMinor"
+        ]
+      },
+      "AdminReportSummary": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "number"
+          },
+          "customers": {
+            "type": "number"
+          },
+          "approvedBusinesses": {
+            "type": "number"
+          },
+          "createdOrders": {
+            "type": "number"
+          },
+          "createdReservations": {
+            "type": "number"
+          },
+          "issuedTickets": {
+            "type": "number"
+          },
+          "requestedRides": {
+            "type": "number"
+          },
+          "completedRides": {
+            "type": "number"
+          },
+          "verifiedRideGrossMinor": {
+            "type": "string"
+          },
+          "verifiedCaptureMinor": {
+            "type": "string"
+          },
+          "ledgerPlatformRevenueMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "days",
+          "customers",
+          "approvedBusinesses",
+          "createdOrders",
+          "createdReservations",
+          "issuedTickets",
+          "requestedRides",
+          "completedRides",
+          "verifiedRideGrossMinor",
+          "verifiedCaptureMinor",
+          "ledgerPlatformRevenueMinor",
+          "currency"
+        ]
+      },
+      "AdminBusinessReportView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "activeBranches": {
+            "type": "number"
+          },
+          "fulfilledOrders": {
+            "type": "number"
+          },
+          "completedReservations": {
+            "type": "number"
+          },
+          "linkedCustomerRides": {
+            "type": "number"
+          },
+          "verifiedCapturedMinor": {
+            "type": "string"
+          },
+          "processedRefundMinor": {
+            "type": "string"
+          },
+          "settledMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "status",
+          "activeBranches",
+          "fulfilledOrders",
+          "completedReservations",
+          "linkedCustomerRides",
+          "verifiedCapturedMinor",
+          "processedRefundMinor",
+          "settledMinor",
+          "currency"
+        ]
+      },
+      "AdminConsistencyView": {
+        "type": "object",
+        "properties": {
+          "confirmedUnverifiedHolds": {
+            "type": "number"
+          },
+          "unpostedVerifiedCaptures": {
+            "type": "number"
+          },
+          "orphanPlanHolds": {
+            "type": "number"
+          },
+          "packageHoldsMissingComponents": {
+            "type": "number"
+          },
+          "linksWithCancelledRides": {
+            "type": "number"
+          },
+          "linksWithCancelledReservations": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "confirmedUnverifiedHolds",
+          "unpostedVerifiedCaptures",
+          "orphanPlanHolds",
+          "packageHoldsMissingComponents",
+          "linksWithCancelledRides",
+          "linksWithCancelledReservations"
+        ]
+      },
+      "AdminMonitoringSummary": {
+        "type": "object",
+        "properties": {
+          "deadFinanceJobs": {
+            "type": "number"
+          },
+          "expiredFinanceLeases": {
+            "type": "number"
+          },
+          "overdueFinanceJobs": {
+            "type": "number"
+          },
+          "openFinanceExceptions": {
+            "type": "number"
+          },
+          "staleOutboxEvents": {
+            "type": "number"
+          },
+          "openUrgentRideIncidents": {
+            "type": "number"
+          },
+          "providerHealth": {
+            "type": "string",
+            "enum": [
+              "unverified"
+            ],
+            "description": "No external provider probe is performed"
+          },
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "deadFinanceJobs",
+          "expiredFinanceLeases",
+          "overdueFinanceJobs",
+          "openFinanceExceptions",
+          "staleOutboxEvents",
+          "openUrgentRideIncidents",
+          "providerHealth",
+          "checkedAt"
+        ]
+      },
+      "AdminAlertView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "incidentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "acknowledgedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "incidentId",
+          "severity",
+          "acknowledgedAt",
+          "createdAt",
+          "summary",
+          "state"
+        ]
+      },
+      "AdminAlertPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminAlertView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "AdminCommandKey": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          }
+        },
+        "required": [
+          "requestKey"
+        ]
+      },
+      "AdminChangedView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "changed"
+        ]
+      },
+      "AdminCommandAuditView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorSubject": {
+            "type": "string"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "applied",
+              "unchanged"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "actorSubject",
+          "operation",
+          "resourceType",
+          "resourceId",
+          "outcome",
+          "reason",
+          "occurredAt"
+        ]
+      },
+      "AdminCommandAuditPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminCommandAuditView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
         ]
       }
     }
