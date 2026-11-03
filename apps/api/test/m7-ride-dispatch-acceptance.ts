@@ -132,3 +132,14 @@ test('M7 acceptance: safety incidents are scoped, durable and replay-safe',async
  assert.equal((await safety.resolve(dispatcher,first.id,zone,'investigating')).status,'investigating');
  assert.equal((await safety.resolve(dispatcher,first.id,zone,'resolved')).status,'resolved');
 });
+
+test('M7 acceptance: trip and financial evidence rows are append-only',async()=>{
+ const trip=await pool.query<{id:string;ride_id:string}>('SELECT id,ride_id FROM ride_trip_events ORDER BY occurred_at DESC LIMIT 1');
+ assert.ok(trip.rows[0]);
+ await assert.rejects(()=>pool.query('UPDATE ride_trip_events SET to_state=to_state WHERE id=$1',[trip.rows[0].id]),{code:'42501'});
+ const complete=await pool.query<{ride_id:string}>('SELECT ride_id FROM ride_fares ORDER BY created_at DESC LIMIT 1');
+ assert.ok(complete.rows[0]);
+ const event=await pool.query<{id:string}>(`INSERT INTO ride_financial_events(ride_id,actor_subject,event_type,amount_minor,idempotency_key)
+ VALUES($1,'test:m7','synthetic_test',1,$2) RETURNING id`,[complete.rows[0].ride_id,randomUUID()]);
+ await assert.rejects(()=>pool.query('DELETE FROM ride_financial_events WHERE id=$1',[event.rows[0].id]),{code:'42501'});
+});
