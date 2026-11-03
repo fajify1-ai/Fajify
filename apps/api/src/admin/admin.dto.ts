@@ -158,6 +158,10 @@ export class AdminSupportMessageView {
  @ApiProperty({type:String}) body!:string;
  @ApiProperty({type:String,format:'date-time'}) createdAt!:string;
 }
+export class AdminSupportMessagePage {
+ @ApiProperty({type:()=>[AdminSupportMessageView]}) items!:AdminSupportMessageView[];
+ @ApiProperty({type:Number,nullable:true}) nextOffset!:number|null;
+}
 export class AdminSupportDetailView {
  @ApiProperty({type:String,format:'uuid'}) id!:string;
  @ApiProperty({type:String}) customerSubject!:string;
@@ -169,8 +173,5 @@ export class AdminSupportDetailView {
  @ApiProperty({type:String}) priority!:string;
  @ApiProperty({type:String,format:'date-time'}) createdAt!:string;
  @ApiProperty({type:String,format:'date-time'}) updatedAt!:string;
- @ApiProperty({schema:{type:'object',additionalProperties:false,properties:{
-  items:{type:'array',items:{$ref:'#/components/schemas/AdminSupportMessageView'}},
-  nextOffset:{type:'integer',nullable:true}
- }}}) messages!: {items:AdminSupportMessageView[];nextOffset:number|null};
+ @ApiProperty({type:()=>AdminSupportMessagePage}) messages!:AdminSupportMessagePage;
 }
