@@ -2,13 +2,13 @@ import {ApiProperty,ApiPropertyOptional} from '@nestjs/swagger';
 import {Type} from 'class-transformer';
 import {ArrayMaxSize,IsArray,IsIn,IsInt,IsISO8601,IsOptional,IsString,IsUUID,IsNumber,Length,Matches,Max,Min} from 'class-validator';
 export class CustomerSavedPlanInput {
- @ApiProperty({minLength:1,maxLength:80}) @IsString() @Length(1,80) occasion!:string;
- @ApiProperty({pattern:'^(0|[1-9][0-9]{0,18})$'}) @Matches(/^(0|[1-9][0-9]{0,18})$/) budgetMinor!:string;
- @ApiProperty({pattern:'^[A-Z]{3}$'}) @Matches(/^[A-Z]{3}$/) currency!:string;
- @ApiProperty({minimum:1,maximum:50}) @IsInt() @Min(1) @Max(50) guests!:number;
- @ApiProperty({format:'date-time'}) @IsISO8601({strict:true,strictSeparator:true}) startsAfter!:string;
- @ApiProperty({format:'date-time'}) @IsISO8601({strict:true,strictSeparator:true}) startsBefore!:string;
- @ApiPropertyOptional({maxLength:120}) @IsOptional() @IsString() @Length(1,120) location?:string;
+ @ApiProperty({type:String,minLength:1,maxLength:80}) @IsString() @Length(1,80) occasion!:string;
+ @ApiProperty({type:String,pattern:'^(0|[1-9][0-9]{0,18})$'}) @Matches(/^(0|[1-9][0-9]{0,18})$/) budgetMinor!:string;
+ @ApiProperty({type:String,pattern:'^[A-Z]{3}$'}) @Matches(/^[A-Z]{3}$/) currency!:string;
+ @ApiProperty({type:Number,minimum:1,maximum:50}) @IsInt() @Min(1) @Max(50) guests!:number;
+ @ApiProperty({type:String,format:'date-time'}) @IsISO8601({strict:true,strictSeparator:true}) startsAfter!:string;
+ @ApiProperty({type:String,format:'date-time'}) @IsISO8601({strict:true,strictSeparator:true}) startsBefore!:string;
+ @ApiPropertyOptional({type:String,maxLength:120}) @IsOptional() @IsString() @Length(1,120) location?:string;
  @ApiPropertyOptional({type:Number,minimum:-90,maximum:90}) @IsOptional() @IsNumber() @Min(-90) @Max(90) latitude?:number;
  @ApiPropertyOptional({type:Number,minimum:-180,maximum:180}) @IsOptional() @IsNumber() @Min(-180) @Max(180) longitude?:number;
  @ApiPropertyOptional({type:Number,minimum:1,maximum:100}) @IsOptional() @IsInt() @Min(1) @Max(100) radiusKm?:number;
@@ -23,49 +23,49 @@ export class CustomerSavedPlanListQuery {
  @ApiPropertyOptional({minimum:0,maximum:10000,default:0}) @IsOptional() @Type(()=>Number) @IsInt() @Min(0) @Max(10000) offset=0;
 }
 export class CustomerSavedPlanView {
- @ApiProperty() id!:string;
- @ApiProperty() revision!:number;
- @ApiProperty() occasion!:string;
- @ApiProperty() budgetMinor!:string;
- @ApiProperty() currency!:string;
- @ApiProperty() guests!:number;
- @ApiProperty({format:'date-time'}) startsAfter!:string;
- @ApiProperty({format:'date-time'}) startsBefore!:string;
- @ApiPropertyOptional({nullable:true}) location!:string|null;
+ @ApiProperty({type:String,}) id!:string;
+ @ApiProperty({type:Number,}) revision!:number;
+ @ApiProperty({type:String,}) occasion!:string;
+ @ApiProperty({type:String,}) budgetMinor!:string;
+ @ApiProperty({type:String,}) currency!:string;
+ @ApiProperty({type:Number,}) guests!:number;
+ @ApiProperty({type:String,format:'date-time'}) startsAfter!:string;
+ @ApiProperty({type:String,format:'date-time'}) startsBefore!:string;
+ @ApiPropertyOptional({type:String,nullable:true}) location!:string|null;
  @ApiProperty({type:[String]}) categories!:string[];
  @ApiProperty({type:[String]}) attributes!:string[];
  @ApiPropertyOptional({type:Number,nullable:true}) latitude!:number|null;
  @ApiPropertyOptional({type:Number,nullable:true}) longitude!:number|null;
  @ApiPropertyOptional({type:Number,nullable:true}) radiusKm!:number|null;
- @ApiProperty({enum:['draft','archived']}) status!:string;
- @ApiProperty({format:'date-time'}) createdAt!:string;
+ @ApiProperty({type:String,enum:['draft','archived']}) status!:string;
+ @ApiProperty({type:String,format:'date-time'}) createdAt!:string;
 }
 export class CustomerSavedPlanPage {
  @ApiProperty({type:()=>[CustomerSavedPlanView]}) items!:CustomerSavedPlanView[];
  @ApiProperty({nullable:true,type:Number}) nextOffset!:number|null;
 }
 export class CustomerPlanRecommendationView {
- @ApiProperty() id!:string;
- @ApiProperty() availabilityId!:string;
- @ApiProperty() businessId!:string;
- @ApiProperty() branchId!:string;
- @ApiProperty() name!:string;
- @ApiProperty() category!:string;
- @ApiProperty() startsAt!:string;
- @ApiProperty() totalMinor!:string;
- @ApiProperty() currency!:string;
- @ApiProperty() score!:number;
+ @ApiProperty({type:String,}) id!:string;
+ @ApiProperty({type:String,}) availabilityId!:string;
+ @ApiProperty({type:String,}) businessId!:string;
+ @ApiProperty({type:String,}) branchId!:string;
+ @ApiProperty({type:String,}) name!:string;
+ @ApiProperty({type:String,}) category!:string;
+ @ApiProperty({type:String,}) startsAt!:string;
+ @ApiProperty({type:String,}) totalMinor!:string;
+ @ApiProperty({type:String,}) currency!:string;
+ @ApiProperty({type:Number,}) score!:number;
  @ApiProperty({type:[String]}) reasons!:string[];
- @ApiProperty({description:'Informational only; revalidate live price, capacity and payment before booking'}) bookingStatus!:string;
- @ApiProperty({enum:['ticket','free_reservation','paid_hold']}) bookingMethod!:string;
+ @ApiProperty({type:String,description:'Informational only; revalidate live price, capacity and payment before booking'}) bookingStatus!:string;
+ @ApiProperty({type:String,enum:['ticket','free_reservation','paid_hold']}) bookingMethod!:string;
 }
 export class CustomerPlanAlternativeView {
- @ApiProperty() code!:string;
- @ApiProperty() description!:string;
+ @ApiProperty({type:String,}) code!:string;
+ @ApiProperty({type:String,}) description!:string;
 }
 export class CustomerPlanRecommendationPage {
  @ApiProperty({type:()=>[CustomerPlanRecommendationView]}) items!:CustomerPlanRecommendationView[];
- @ApiProperty({format:'date-time'}) evaluatedAt!:string;
+ @ApiProperty({type:String,format:'date-time'}) evaluatedAt!:string;
  @ApiProperty({type:()=>[CustomerPlanAlternativeView]}) alternatives!:CustomerPlanAlternativeView[];
 }
 
@@ -74,11 +74,11 @@ export class CustomerPlanFeedbackInput {
  @ApiPropertyOptional({type:String,maxLength:500}) @IsOptional() @IsString() @Length(1,500) comment?:string;
 }
 export class CustomerPlanFeedbackView {
- @ApiProperty() id!:string;
- @ApiProperty() planId!:string;
- @ApiProperty() rating!:number;
+ @ApiProperty({type:String,}) id!:string;
+ @ApiProperty({type:String,}) planId!:string;
+ @ApiProperty({type:Number,}) rating!:number;
  @ApiProperty({nullable:true,type:String}) comment!:string|null;
- @ApiProperty({format:'date-time'}) createdAt!:string;
+ @ApiProperty({type:String,format:'date-time'}) createdAt!:string;
 }
 
 export class CustomerPlanBookingInput {
@@ -96,6 +96,6 @@ export class CustomerPlanBookingHoldView {
  @ApiProperty({type:String}) amountMinor!:string;
  @ApiProperty({type:String}) currency!:string;
  @ApiProperty({type:Number}) quantity!:number;
- @ApiProperty({enum:['held','confirmed','expired','cancelled','late']}) status!:string;
+ @ApiProperty({type:String,enum:['held','confirmed','expired','cancelled','late']}) status!:string;
  @ApiProperty({type:String,format:'date-time'}) expiresAt!:string;
 }
