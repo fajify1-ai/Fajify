@@ -134,3 +134,35 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
   }
  }finally{await app.close();}
 });
+
+test('M8 combined revenue scopes are both necessary; read attempts are audited without path data',async()=>{
+ const metadataKey='faji:m8:required-admin-scope';
+ const required=Reflect.getMetadata(metadataKey,AdminInsightsController.prototype.report) as string[];
+ assert.deepEqual(required,['reports.read','finance.read']);
+ let grants=['reports.read'];
+ let offline=false;
+ const statements:Array<{sql:string;params:unknown[]}>=[],audited:Array<{sql:string;params:unknown[]}>= [];
+ const grantPool={query:async(sql:string,params:unknown[])=>{
+  statements.push({sql,params});if(offline)throw Error('database offline');
+  return {rows:grants.map(scope=>({scope})),rowCount:grants.length};
+ }} as unknown as Pool;
+ const guard=new AdminScopeGuard(grantPool);
+ const handler=AdminInsightsController.prototype.report;
+ const ctx={getHandler:()=>handler,getClass:()=>AdminInsightsController,
+  switchToHttp:()=>({getRequest:()=>({identity:full,method:'GET',originalUrl:'/api/v1/admin/reports/overview?customerSubject=secret'})})} as any;
+ await assert.rejects(guard.canActivate(ctx),{status:403});
+ grants=['reports.read','finance.read'];
+ assert.equal(await guard.canActivate(ctx),true);
+ assert.deepEqual(statements.at(-1)?.params,['admin-A',['reports.read','finance.read']]);
+ offline=true;await assert.rejects(guard.canActivate(ctx),{status:503});
+ const auditPool={query:async(sql:string,params:unknown[])=>{audited.push({sql,params});return {rowCount:1};}} as unknown as Pool;
+ const readGuard=new AdminReadAuditGuard(auditPool);
+ assert.equal(await readGuard.canActivate(ctx),true);
+ assert.equal(audited.length,1);
+ assert.equal(audited[0].params[0],'admin-A');
+ assert.equal(audited[0].params[1],'AdminInsightsController:report');
+ assert.equal(audited[0].params.some(v=>String(v).includes('secret')),false);
+ const postCtx={...ctx,switchToHttp:()=>({getRequest:()=>({identity:full,method:'POST'})})};
+ assert.equal(await readGuard.canActivate(postCtx),true);
+ assert.equal(audited.length,1);
+});
