@@ -1,8 +1,8 @@
 # M8 · Phase 1 — Platform Administration, Integration & Operations
 
-**Workstream:** M8-P1 — Backend & Platform  
-**Branch:** `feat/m8-p1-admin-operations` · **PR:** https://github.com/fajify1-ai/Fajify/pull/20  
-**Initial base:** `98eaf661c55f522e1bb120fe717fc08a909f918f` (2026-11-03); **accepted M7 main integrated:** `f1b26bc22a342c3afd37095e043d28f70b0f588b` via merge `d45215af3de7c7bb590c9486af728f5bebd22b6e`  
+**Workstream:** M8-P1 — Backend & Platform
+**Branch:** `feat/m8-p1-admin-operations` · **PR:** https://github.com/fajify1-ai/Fajify/pull/20
+**Initial base:** `98eaf661c55f522e1bb120fe717fc08a909f918f` (2026-11-03); **accepted M7 main integrated:** `f1b26bc22a342c3afd37095e043d28f70b0f588b` via merge `d45215af3de7c7bb590c9486af728f5bebd22b6e`
 **State:** Broad backend implementation committed. **Local exact-SHA acceptance, generated OpenAPI snapshot, operator scope provisioning, cross-domain integration review and production release remain pending.** PR stays draft. No deployment or main merge performed.
 
 ## Ownership

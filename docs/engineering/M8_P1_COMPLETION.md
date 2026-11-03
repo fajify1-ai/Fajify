@@ -1,6 +1,6 @@
 # M8-P1 Backend Engineering Handoff
 
-PR: https://github.com/fajify1-ai/Fajify/pull/20  
+PR: https://github.com/fajify1-ai/Fajify/pull/20
 Branch: `feat/m8-p1-admin-operations`
 
 Implementation created for scopes, auditing, moderation, support, financial reads, cross-domain consistency and account timeline, operational reporting, incident monitoring, alert inbox, customer-owned support reply notifications, privileged read-attempt auditing, customer-consented booking-to-M7-ride links, ride financial/safety reporting and exactly-once request-key command receipts. See [full M8-P1 implementation record](PHASE_1_MILESTONE_8_IMPLEMENTATION.md).
