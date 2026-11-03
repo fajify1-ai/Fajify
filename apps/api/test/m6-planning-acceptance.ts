@@ -201,4 +201,3 @@ test('provider-verified package capture issues one confirmed reservation without
   if(oldCallback===undefined)delete process.env.PAYMENT_CALLBACK_URL;else process.env.PAYMENT_CALLBACK_URL=oldCallback;
  }
 });
-
