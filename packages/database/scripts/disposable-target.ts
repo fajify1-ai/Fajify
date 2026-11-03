@@ -3,7 +3,7 @@ import {Pool} from 'pg';
 /** Explicit opt-in and server-side marker are both required before integration writes. */
 export async function assertDisposable(pool:Pool):Promise<void>{
  const expected=process.env.FAJI_DISPOSABLE_DATABASE;
- if(!expected || !/^fajify_m[12345]_test_[a-z0-9_]+$/.test(expected))throw new Error('A uniquely named FAJI_DISPOSABLE_DATABASE is required');
+ if(!expected || !/^fajify_m[123457]_test_[a-z0-9_]+$/.test(expected))throw new Error('A uniquely named FAJI_DISPOSABLE_DATABASE is required');
  const milestone=expected.split('_')[1];
  const marker=`fajify:${milestone}:disposable`;
  const result=await pool.query<{name:string;marker:string;version:string}>(
