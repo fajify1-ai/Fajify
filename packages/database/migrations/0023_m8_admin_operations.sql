@@ -152,3 +152,16 @@ REVOKE ALL ON FUNCTION m8_audit_scope_grant() FROM PUBLIC;
 CREATE TRIGGER admin_scope_grant_audit AFTER INSERT OR UPDATE OF active,granted_by ON admin_scope_grants
  FOR EACH ROW EXECUTE FUNCTION m8_audit_scope_grant();
 REVOKE ALL ON admin_scope_grant_events FROM PUBLIC;
+
+-- Audit identities are never silently renamed or deleted. Revoke by setting active=false.
+CREATE FUNCTION m8_scope_grant_identity_guard() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ IF TG_OP='DELETE' THEN RAISE EXCEPTION 'M8: administrator scope grants cannot be deleted'; END IF;
+ IF NEW.identity_subject IS DISTINCT FROM OLD.identity_subject OR NEW.scope IS DISTINCT FROM OLD.scope
+ THEN RAISE EXCEPTION 'M8: administrator scope grant identity cannot change'; END IF;
+ RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION m8_scope_grant_identity_guard() FROM PUBLIC;
+CREATE TRIGGER admin_scope_grant_identity_guard BEFORE UPDATE OR DELETE ON admin_scope_grants
+ FOR EACH ROW EXECUTE FUNCTION m8_scope_grant_identity_guard();

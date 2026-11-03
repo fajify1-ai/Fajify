@@ -54,7 +54,7 @@ export class AdminInsightsService {
  }
  async commandAudit(q:PageQuery){
   const result=await this.pool.query(
-   'SELECT id,actor_subject AS "actorSubject",operation,resource_type AS "resourceType",resource_id AS "resourceId",outcome,reason,occurred_at AS "occurredAt" '+
+   'SELECT id,"actorSubject",operation,"resourceType","resourceId",outcome,reason,"occurredAt" '+
    'FROM (SELECT id,actor_subject AS "actorSubject",operation,resource_type AS "resourceType",resource_id AS "resourceId",outcome,reason,occurred_at AS "occurredAt" FROM admin_action_events '+
    'UNION ALL SELECT id,granted_by AS "actorSubject",CASE WHEN active THEN \'scope.grant\' ELSE \'scope.revoke\' END AS operation,\'admin_scope\' AS "resourceType",identity_subject AS "resourceId",\'applied\' AS outcome,scope AS reason,occurred_at AS "occurredAt" FROM admin_scope_grant_events) events '+
    'ORDER BY "occurredAt" DESC,id DESC LIMIT $1 OFFSET $2',[q.limit+1,q.offset]);
