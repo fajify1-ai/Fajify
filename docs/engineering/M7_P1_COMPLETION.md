@@ -5,14 +5,14 @@
 
 ## Implemented source
 
-1. M7 ride/driver/dispatch/finance/safety PostgreSQL/PostGIS tables and sequential migrations `0090`–`0100`.
+1. M7 ride/driver/dispatch/finance/safety PostgreSQL/PostGIS tables and sequential migrations `0090`–`0101`.
 2. Keycloak bearer, active account, driver role, dispatcher geofence resource membership and MFA-bound privileged controls.
 3. Required four-document driver compliance; private signed S3 document uploads, authenticated object evidence and administrative review.
 4. Customer quotes, server-controlled versioned tariffs, request replay, trip operations, payment-intent preparation and history.
 5. Geofenced matching, atomic offer acceptance with generations, expiry, suspension/disqualification recovery, verified GPS, assigned-trip events and SSE history.
 6. Safety incidents, urgent escalation on in-progress eligibility loss, immutable evidence and operator-scoped incident queue.
 7. M5 verified payment integration, zero-double-commission operator policy, recipient verification, payout reservation, one-shot transfer and independent reconciliation/reversal.
-8. Unit and disposable PostgreSQL regression tests, generated OpenAPI contract gates, restricted DB grants, and one-command disposable acceptance launcher.
+8. Unit tests separated from historical database-integration tests, disposable PostgreSQL regression tests, generated OpenAPI contract gates, restricted DB grants, and one-command disposable acceptance launcher.
 
 ## Essential acceptance restrictions
 
@@ -38,6 +38,10 @@ bash tooling/run-m7-p1-disposable.sh
 
 **Offline export:** the helper uses syntactically valid, non-functional loopback configuration values only to instantiate the NestJS API schema. It does not require or authenticate to real PostgreSQL, Redis, Keycloak or S3 services. If it fails, inspect the error and do not accept or commit the generated artifact without reviewing it.
 
-The launcher verifies the exact source revision, creates an isolated PostgreSQL 16/PostGIS database, applies migrations and restricted roles, executes relevant tests/static checks/contract gates, produces a machine-readable acceptance report, then removes the cluster. A PASS requires all checks and cleanup to succeed. Do not present the branch as release-ready if any gate fails.
+The launcher verifies the exact source revision, creates an isolated PostgreSQL 16/PostGIS database, applies migrations and restricted roles, executes non-database API tests, the M7 database suite and existing database-integration tests after migration, then static checks and contract gates, produces a machine-readable acceptance report, then removes the cluster. A PASS requires all checks and cleanup to succeed. Do not present the branch as release-ready if any gate fails.
 
 The development branch includes the approved changes from `main`, without merging M7 back into `main`. Merge only after a pinned, accepted local report and owner review.
+
+## First consolidated run remediation
+
+First local run at `e4ca943d634a14131ed3be4cd37c9b6335bfc525`: 8/11 gates passed, API lint reported two unused exception imports, and M7 database requests could not lock the append-only `ride_fare_quotes` table. The broad API test glob also included nine historical `.database.test.ts` test cases before migrations. Remediation removes unused imports, uses SELECT-only quote reads with single-use unique constraint and quote mutation trigger in migration `0101`, runs pure unit tests independently, then runs legacy database tests only after the M7 migration/privilege gate. The first unit gate recorded ten failures, so at least one further issue may remain; the new verification script displays failing TAP assertions. **All remediation must be reverified on the exact follow-up commit**.
