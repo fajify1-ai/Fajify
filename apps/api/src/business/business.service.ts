@@ -79,6 +79,10 @@ export class BusinessService {
    if(!previous.rowCount)throw new NotFoundException('Reservation not found');
    const from=previous.rows[0];if(!reservationNext[from.status].includes(to))throw new ConflictException('Illegal reservation transition');
    if(to==='cancelled'){
+    const paid=await c.query(`
+     SELECT 1 FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id
+     WHERE h.reservation_id=$1 AND p.status='succeeded' AND h.status='confirmed'`,[id]);
+    if(paid.rowCount)throw new ConflictException('Paid reservation cancellation requires the verified finance refund workflow');
     const released=await c.query('UPDATE business_availability SET reserved=reserved-$4 WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND reserved>=$4 RETURNING id',[from.availability_id,businessId,branchId,from.guests]);
     if(!released.rowCount)throw new ConflictException('Insufficient reserved capacity for cancellation');
     const components=await c.query<{availability_id:string;quantity:number}>(`
