@@ -98,12 +98,14 @@ export class PlanningService {
   const ranked=rankExperiences({budgetMinor:plan.budgetMinor,currency:plan.currency,guests:plan.guests,
    startsAfter:plan.startsAfter,startsBefore:plan.startsBefore,location:plan.location??undefined,categories:plan.categories,occasion:plan.occasion,attributes:plan.attributes},candidates);
   const bySlot=new Map(rows.rows.map(r=>[r.availabilityId,r]));
+  await this.pool.query(`INSERT INTO customer_plan_evaluations(plan_id,customer_subject,revision,eligible_count,returned_count)
+   VALUES($1,$2,$3,$4,$5)`,[id,subject,plan.revision,ranked.length,Math.min(50,ranked.length)]);
   return {items:ranked.slice(0,50).map(r=>{
    const original=bySlot.get(r.id)!;
    return {id:original.id,availabilityId:r.id,businessId:original.businessId,branchId:original.branchId,name:original.name,
     category:original.category,startsAt:original.startsAt.toISOString(),totalMinor:r.totalMinor,currency:original.currency,
     score:r.score,reasons:r.reasons,bookingStatus:'revalidation_required'};
-  }),evaluatedAt:new Date().toISOString()};
+  }),evaluatedAt:new Date().toISOString(),alternatives:ranked.length?[]:[{code:'refine_criteria',description:'No experience meets every selected constraint; adjust budget, date, location or category before retrying.'}]};
  }
  async update(identity:VerifiedIdentity,id:string,input:CustomerSavedPlanEditInput){
   validate(input);
