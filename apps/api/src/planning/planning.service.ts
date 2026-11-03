@@ -154,6 +154,7 @@ export class PlanningService {
  async bookingHold(identity:VerifiedIdentity,id:string,input:CustomerPlanBookingInput){
   const plan=await this.get(identity.subject,id);
   if(plan.status!=='draft')throw new ConflictException('Archived plan cannot create a booking');
+  if(plan.revision!==input.revision)throw new ConflictException('Plan changed; refresh before creating a hold');
   if(plan.guests>50)throw new ConflictException('Maximum booking group size is 50; split this plan');
   const suggestions=await this.recommend(identity.subject,id);
   const selected=suggestions.items.find(item=>item.availabilityId===input.availabilityId.toLowerCase());
@@ -163,7 +164,8 @@ export class PlanningService {
   if(selected.totalMinor!==input.expectedTotalMinor)throw new ConflictException('Recommendation price changed');
   return this.commerce.hold(identity,{
    kind:'reservation',sourceId:selected.availabilityId,quantity:plan.guests,
-   guestName:input.guestName,requestKey:input.requestKey,expectedAmountMinor:input.expectedTotalMinor
+   guestName:input.guestName,requestKey:input.requestKey,expectedAmountMinor:input.expectedTotalMinor,
+   planId:id,planRevision:input.revision
   });
  }
 
