@@ -1,7 +1,7 @@
 import {ApiProperty,ApiPropertyOptional} from '@nestjs/swagger';
 import {Type} from 'class-transformer';
 import {ArrayMaxSize,IsArray,IsIn,IsInt,IsISO8601,IsOptional,IsString,IsUUID,IsNumber,Length,Matches,Max,Min} from 'class-validator';
-export class PlanInput {
+export class CustomerSavedPlanInput {
  @ApiProperty({minLength:1,maxLength:80}) @IsString() @Length(1,80) occasion!:string;
  @ApiProperty({pattern:'^(0|[1-9][0-9]{0,18})$'}) @Matches(/^(0|[1-9][0-9]{0,18})$/) budgetMinor!:string;
  @ApiProperty({pattern:'^[A-Z]{3}$'}) @Matches(/^[A-Z]{3}$/) currency!:string;
@@ -14,14 +14,14 @@ export class PlanInput {
  @ApiPropertyOptional({type:Number,minimum:1,maximum:100}) @IsOptional() @IsInt() @Min(1) @Max(100) radiusKm?:number;
  @ApiPropertyOptional({type:[String],maxItems:8}) @IsOptional() @IsArray() @ArrayMaxSize(8) @IsIn(['service','package','event'],{each:true}) categories?:string[];
 }
-export class PlanEditInput extends PlanInput {
+export class CustomerSavedPlanEditInput extends CustomerSavedPlanInput {
  @ApiProperty({type:Number,minimum:1}) @IsInt() @Min(1) revision!:number;
 }
-export class PlanListQuery {
+export class CustomerSavedPlanListQuery {
  @ApiPropertyOptional({minimum:1,maximum:50,default:20}) @IsOptional() @Type(()=>Number) @IsInt() @Min(1) @Max(50) limit=20;
  @ApiPropertyOptional({minimum:0,maximum:10000,default:0}) @IsOptional() @Type(()=>Number) @IsInt() @Min(0) @Max(10000) offset=0;
 }
-export class PlanView {
+export class CustomerSavedPlanView {
  @ApiProperty() id!:string;
  @ApiProperty() revision!:number;
  @ApiProperty() occasion!:string;
@@ -38,11 +38,11 @@ export class PlanView {
  @ApiProperty({enum:['draft','archived']}) status!:string;
  @ApiProperty({format:'date-time'}) createdAt!:string;
 }
-export class PlanPage {
- @ApiProperty({type:()=>[PlanView]}) items!:PlanView[];
+export class CustomerSavedPlanPage {
+ @ApiProperty({type:()=>[CustomerSavedPlanView]}) items!:CustomerSavedPlanView[];
  @ApiProperty({nullable:true,type:Number}) nextOffset!:number|null;
 }
-export class RecommendationView {
+export class CustomerPlanRecommendationView {
  @ApiProperty() id!:string;
  @ApiProperty() availabilityId!:string;
  @ApiProperty() businessId!:string;
@@ -56,16 +56,16 @@ export class RecommendationView {
  @ApiProperty({type:[String]}) reasons!:string[];
  @ApiProperty({description:'Informational only; revalidate live price, capacity and payment before booking'}) bookingStatus!:string;
 }
-export class RecommendationPage {
- @ApiProperty({type:()=>[RecommendationView]}) items!:RecommendationView[];
+export class CustomerPlanRecommendationPage {
+ @ApiProperty({type:()=>[CustomerPlanRecommendationView]}) items!:CustomerPlanRecommendationView[];
  @ApiProperty() evaluatedAt!:string;
 }
 
-export class PlanFeedbackInput {
+export class CustomerPlanFeedbackInput {
  @ApiProperty({type:Number,minimum:1,maximum:5}) @IsInt() @Min(1) @Max(5) rating!:number;
  @ApiPropertyOptional({type:String,maxLength:500}) @IsOptional() @IsString() @Length(1,500) comment?:string;
 }
-export class PlanFeedbackView {
+export class CustomerPlanFeedbackView {
  @ApiProperty() id!:string;
  @ApiProperty() planId!:string;
  @ApiProperty() rating!:number;
@@ -73,13 +73,13 @@ export class PlanFeedbackView {
  @ApiProperty({format:'date-time'}) createdAt!:string;
 }
 
-export class PlanBookingInput {
+export class CustomerPlanBookingInput {
  @ApiProperty({type:String,format:'uuid'}) @IsUUID() availabilityId!:string;
  @ApiProperty({type:String,pattern:'^(0|[1-9][0-9]{0,18})$'}) @Matches(/^(0|[1-9][0-9]{0,18})$/) expectedTotalMinor!:string;
  @ApiProperty({type:String,minLength:1,maxLength:120}) @IsString() @Length(1,120) @Matches(/\S/) guestName!:string;
  @ApiProperty({type:String,pattern:'^[A-Za-z0-9_-]{8,100}$'}) @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey!:string;
 }
-export class PlanBookingHoldView {
+export class CustomerPlanBookingHoldView {
  @ApiProperty({type:String,format:'uuid'}) id!:string;
  @ApiProperty({type:String,format:'uuid'}) paymentIntentId!:string;
  @ApiProperty({type:String,format:'uuid'}) catalogueId!:string;
