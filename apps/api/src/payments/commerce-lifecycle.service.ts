@@ -226,7 +226,16 @@ export class CommerceLifecycle {
    if(h.kind==='ticket'){
     const unused=await c.query("UPDATE issued_tickets SET state='revoked' WHERE hold_id=$1 AND state='issued' RETURNING id",[h.id]);
     await c.query('UPDATE ticket_inventory SET issued=issued-$2 WHERE catalogue_id=$1',[h.catalogue_id,unused.rowCount]);
-   }else{const result=await c.query("UPDATE business_reservations SET status='cancelled',updated_at=now() WHERE id=$1 AND status='confirmed' RETURNING id",[h.reservation_id]);if(result.rowCount)await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1',[h.availability_id,h.quantity]);}
+   }else{const result=await c.query("UPDATE business_reservations SET status='cancelled',updated_at=now() WHERE id=$1 AND status='confirmed' RETURNING id",[h.reservation_id]);if(result.rowCount){
+    await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1',[h.availability_id,h.quantity]);
+    const components=await c.query<{availability_id:string;quantity:number}>(`
+     SELECT availability_id,quantity FROM package_component_holds WHERE hold_id=$1 AND released_at IS NULL ORDER BY availability_id FOR UPDATE`,[h.id]);
+    for(const component of components.rows){
+     const freed=await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1 AND reserved>=$2 RETURNING id',[component.availability_id,component.quantity]);
+     if(!freed.rowCount)throw new ConflictException('Package refund capacity release failed');
+    }
+    await c.query('UPDATE package_component_holds SET released_at=now() WHERE hold_id=$1 AND released_at IS NULL',[h.id]);
+   }}
    await c.query("UPDATE paid_holds SET status='cancelled' WHERE id=$1",[h.id]);
   }
  }
