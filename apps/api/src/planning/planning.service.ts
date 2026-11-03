@@ -95,4 +95,39 @@ export class PlanningService {
     score:r.score,reasons:r.reasons,bookingStatus:'revalidation_required'};
   }),evaluatedAt:new Date().toISOString()};
  }
+ async update(identity:VerifiedIdentity,id:string,input:PlanEditInput){
+  validate(input);
+  return this.customer.withAccountTransaction(identity,async c=>{
+   const existing=await c.query<{revision:number,status:string}>('SELECT revision,status FROM customer_plans WHERE id=$1 AND customer_subject=$2 FOR UPDATE',[id,identity.subject]);
+   if(!existing.rowCount)throw new NotFoundException('Plan not found');
+   if(existing.rows[0].status!=='draft')throw new ConflictException('Archived plan cannot be edited');
+   if(existing.rows[0].revision!==input.revision)throw new ConflictException('Plan revision changed; reload before editing');
+   const result=await c.query<Stored>(`UPDATE customer_plans SET occasion=$3,budget_minor=$4,currency=$5,guests=$6,
+    starts_after=$7,starts_before=$8,location_text=$9,categories=$10,latitude=$11,longitude=$12,radius_km=$13,
+    revision=revision+1,updated_at=now() WHERE id=$1 AND customer_subject=$2 RETURNING ${cols}`,
+    [id,identity.subject,input.occasion.trim(),input.budgetMinor,input.currency,input.guests,input.startsAfter,input.startsBefore,
+     input.location?.trim()||null,input.categories??[],input.latitude??null,input.longitude??null,input.radiusKm??null]);
+   return serialized(result.rows[0]);
+  });
+ }
+ async feedback(identity:VerifiedIdentity,id:string,input:PlanFeedbackInput){
+  return this.customer.withAccountTransaction(identity,async c=>{
+   const owner=await c.query('SELECT 1 FROM customer_plans WHERE id=$1 AND customer_subject=$2 FOR SHARE',[id,identity.subject]);
+   if(!owner.rowCount)throw new NotFoundException('Plan not found');
+   const rows=await c.query<{id:string;planId:string;rating:number;comment:string|null;createdAt:Date}>(`
+    INSERT INTO customer_plan_feedback(plan_id,customer_subject,rating,comment) VALUES($1,$2,$3,$4)
+    ON CONFLICT(plan_id,customer_subject) DO UPDATE SET rating=EXCLUDED.rating,comment=EXCLUDED.comment
+    RETURNING id,plan_id AS "planId",rating,comment,created_at AS "createdAt"`,[id,identity.subject,input.rating,input.comment?.trim()??null]);
+   return {...rows.rows[0],createdAt:rows.rows[0].createdAt.toISOString()};
+  });
+ }
+ async feedbackDetail(subject:string,id:string){
+  const result=await this.pool.query<{id:string;planId:string;rating:number;comment:string|null;createdAt:Date}>(`
+   SELECT f.id,f.plan_id AS "planId",f.rating,f.comment,f.created_at AS "createdAt"
+   FROM customer_plan_feedback f JOIN customer_plans p ON p.id=f.plan_id AND p.customer_subject=f.customer_subject
+   WHERE f.plan_id=$1 AND f.customer_subject=$2`,[id,subject]);
+  if(!result.rowCount)throw new NotFoundException('Feedback not found');
+  return {...result.rows[0],createdAt:result.rows[0].createdAt.toISOString()};
+ }
+
 }
