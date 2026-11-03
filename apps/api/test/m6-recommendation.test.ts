@@ -32,3 +32,13 @@ test('rejects invalid group size, money and timezone-free dates',()=>{
  assert.throws(()=>rankExperiences({...preferences,budgetMinor:'1.50'},[candidate]));
  assert.throws(()=>rankExperiences({...preferences,startsAfter:'2026-12-01'},[candidate]));
 });
+
+test('fixed group-price packages do not multiply quoted group price',()=>{
+ const packageOffer={...candidate,category:'package',pricingModel:'per_group' as const,pricePerGuestMinor:'750000'};
+ const [result]=rankExperiences(preferences,[packageOffer]);
+ assert.equal(result.totalMinor,'750000');
+});
+test('group-price package over budget is rejected',()=>{
+ const packageOffer={...candidate,category:'package',pricingModel:'per_group' as const,pricePerGuestMinor:'3000000'};
+ assert.deepEqual(rankExperiences(preferences,[packageOffer]),[]);
+});
