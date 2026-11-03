@@ -15,11 +15,11 @@ M8-P1 owns protected admin API/data, operations, audit, support, reporting, moni
 
 | M8 scope | Backend surface | Notes |
 | --- | --- | --- |
-| **8.1 Admin foundation** | Explicit operator-provisioned PostgreSQL admin scopes; existing verified Keycloak `platform-admin` + admin-web client + fresh MFA + active session and privileged request budget; immutable command receipts/action audit, grant-change audit | Operator grants cannot be self-provisioned from API. M8 endpoints fail closed with no matching scope. Existing M2/M3/M5 privileged endpoints retain their original authorization until jointly migrated/reviewed |
+| **8.1 Admin foundation** | Explicit operator-provisioned PostgreSQL admin scopes; existing verified Keycloak `platform-admin` + admin-web client + fresh MFA + active session and privileged request budget; immutable command receipts/action audit, grant-change audit and PII-free admin read-attempt audit | Operator grants cannot be self-provisioned from API. M8 endpoints fail closed with no matching scope. Existing M2/M3/M5 privileged endpoints retain their original authorization until jointly migrated/reviewed |
 | **8.2 Marketplace governance** | Pending merchant approval queue, moderated review queue, review hide/restore, branch restriction and catalogue unpublish/restore, active restriction queue | Existing M3 `POST /api/v1/business/onboarding/{id}/review` performs authoritative merchant approval. DB triggers prevent merchant reactivation while admin restriction is active; original enabled/publication choice is preserved |
 | **8.3 Finance administration** | Aggregate verified-capture, final refunds, successful settlements, unresolved disputes/reconciliation cases; merchant-level financial reports | Existing M5 `/api/v1/admin/finance` owns all refund, payout, policy, dispute and verified-provider commands. M8 does not reimplement money movement |
-| **8.4 Support and incident response** | Private support queue/detail, admin replies visible in customer thread, assignment, priority, reopen/close, admin incidents/transition history, high/critical alert creation | All writes use durable request keys, transactional audit and legal-state checks; raw message bodies are not copied into command receipts |
-| **8.5 Integration** | Audited unified customer timeline (M4 orders/reservations/support, M5 holds, M6 plans), M4/M5/M6 consistency diagnostics, reuse of existing package-to-hold capacity and outbox/notification rules | **Booking-to-ride and order-to-delivery binding remain blocked** on accepted M7 dispatch/delivery contracts and explicit customer consent. No fictitious linked ride or delivery created |
+| **8.4 Support and incident response** | Private support queue/detail, admin replies visible in customer thread, customer-owned support notifications, assignment, priority, reopen/close, admin incidents/transition history, high/critical alert creation | All writes use durable request keys, transactional audit and legal-state checks; raw message bodies are not copied into command receipts |
+| **8.5 Integration** | Audited unified customer timeline (M4 orders/reservations/support, M5 holds, M6 plans), M4/M5/M6 consistency diagnostics, reuse of existing package-to-hold capacity, a durable support reply notification trigger and outbox rules | **Booking-to-ride and order-to-delivery binding remain blocked** on accepted M7 dispatch/delivery contracts and explicit customer consent. No fictitious linked ride or delivery created |
 | **8.6 Reporting** | 1–90-day customer/merchant/booking/ticket/verified-capture/ledger revenue summary; per-merchant operational and financial report | Money values are decimal-string minor units, derived from authoritative M5 records. `reports.read` **and** `finance.read` required for financial reports |
 | **8.7 Monitoring** | Read-only finance-job/lease/reconciliation/outbox health, optional supervised monitor tick, persistent deduplicated incidents/alert inbox, acknowledgement and audit | API returns `providerHealth: unverified` until independent provider probes are configured; outbox events are not proof of push/email delivery |
 
@@ -42,6 +42,10 @@ All below are prefixed `/api/v1/admin`; every M8 route requires signed active Ke
 | GET | `/monitoring/status`, `/monitoring/alerts` | `monitoring.read` |
 | POST | `/monitoring/check`, `/monitoring/alerts/{id}/acknowledgement` | `incidents.write` |
 
+M8 also exposes **customer-authenticated, ownership-protected** `GET /api/v1/customer/support-notifications` (bounded newest-first page) and `PUT /api/v1/customer/support-notifications/{id}/read`. These require an active unrevoked customer session and the existing customer write budget; they do **not** grant admin access. Every new administrator reply creates exactly one in-app notice, while customer-authored messages create none. P2 will consume the notification feed in the customer UI; external push/email delivery is not implied.
+
+Privileged GET requests create an append-only `admin.read_requested` record identified by the static controller/handler name. This describes a request, not its eventual HTTP outcome; raw paths, query values and private message content are deliberately excluded.
+
 Commands accept bounded strict DTOs. State mutations require `requestKey` (8–100 safe characters); retries by the same admin with identical payload return one committed result. Reusing a key for a different action fails. All read endpoints return `Cache-Control: no-store`, bounded pages for collections, and no provider credentials/OTP/QR secrets.
 
 ## Database and runtime privileges
@@ -51,6 +55,7 @@ Commands accept bounded strict DTOs. State mutations require `requestKey` (8–1
 - `admin_action_events`, `admin_command_receipts` (immutable, atomic with changes).
 - `admin_marketplace_restrictions` and database-level branch/catalogue reactivation triggers.
 - Support case assignment/priority and public admin reply author metadata.
+- `customer_support_notifications` owner-scoped, exactly-once trigger per administrator-authored message, bounded read history.
 - `admin_incidents`, `admin_monitor_signals`, `admin_alerts` (monitored, acknowledged event inbox).
 
 The restricted runtime may SELECT scope grants, never write them; it may SELECT/INSERT immutable command/audit records but not UPDATE/DELETE them. It may modify only the designated mutable M8 domain state. Grants are added to `packages/database/scripts/grant-m5-runtime.ts`; the disposable-target verifier now accepts an explicitly marked `fajify_m8_test_*` PostgreSQL 16 database. M8 uses the same app runtime pool as existing M1–M6 domains, not a connection to the Keycloak database.
@@ -72,7 +77,7 @@ bash tooling/run-m8-p1-disposable.sh
 
 The script provisions and destroys a **unique disposable** PostgreSQL 16/PostGIS cluster, checks the marker and identity-database sentinel, separates migration and runtime roles, applies migrations twice, validates privileges, runs API and database typechecks/lint/build, report tests, API tests, restricted PostgreSQL M8 scenarios, OpenAPI regeneration/snapshot equality, dependency audit and source integrity. `tooling/m8-verification-report.mjs` rejects absent/skipped/failed evidence and writes `acceptance.json` with the tested SHA. Never use production data or credentials for this acceptance.
 
-The M8 HTTP tests cover role, client, fresh MFA, session revocation, suspension, rate limiting, DTO validation and documentation. Database tests cover command replay/key mismatch, customer ownership, moderation, DB restriction barriers, support replies, incident transitions, finance/account timelines and deduplicated alerts. These are **prepared tests only** until a local runner completes with a passing result.
+The M8 HTTP tests cover role, client, fresh MFA, session revocation, suspension, scoped reports, PII-free read audits, customer support notification ownership, rate limiting, DTO validation and documentation. Database tests cover command replay/key mismatch, customer ownership, moderation, DB restriction barriers, exactly-once support notices, incident transitions, finance/account timelines and deduplicated alerts. These are **prepared tests only** until a local runner completes with a passing result.
 
 ## Unresolved integration/release gates
 

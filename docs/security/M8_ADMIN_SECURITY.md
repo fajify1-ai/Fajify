@@ -5,6 +5,7 @@
 ## Trust boundaries
 - Keycloak owns the signed issuer/audience/subject, `platform-admin` role, authorized admin web party, MFA ACR and authentication time. Application Postgres owns account suspension/revocation, explicitly scoped grant decisions, business records and operational history. UI route checks are not an authority.
 - All M8 routes use identity, active account/session, privileged recent MFA, explicitly granted M8 scope(s), and PostgreSQL-backed budget guards. Scope DB outage is fail-closed. Revenue reports require two scopes.
+- Sensitive privileged reads produce append-only static-operation audit requests without URLs, user query values or private content. An audit of a read request is not a successful-read receipt.
 - Operator grants are made outside runtime, with human review. The runtime cannot modify scope grant rows. Grant changes have append-only audited history and cannot be deleted or retargeted.
 
 ## Adversarial and negative cases
@@ -13,6 +14,7 @@
 - Different request payload with reused actor/request key → conflict, not replayed mutation. Same exact request returns the prior JSON-safe response.
 - Concurrent moderation and merchant reactivation → database-level restricted flag prevents merchant bypass. Lifting a restriction restores the merchant's former enabled/publication value.
 - Admin acting on their own review or self-owned merchant resource → denied.
+- A customer attempts to read or mark another customer's support notification → ownership-filtered result or not found; missing/invalid/revoked customer token → denied. An admin reply creates one notice by unique message ID; a customer's own reply creates no admin notice.
 - Case escalation to an inactive/unauthorized assignee → denied. Closed case reply → denied. Public customer messages remain owner-visible, with admin author attribution not leaked through legacy M4 customer read projections.
 - Forbidden incident transition or attempt to resolve a still-active monitored failure → denied.
 - Missing provider evidence → no financial capture/settlement success inferred. No M8 service moves money directly.

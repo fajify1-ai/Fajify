@@ -24,7 +24,8 @@ Use exact allowed scopes defined in migration `0023_m8_admin_operations.sql`. Re
 ## 2. Moderation and customer support
 - Review the pending merchant queue; use the existing authoritative M3 business review command, not SQL updates to merchant status.
 - Moderate customer reviews via M8; `hidden` reviews leave historical records intact. Restrictions use a clear reason and unique request key. Branch/catalogue restrictions prevent merchant reactivation until explicitly restored by governance, and restore the prior merchant enabled state.
-- Support operators may list private cases, assign only active support-scoped admins, reply to open cases, close/reopen, and inspect incidents. Admin replies are visible in customer support messages; neither an internal incident nor an audit reason should contain credentials, OTPs or unnecessary customer details.
+- Support operators may list private cases, assign only active support-scoped admins, reply to open cases, close/reopen, and inspect incidents. The M8 trigger creates a durable in-app notice for each admin-authored support reply; customer-side `GET /api/v1/customer/support-notifications` and `PUT /api/v1/customer/support-notifications/{id}/read` are owner-scoped, and they don't imply successful FCM/email delivery. Admin replies are visible in customer support messages; neither an internal incident nor an audit reason should contain credentials, OTPs or unnecessary customer details.
+- Every successful M8 privileged read request is attributed as `admin.read_requested` in immutable audit history; its static controller/handler name excludes raw PII. The event means **requested**, not necessarily returned successfully.
 - Never direct-update bookings, payment records, holds, settlements, journals, trip states or identity permissions as a support shortcut. Escalate to owning domain APIs.
 
 ## 3. Finance reconciliation and reporting

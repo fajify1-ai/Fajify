@@ -3,7 +3,7 @@
 PR: https://github.com/fajify1-ai/Fajify/pull/20  
 Branch: `feat/m8-p1-admin-operations`
 
-Implementation created for scopes, auditing, moderation, support, financial reads, cross-domain consistency and account timeline, operational reporting, incident monitoring, alert inbox and exactly-once request-key command receipts. See [full M8-P1 implementation record](PHASE_1_MILESTONE_8_IMPLEMENTATION.md).
+Implementation created for scopes, auditing, moderation, support, financial reads, cross-domain consistency and account timeline, operational reporting, incident monitoring, alert inbox, customer-owned support reply notifications, privileged read-attempt auditing, and exactly-once request-key command receipts. See [full M8-P1 implementation record](PHASE_1_MILESTONE_8_IMPLEMENTATION.md).
 
 **Not accepted.** This repository increment has not been locally compiled, migrated, typechecked, or verified on a pinned commit in this ChatGPT environment. OpenAPI snapshot regeneration is needed. The prepared exact-SHA disposable runner is:
 
