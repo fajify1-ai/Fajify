@@ -12,7 +12,9 @@
     "contracts": "node --import tsx scripts/export-openapi.ts",
     "test:database": "node --import tsx --test test/*.database.test.ts",
     "test:m5:database": "node --import tsx --test --test-concurrency=1 test/m5-payment-acceptance.ts test/m5-lifecycle-acceptance.ts",
-    "worker:finance": "node dist/payments/m5-worker.js"
+    "worker:finance": "node dist/payments/m5-worker.js",
+    "worker:rides": "node dist/rides/ride-expiry.worker.js",
+    "test:m7:database": "node --import tsx --test --test-concurrency=1 test/m7-ride-dispatch-acceptance.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
