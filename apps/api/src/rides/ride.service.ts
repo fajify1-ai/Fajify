@@ -40,6 +40,32 @@ export class RideService {
   }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
  }
 
+ async driverOffers(subject:string,limit=20){
+  const r=await this.pool.query(`SELECT o.id,o.ride_id,o.expires_at,o.fence_version,
+   ST_Y(ride.pickup::geometry) AS pickup_lat, ST_X(ride.pickup::geometry) AS pickup_lng,
+   ST_Y(ride.destination::geometry) AS destination_lat, ST_X(ride.destination::geometry) AS destination_lng,
+   ride.quote_amount_minor::text,ride.currency,ride.category
+   FROM ride_dispatch_offers o JOIN ride_drivers driver ON driver.id=o.driver_id
+   JOIN ride_requests ride ON ride.id=o.ride_id
+   JOIN ride_dispatch_areas area ON area.id=o.area_id AND area.active
+   WHERE driver.identity_subject=$1 AND driver.status='approved' AND driver.available
+    AND o.status='pending' AND o.expires_at>now()
+    AND o.fence_version=ride.dispatch_generation AND ride.status='offered'
+    AND EXISTS(SELECT 1 FROM resource_memberships membership
+     WHERE membership.identity_subject=$1 AND membership.resource_type='dispatch_area'
+     AND membership.resource_id=area.id AND membership.role='driver' AND membership.active)
+    AND EXISTS(SELECT 1 FROM ride_driver_locations location
+      WHERE location.driver_id=driver.id AND location.consent_granted AND location.observed_at>now()-interval '30 seconds'
+      AND ST_Intersects(area.boundary,location.position::geometry))
+   ORDER BY o.expires_at ASC LIMIT $2`,[subject,limit]);
+  return {offers:r.rows};
+ }
+ async driverTrips(subject:string,limit=20){
+  const r=await this.pool.query(`SELECT ride.id,ride.status,ride.category,ride.quote_amount_minor::text,ride.currency,ride.created_at
+   FROM ride_requests ride JOIN ride_drivers driver ON driver.id=ride.assigned_driver_id
+   WHERE driver.identity_subject=$1 ORDER BY ride.created_at DESC LIMIT $2`,[subject,limit]);
+  return {trips:r.rows};
+ }
  async acceptOffer(offerId:string,driverSubject:string) {
   // Lock ride first, then driver, then offer to maintain a consistent global lock order.
   const client=await this.pool.connect();
