@@ -35,9 +35,12 @@ export PGHOST=127.0.0.1 PGPORT="$pg_port" PGUSER=m6_admin PGDATABASE=postgres PG
 CREATE ROLE m6_migrator LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD :'mig';
 CREATE ROLE m6_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD :'run';
 CREATE DATABASE :"db" OWNER m6_migrator;
+CREATE DATABASE keycloak_m1_sentinel OWNER m6_admin;
 COMMENT ON DATABASE :"db" IS 'fajify:m6:disposable';
 REVOKE ALL ON DATABASE :"db" FROM PUBLIC;
 GRANT CONNECT ON DATABASE :"db" TO m6_runtime;
+REVOKE ALL ON DATABASE keycloak_m1_sentinel FROM PUBLIC;
+REVOKE ALL ON DATABASE keycloak_m1_sentinel FROM m6_runtime;
 SQL
 PGDATABASE="$FAJI_DISPOSABLE_DATABASE" "$pg_bin/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
 CREATE EXTENSION postgis;
@@ -46,6 +49,7 @@ GRANT USAGE ON SCHEMA public TO m6_runtime;
 SQL
 export FAJI_DATABASE_URL="postgresql://m6_migrator:$FAJI_MIGRATION_PASSWORD@127.0.0.1:$pg_port/$FAJI_DISPOSABLE_DATABASE"
 export FAJI_RUNTIME_DATABASE_URL="postgresql://m6_runtime:$FAJI_RUNTIME_PASSWORD@127.0.0.1:$pg_port/$FAJI_DISPOSABLE_DATABASE"
+export FAJI_KEYCLOAK_TEST_URL="postgresql://m6_runtime:$FAJI_RUNTIME_PASSWORD@127.0.0.1:$pg_port/keycloak_m1_sentinel"
 export NODE_ENV=test
 export REDIS_URL="redis://127.0.0.1:6379"
 export KEYCLOAK_ISSUER="http://localhost:8080/realms/faji"
