@@ -5373,6 +5373,367 @@
           "finance-admin"
         ]
       }
+    },
+    "/api/v1/plans": {
+      "post": {
+        "operationId": "PlanningController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerSavedPlanInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSavedPlanView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "experience-planning"
+        ]
+      },
+      "get": {
+        "operationId": "PlanningController_list_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSavedPlanPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "experience-planning"
+        ]
+      }
+    },
+    "/api/v1/plans/{id}": {
+      "get": {
+        "operationId": "PlanningController_get_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSavedPlanView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "experience-planning"
+        ]
+      },
+      "put": {
+        "operationId": "PlanningController_update_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerSavedPlanEditInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSavedPlanView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "experience-planning"
+        ]
+      }
+    },
+    "/api/v1/plans/{id}/recommendations": {
+      "get": {
+        "operationId": "PlanningController_recommendations_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerPlanRecommendationPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "experience-planning"
+        ]
+      }
+    },
+    "/api/v1/plans/{id}/archive": {
+      "post": {
+        "operationId": "PlanningController_archive_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerSavedPlanView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "experience-planning"
+        ]
+      }
+    },
+    "/api/v1/plans/{id}/feedback": {
+      "post": {
+        "operationId": "PlanningController_feedback_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerPlanFeedbackInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerPlanFeedbackView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "experience-planning"
+        ]
+      },
+      "get": {
+        "operationId": "PlanningController_feedbackDetail_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerPlanFeedbackView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "experience-planning"
+        ]
+      }
+    },
+    "/api/v1/plans/{id}/booking-holds": {
+      "post": {
+        "operationId": "PlanningController_bookingHold_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerPlanBookingInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerPlanBookingHoldView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "experience-planning"
+        ]
+      }
     }
   },
   "info": {
@@ -8125,6 +8486,501 @@
           "resolution",
           "amountMinor",
           "message"
+        ]
+      },
+      "CustomerSavedPlanInput": {
+        "type": "object",
+        "properties": {
+          "occasion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "budgetMinor": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,18})$"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "guests": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "startsAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startsBefore": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "radiusKm": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "categories": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "attributes": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "occasion",
+          "budgetMinor",
+          "currency",
+          "guests",
+          "startsAfter",
+          "startsBefore"
+        ]
+      },
+      "CustomerSavedPlanView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "number"
+          },
+          "occasion": {
+            "type": "string"
+          },
+          "budgetMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "guests": {
+            "type": "number"
+          },
+          "startsAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startsBefore": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "radiusKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "archived"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "revision",
+          "occasion",
+          "budgetMinor",
+          "currency",
+          "guests",
+          "startsAfter",
+          "startsBefore",
+          "categories",
+          "attributes",
+          "status",
+          "createdAt"
+        ]
+      },
+      "CustomerSavedPlanPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerSavedPlanView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "CustomerPlanRecommendationView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "availabilityId": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string"
+          },
+          "totalMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "bookingStatus": {
+            "type": "string",
+            "description": "Informational only; revalidate live price, capacity and payment before booking"
+          },
+          "bookingMethod": {
+            "type": "string",
+            "enum": [
+              "ticket",
+              "free_reservation",
+              "paid_hold"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "availabilityId",
+          "businessId",
+          "branchId",
+          "name",
+          "category",
+          "startsAt",
+          "totalMinor",
+          "currency",
+          "score",
+          "reasons",
+          "bookingStatus",
+          "bookingMethod"
+        ]
+      },
+      "CustomerPlanAlternativeView": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "description"
+        ]
+      },
+      "CustomerPlanRecommendationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerPlanRecommendationView"
+            }
+          },
+          "evaluatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "alternatives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerPlanAlternativeView"
+            }
+          }
+        },
+        "required": [
+          "items",
+          "evaluatedAt",
+          "alternatives"
+        ]
+      },
+      "CustomerSavedPlanEditInput": {
+        "type": "object",
+        "properties": {
+          "occasion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "budgetMinor": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,18})$"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "guests": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "startsAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startsBefore": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "radiusKm": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "categories": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "attributes": {
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "revision": {
+            "type": "number",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "occasion",
+          "budgetMinor",
+          "currency",
+          "guests",
+          "startsAfter",
+          "startsBefore",
+          "revision"
+        ]
+      },
+      "CustomerPlanFeedbackInput": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "rating"
+        ]
+      },
+      "CustomerPlanFeedbackView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "planId": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "number"
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "planId",
+          "rating",
+          "comment",
+          "createdAt"
+        ]
+      },
+      "CustomerPlanBookingInput": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "number",
+            "minimum": 1
+          },
+          "availabilityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expectedTotalMinor": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,18})$"
+          },
+          "guestName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          }
+        },
+        "required": [
+          "revision",
+          "availabilityId",
+          "expectedTotalMinor",
+          "guestName",
+          "requestKey"
+        ]
+      },
+      "CustomerPlanBookingHoldView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "catalogueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "availabilityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amountMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "held",
+              "confirmed",
+              "expired",
+              "cancelled",
+              "late"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "paymentIntentId",
+          "catalogueId",
+          "availabilityId",
+          "amountMinor",
+          "currency",
+          "quantity",
+          "status",
+          "expiresAt"
         ]
       }
     }

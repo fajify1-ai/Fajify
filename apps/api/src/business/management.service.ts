@@ -110,6 +110,13 @@ export class ManagementService {
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
    const pack=await c.query("SELECT 1 FROM business_catalogue WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND kind='package' AND active FOR UPDATE",[item,business,branch]);
    if(pack.rowCount!==1)throw new NotFoundException('Package unavailable');
+   const committed=await c.query(`
+    SELECT 1 FROM paid_holds h
+    LEFT JOIN business_reservations r ON r.id=h.reservation_id
+    WHERE h.catalogue_id=$1 AND h.business_id=$2 AND h.branch_id=$3
+    AND (h.status='held' OR (h.status='confirmed' AND r.status IN ('confirmed','checked_in')))
+    LIMIT 1`,[item,business,branch]);
+   if(committed.rowCount)throw new ConflictException('Package has active paid commitments; configuration changes are blocked');
    const products=await c.query("SELECT id FROM business_catalogue WHERE business_id=$1 AND branch_id=$2 AND id=ANY($3::uuid[]) AND kind<>'package' AND active FOR SHARE",[business,branch,components.map(v=>v.catalogueId)]);
    if(products.rowCount!==components.length)throw new ConflictException('Invalid or foreign package component');
    await c.query('DELETE FROM business_package_components WHERE business_id=$1 AND branch_id=$2 AND package_id=$3',[business,branch,item]);

@@ -7,7 +7,7 @@ import {FinanceLedger,minor,type FinanceIntent} from './finance-ledger.service';
 import {PaystackGateway} from './paystack.gateway';
 import {parseTicketToken,ticketKey,ticketNonce,ticketToken} from './ticket-token';
 
-export type HoldInput={kind:'reservation'|'ticket';sourceId:string;quantity:number;guestName:string;requestKey:string};
+export type HoldInput={kind:'reservation'|'ticket';sourceId:string;quantity:number;guestName:string;requestKey:string;expectedAmountMinor?:string;planId?:string;planRevision?:number};
 @Injectable()
 export class CommerceLifecycle {
  constructor(@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CustomerService)readonly customers:CustomerService,@Inject(PaystackGateway)readonly gateway:PaystackGateway){}
@@ -16,7 +16,24 @@ export class CommerceLifecycle {
   const environment=this.gateway.environment();const key=input.kind==='ticket'?ticketKey().keyId:null;
   return this.customers.withAccountTransaction(who,async c=>{
    const prior=(await c.query('SELECT h.*,p.amount_minor::text,p.currency FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id WHERE h.customer_subject=$1 AND h.request_key=$2',[who.subject,input.requestKey])).rows[0];
-   if(prior){if(prior.kind!==input.kind||prior.quantity!==input.quantity||prior.guest_name!==input.guestName.trim()||(prior.availability_id??prior.catalogue_id)!==input.sourceId.toLowerCase())throw new ConflictException('Hold retry key conflict');return this.holdProjection(prior);}
+   if(prior){
+    if(prior.kind!==input.kind||prior.quantity!==input.quantity||prior.guest_name!==input.guestName.trim()||(prior.availability_id??prior.catalogue_id)!==input.sourceId.toLowerCase()||(input.expectedAmountMinor!==undefined&&prior.amount_minor!==input.expectedAmountMinor))
+     throw new ConflictException('Hold retry key conflict');
+    if(input.planId){
+     const link=(await c.query<{plan_id:string;plan_revision:number}>('SELECT plan_id,plan_revision FROM customer_plan_hold_links WHERE hold_id=$1',[prior.id])).rows[0];
+     if(!link||link.plan_id!==input.planId.toLowerCase()||link.plan_revision!==input.planRevision)
+      throw new ConflictException('Hold retry key belongs to another plan or revision');
+    }
+    return this.holdProjection(prior);
+   }
+   if(input.planId){
+    const planning=await c.query<{revision:number;status:string;guests:number}>(`
+     SELECT revision,status,guests FROM customer_plans
+     WHERE id=$1 AND customer_subject=$2 FOR SHARE`,[input.planId,who.subject]);
+    if(!planning.rowCount||planning.rows[0].status!=='draft'||planning.rows[0].revision!==input.planRevision||
+       planning.rows[0].guests!==input.quantity)
+     throw new ConflictException('Planning revision or group size changed before capacity lock');
+   }
    let source;
    if(input.kind==='reservation')source=(await c.query('SELECT catalogue_id,business_id,branch_id FROM business_availability WHERE id=$1',[input.sourceId])).rows[0];
    else source=(await c.query('SELECT id AS catalogue_id,business_id,branch_id FROM business_catalogue WHERE id=$1',[input.sourceId])).rows[0];
@@ -25,11 +42,48 @@ export class CommerceLifecycle {
    const eligible=await c.query("SELECT 1 FROM business_branches b JOIN business_onboarding m ON m.id=b.business_id WHERE b.id=$1 AND b.business_id=$2 AND b.active AND m.status='approved' FOR SHARE OF b,m",[source.branch_id,source.business_id]);
    if(!eligible.rowCount)throw new ConflictException('Merchant unavailable');
    const item=(await c.query('SELECT *,price_minor::text FROM business_catalogue WHERE id=$1 AND active AND published FOR SHARE',[source.catalogue_id])).rows[0];
-   if(!item||item.currency!=='NGN'||item.kind!==(input.kind==='ticket'?'event':'service'))throw new ConflictException('Paid offering unavailable');
-   const amount=minor((BigInt(item.price_minor)*BigInt(input.quantity)).toString()),policy=await this.ledger.policy(c,source.business_id);
+   if(!item||item.currency!=='NGN'||(input.kind==='ticket'?item.kind!=='event':!['service','package'].includes(item.kind)))throw new ConflictException('Paid offering unavailable');
+   let multiplier=BigInt(input.quantity);
+   let packageComponents:{catalogueId:string;quantity:number}[]=[];
+   if(item.kind==='package'){
+    const configured=(await c.query<{pricing_model:string;min_guests:number;max_guests:number}>(
+     'SELECT pricing_model,min_guests,max_guests FROM business_public_packages WHERE catalogue_id=$1',[source.catalogue_id])).rows[0];
+    if(!configured||input.quantity<configured.min_guests||input.quantity>configured.max_guests)throw new ConflictException('Package group size unavailable');
+    multiplier=configured.pricing_model==='per_group'?1n:BigInt(input.quantity);
+    const componentRows=await c.query<{catalogue_id:string;quantity:number;kind:string;active:boolean;published:boolean;currency:string}>(
+     `SELECT component.id AS catalogue_id,pc.quantity,component.kind,component.active,component.published,component.currency
+      FROM business_package_components pc
+      JOIN business_catalogue component ON component.id=pc.component_id AND component.business_id=pc.business_id AND component.branch_id=pc.branch_id
+      WHERE pc.package_id=$1 AND pc.business_id=$2 AND pc.branch_id=$3 ORDER BY component.id FOR SHARE OF component`,
+     [source.catalogue_id,source.business_id,source.branch_id]);
+    if(!componentRows.rowCount||componentRows.rows.some(row=>!row.active||!row.published||row.kind==='package'||row.currency!==item.currency))
+     throw new ConflictException('Package component unavailable');
+    packageComponents=componentRows.rows.map(row=>({catalogueId:row.catalogue_id,quantity:row.quantity*(configured.pricing_model==='per_guest'?input.quantity:1)}));
+    if(packageComponents.some(row=>!Number.isSafeInteger(row.quantity)||row.quantity<1||row.quantity>100000))
+     throw new ConflictException('Package component quantity unavailable');
+   }
+   const amount=minor((BigInt(item.price_minor)*multiplier).toString()),policy=await this.ledger.policy(c,source.business_id);
+   if(input.expectedAmountMinor!==undefined&&amount.toString()!==input.expectedAmountMinor)
+    throw new ConflictException('Offering price changed; refresh the recommendation');
+   const componentSlots:{id:string;quantity:number}[]=[];
    if(input.kind==='reservation'){
     const updated=await c.query("UPDATE business_availability SET reserved=reserved+$2 WHERE id=$1 AND active AND starts_at>now()+$3*interval '1 minute' AND reserved+$2<=capacity RETURNING id",[input.sourceId,input.quantity,policy.hold_minutes]);
     if(!updated.rowCount)throw new ConflictException('Slot unavailable');
+    if(packageComponents.length){
+     const parent=(await c.query<{starts_at:Date}>('SELECT starts_at FROM business_availability WHERE id=$1',[input.sourceId])).rows[0];
+     for(const line of packageComponents){
+      const selected=await c.query<{id:string}>(`
+       SELECT a.id FROM business_availability a JOIN business_catalogue i ON i.id=a.catalogue_id
+       WHERE a.catalogue_id=$1 AND a.business_id=$2 AND a.branch_id=$3
+       AND a.starts_at=$4::timestamptz AND a.active AND a.starts_at>now()
+       AND i.active AND i.published AND a.capacity-a.reserved>=$5
+       ORDER BY a.id LIMIT 1 FOR UPDATE OF a`,[line.catalogueId,source.business_id,source.branch_id,parent.starts_at,line.quantity]);
+      if(!selected.rowCount)throw new ConflictException('Package component slot unavailable');
+      const taken=await c.query('UPDATE business_availability SET reserved=reserved+$2 WHERE id=$1 AND reserved+$2<=capacity RETURNING id',[selected.rows[0].id,line.quantity]);
+      if(!taken.rowCount)throw new ConflictException('Package component capacity exhausted');
+      componentSlots.push({id:selected.rows[0].id,quantity:line.quantity});
+     }
+    }
    }else{
     const event=await c.query("SELECT 1 FROM business_event_config WHERE catalogue_id=$1 AND starts_at>now()+$2*interval '1 minute' FOR SHARE",[source.catalogue_id,policy.hold_minutes]);
     if(!event.rowCount)throw new ConflictException('Event unavailable');
@@ -42,6 +96,8 @@ export class CommerceLifecycle {
    await this.ledger.terms(c,p,policy.id);
    const hold=(await c.query(`INSERT INTO paid_holds(id,intent_id,customer_subject,business_id,branch_id,catalogue_id,kind,availability_id,quantity,guest_name,request_key,expires_at,key_id)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now()+$12*interval '1 minute',$13) RETURNING *`,[id,intent,who.subject,source.business_id,source.branch_id,source.catalogue_id,input.kind,input.kind==='reservation'?input.sourceId:null,input.quantity,input.guestName.trim(),input.requestKey,policy.hold_minutes,key])).rows[0];
+   for(const line of componentSlots)await c.query('INSERT INTO package_component_holds(hold_id,availability_id,quantity) VALUES($1,$2,$3)',[id,line.id,line.quantity]);
+   if(input.planId)await c.query('INSERT INTO customer_plan_hold_links(hold_id,plan_id,customer_subject,plan_revision) VALUES($1,$2,$3,$4)',[id,input.planId,who.subject,input.planRevision]);
    await this.ledger.event(c,'hold',id,'created',who.subject);return this.holdProjection({...hold,amount_minor:amount.toString(),currency:'NGN'});
   });
  }
@@ -51,6 +107,14 @@ export class CommerceLifecycle {
   if(h.status!=='held')return;
   if(h.kind==='ticket')await c.query('UPDATE ticket_inventory SET held=held-$2 WHERE catalogue_id=$1',[h.catalogue_id,h.quantity]);
   else await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1',[h.availability_id,h.quantity]);
+  const components=await c.query<{availability_id:string;quantity:number}>(`
+   SELECT availability_id,quantity FROM package_component_holds
+   WHERE hold_id=$1 AND released_at IS NULL ORDER BY availability_id FOR UPDATE`,[h.id]);
+  for(const line of components.rows){
+   const result=await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1 AND reserved>=$2 RETURNING id',[line.availability_id,line.quantity]);
+   if(!result.rowCount)throw new ConflictException('Package component release failed');
+  }
+  await c.query('UPDATE package_component_holds SET released_at=now() WHERE hold_id=$1 AND released_at IS NULL',[h.id]);
   await c.query('UPDATE paid_holds SET status=$2 WHERE id=$1',[h.id,status]);
  }
  async validatePurchase(c:PoolClient,p:FinanceIntent){
@@ -62,6 +126,36 @@ export class CommerceLifecycle {
   const h=(await c.query('SELECT *,expires_at>now() AS unexpired FROM paid_holds WHERE intent_id=$1 FOR UPDATE',[p.id])).rows[0];
   if(!h||h.status!=='held'||!h.unexpired)throw new ConflictException('Payment hold expired');
   if(!(await c.query("SELECT 1 FROM business_branches b JOIN business_onboarding m ON m.id=b.business_id JOIN business_catalogue i ON i.branch_id=b.id WHERE i.id=$1 AND i.active AND i.published AND b.active AND m.status='approved' FOR SHARE OF b,m,i",[h.catalogue_id])).rowCount)throw new ConflictException('Offering unavailable');
+  const packageOffer=await c.query<{price_minor:string;pricing_model:string;min_guests:number;max_guests:number}>(`
+   SELECT i.price_minor::text,p.pricing_model,p.min_guests,p.max_guests
+   FROM business_catalogue i JOIN business_public_packages p ON p.catalogue_id=i.id
+   WHERE i.id=$1 AND i.kind='package' AND i.active AND i.published FOR SHARE OF i,p`,[h.catalogue_id]);
+  if(packageOffer.rowCount){
+   const pkg=packageOffer.rows[0],calculated=BigInt(pkg.price_minor)*(pkg.pricing_model==='per_group'?1n:BigInt(h.quantity));
+   if(h.quantity<pkg.min_guests||h.quantity>pkg.max_guests||calculated.toString()!==p.amount_minor)
+    throw new ConflictException('Package price or group configuration changed');
+   const components=await c.query<{availability_id:string}>(`
+    SELECT availability_id FROM package_component_holds WHERE hold_id=$1 AND released_at IS NULL`,[h.id]);
+   const invalid=await c.query(`
+    SELECT 1 FROM business_package_components pc
+    LEFT JOIN business_catalogue i ON i.id=pc.component_id AND i.business_id=pc.business_id AND i.branch_id=pc.branch_id
+    WHERE pc.package_id=$1 AND (i.id IS NULL OR NOT i.active OR NOT i.published OR i.kind='package')`,[h.catalogue_id]);
+   const configured=await c.query<{n:number}>('SELECT count(*)::int AS n FROM business_package_components WHERE package_id=$1',[h.catalogue_id]);
+   const mismatch=await c.query(`
+    SELECT 1 FROM business_package_components pc
+    WHERE pc.package_id=$2 AND NOT EXISTS (
+     SELECT 1 FROM package_component_holds ph
+     JOIN business_availability a ON a.id=ph.availability_id
+     JOIN business_availability base ON base.id=$3
+     JOIN business_catalogue i ON i.id=a.catalogue_id
+     WHERE ph.hold_id=$1 AND ph.released_at IS NULL AND i.id=pc.component_id
+     AND a.active AND a.starts_at=base.starts_at
+     AND i.active AND i.published AND i.currency='NGN'
+     AND ph.quantity::bigint=pc.quantity::bigint * CASE WHEN $4::text='per_guest' THEN $5::bigint ELSE 1::bigint END
+    )`,[h.id,h.catalogue_id,h.availability_id,pkg.pricing_model,h.quantity]);
+   if(!components.rowCount||components.rowCount!==configured.rows[0].n||invalid.rowCount||mismatch.rowCount)
+    throw new ConflictException('Package composition unavailable');
+  }
   if(h.kind==='ticket'){ticketKey(h.key_id);if(!(await c.query('SELECT 1 FROM business_event_config WHERE catalogue_id=$1 AND starts_at>now() FOR SHARE',[h.catalogue_id])).rowCount)throw new ConflictException('Event has started');}
   else if(!(await c.query('SELECT 1 FROM business_availability WHERE id=$1 AND active AND starts_at>now() FOR UPDATE',[h.availability_id])).rowCount)throw new ConflictException('Slot no longer available');
  }
@@ -182,7 +276,16 @@ export class CommerceLifecycle {
    if(h.kind==='ticket'){
     const unused=await c.query("UPDATE issued_tickets SET state='revoked' WHERE hold_id=$1 AND state='issued' RETURNING id",[h.id]);
     await c.query('UPDATE ticket_inventory SET issued=issued-$2 WHERE catalogue_id=$1',[h.catalogue_id,unused.rowCount]);
-   }else{const result=await c.query("UPDATE business_reservations SET status='cancelled',updated_at=now() WHERE id=$1 AND status='confirmed' RETURNING id",[h.reservation_id]);if(result.rowCount)await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1',[h.availability_id,h.quantity]);}
+   }else{const result=await c.query("UPDATE business_reservations SET status='cancelled',updated_at=now() WHERE id=$1 AND status='confirmed' RETURNING id",[h.reservation_id]);if(result.rowCount){
+    await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1',[h.availability_id,h.quantity]);
+    const components=await c.query<{availability_id:string;quantity:number}>(`
+     SELECT availability_id,quantity FROM package_component_holds WHERE hold_id=$1 AND released_at IS NULL ORDER BY availability_id FOR UPDATE`,[h.id]);
+    for(const component of components.rows){
+     const freed=await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1 AND reserved>=$2 RETURNING id',[component.availability_id,component.quantity]);
+     if(!freed.rowCount)throw new ConflictException('Package refund capacity release failed');
+    }
+    await c.query('UPDATE package_component_holds SET released_at=now() WHERE hold_id=$1 AND released_at IS NULL',[h.id]);
+   }}
    await c.query("UPDATE paid_holds SET status='cancelled' WHERE id=$1",[h.id]);
   }
  }
