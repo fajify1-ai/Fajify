@@ -122,7 +122,20 @@ export class CommerceLifecycle {
     SELECT 1 FROM business_package_components pc
     LEFT JOIN business_catalogue i ON i.id=pc.component_id AND i.business_id=pc.business_id AND i.branch_id=pc.branch_id
     WHERE pc.package_id=$1 AND (i.id IS NULL OR NOT i.active OR NOT i.published OR i.kind='package')`,[h.catalogue_id]);
-   if(!components.rowCount||invalid.rowCount)
+   const configured=await c.query<{n:number}>('SELECT count(*)::int AS n FROM business_package_components WHERE package_id=$1',[h.catalogue_id]);
+   const mismatch=await c.query(`
+    SELECT 1 FROM business_package_components pc
+    WHERE pc.package_id=$2 AND NOT EXISTS (
+     SELECT 1 FROM package_component_holds ph
+     JOIN business_availability a ON a.id=ph.availability_id
+     JOIN business_availability base ON base.id=$3
+     JOIN business_catalogue i ON i.id=a.catalogue_id
+     WHERE ph.hold_id=$1 AND ph.released_at IS NULL AND i.id=pc.component_id
+     AND a.active AND a.starts_at=base.starts_at
+     AND i.active AND i.published AND i.currency='NGN'
+     AND ph.quantity::bigint=pc.quantity::bigint * CASE WHEN $4::text='per_guest' THEN $5::bigint ELSE 1::bigint END
+    )`,[h.id,h.catalogue_id,h.availability_id,pkg.pricing_model,h.quantity]);
+   if(!components.rowCount||components.rowCount!==configured.rows[0].n||invalid.rowCount||mismatch.rowCount)
     throw new ConflictException('Package composition unavailable');
   }
   if(h.kind==='ticket'){ticketKey(h.key_id);if(!(await c.query('SELECT 1 FROM business_event_config WHERE catalogue_id=$1 AND starts_at>now() FOR SHARE',[h.catalogue_id])).rowCount)throw new ConflictException('Event has started');}
