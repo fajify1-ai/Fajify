@@ -14,7 +14,7 @@ const matching=z.object({areaId:z.string().uuid(),offerCount:z.number().int().mi
 @RequireRoles('dispatcher')
 @Controller({path:'dispatch',version:'1'})
 export class RideDispatchController {
- constructor(@Inject(RideRequestsService)private readonly areas:RideAreasService,@Inject(RideService)private readonly rides:RideService){}
+ constructor(@Inject(RideAreasService)private readonly areas:RideAreasService,@Inject(RideService)private readonly rides:RideService){}
  @Post('rides/:id/match') @ApiBody({schema:{type:'object',required:['areaId','offerCount','validForSeconds'],properties:{areaId:{type:'string',format:'uuid'},offerCount:{type:'integer'},validForSeconds:{type:'integer'}}}})
  @ApiOkResponse({description:'Area-scoped matching; returns offers actually issued'})
  async match(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) rideId:string,@Body() body:unknown){
