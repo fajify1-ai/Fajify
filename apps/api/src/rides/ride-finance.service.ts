@@ -96,6 +96,12 @@ export class RideFinanceService {
    const p=await c.query<{state:string;provider_reference:string;recipient_ref:string;amount_minor:string}>(`SELECT state,provider_reference,recipient_ref,amount_minor::text FROM ride_driver_payouts WHERE id=$1 FOR UPDATE`,[payoutId]);
    if(!p.rows[0])throw new NotFoundException();
    if(p.rows[0].state!=='reserved')throw new ConflictException('Payout already submitted or awaiting reconciliation');
+   const stillVerified=await c.query(`SELECT 1 FROM ride_driver_bank_refs bank
+    JOIN ride_driver_payouts payout ON payout.driver_id=bank.driver_id
+    JOIN ride_drivers driver ON driver.id=payout.driver_id
+    WHERE payout.id=$1 AND payout.recipient_ref=bank.payout_recipient_ref AND bank.verified AND driver.status='approved'
+    FOR SHARE OF bank,driver`,[payoutId]);
+   if(!stillVerified.rowCount)throw new ConflictException('Payout recipient or driver eligibility changed');
    await c.query("UPDATE ride_driver_payouts SET state='submitting',updated_at=now() WHERE id=$1",[payoutId]);
    return p.rows[0];
   });
