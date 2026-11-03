@@ -116,8 +116,9 @@ export class RideFinanceService {
   if(!identified.rows[0])throw new NotFoundException();
   const expected=identified.rows[0];
   const provider=await this.gateway.transferStatus(expected.provider_reference);
+  const recipient=typeof provider.recipient==='object'?provider.recipient?.recipient_code:provider.recipient;
   if(provider.reference!==expected.provider_reference||provider.domain!==this.gateway.environment()||
-     Number(provider.amount)!==Number(expected.amount_minor)||provider.recipient?.recipient_code!==expected.recipient_ref)
+     String(provider.amount)!==expected.amount_minor||provider.currency!=='NGN'||recipient!==expected.recipient_ref)
    throw new ConflictException('Payout evidence mismatch');
   return this.ledger.tx(business,async c=>{
    const r=await c.query<{state:string;ride_id:string;amount_minor:string;provider_reference:string}>(`SELECT state,ride_id,amount_minor::text,provider_reference FROM ride_driver_payouts WHERE id=$1 FOR UPDATE`,[payoutId]);
@@ -127,6 +128,15 @@ export class RideFinanceService {
    if(!['success','failed'].includes(provider.status))return {payoutId,state:'uncertain',replayed:false};
    const fare=await c.query<{payment_intent_id:string}>(`SELECT payment_intent_id FROM ride_fares WHERE ride_id=$1 FOR UPDATE`,[p.ride_id]);
    const amount=BigInt(p.amount_minor),intent=fare.rows[0].payment_intent_id;
+   const fee=provider.fee_charged;
+   if(fee==null){
+    await this.ledger.case(c,intent,'payout_fee_unverified',p.provider_reference);
+    return {payoutId,state:'uncertain',replayed:false};
+   }
+   if(typeof fee!=='number'||!Number.isSafeInteger(fee)||fee<0)
+    throw new ConflictException('Invalid verified transfer fee');
+   await this.ledger.post(c,'ride:'+p.ride_id+':provider-fee',intent,'gateway_fee_expense','gateway_clearing',BigInt(fee));
+   await c.query("UPDATE finance_reconciliation_cases SET state='resolved' WHERE intent_id=$1 AND kind='payout_fee_unverified' AND provider_id=$2",[intent,p.provider_reference]);
    if(provider.status==='success'){
     await this.ledger.post(c,'ride:'+p.ride_id+':driver-paid',intent,'payout_reserve','gateway_clearing',amount);
     await c.query("UPDATE ride_driver_payouts SET state='reconciled',updated_at=now() WHERE id=$1",[payoutId]);
