@@ -1,5 +1,5 @@
 import {Body,Controller,Get,Header,HttpCode,Inject,Param,ParseUUIDPipe,Post,Query,Req,UseGuards,BadRequestException} from '@nestjs/common';
-import {ApiBearerAuth,ApiBody,ApiOkResponse,ApiParam,ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth,ApiBody,ApiOkResponse,ApiParam,ApiQuery,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
@@ -24,7 +24,7 @@ export class AdminInsightsController{
  @Get('finance/summary') @RequireAdminScope('finance.read') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminFinanceSummary})
  finance(){return this.insights.finance();}
- @Get('reports/overview') @RequireAdminScopes('reports.read','finance.read') @Header('Cache-Control','no-store')
+ @Get('reports/overview') @ApiQuery({name:'days',required:false,schema:{type:'integer',minimum:1,maximum:90,default:30}}) @RequireAdminScopes('reports.read','finance.read') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminReportSummary})
  report(@Query(validated(AdminReportRangeQuery)) q:AdminReportRangeQuery){return this.insights.report(q.days);}
  @Get('reports/businesses/:id') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}})

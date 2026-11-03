@@ -1,5 +1,5 @@
 import {Body,Controller,Get,Header,HttpCode,Inject,Param,ParseUUIDPipe,Post,Query,Req,UseGuards} from '@nestjs/common';
-import {ApiBearerAuth,ApiBody,ApiCreatedResponse,ApiOkResponse,ApiParam,ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth,ApiBody,ApiCreatedResponse,ApiOkResponse,ApiParam,ApiQuery,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
@@ -53,7 +53,7 @@ export class AdminGovernanceController {
 @Controller({path:'admin/support',version:'1'}) @UseGuards(...guards)
 export class AdminSupportController {
  constructor(@Inject(AdminSupportService)private readonly service:AdminSupportService){}
- @Get('cases') @RequireAdminScope('support.read') @Header('Cache-Control','no-store')
+ @Get('cases') @ApiQuery({name:'state',required:false,enum:['open','closed']}) @RequireAdminScope('support.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminPagedResult})
  cases(@Query(validated(AdminSupportListQuery)) q:AdminSupportListQuery){return this.service.cases(q,q.state??'open');}
  @Get('cases/:id') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @RequireAdminScope('support.read') @Header('Cache-Control','no-store')

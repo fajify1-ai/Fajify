@@ -43,6 +43,7 @@ test('M8 support notifications are protected and bind customer identity from a v
   assert.equal(list.status,200);assert.equal(list.headers['cache-control'],'no-store');
   assert.equal(calls[0].subject,'customer-A');
   assert.equal((await auth(request(server).put('/api/v1/customer/support-notifications/not-a-uuid/read'))).status,400);
+  assert.equal((await auth(request(server).put('/api/v1/customer/support-notifications/'+noticeId+'/read').send({customerSubject:'customer-B'}))).status,400);
   const read=await auth(request(server).put('/api/v1/customer/support-notifications/'+noticeId+'/read'));
   assert.equal(read.status,200);assert.equal(calls[1].subject,'customer-A');
   revoked=true;
@@ -65,7 +66,7 @@ test('M8 support notifications use bounded owner-scoped SQL and account-safe rea
   seen.push({sql,args});return {rows:[{id:noticeId,caseId:noticeId,readAt:null,createdAt:timestamp}],rowCount:1};
  }} as unknown as Pool;
  const customer={withAccountTransaction:async(_identity:unknown,run:(c:{query:(sql:string,args:unknown[])=>Promise<unknown>})=>Promise<unknown>)=>
-  run({query:async(sql:string,args:unknown[])=>{seen.push({sql,args});return {rows:[{id:noticeId}],rowCount:1};}})} as CustomerService;
+  run({query:async(sql:string,args:unknown[])=>{seen.push({sql,args});return {rows:[{id:noticeId}],rowCount:1};}})} as unknown as CustomerService;
  const service=new CustomerSupportNotificationsService(pool,customer);
  const listed=await service.list('customer-A',{limit:5,offset:3});
  assert.equal(listed.items.length,1);
