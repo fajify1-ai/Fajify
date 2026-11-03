@@ -50,7 +50,9 @@ async function driver(){
  const id=row.rows[0].id;
  await pool.query("INSERT INTO resource_memberships(identity_subject,resource_type,resource_id,role,active) VALUES($1,'dispatch_area',$2,'driver',true)",[who,zone]);
  await pool.query("INSERT INTO ride_vehicles(driver_id,category,registration,approved) VALUES($1,$2,$3,true)",[id,category,randomUUID()]);
- await pool.query("INSERT INTO ride_driver_documents(driver_id,document_kind,private_object_key,review_status,expires_at) VALUES($1,'licence',$2,'approved',now()+interval '1 year')",[id,'private/ride-drivers/'+id+'/licence/'+randomUUID()]);
+ for(const kind of ['licence','identification','insurance','vehicle_registration']){
+  await pool.query("INSERT INTO ride_driver_documents(driver_id,document_kind,private_object_key,review_status,expires_at) VALUES($1,$2,$3,'approved',now()+interval '1 year')",[id,kind,'private/ride-drivers/'+id+'/'+kind+'/'+randomUUID()]);
+ }
  const accepted=await rides.location(who,6.5244,3.3792,new Date(),1,true);
  assert.equal(accepted.accepted,true);
  return {subject:who,id};
@@ -228,4 +230,11 @@ test('M7 acceptance: in-trip driver suspension escalates only once, without unsa
  const i=await pool.query<{severity:string}>(`SELECT severity FROM ride_incidents WHERE ride_id=$1 AND kind='driver_ineligible'`,[ride.id]);
  assert.equal(i.rowCount,1);assert.equal(i.rows[0].severity,'urgent');
  await assert.rejects(()=>rides.transition(ride.id,d.subject,'completed'),{status:403});
+});
+
+test('M7 acceptance: partial document approval cannot make a driver dispatch-eligible',async()=>{
+ const d=await driver(),ride=await request();
+ await pool.query("DELETE FROM ride_driver_documents WHERE driver_id=$1 AND document_kind='insurance'",[d.id]);
+ await assert.rejects(()=>rides.offer(ride.id,d.id,dispatcher,new Date(Date.now()+90000),zone),{status:403});
+ assert.ok(!(await areas.candidates(dispatcher,zone,ride.id,50)).candidates.some(x=>x.driverId===d.id));
 });
