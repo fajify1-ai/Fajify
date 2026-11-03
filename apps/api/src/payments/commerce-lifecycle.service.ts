@@ -118,10 +118,11 @@ export class CommerceLifecycle {
     throw new ConflictException('Package price or group configuration changed');
    const components=await c.query<{availability_id:string}>(`
     SELECT availability_id FROM package_component_holds WHERE hold_id=$1 AND released_at IS NULL`,[h.id]);
-   if(!components.rowCount||!(await c.query(`
+   const invalid=await c.query(`
     SELECT 1 FROM business_package_components pc
     LEFT JOIN business_catalogue i ON i.id=pc.component_id AND i.business_id=pc.business_id AND i.branch_id=pc.branch_id
-    WHERE pc.package_id=$1 AND (i.id IS NULL OR NOT i.active OR NOT i.published OR i.kind='package')`,[h.catalogue_id])).rowCount===false)
+    WHERE pc.package_id=$1 AND (i.id IS NULL OR NOT i.active OR NOT i.published OR i.kind='package')`,[h.catalogue_id]);
+   if(!components.rowCount||invalid.rowCount)
     throw new ConflictException('Package composition unavailable');
   }
   if(h.kind==='ticket'){ticketKey(h.key_id);if(!(await c.query('SELECT 1 FROM business_event_config WHERE catalogue_id=$1 AND starts_at>now() FOR SHARE',[h.catalogue_id])).rowCount)throw new ConflictException('Event has started');}
