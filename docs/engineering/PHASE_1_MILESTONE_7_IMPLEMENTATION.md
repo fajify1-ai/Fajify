@@ -22,6 +22,8 @@
 `0094_ride_finance_links.sql` — category commission snapshots, payment-to-ride link, payout reservations.  
 `0095_ride_evidence_integrity.sql` — append-only database triggers for trip and financial event histories.  
 `0096_ride_tariffs.sql` — versioned active vehicle-category tariff policies.
+`0097_ride_payout_reversals.sql` — payout reversal states and immutable fee observations.
+`0098_ride_tariff_integrity.sql` — database enforcement against mutating published tariff history.
 
 ### API operations (versioned under `/api/v1`)
 
@@ -73,6 +75,10 @@ pnpm --filter @faji/api worker:rides
 Worker safety: it locks ride rows before expiring offers, requeues rides with no live pending offers and increments the dispatch generation. The `ride.payout.*` events are not instructions to transfer money automatically.
 
 ### Local review / consolidated verification (NOT YET EXECUTED)
+
+The preferred consolidated acceptance invocation is `bash tooling/run-m7-p1-disposable.sh` from a clean checkout on this branch as an unprivileged user. It provisions and destroys a marked isolated PostgreSQL 16/PostGIS cluster, runs the M7 database suite alongside existing API static/unit/build checks, exports OpenAPI, requires the snapshot to be current and writes `FAJI_M7_REPORT_DIR/acceptance.json` with exact source SHA and cleanup outcome. This launch script is **committed but has not been executed here**. It deliberately fails until an accepted, freshly generated OpenAPI snapshot is committed; do not bypass the comparison gate.
+
+### Manual verification commands, if diagnosing a failing consolidated gate
 
 Run only against a **fresh, explicitly disposable PostgreSQL 16 + PostGIS database**, with independent Keycloak and Paystack sandbox fixtures. Do not use development, shared staging or production credentials for the disposable acceptance runner.
 
