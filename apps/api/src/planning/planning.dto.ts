@@ -1,6 +1,6 @@
 import {ApiProperty,ApiPropertyOptional} from '@nestjs/swagger';
 import {Type} from 'class-transformer';
-import {ArrayMaxSize,IsArray,IsIn,IsInt,IsISO8601,IsOptional,IsString,IsNumber,Length,Matches,Max,Min} from 'class-validator';
+import {ArrayMaxSize,IsArray,IsIn,IsInt,IsISO8601,IsOptional,IsString,IsUUID,IsNumber,Length,Matches,Max,Min} from 'class-validator';
 export class PlanInput {
  @ApiProperty({minLength:1,maxLength:80}) @IsString() @Length(1,80) occasion!:string;
  @ApiProperty({pattern:'^(0|[1-9][0-9]{0,18})$'}) @Matches(/^(0|[1-9][0-9]{0,18})$/) budgetMinor!:string;
@@ -71,4 +71,22 @@ export class PlanFeedbackView {
  @ApiProperty() rating!:number;
  @ApiProperty({nullable:true,type:String}) comment!:string|null;
  @ApiProperty({format:'date-time'}) createdAt!:string;
+}
+
+export class PlanBookingInput {
+ @ApiProperty({type:String,format:'uuid'}) @IsUUID() availabilityId!:string;
+ @ApiProperty({type:String,pattern:'^(0|[1-9][0-9]{0,18})$'}) @Matches(/^(0|[1-9][0-9]{0,18})$/) expectedTotalMinor!:string;
+ @ApiProperty({type:String,minLength:1,maxLength:120}) @IsString() @Length(1,120) @Matches(/\S/) guestName!:string;
+ @ApiProperty({type:String,pattern:'^[A-Za-z0-9_-]{8,100}$'}) @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey!:string;
+}
+export class PlanBookingHoldView {
+ @ApiProperty({type:String,format:'uuid'}) id!:string;
+ @ApiProperty({type:String,format:'uuid'}) paymentIntentId!:string;
+ @ApiProperty({type:String,format:'uuid'}) catalogueId!:string;
+ @ApiProperty({type:String,format:'uuid'}) availabilityId!:string;
+ @ApiProperty({type:String}) amountMinor!:string;
+ @ApiProperty({type:String}) currency!:string;
+ @ApiProperty({type:Number}) quantity!:number;
+ @ApiProperty({enum:['held','confirmed','expired','cancelled','late']}) status!:string;
+ @ApiProperty({type:String,format:'date-time'}) expiresAt!:string;
 }
