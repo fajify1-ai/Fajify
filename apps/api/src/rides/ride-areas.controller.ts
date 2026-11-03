@@ -3,6 +3,7 @@ import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
+import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
@@ -11,7 +12,7 @@ const areaSchema=z.object({name:z.string().trim().min(3).max(120),geojson:z.stri
 const toggleSchema=z.object({active:z.boolean()}).strict();
 @ApiTags('ride-dispatch-areas') @ApiBearerAuth('keycloak')
 @Controller({path:'dispatch/areas',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,RolesGuard)
+@UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideAreasController {
  constructor(@Inject(RideAreasService)private readonly areas:RideAreasService){}
  @Post() @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
