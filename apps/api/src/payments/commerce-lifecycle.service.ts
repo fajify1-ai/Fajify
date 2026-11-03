@@ -16,7 +16,16 @@ export class CommerceLifecycle {
   const environment=this.gateway.environment();const key=input.kind==='ticket'?ticketKey().keyId:null;
   return this.customers.withAccountTransaction(who,async c=>{
    const prior=(await c.query('SELECT h.*,p.amount_minor::text,p.currency FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id WHERE h.customer_subject=$1 AND h.request_key=$2',[who.subject,input.requestKey])).rows[0];
-   if(prior){if(prior.kind!==input.kind||prior.quantity!==input.quantity||prior.guest_name!==input.guestName.trim()||(prior.availability_id??prior.catalogue_id)!==input.sourceId.toLowerCase()||(input.expectedAmountMinor!==undefined&&prior.amount_minor!==input.expectedAmountMinor))throw new ConflictException('Hold retry key conflict');return this.holdProjection(prior);}
+   if(prior){
+    if(prior.kind!==input.kind||prior.quantity!==input.quantity||prior.guest_name!==input.guestName.trim()||(prior.availability_id??prior.catalogue_id)!==input.sourceId.toLowerCase()||(input.expectedAmountMinor!==undefined&&prior.amount_minor!==input.expectedAmountMinor))
+     throw new ConflictException('Hold retry key conflict');
+    if(input.planId){
+     const link=(await c.query<{plan_id:string;plan_revision:number}>('SELECT plan_id,plan_revision FROM customer_plan_hold_links WHERE hold_id=$1',[prior.id])).rows[0];
+     if(!link||link.plan_id!==input.planId.toLowerCase()||link.plan_revision!==input.planRevision)
+      throw new ConflictException('Hold retry key belongs to another plan or revision');
+    }
+    return this.holdProjection(prior);
+   }
    if(input.planId){
     const planning=await c.query<{revision:number;status:string;guests:number}>(`
      SELECT revision,status,guests FROM customer_plans
@@ -88,6 +97,7 @@ export class CommerceLifecycle {
    const hold=(await c.query(`INSERT INTO paid_holds(id,intent_id,customer_subject,business_id,branch_id,catalogue_id,kind,availability_id,quantity,guest_name,request_key,expires_at,key_id)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now()+$12*interval '1 minute',$13) RETURNING *`,[id,intent,who.subject,source.business_id,source.branch_id,source.catalogue_id,input.kind,input.kind==='reservation'?input.sourceId:null,input.quantity,input.guestName.trim(),input.requestKey,policy.hold_minutes,key])).rows[0];
    for(const line of componentSlots)await c.query('INSERT INTO package_component_holds(hold_id,availability_id,quantity) VALUES($1,$2,$3)',[id,line.id,line.quantity]);
+   if(input.planId)await c.query('INSERT INTO customer_plan_hold_links(hold_id,plan_id,customer_subject,plan_revision) VALUES($1,$2,$3,$4)',[id,input.planId,who.subject,input.planRevision]);
    await this.ledger.event(c,'hold',id,'created',who.subject);return this.holdProjection({...hold,amount_minor:amount.toString(),currency:'NGN'});
   });
  }
