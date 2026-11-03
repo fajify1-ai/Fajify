@@ -34,5 +34,8 @@ export const M8_OPERATIONS:ReadonlyArray<AdminOperation>=[
 /** M8-owned customer support notification contracts consumed by M8-P2. */
 export const M8_CUSTOMER_OPERATIONS:ReadonlyArray<AdminOperation>=[
  {path:'/api/v1/customer/support-notifications',method:'get',body:false,status:200,paginated:true},
- {path:'/api/v1/customer/support-notifications/{id}/read',method:'put',body:false,status:200,paginated:false}
+ {path:'/api/v1/customer/support-notifications/{id}/read',method:'put',body:false,status:200,paginated:false},
+ {path:'/api/v1/customer/integrations/booking-rides',method:'get',body:false,status:200,paginated:true},
+ {path:'/api/v1/customer/integrations/booking-rides',method:'post',body:true,status:200,paginated:false},
+ {path:'/api/v1/customer/integrations/booking-rides/{id}/unlink',method:'put',body:false,status:200,paginated:false}
 ];

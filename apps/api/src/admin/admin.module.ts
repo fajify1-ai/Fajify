@@ -2,6 +2,8 @@ import {Module} from '@nestjs/common';
 import {IdentityModule} from '../auth/identity.module';
 import {CustomerModule} from '../customer/customer.module';
 import {CustomerSupportNotificationsController,SupportNoticeEmptyBodyGuard} from './customer-support-notifications.controller';
+import {CustomerBookingRideController,BookingRideEmptyBodyGuard} from './customer-booking-ride.controller';
+import {CustomerBookingRideService} from './customer-booking-ride.service';
 import {CustomerSupportNotificationsService} from './customer-support-notifications.service';
 import {AdminOperationsController} from './admin.controller';
 import {AdminGovernanceController,AdminSupportController,AdminIncidentController} from './admin-workflows.controller';
@@ -19,8 +21,8 @@ import {AdminReadAuditGuard} from './admin-read-audit.guard';
 
 @Module({
  imports:[IdentityModule,CustomerModule],
- controllers:[CustomerSupportNotificationsController,AdminOperationsController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController],
- providers:[CustomerSupportNotificationsService,SupportNoticeEmptyBodyGuard,AdminReadAuditGuard,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
+ controllers:[CustomerSupportNotificationsController,CustomerBookingRideController,AdminOperationsController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController],
+ providers:[CustomerBookingRideService,BookingRideEmptyBodyGuard,CustomerSupportNotificationsService,SupportNoticeEmptyBodyGuard,AdminReadAuditGuard,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
   AdminIncidentService,AdminInsightsService,AdminMonitorService]
 })
 export class AdminOperationsModule {}
