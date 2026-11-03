@@ -2,8 +2,8 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 const [directory,commit,status]=process.argv.slice(2);
 if(!directory||!commit||status===undefined)throw Error('Report directory, source SHA, and exit status required');
-const required=['disposable-preflight','database-types','api-types','m6-test-types','api-lint','api-build','migrations','migrations-replay','runtime-grants','database-tests','api-tests','m6-postgres-tests','contracts','contract-snapshot','source-whitespace','dependency-audit','source-unchanged'];
-const testNames=['database-tests','api-tests','m6-postgres-tests'];
+const required=['disposable-preflight','database-types','api-types','m6-test-types','api-lint','api-build','migrations','migrations-replay','runtime-grants','report-tests','database-tests','api-tests','m6-postgres-tests','contracts','contract-snapshot','source-whitespace','dependency-audit','source-unchanged'];
+const testNames=['report-tests','database-tests','api-tests','m6-postgres-tests'];
 const problems=[];
 let checks=[];
 try{checks=readFileSync(join(directory,'checks.jsonl'),'utf8').trim().split('\n').filter(Boolean).map(v=>JSON.parse(v));}
