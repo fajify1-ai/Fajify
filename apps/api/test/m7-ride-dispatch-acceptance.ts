@@ -12,6 +12,8 @@ import {RideRequestsService} from '../src/rides/ride-requests.service';
 import {RideLifecycleOperations} from '../src/rides/ride-lifecycle-operations.service';
 import {RideSafetyService} from '../src/rides/ride-safety.service';
 import {RideTrackingService} from '../src/rides/ride-tracking.service';
+import {RideTariffService} from '../src/rides/ride-tariff.service';
+import {RideFareService} from '../src/rides/ride-fare.service';
 import {expireRideOffers} from '../src/rides/ride-expiry.worker';
 
 const ack='m7-disposable-postgis-only';
@@ -142,4 +144,35 @@ test('M7 acceptance: trip and financial evidence rows are append-only',async()=>
  const event=await pool.query<{id:string}>(`INSERT INTO ride_financial_events(ride_id,actor_subject,event_type,amount_minor,idempotency_key)
  VALUES($1,'test:m7','synthetic_test',1,$2) RETURNING id`,[complete.rows[0].ride_id,randomUUID()]);
  await assert.rejects(()=>pool.query('DELETE FROM ride_financial_events WHERE id=$1',[event.rows[0].id]),{code:'42501'});
+});
+
+test('M7 acceptance: per-category fare policy versions are serialized and quotes preserve prices',async()=>{
+ const tariffs=new RideTariffService(pool),fare=new RideFareService(pool);
+ const category='category-'+randomUUID().slice(0,8);
+ const first=await tariffs.create('test:admin',{category,baseMinor:'500',perKmMinor:'100',commissionBps:500});
+ assert.equal(first.version,1);
+ const quoted=await fare.quote(customer,{pickup:coords(),destination:coords(6.53,3.4),category});
+ assert.equal(quoted.pricingVersion,'v1');
+ assert.ok(BigInt(quoted.amountMinor)>500n);
+ const next=await Promise.all([
+  tariffs.create('test:admin',{category,baseMinor:'700',perKmMinor:'200',commissionBps:1000}),
+  tariffs.create('test:admin',{category,baseMinor:'800',perKmMinor:'300',commissionBps:1500})
+ ]);
+ assert.deepEqual(next.map(x=>x.version).sort((a,b)=>a-b),[2,3]);
+ const stored=await pool.query<{amount_minor:string;commission_bps:number;policy_id:string}>(`SELECT amount_minor::text,commission_bps,policy_id
+  FROM ride_fare_quotes WHERE id=$1`,[quoted.id]);
+ assert.equal(stored.rows[0].commission_bps,500);
+ assert.equal(stored.rows[0].amount_minor,quoted.amountMinor);
+ assert.equal(stored.rows[0].policy_id,first.id);
+ assert.equal((await pool.query('SELECT count(*)::int AS n FROM ride_tariff_policies WHERE category=$1 AND active',[category])).rows[0].n,1);
+});
+test('M7 acceptance: driver matching rejects out-of-scope dispatch and disabled accounts',async()=>{
+ const ride=await request(),d=await driver();
+ assert.equal((await areas.candidates(dispatcher,zone,ride.id,5)).candidates.some(x=>x.driverId===d.id),true);
+ await assert.rejects(()=>areas.candidates(customer,zone,ride.id,5),{status:403});
+ await pool.query('UPDATE account_access SET suspended=true WHERE identity_subject=$1',[d.subject]);
+ await assert.rejects(()=>rides.offer(ride.id,d.id,dispatcher,new Date(Date.now()+80000),zone),{status:403});
+ const view=await areas.candidates(dispatcher,zone,ride.id,10);
+ assert.ok(!view.candidates.some(x=>x.driverId===d.id));
+ await pool.query('UPDATE account_access SET suspended=false WHERE identity_subject=$1',[d.subject]);
 });
