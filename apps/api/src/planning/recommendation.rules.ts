@@ -11,10 +11,13 @@ export interface PlanningPreferences {
   startsBefore: string;
   location?: string;
   categories?: string[];
+  occasion?:string;
+  attributes?:string[];
 }
 export interface PlanningCandidate {
   id: string;
   name: string;
+  description?:string;
   category: string;
   address: string;
   currency: string;
@@ -66,8 +69,14 @@ export function rankExperiences(input: PlanningPreferences, candidates: readonly
     // Prefer closer budget fit and earlier availability, but never relax hard constraints.
     const budgetFit=budget===0n ? 100 : Number((total*100n)/budget);
     const timeFit=Math.max(0,100-Math.floor(((starts-from)/(to-from))*100));
-    const score=budgetFit*2+timeFit;
     const reasons=['Within budget','Sufficient capacity','Available in requested window'];
+    let score=budgetFit*2+timeFit;
+    const semantic=(candidate.name+' '+(candidate.description??'')).toLocaleLowerCase();
+    const occasion=input.occasion?.trim().toLocaleLowerCase();
+    if(occasion&&semantic.includes(occasion)){score+=25;reasons.push('Matches your occasion');}
+    const attrs=[...new Set(input.attributes?.map(a=>a.trim().toLocaleLowerCase()).filter(Boolean))];
+    const matches=attrs.filter(a=>semantic.includes(a));
+    if(matches.length){score+=Math.min(matches.length,8)*10;reasons.push('Matches '+matches.length+' selected preferences');}
     if (location) reasons.push('Matches requested location');
     if (categories.size) reasons.push('Matches selected category');
     results.push({id:candidate.id,score,totalMinor:total.toString(),reasons,candidate});
