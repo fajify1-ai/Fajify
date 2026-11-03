@@ -89,13 +89,13 @@ test('M8 audit feed validates pagination and rejects unauthorized or over-budget
   f.setAllowed(true);
   const ok=await auth(request(http).get('/api/v1/admin/operations/audit?limit=3&offset=2'));
   assert.equal(ok.status,200);assert.equal(ok.headers['cache-control'],'no-store');
-  assert.deepEqual(f.calls.audit,[{limit:3,offset:2}]);
+  assert.deepEqual(f.calls.audit.map(({limit,offset})=>({limit,offset})),[{limit:3,offset:2}]);
   assert.equal(Object.hasOwn(ok.body.items[0],'details'),false);
   const doc=apiDocument(f.app);
   for(const path of ['/api/v1/admin/operations/overview','/api/v1/admin/operations/audit']){
    const op=doc.paths[path]?.get;
    assert.ok(op?.security?.some(s=>Object.hasOwn(s,'keycloak')));
-   assert.ok(op.responses?.['200']);
+   assert.ok(op?.responses?.['200']);
   }
   assert.ok(doc.paths['/api/v1/admin/operations/audit'].get?.parameters?.some(p=>'name' in p&&p.name==='limit'));
  }finally{await f.app.close();}

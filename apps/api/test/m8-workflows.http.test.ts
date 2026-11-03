@@ -130,7 +130,7 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
    const verb=path.includes('moderation')||path.includes('assignment')||path.endsWith('/incidents')?'post':'get';
    const op=doc.paths[path]?.[verb];
    assert.ok(op?.security?.some(s=>Object.hasOwn(s,'keycloak')),path);
-   assert.ok(op.responses?.[verb==='post'&&path.endsWith('/incidents')?'201':'200'],path);
+   assert.ok(op?.responses?.[verb==='post'&&path.endsWith('/incidents')?'201':'200'],path);
   }
  }finally{await app.close();}
 });
