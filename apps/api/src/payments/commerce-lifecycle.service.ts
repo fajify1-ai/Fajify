@@ -7,7 +7,7 @@ import {FinanceLedger,minor,type FinanceIntent} from './finance-ledger.service';
 import {PaystackGateway} from './paystack.gateway';
 import {parseTicketToken,ticketKey,ticketNonce,ticketToken} from './ticket-token';
 
-export type HoldInput={kind:'reservation'|'ticket';sourceId:string;quantity:number;guestName:string;requestKey:string;expectedAmountMinor?:string};
+export type HoldInput={kind:'reservation'|'ticket';sourceId:string;quantity:number;guestName:string;requestKey:string;expectedAmountMinor?:string;planId?:string;planRevision?:number};
 @Injectable()
 export class CommerceLifecycle {
  constructor(@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CustomerService)readonly customers:CustomerService,@Inject(PaystackGateway)readonly gateway:PaystackGateway){}
@@ -17,6 +17,14 @@ export class CommerceLifecycle {
   return this.customers.withAccountTransaction(who,async c=>{
    const prior=(await c.query('SELECT h.*,p.amount_minor::text,p.currency FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id WHERE h.customer_subject=$1 AND h.request_key=$2',[who.subject,input.requestKey])).rows[0];
    if(prior){if(prior.kind!==input.kind||prior.quantity!==input.quantity||prior.guest_name!==input.guestName.trim()||(prior.availability_id??prior.catalogue_id)!==input.sourceId.toLowerCase()||(input.expectedAmountMinor!==undefined&&prior.amount_minor!==input.expectedAmountMinor))throw new ConflictException('Hold retry key conflict');return this.holdProjection(prior);}
+   if(input.planId){
+    const planning=await c.query<{revision:number;status:string;guests:number}>(`
+     SELECT revision,status,guests FROM customer_plans
+     WHERE id=$1 AND customer_subject=$2 FOR SHARE`,[input.planId,who.subject]);
+    if(!planning.rowCount||planning.rows[0].status!=='draft'||planning.rows[0].revision!==input.planRevision||
+       planning.rows[0].guests!==input.quantity)
+     throw new ConflictException('Planning revision or group size changed before capacity lock');
+   }
    let source;
    if(input.kind==='reservation')source=(await c.query('SELECT catalogue_id,business_id,branch_id FROM business_availability WHERE id=$1',[input.sourceId])).rows[0];
    else source=(await c.query('SELECT id AS catalogue_id,business_id,branch_id FROM business_catalogue WHERE id=$1',[input.sourceId])).rows[0];
