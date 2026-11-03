@@ -85,6 +85,16 @@ export class RideService {
    // Driver commands may only advance operational trip states, not override dispatch decisions.
    if(!['driver_arriving','driver_arrived','in_progress','completed'].includes(to))throw new ForbiddenException();
    await client.query('UPDATE ride_requests SET status=$2,updated_at=now() WHERE id=$1',[rideId,to]);
+   if(to==='completed'){
+    const fare=await client.query(`INSERT INTO ride_fares(ride_id,gross_minor,commission_minor,driver_minor,commission_bps)
+      SELECT r.id,r.quote_amount_minor,
+       floor(r.quote_amount_minor::numeric*q.commission_bps/10000)::bigint,
+       r.quote_amount_minor-floor(r.quote_amount_minor::numeric*q.commission_bps/10000)::bigint,
+       q.commission_bps
+      FROM ride_requests r JOIN ride_fare_quotes q ON q.id=r.quote_id
+      WHERE r.id=$1 AND r.quote_amount_minor>=1 RETURNING ride_id`,[rideId]);
+    if(fare.rowCount!==1)throw new ConflictException('Validated booking fare unavailable');
+   }
    await client.query('INSERT INTO ride_trip_events(ride_id,actor_subject,from_state,to_state) VALUES($1,$2,$3,$4)',[rideId,actorSubject,r.rows[0].status,to]);
    await client.query("INSERT INTO outbox_events(event_type,payload) VALUES('ride.state.changed',$1)",[JSON.stringify({rideId,to})]);
    await client.query('COMMIT');
