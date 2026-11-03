@@ -18,7 +18,7 @@ export class RideRequestsService {
       FROM ride_fare_quotes WHERE id=$1 FOR UPDATE`,[input.quoteId]);
    const quote=q.rows[0];
    if(!quote||quote.customer_subject!==subject)throw new NotFoundException('Quote unavailable');
-   if(quote.expires_at.getTime()<=Date.now()||quote.category!==input.category)throw new ConflictException('Quote expired or mismatched');
+   if(quote.category!==input.category)throw new ConflictException('Quote category mismatched');
    const same=(a:number,b:number)=>Math.abs(a-b)<0.000001;
    if(!same(quote.pickup_lat,input.pickup.latitude)||!same(quote.pickup_lng,input.pickup.longitude)||
       !same(quote.destination_lat,input.destination.latitude)||!same(quote.destination_lng,input.destination.longitude))
@@ -28,6 +28,7 @@ export class RideRequestsService {
      if(existing.rows[0].quote_id!==input.quoteId)throw new ConflictException('Idempotency key reused');
      await client.query('COMMIT');return {id:existing.rows[0].id,replayed:true};
    }
+   if(quote.expires_at.getTime()<=Date.now())throw new ConflictException('Quote expired');
    const result=await client.query<{id:string}>(`INSERT INTO ride_requests(customer_subject,pickup,destination,category,quote_amount_minor,currency,quote_expires_at,quote_id,idempotency_key)
      VALUES($1,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography,ST_SetSRID(ST_MakePoint($4,$5),4326)::geography,$6,$7,$8,$9,$10,$11)
      RETURNING id`,[subject,input.pickup.longitude,input.pickup.latitude,input.destination.longitude,input.destination.latitude,input.category,quote.amount_minor,quote.currency,quote.expires_at,input.quoteId,input.idempotencyKey]);
