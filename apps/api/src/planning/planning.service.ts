@@ -92,7 +92,7 @@ export class PlanningService {
        SELECT 1 FROM business_availability ca
        WHERE ca.catalogue_id=pc.component_id AND ca.business_id=i.business_id AND ca.branch_id=i.branch_id
        AND ca.active AND ca.starts_at=a.starts_at AND ca.starts_at>now()
-       AND ca.capacity-ca.reserved>=pc.quantity * CASE WHEN p.pricing_model='per_guest' THEN $1 ELSE 1 END
+       AND (ca.capacity-ca.reserved)::bigint>=pc.quantity::bigint * CASE WHEN p.pricing_model='per_guest' THEN $1::bigint ELSE 1::bigint END
       )
      )
    ))
