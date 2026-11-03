@@ -189,3 +189,13 @@ test('M7 acceptance: driver matching rejects out-of-scope dispatch and disabled 
  assert.ok(!view.candidates.some(x=>x.driverId===d.id));
  await pool.query('UPDATE account_access SET suspended=false WHERE identity_subject=$1',[d.subject]);
 });
+
+test('M7 acceptance: restricted runtime cannot alter schema, delete trip evidence or access Keycloak sentinel',async()=>{
+ await assert.rejects(()=>runtime.query('CREATE TABLE m7_escape(id integer)'),{code:'42501'});
+ const r=await runtime.query<{allowed:boolean}>(`SELECT has_database_privilege(current_user,'keycloak_m1_sentinel','CONNECT') AS allowed`);
+ assert.equal(r.rows[0].allowed,false);
+ const state=await runtime.query<{grant:boolean}>(`SELECT has_table_privilege(current_user,'ride_requests','UPDATE') AS grant`);
+ assert.equal(state.rows[0].grant,true);
+ const noDelete=await runtime.query<{allowed:boolean}>(`SELECT has_table_privilege(current_user,'ride_trip_events','DELETE') AS allowed`);
+ assert.equal(noDelete.rows[0].allowed,false);
+});
