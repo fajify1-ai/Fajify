@@ -133,7 +133,6 @@ export class CommerceLifecycle {
    if(!(await c.query("SELECT 1 FROM business_branches b JOIN business_onboarding m ON m.id=b.business_id WHERE b.id=$1 AND b.active AND m.status='approved' FOR SHARE OF b,m",[order.branch_id])).rowCount)throw new ConflictException('Merchant unavailable');return;
   }
   const h=(await c.query('SELECT *,expires_at>now() AS unexpired FROM paid_holds WHERE intent_id=$1 FOR UPDATE',[p.id])).rows[0];
-  const rideLink=(await c.query('SELECT ride_id FROM ride_payment_links WHERE intent_id=$1',[p.id])).rows[0];
   if(!h||h.status!=='held'||!h.unexpired)throw new ConflictException('Payment hold expired');
   if(!(await c.query("SELECT 1 FROM business_branches b JOIN business_onboarding m ON m.id=b.business_id JOIN business_catalogue i ON i.branch_id=b.id WHERE i.id=$1 AND i.active AND i.published AND b.active AND m.status='approved' FOR SHARE OF b,m,i",[h.catalogue_id])).rowCount)throw new ConflictException('Offering unavailable');
   const packageOffer=await c.query<{price_minor:string;pricing_model:string;min_guests:number;max_guests:number}>(`
@@ -206,6 +205,7 @@ export class CommerceLifecycle {
   const terms=(await c.query('SELECT * FROM payment_terms WHERE intent_id=$1',[p.id])).rows[0];
   const link=(await c.query('SELECT order_id FROM finance_order_links WHERE intent_id=$1',[p.id])).rows[0];
   const h=(await c.query('SELECT *,expires_at>now() AS unexpired FROM paid_holds WHERE intent_id=$1 FOR UPDATE',[p.id])).rows[0];
+  const rideLink=(await c.query('SELECT ride_id FROM ride_payment_links WHERE intent_id=$1',[p.id])).rows[0];
   if(!terms&&!h&&!link&&!rideLink)return; // Historical/operator fixture capture has no purchasable resource.
   try{await this.ledger.terms(c,p);}catch{await this.ledger.fullRefund(c,p,'Payment lacks an approved financial policy');return;}
   let eligible=true;
