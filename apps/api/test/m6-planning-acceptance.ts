@@ -128,6 +128,18 @@ test('stale displayed package amount cannot create a hold',async()=>{
  await assert.rejects(()=>planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'19999',guestName:'Test Guest',requestKey:'m6-package-stale-0001'}),ConflictException);
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[packageSlot])).rows[0].reserved,0);
 });
+test('non-NGN paid packages cannot appear as M5-bookable recommendations',async()=>{
+ const usdService=(await business.createItem(owner,merchantId,branch,{name:'USD experience component',kind:'service',priceMinor:1000,currency:'USD',published:true})).id;
+ const foreign=(await business.createItem(owner,merchantId,branch,{name:'USD paid package',kind:'package',priceMinor:10000,currency:'USD',published:true})).id;
+ await management.replacePackage(owner,merchantId,branch,foreign,[{catalogueId:usdService,quantity:1}]);
+ await market.configurePackage(identity(owner),merchantId,branch,foreign,{pricingModel:'per_group',minGuests:2,maxGuests:3,addOns:[]});
+ await business.createSlot(owner,merchantId,branch,{catalogueId:usdService,startsAt,endsAt,capacity:2});
+ await business.createSlot(owner,merchantId,branch,{catalogueId:foreign,startsAt,endsAt,capacity:2});
+ const plan=await planning.create(identity(a),{occasion:'birthday',budgetMinor:'20000',currency:'USD',guests:2,
+  startsAfter:new Date(Date.now()+20*3600000).toISOString(),startsBefore:new Date(Date.now()+48*3600000).toISOString(),categories:['package']});
+ const result=await planning.recommend(a,plan.id);
+ assert.equal(result.items.some(item=>item.name==='USD paid package'),false);
+});
 test('revoked session cannot update plans or give feedback',async()=>{
  const plan=await newPlan(b);
  await access.revokeSession(b,identity(b).sessionId!);
