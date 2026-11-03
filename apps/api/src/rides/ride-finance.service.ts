@@ -88,6 +88,10 @@ export class RideFinanceService {
  async submitPayout(actor:string,payoutId:string){
   if(process.env.FAJI_RIDE_PAYOUT_ENABLED!=='true')throw new ServiceUnavailableException('Ride payout execution disabled by operator');
   const business=operatorBusiness();
+  const prelim=await this.pool.query<{recipient_ref:string;state:string}>('SELECT recipient_ref,state FROM ride_driver_payouts WHERE id=$1',[payoutId]);
+  if(!prelim.rows[0])throw new NotFoundException();
+  if(prelim.rows[0].state!=='reserved')throw new ConflictException('Payout already submitted or awaiting reconciliation');
+  await this.gateway.recipient(prelim.rows[0].recipient_ref);
   const item=await this.ledger.tx(business,async c=>{
    const p=await c.query<{state:string;provider_reference:string;recipient_ref:string;amount_minor:string}>(`SELECT state,provider_reference,recipient_ref,amount_minor::text FROM ride_driver_payouts WHERE id=$1 FOR UPDATE`,[payoutId]);
    if(!p.rows[0])throw new NotFoundException();
@@ -95,8 +99,6 @@ export class RideFinanceService {
    await c.query("UPDATE ride_driver_payouts SET state='submitting',updated_at=now() WHERE id=$1",[payoutId]);
    return p.rows[0];
   });
-  // Independently check the recipient again. Ambiguous provider writes are never retried.
-  await this.gateway.recipient(item.recipient_ref);
   // An ambiguous provider response is NOT retried. Recovery verifies the original reference.
   try{
    await this.gateway.transfer(item.provider_reference,item.amount_minor,item.recipient_ref);
