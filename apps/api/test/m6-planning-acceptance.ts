@@ -157,3 +157,21 @@ test('provider-verified package capture issues one confirmed reservation without
   if(oldCallback===undefined)delete process.env.PAYMENT_CALLBACK_URL;else process.env.PAYMENT_CALLBACK_URL=oldCallback;
  }
 });
+
+test('expired package holds restore every allocated component exactly once',async()=>{
+ const plan=await newPlan();
+ const hold=await planning.bookingHold(identity(a),plan.id,{availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Expiry Guest',requestKey:'m6-expiry-package-0001'});
+ const c=await admin.connect();
+ try{
+  await assertDisposable(admin);await c.query('BEGIN');
+  await c.query('ALTER TABLE paid_holds DISABLE TRIGGER paid_holds_guard');
+  await c.query("UPDATE paid_holds SET expires_at=now()-interval '1 second' WHERE id=$1",[hold.id]);
+  await c.query('ALTER TABLE paid_holds ENABLE TRIGGER paid_holds_guard');
+  await c.query('COMMIT');
+ }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
+ await commerce.expire();
+ assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[packageSlot])).rows[0].reserved,0);
+ assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[componentSlot])).rows[0].reserved,0);
+ const released=await admin.query('SELECT released_at FROM package_component_holds WHERE hold_id=$1',[hold.id]);
+ assert.equal(released.rows.length,1);assert.ok(released.rows[0].released_at);
+});
