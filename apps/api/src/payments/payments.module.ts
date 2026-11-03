@@ -14,5 +14,5 @@ import {CommerceLifecycle} from './commerce-lifecycle.service';
 import {FinancialOperations} from './financial-operations.service';
 import {M5CustomerController,M5MerchantController,M5AdminController} from './m5-lifecycle.controller';
 import {FinanceJobs} from './finance-jobs.service';
-@Module({imports:[IdentityModule,CustomerModule],controllers:[PaymentsController,CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController,OrderIntentsController,M5CustomerController,M5MerchantController,M5AdminController],providers:[PaymentsService,PaystackGateway,PaymentReadsService,OrderIntentsService,FinanceLedger,CommerceLifecycle,FinancialOperations,FinanceJobs]})
+@Module({imports:[IdentityModule,CustomerModule],controllers:[PaymentsController,CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController,OrderIntentsController,M5CustomerController,M5MerchantController,M5AdminController],providers:[PaymentsService,PaystackGateway,PaymentReadsService,OrderIntentsService,FinanceLedger,CommerceLifecycle,FinancialOperations,FinanceJobs],exports:[CommerceLifecycle]})
 export class PaymentsModule {}
