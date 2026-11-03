@@ -3,6 +3,7 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {isDeepStrictEqual} from 'node:util';
 import {M5_OPERATIONS} from '../src/payments/m5-contracts';
 import {M4_OPERATIONS} from '../src/customer/customer-contracts';
+import {M6_OPERATIONS} from '../src/planning/planning-contracts';
 import {resolve} from 'node:path';
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from '../src/app.module';
@@ -79,6 +80,20 @@ async function run(){
    if(method==='get'&&!op.parameters?.some(p=>'name' in p&&p.in==='query'&&p.name==='limit'))throw new Error('Missing M5 pagination: '+path);
    for(const name of [...path.matchAll(/\{([^}]+)\}/g)].map(m=>m[1]))
     if(!op.parameters?.some(p=>'name' in p&&p.name===name&&p.in==='path'&&p.required))throw new Error('Missing M5 lifecycle path parameter: '+path);
+  }
+  for(const contract of M6_OPERATIONS){
+   const operation=doc.paths[contract.path]?.[contract.method];
+   if(!operation)throw new Error('Missing M6 planning route: '+contract.method+' '+contract.path);
+   if(!operation.security?.some(s=>Object.hasOwn(s,'keycloak')))throw new Error('Missing M6 identity protection: '+contract.path);
+   if(contract.body&&!operation.requestBody)throw new Error('Missing M6 request body: '+contract.path);
+   const response=operation.responses[String(contract.status)];
+   if(!response||!('content' in response)||!response.content?.['application/json']?.schema)
+    throw new Error('Missing M6 response schema: '+contract.path);
+   for(const name of [...contract.path.matchAll(/\\{([^}]+)\\}/g)].map(m=>m[1]))
+    if(!operation.parameters?.some(p=>'name' in p&&p.name===name&&p.in==='path'&&p.required))
+     throw new Error('Missing M6 path parameter: '+contract.path);
+   if('paginated' in contract&&contract.paginated&&!operation.parameters?.some(p=>'name' in p&&p.name==='limit'&&p.in==='query'))
+    throw new Error('Missing M6 pagination: '+contract.path);
   }
   const snapshot=resolve(__dirname,'../../../packages/api_contracts/openapi.json');
   const previous=JSON.parse(readFileSync(snapshot,'utf8')) as typeof doc;
