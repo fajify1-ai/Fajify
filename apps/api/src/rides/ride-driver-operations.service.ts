@@ -88,7 +88,7 @@ export class RideDriverOperations {
     if(d.rows[0].status!=='approved')throw new ForbiddenException('Unapproved driver');
     const check=await c.query<{eligible:boolean}>(`SELECT
       EXISTS(SELECT 1 FROM ride_vehicles WHERE driver_id=$1 AND approved)
-      AND EXISTS(SELECT 1 FROM ride_driver_documents WHERE driver_id=$1 AND review_status='approved' AND expires_at>now())
+      AND ((SELECT COUNT(DISTINCT document_kind) FROM ride_driver_documents WHERE driver_id=$1 AND review_status='approved' AND expires_at>now())=4)
       AND NOT EXISTS(SELECT 1 FROM ride_driver_documents WHERE driver_id=$1 AND (review_status<>'approved' OR expires_at IS NULL OR expires_at<=now()))
       AND NOT EXISTS(SELECT 1 FROM ride_requests WHERE assigned_driver_id=$1 AND status IN ('assigned','driver_arriving','driver_arrived','in_progress')) AS eligible`,[id]);
     if(!check.rows[0]?.eligible)throw new ConflictException('Driver has invalid documents, vehicle or active trip');
