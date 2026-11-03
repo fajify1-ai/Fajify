@@ -8,15 +8,17 @@ import {assertTripTransition, canOfferRideToDriver, isUsableDriverPosition, type
 export class RideService {
  constructor(@Inject(DATABASE_POOL) private readonly pool:Pool){}
 
- async offer(rideId:string,driverId:string,actor:string,expiresAt:Date) {
+ async offer(rideId:string,driverId:string,actor:string,expiresAt:Date,areaId:string) {
   // Dispatch authorization is required at the controller boundary before invoking this method.
   if(!actor||!Number.isFinite(expiresAt.getTime())||expiresAt.getTime()<=Date.now())throw new ConflictException('Invalid offer expiry');
   const client=await this.pool.connect();
   try {
    await client.query('BEGIN');
-   const ride=await client.query<{status:TripState}>('SELECT status FROM ride_requests WHERE id=$1 FOR UPDATE',[rideId]);
+   const ride=await client.query<{status:TripState;dispatch_generation:string}>('SELECT status,dispatch_generation FROM ride_requests WHERE id=$1 FOR UPDATE',[rideId]);
    if(ride.rowCount!==1)throw new NotFoundException('Ride not found');
    if(!['requested','offered'].includes(ride.rows[0].status))throw new ConflictException('Ride not accepting offers');
+   const zone=await client.query("SELECT 1 FROM ride_dispatch_areas a JOIN ride_requests r ON r.id=$2 WHERE a.id=$1 AND a.active AND ST_Intersects(a.boundary,r.pickup::geometry)",[areaId,rideId]);
+   if(!zone.rowCount)throw new ForbiddenException('Pickup outside active dispatch area');
    const d=await client.query<{approved:boolean;suspended:boolean;vehicle_approved:boolean;expires_at:Date|null;available:boolean;active:boolean}>(`
      SELECT d.status='approved' AS approved,d.status='suspended' AS suspended,
        EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved) AS vehicle_approved,
@@ -27,9 +29,11 @@ export class RideService {
    const documents=await client.query<{valid:boolean}>(`SELECT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=$1 AND x.review_status='approved' AND x.expires_at>now()) AND NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=$1 AND (x.review_status<>'approved' OR x.expires_at IS NULL OR x.expires_at<=now())) AS valid`,[driverId]);
    if(!documents.rows[0]?.valid)throw new ForbiddenException('Driver documents ineligible');
    if(!x||!canOfferRideToDriver({approved:x.approved,suspended:x.suspended,vehicleApproved:x.vehicle_approved,documentsExpireAt:x.expires_at,available:x.available,hasActiveAssignment:x.active},new Date()))throw new ForbiddenException('Driver ineligible');
-   const offer=await client.query<{id:string}>(`INSERT INTO ride_dispatch_offers(ride_id,driver_id,expires_at)
-      VALUES($1,$2,$3) RETURNING id`,[rideId,driverId,expiresAt]);
-   if(ride.rows[0].status==='requested')await client.query("UPDATE ride_requests SET status='offered',updated_at=now() WHERE id=$1",[rideId]);
+   const eligible=await client.query("SELECT 1 FROM ride_drivers d JOIN account_access acc ON acc.identity_subject=d.identity_subject AND acc.suspended=false JOIN user_profiles p ON p.identity_subject=d.identity_subject AND p.suspended=false JOIN ride_driver_locations l ON l.driver_id=d.id AND l.consent_granted AND l.observed_at>now()-interval '30 seconds' JOIN ride_dispatch_areas a ON a.id=$2 AND a.active JOIN ride_requests r ON r.id=$3 WHERE d.id=$1 AND ST_Intersects(a.boundary,l.position::geometry) AND ST_DWithin(l.position,r.pickup,20000) AND EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved AND v.category=r.category) AND EXISTS(SELECT 1 FROM resource_memberships m WHERE m.identity_subject=d.identity_subject AND m.resource_type='dispatch_area' AND m.resource_id=a.id AND m.role='driver' AND m.active)",[driverId,areaId,rideId]);
+   if(!eligible.rowCount)throw new ForbiddenException('Driver outside active eligible coverage');
+   const generation=ride.rows[0].status==='requested'?BigInt(ride.rows[0].dispatch_generation)+1n:BigInt(ride.rows[0].dispatch_generation);
+   if(ride.rows[0].status==='requested')await client.query("UPDATE ride_requests SET status='offered',dispatch_generation=$2,updated_at=now() WHERE id=$1",[rideId,generation.toString()]);
+   const offer=await client.query<{id:string}>("INSERT INTO ride_dispatch_offers(ride_id,driver_id,expires_at,area_id,fence_version) VALUES($1,$2,$3,$4,$5) RETURNING id",[rideId,driverId,expiresAt,areaId,generation.toString()]);
    await client.query("INSERT INTO outbox_events(event_type,payload) VALUES('ride.offer.created',$1)",[JSON.stringify({rideId,driverId,offerId:offer.rows[0].id})]);
    await client.query('COMMIT');
    return offer.rows[0];
@@ -44,18 +48,21 @@ export class RideService {
    const lookup=await client.query<{ride_id:string;driver_id:string}>('SELECT ride_id,driver_id FROM ride_dispatch_offers WHERE id=$1',[offerId]);
    if(lookup.rowCount!==1)throw new NotFoundException('Offer not found');
    const {ride_id,driver_id}=lookup.rows[0];
-   const ride=await client.query<{status:TripState}>('SELECT status FROM ride_requests WHERE id=$1 FOR UPDATE',[ride_id]);
+   const ride=await client.query<{status:TripState;dispatch_generation:string}>('SELECT status,dispatch_generation FROM ride_requests WHERE id=$1 FOR UPDATE',[ride_id]);
    const driver=await client.query<{identity_subject:string;status:string;available:boolean}>('SELECT identity_subject,status,available FROM ride_drivers WHERE id=$1 FOR UPDATE',[driver_id]);
    if(driver.rows[0]?.identity_subject!==driverSubject)throw new ForbiddenException();
-   const offer=await client.query<{status:string;expires_at:Date}>('SELECT status,expires_at FROM ride_dispatch_offers WHERE id=$1 FOR UPDATE',[offerId]);
-   if(ride.rows[0]?.status!=='offered'||offer.rows[0]?.status!=='pending'||offer.rows[0].expires_at.getTime()<=Date.now())throw new ConflictException('Offer no longer available');
+   const offer=await client.query<{status:string;expires_at:Date;fence_version:string;area_id:string}>('SELECT status,expires_at,fence_version,area_id FROM ride_dispatch_offers WHERE id=$1 FOR UPDATE',[offerId]);
+   if(ride.rows[0]?.status!=='offered'||offer.rows[0]?.status!=='pending'||offer.rows[0].expires_at.getTime()<=Date.now()||offer.rows[0].fence_version!==ride.rows[0].dispatch_generation)throw new ConflictException('Offer expired or superseded');
+   const area=await client.query("SELECT 1 FROM ride_dispatch_areas a JOIN ride_driver_locations l ON l.driver_id=$2 AND l.consent_granted AND l.observed_at>now()-interval '30 seconds' JOIN ride_requests r ON r.id=$3 WHERE a.id=$1 AND a.active AND ST_Intersects(a.boundary,l.position::geometry) AND ST_Intersects(a.boundary,r.pickup::geometry) AND ST_DWithin(l.position,r.pickup,20000)",[offer.rows[0].area_id,driver_id,ride_id]);
+   const member=await client.query("SELECT 1 FROM resource_memberships m JOIN account_access a ON a.identity_subject=m.identity_subject AND a.suspended=false JOIN user_profiles p ON p.identity_subject=m.identity_subject AND p.suspended=false WHERE m.identity_subject=$1 AND m.resource_type='dispatch_area' AND m.resource_id=$2 AND m.role='driver' AND m.active",[driverSubject,offer.rows[0].area_id]);
+   if(!area.rowCount||!member.rowCount)throw new ForbiddenException('Dispatch-area authorization or GPS eligibility revoked');
    const eligibility=await client.query<{eligible:boolean}>(`SELECT (
      d.status='approved' AND d.available
-     AND EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved)
+     AND EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved AND v.category=(SELECT category FROM ride_requests WHERE id=$2))
      AND EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND x.review_status='approved' AND x.expires_at>now())
      AND NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND (x.review_status<>'approved' OR x.expires_at<=now() OR x.expires_at IS NULL))
      AND NOT EXISTS(SELECT 1 FROM ride_requests r WHERE r.assigned_driver_id=d.id AND r.status IN ('assigned','driver_arriving','driver_arrived','in_progress'))
-     ) AS eligible FROM ride_drivers d WHERE d.id=$1`,[driver_id]);
+     ) AS eligible FROM ride_drivers d WHERE d.id=$1`,[driver_id,ride_id]);
    if(!eligibility.rows[0]?.eligible)throw new ForbiddenException('Driver ineligible');
    await client.query("UPDATE ride_requests SET status='assigned',assigned_driver_id=$2,updated_at=now() WHERE id=$1",[ride_id,driver_id]);
    await client.query("UPDATE ride_dispatch_offers SET status='accepted' WHERE id=$1",[offerId]);
