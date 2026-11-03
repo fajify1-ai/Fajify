@@ -1,5 +1,5 @@
 import {BadRequestException,Body,Controller,Get,Inject,Param,ParseUUIDPipe,Post,Req,UseGuards} from '@nestjs/common';
-import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
@@ -23,9 +23,12 @@ function parse<T>(schema:z.ZodType<T>,input:unknown):T{
 export class CustomerRidesController {
  constructor(@Inject(RideFareService)private readonly fares:RideFareService,@Inject(RideRequestsService)private readonly rides:RideRequestsService){}
  @Post('quotes')
+ @ApiBody({schema:{type:'object',required:['pickup','destination','category'],properties:{pickup:{type:'object'},destination:{type:'object'},category:{type:'string'}}}})
+ @ApiOkResponse({schema:{type:'object',properties:{id:{type:'string',format:'uuid'},amountMinor:{type:'string'},currency:{type:'string'},expiresAt:{type:'string',format:'date-time'},pricingVersion:{type:'string'},distanceBasis:{type:'string'}}}})
  quote(@Req() req:{identity:VerifiedIdentity},@Body() body:unknown){return this.fares.quote(req.identity.subject,parse(quoteInput,body));}
- @Post()
+ @Post() @ApiBody({schema:{type:'object',required:['pickup','destination','category','quoteId','idempotencyKey'],properties:{pickup:{type:'object'},destination:{type:'object'},category:{type:'string'},quoteId:{type:'string',format:'uuid'},idempotencyKey:{type:'string'}}}})
+ @ApiOkResponse({schema:{type:'object',properties:{id:{type:'string',format:'uuid'},replayed:{type:'boolean'}}}})
  create(@Req() req:{identity:VerifiedIdentity},@Body() body:unknown){return this.rides.create(req.identity.subject,parse(rideInput,body));}
- @Get(':id')
+ @Get(':id') @ApiOkResponse({description:'Owned ride only'})
  get(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) id:string){return this.rides.get(req.identity.subject,id);}
 }
