@@ -17,7 +17,7 @@ export function apiDocument(app:import('@nestjs/common').INestApplication){
 }
 async function bootstrap(){
  const {AppModule}=await import('./app.module');
- const app=await NestFactory.create(AppModule,{bufferLogs:true});
+ const app=await NestFactory.create(AppModule,{bufferLogs:true,rawBody:true});
  setupApi(app);
  if(process.env.NODE_ENV!=='production') SwaggerModule.setup('api/docs',app,apiDocument(app));
  app.enableShutdownHooks();

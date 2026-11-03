@@ -33,6 +33,7 @@ export class AccessService {
   const client=await this.pool.connect();
   try{
    await client.query('BEGIN');
+   await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',['session:'+subject+':'+sessionId]);
    await client.query('INSERT INTO revoked_identity_sessions(identity_subject,session_id) VALUES($1,$2) ON CONFLICT DO NOTHING',[subject,sessionId]);
    await client.query("INSERT INTO identity_security_events(actor_subject,event_type) VALUES($1,'session_revoked')",[subject]);
    await client.query('COMMIT');
