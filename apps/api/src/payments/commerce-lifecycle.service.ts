@@ -118,6 +118,15 @@ export class CommerceLifecycle {
   await c.query('UPDATE paid_holds SET status=$2 WHERE id=$1',[h.id,status]);
  }
  async validatePurchase(c:PoolClient,p:FinanceIntent){
+  const rideLink=(await c.query('SELECT ride_id FROM ride_payment_links WHERE intent_id=$1',[p.id])).rows[0];
+  if(rideLink){
+   const ride=(await c.query(`SELECT r.status,r.customer_subject,f.payment_intent_id,f.gross_minor::text
+     FROM ride_requests r JOIN ride_fares f ON f.ride_id=r.id WHERE r.id=$1 FOR UPDATE OF r,f`,[rideLink.ride_id])).rows[0];
+   if(!ride||ride.status!=='completed'||ride.customer_subject!==p.customer_subject||
+     ride.payment_intent_id!==p.id||ride.gross_minor!==p.amount_minor)
+     throw new ConflictException('Ride is not payable');
+   return;
+  }
   const linked=(await c.query('SELECT order_id FROM finance_order_links WHERE intent_id=$1',[p.id])).rows[0];
   if(linked){const current=(await c.query('SELECT coalesce(n.intent_id,l.intent_id) AS intent_id FROM payment_order_links l LEFT JOIN payment_order_current n ON n.order_id=l.order_id WHERE l.order_id=$1',[linked.order_id])).rows[0];if(!current||current.intent_id!==p.id)throw new ConflictException('Payment attempt was superseded or is not the current order attempt');}
   if(linked){const order=(await c.query('SELECT status,business_id,branch_id FROM business_orders WHERE id=$1 FOR UPDATE',[linked.order_id])).rows[0];if(!order||order.status!=='placed')throw new ConflictException('Order no longer payable');
@@ -196,7 +205,8 @@ export class CommerceLifecycle {
   const terms=(await c.query('SELECT * FROM payment_terms WHERE intent_id=$1',[p.id])).rows[0];
   const link=(await c.query('SELECT order_id FROM finance_order_links WHERE intent_id=$1',[p.id])).rows[0];
   const h=(await c.query('SELECT *,expires_at>now() AS unexpired FROM paid_holds WHERE intent_id=$1 FOR UPDATE',[p.id])).rows[0];
-  if(!terms&&!h&&!link)return; // Historical/operator fixture capture has no purchasable resource.
+  const rideLink=(await c.query('SELECT ride_id FROM ride_payment_links WHERE intent_id=$1',[p.id])).rows[0];
+  if(!terms&&!h&&!link&&!rideLink)return; // Historical/operator fixture capture has no purchasable resource.
   try{await this.ledger.terms(c,p);}catch{await this.ledger.fullRefund(c,p,'Payment lacks an approved financial policy');return;}
   let eligible=true;
   try{await this.validatePurchase(c,p);}catch{eligible=false;}
@@ -213,6 +223,12 @@ export class CommerceLifecycle {
    for(let n=1;n<=h.quantity;n++)await c.query('INSERT INTO issued_tickets(hold_id,ordinal,nonce,key_id) VALUES($1,$2,$3,$4) ON CONFLICT(hold_id,ordinal) DO NOTHING',[h.id,n,ticketNonce(),h.key_id]);
    await c.query("UPDATE paid_holds SET status='confirmed' WHERE id=$1",[h.id]);
    await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('tickets.issued',$1)",[JSON.stringify({holdId:h.id,paymentIntentId:p.id})]);
+  }else if(rideLink){
+   const changed=await c.query("UPDATE ride_fares SET payment_state='verified',settlement_state='eligible',verified_at=now() WHERE ride_id=$1 AND payment_intent_id=$2 AND payment_state='unpaid' RETURNING ride_id",[rideLink.ride_id,p.id]);
+   if(changed.rowCount!==1)throw new ConflictException('Ride capture replay conflict');
+   const fare=(await c.query('SELECT gross_minor::text FROM ride_fares WHERE ride_id=$1',[rideLink.ride_id])).rows[0];
+   await c.query("INSERT INTO ride_financial_events(ride_id,actor_subject,event_type,amount_minor,idempotency_key) VALUES($1,$2,'capture_verified',$3,$4) ON CONFLICT(idempotency_key) DO NOTHING",[rideLink.ride_id,'system:m5',fare.gross_minor,'ride:'+rideLink.ride_id+':capture_verified']);
+   await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('ride.payment.verified',$1)",[JSON.stringify({rideId:rideLink.ride_id,paymentIntentId:p.id})]);
   }else await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('business.order.paid',$1)",[JSON.stringify({businessId:p.business_id,resourceId:link.order_id,paymentIntentId:p.id})]);
   await c.query("UPDATE payment_terms SET resolution='confirmed' WHERE intent_id=$1",[p.id]);
   await this.ledger.allocate(c,p);await this.ledger.event(c,'payment',p.id,'purchase_confirmed','system:m5');

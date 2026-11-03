@@ -1,0 +1,51 @@
+# Fajify Milestone 7, Phase 1 — backend engineering handoff
+
+**Development branch:** `feat/m7-p1-ride-dispatch-backend`  
+**State:** Source implementation committed; **NOT locally accepted, NOT merged, NOT production-enabled**.
+
+## Implemented source
+
+1. M7 ride/driver/dispatch/finance/safety PostgreSQL/PostGIS tables and sequential migrations `0090`–`0101`.
+2. Keycloak bearer, active account, driver role, dispatcher geofence resource membership and MFA-bound privileged controls.
+3. Required four-document driver compliance; private signed S3 document uploads, authenticated object evidence and administrative review.
+4. Customer quotes, server-controlled versioned tariffs, request replay, trip operations, payment-intent preparation and history.
+5. Geofenced matching, atomic offer acceptance with generations, expiry, suspension/disqualification recovery, verified GPS, assigned-trip events and SSE history.
+6. Safety incidents, urgent escalation on in-progress eligibility loss, immutable evidence and operator-scoped incident queue.
+7. M5 verified payment integration, zero-double-commission operator policy, recipient verification, payout reservation, one-shot transfer and independent reconciliation/reversal.
+8. Unit tests separated from historical database-integration tests, disposable PostgreSQL regression tests, generated OpenAPI contract gates, restricted DB grants, and one-command disposable acceptance launcher.
+
+## Essential acceptance restrictions
+
+- No tests were executed as part of the remote GitHub editing session. Source implementations are **not evidence of correctness**.
+- The OpenAPI snapshot must be regenerated and committed after dependency installation, before running consolidated acceptance.
+- Operator-controlled prerequisites include an approved M5 ride business with zero secondary commission, configured SigV4 private S3 storage, active dispatch zones and membership, versioned fares and sandbox gateways.
+- Production document malware inspection and independent ID validity review are not certified by authenticated S3 metadata. Device GPS/background integration and external safety responder coverage are separately evidenced in client/operations acceptance.
+- The initial fare distance source is geodesic rather than provider road-routing; production road fare and ETA policy requires explicit review. Backend SSE is supported; no WebSocket delivery acceptance is claimed.
+
+## Local acceptance handoff
+
+From an **unprivileged** account and a clean checkout of this branch:
+
+```bash
+corepack pnpm install --frozen-lockfile
+corepack pnpm --filter @faji/api typecheck:m7
+# First generate, review and commit a current OpenAPI snapshot.
+bash tooling/export-m7-contracts-offline.sh
+git diff -- packages/api_contracts/openapi.json
+# After reviewing the diff, commit the snapshot before the one-shot acceptance.
+bash tooling/run-m7-p1-disposable.sh
+```
+
+**Offline export:** the helper uses syntactically valid, non-functional loopback configuration values only to instantiate the NestJS API schema. It does not require or authenticate to real PostgreSQL, Redis, Keycloak or S3 services. If it fails, inspect the error and do not accept or commit the generated artifact without reviewing it.
+
+The launcher verifies the exact source revision, creates an isolated PostgreSQL 16/PostGIS database, applies migrations and restricted roles, executes non-database API tests, the M7 database suite and existing database-integration tests after migration, then static checks and contract gates, produces a machine-readable acceptance report, then removes the cluster. A PASS requires all checks and cleanup to succeed. Do not present the branch as release-ready if any gate fails.
+
+The development branch includes the approved changes from `main`, without merging M7 back into `main`. Merge only after a pinned, accepted local report and owner review.
+
+## First consolidated run remediation
+
+First local run at `e4ca943d634a14131ed3be4cd37c9b6335bfc525`: 8/11 gates passed, API lint reported two unused exception imports, and M7 database requests could not lock the append-only `ride_fare_quotes` table. The broad API test glob also included nine historical `.database.test.ts` test cases before migrations. Remediation removes unused imports, uses SELECT-only quote reads with single-use unique constraint and quote mutation trigger in migration `0101`, runs pure unit tests independently, then runs legacy database tests only after the M7 migration/privilege gate. The first unit gate recorded ten failures, so at least one further issue may remain; the new verification script displays failing TAP assertions. **All remediation must be reverified on the exact follow-up commit**.
+
+## M6 main integration before consolidated rerun
+
+Merged accepted Milestone 6 main revision `98eaf661c55f522e1bb120fe717fc08a909f918f` into the M7 development branch at `e1fe37e42c5f093c7a2b3a2ee46ecc237476b13d`. Preserved M6 planning/package booking and M7 ride payment capture in `CommerceLifecycle`, combined module providers/exports and contract presence checks, and accepted M6's OpenAPI snapshot **as the baseline**, intentionally requiring an explicit fresh M6+M7 export. Before consolidated acceptance: run `bash tooling/export-m7-contracts-offline.sh`, review the generated `packages/api_contracts/openapi.json` diff, commit the resulting snapshot, and then run `bash tooling/run-m7-p1-disposable.sh` at the exact resulting clean revision. The first acceptance log cannot certify this merged source.
