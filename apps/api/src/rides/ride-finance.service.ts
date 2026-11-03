@@ -133,6 +133,7 @@ export class RideFinanceService {
   const identified=await this.pool.query<{provider_reference:string;recipient_ref:string;amount_minor:string}>(`SELECT provider_reference,recipient_ref,amount_minor::text FROM ride_driver_payouts WHERE id=$1`,[payoutId]);
   if(!identified.rows[0])throw new NotFoundException();
   const expected=identified.rows[0];
+  // This verification is read-only; never repeat a provider transfer on uncertain responses.
   const provider=await this.gateway.transferStatus(expected.provider_reference);
   const recipient=typeof provider.recipient==='object'?provider.recipient?.recipient_code:provider.recipient;
   if(provider.reference!==expected.provider_reference||provider.domain!==this.gateway.environment()||
@@ -141,32 +142,56 @@ export class RideFinanceService {
   return this.ledger.tx(business,async c=>{
    const r=await c.query<{state:string;ride_id:string;amount_minor:string;provider_reference:string}>(`SELECT state,ride_id,amount_minor::text,provider_reference FROM ride_driver_payouts WHERE id=$1 FOR UPDATE`,[payoutId]);
    const p=r.rows[0];if(!p||p.provider_reference!==expected.provider_reference)throw new ConflictException('Payout changed');
-   if(p.state==='reconciled'||p.state==='failed')return {payoutId,state:p.state,replayed:true};
-   if(!['submitting','uncertain'].includes(p.state))throw new ConflictException('Payout not yet submitted');
-   if(!['success','failed'].includes(provider.status))return {payoutId,state:'uncertain',replayed:false};
+   if(p.state==='failed'||p.state==='reversed'||(p.state==='reconciled'&&provider.status!=='reversed'))
+    return {payoutId,state:p.state,replayed:true};
+   if(!['submitting','uncertain','reconciled'].includes(p.state))
+    throw new ConflictException('Payout not submitted');
+   if(!['success','failed','reversed'].includes(provider.status))
+    return {payoutId,state:p.state==='reconciled'?'reconciled':'uncertain',replayed:false};
+   if(p.state==='reconciled'&&provider.status!=='reversed')
+    return {payoutId,state:'reconciled',replayed:true};
    const fare=await c.query<{payment_intent_id:string}>(`SELECT payment_intent_id FROM ride_fares WHERE ride_id=$1 FOR UPDATE`,[p.ride_id]);
+   if(!fare.rows[0]?.payment_intent_id)throw new ConflictException('Ride payment intent missing');
    const amount=BigInt(p.amount_minor),intent=fare.rows[0].payment_intent_id;
    const fee=provider.fee_charged;
    if(fee==null){
     await this.ledger.case(c,intent,'payout_fee_unverified',p.provider_reference);
-    return {payoutId,state:'uncertain',replayed:false};
+    return {payoutId,state:p.state==='reconciled'?'reconciled':'uncertain',replayed:false};
    }
    if(typeof fee!=='number'||!Number.isSafeInteger(fee)||fee<0)
     throw new ConflictException('Invalid verified transfer fee');
-   await this.ledger.post(c,'ride:'+p.ride_id+':provider-fee',intent,'gateway_fee_expense','gateway_clearing',BigInt(fee));
+   const observed=await c.query<{fee_minor:string;return_minor:string|null}>(`SELECT fee_minor::text,return_minor::text FROM ride_payout_fee_evidence WHERE payout_id=$1 FOR UPDATE`,[payoutId]);
+   if(!observed.rowCount){
+    await c.query('INSERT INTO ride_payout_fee_evidence(payout_id,fee_minor) VALUES($1,$2)',[payoutId,String(fee)]);
+    await this.ledger.post(c,'ride:'+p.ride_id+':provider-fee',intent,'gateway_fee_expense','gateway_clearing',BigInt(fee));
+   }else if(provider.status==='reversed'&&BigInt(fee)<=BigInt(observed.rows[0].fee_minor)){
+    const returned=BigInt(observed.rows[0].fee_minor)-BigInt(fee);
+    if(observed.rows[0].return_minor!==null&&BigInt(observed.rows[0].return_minor)!==returned)
+     throw new ConflictException('Payout fee return mismatch');
+    await c.query('UPDATE ride_payout_fee_evidence SET return_minor=$2 WHERE payout_id=$1',[payoutId,returned.toString()]);
+    await this.ledger.post(c,'ride:'+p.ride_id+':provider-fee-return',intent,'gateway_clearing','gateway_fee_expense',returned);
+   }else if(observed.rows[0].fee_minor!==String(fee)){
+    await this.ledger.case(c,intent,'payout_fee_mismatch',p.provider_reference);
+    throw new ConflictException('Provider payout fee changed without supported reversal');
+   }
    await c.query("UPDATE finance_reconciliation_cases SET state='resolved' WHERE intent_id=$1 AND kind='payout_fee_unverified' AND provider_id=$2",[intent,p.provider_reference]);
    if(provider.status==='success'){
     await this.ledger.post(c,'ride:'+p.ride_id+':driver-paid',intent,'payout_reserve','gateway_clearing',amount);
     await c.query("UPDATE ride_driver_payouts SET state='reconciled',updated_at=now() WHERE id=$1",[payoutId]);
     await c.query("UPDATE ride_fares SET settlement_state='reconciled' WHERE ride_id=$1",[p.ride_id]);
+   }else if(provider.status==='reversed'&&p.state==='reconciled'){
+    await this.ledger.post(c,'ride:'+p.ride_id+':driver-reversed',intent,'gateway_clearing','merchant_payable:'+business,amount);
+    await c.query("UPDATE ride_driver_payouts SET state='reversed',updated_at=now() WHERE id=$1",[payoutId]);
+    await c.query("UPDATE ride_fares SET settlement_state='blocked' WHERE ride_id=$1",[p.ride_id]);
    }else{
     await this.ledger.post(c,'ride:'+p.ride_id+':driver-release',intent,'payout_reserve','merchant_payable:'+business,amount);
-    await c.query("UPDATE ride_driver_payouts SET state='failed',updated_at=now() WHERE id=$1",[payoutId]);
+    await c.query('UPDATE ride_driver_payouts SET state=$2,updated_at=now() WHERE id=$1',[payoutId,provider.status==='reversed'?'reversed':'failed']);
     await c.query("UPDATE ride_fares SET settlement_state='blocked' WHERE ride_id=$1",[p.ride_id]);
    }
    await this.ledger.event(c,'ride_payout',payoutId,'provider_'+provider.status,actor);
    await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('ride.payout.reconciled',$1)",[JSON.stringify({rideId:p.ride_id,payoutId,status:provider.status})]);
-   return {payoutId,state:provider.status==='success'?'reconciled':'failed',replayed:false};
+   return {payoutId,state:provider.status==='success'?'reconciled':provider.status==='reversed'?'reversed':'failed',replayed:false};
   });
  }
+}
 }
