@@ -6,6 +6,7 @@ import {AccountGuard} from '../auth/account.guard';
 import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
+import {AdminRateGuard} from '../auth/admin-rate.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideDriverOperations} from './ride-driver-operations.service';
 type Request={identity:VerifiedIdentity};
@@ -34,22 +35,22 @@ export class RideDriverOperationsController {
  @Post('me/payout-recipient') @RequireRoles('driver')
  @ApiBody({schema:{type:'object',required:['recipientReference'],properties:{recipientReference:{type:'string'}}}})
  payout(@Req() r:Request,@Body() body:unknown){return this.ops.bankReference(r.identity.subject,parse(bank,body).recipientReference);}
- @Post('documents/:id/review') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @Post('documents/:id/review') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard)
  @ApiBody({schema:{type:'object',required:['approve'],properties:{approve:{type:'boolean'}}}})
  reviewDocument(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string,@Body() body:unknown){
   return this.ops.reviewDocument(r.identity.subject,id,parse(review,body).approve);
  }
- @Post('vehicles/:id/review') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @Post('vehicles/:id/review') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard)
  @ApiBody({schema:{type:'object',required:['approve'],properties:{approve:{type:'boolean'}}}})
  reviewVehicle(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string,@Body() body:unknown){
   return this.ops.reviewVehicle(r.identity.subject,id,parse(review,body).approve);
  }
- @Post(':id/suspension') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @Post(':id/suspension') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard)
  @ApiBody({schema:{type:'object',required:['suspend'],properties:{suspend:{type:'boolean'}}}})
  suspend(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string,@Body() body:unknown){
   return this.ops.suspend(r.identity.subject,id,parse(suspension,body).suspend);
  }
- @Post(':id/payout-recipient/verify') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @Post(':id/payout-recipient/verify') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard)
  @ApiBody({schema:{type:'object',required:['recipientReference'],properties:{recipientReference:{type:'string'}}}})
  verifyPayout(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string,@Body() body:unknown){
   return this.ops.verifyBankReference(r.identity.subject,id,parse(bank,body).recipientReference);
