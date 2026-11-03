@@ -33,3 +33,20 @@ This is a **rules primitive**, not an end-to-end recommendation API or booking i
 - Generated OpenAPI snapshot and consumer integration reviewed before PR merge.
 
 **Verification:** Not run. No tests, CI, database migration or production validation is claimed by this document.
+
+## Second implementation increment (unverified)
+- Additive `0015_m6_customer_planning.sql`: customer-owned plans, strict budget/group/time constraints and owner indexes; migrations must be applied in order on a marked disposable database.
+- NestJS `PlanningModule` exposes `POST /api/v1/plans`, `GET /api/v1/plans`, `GET /api/v1/plans/:id`, `GET /api/v1/plans/:id/recommendations` and `POST /api/v1/plans/:id/archive`.
+- Writes use the existing customer transaction/account/session validation path; reads use account and identity guards and owner-scoped SQL. Planning results are recomputed from approved, active merchant listings and future live slots.
+- Package pricing distinguishes `per_group` from `per_guest`; fixed group prices are not multiplied by attendee counts. Package components must be eligible.
+- Recommendation results are **not payment confirmation or booking reservations**. They are nonbinding and explicitly marked for revalidation.
+
+## Remaining engineering before final consolidated local verification
+1. Verify migration number against all active integration branches and synchronize least-privilege grants for the M6 customer-plan table.
+2. Add spatial radius inputs and use authoritative PostGIS location matching, plus server-authoritative category/occasion policy.
+3. Add customer preference versioning, plan editing, feedback and recommendation evaluation instrumentation.
+4. Add fully composed package booking, idempotent capacity holds, race-safe component capacity and payment orchestration through M5's verified reservation/intent service. Do not directly mark unpaid bookings confirmed.
+5. Add end-to-end PostgreSQL test scenarios (customer isolation, revoked sessions, stale price, capacity races, package currency/tenant isolation), migration rollback-mitigation evidence and deterministic contract snapshot coverage.
+6. Run local lint, typecheck, API tests, DB migration/acceptance, OpenAPI generation, dependency audit and API build on one exact SHA, then review with the consuming phase owners.
+
+**No consolidated local checks have been run.** Code is committed but draft/unaccepted. This is not a claim of complete M6-P1 engineering acceptance.
