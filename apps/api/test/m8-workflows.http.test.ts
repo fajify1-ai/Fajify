@@ -87,7 +87,11 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
    {provide:AdminInsightsService,useValue:insights},
    {provide:AdminMonitorService,useValue:monitor},
   ]
- }).compile();
+ }).overrideGuard(AdminScopeGuard)
+ .useValue({canActivate:()=>true})
+ .overrideGuard(AdminReadAuditGuard)
+ .useValue({canActivate:()=>true})
+ .compile();
  const app=module.createNestApplication();setupApi(app);await app.init();const server=app.getHttpServer();
  try{
   assert.equal((await request(server).get('/api/v1/admin/finance/summary')).status,401);

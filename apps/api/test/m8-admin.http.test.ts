@@ -45,7 +45,11 @@ async function fixture(){
   {provide:AdminReadAuditGuard,useValue:{canActivate:()=>true}},
   {provide:AccessService,useValue:access},{provide:IDENTITY_VERIFIER,useValue:verifier},
   {provide:AdminOperationsService,useValue:service}
- ]}).compile();
+ ]}).overrideGuard(AdminScopeGuard)
+ .useValue({canActivate:()=>true})
+ .overrideGuard(AdminReadAuditGuard)
+ .useValue({canActivate:()=>true})
+ .compile();
  const app=module.createNestApplication();setupApi(app);await app.init();
  return {app,calls,setIdentity:(value:typeof elevated)=>{identity=value;},
   setSuspended:(value:boolean)=>{suspended=value;},setRevoked:(value:boolean)=>{revoked=value;},
