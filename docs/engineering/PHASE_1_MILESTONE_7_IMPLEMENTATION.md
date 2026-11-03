@@ -1,45 +1,100 @@
-# M7 · Phase 1 — Ride & Dispatch backend implementation
+# Fajify — Milestone 7 / Phase 1 Engineering Handoff
 
-**Status:** In development. Not accepted, not merged, not released.
-**Branch:** `feat/m7-p1-ride-dispatch-backend`
-**Base:** `2c64b47267d866ec93f6428a9ebe3fd66f70456f`
-**Authority:** [M7 scope](MILESTONES.md), [phase allocation](../roadmap/FOUR_PHASE_MODEL.md), [architecture](../architecture/SYSTEM_ARCHITECTURE.md).
+**Phase:** M7-P1 · Backend & Platform  
+**Branch:** `feat/m7-p1-ride-dispatch-backend`  
+**Baseline:** `2c64b47267d866ec93f6428a9ebe3fd66f70456f`  
+**Status:** Implementation committed for local review; no consolidated local acceptance performed. Do not merge, stage with live providers, or assert phase completion until verification evidence exists.
 
-## Objective and boundaries
+## Scope and architecture
 
-Implement NestJS API modules, durable PostgreSQL/PostGIS migrations, background processing, server-scoped authorization, authenticated realtime contracts, and OpenAPI support for the combined Driver/Dispatcher app and Customer/Business clients. No live traffic or credentials required for development.
+- NestJS modular monolith with signed Keycloak OIDC identity, M2 account revocation, role checks and PostgreSQL resource membership.
+- PostgreSQL/PostGIS authoritative state; transaction-locked offers, driver claims and trip transitions; durable outbox, incident and financial audit records.
+- SSE endpoint for authenticated low-frequency updates plus cursor-based timeline recovery; **WebSocket push fanout and real-device background tracking are not accepted or evidenced by these changes**.
+- Fare policies by vehicle category and version, immutable quote snapshot, provisional geodesic distance. Geodesic metres are **not** driving distance/ETA; do not present the quote as a provider-verified road fare.
+- M5 Paystack intent, verified receipt, ledger posting, refunds and payout reconciliation reused for ride financial flows. Driver settlement reserves existing M5 payable balance, records one-shot transfers and requires independent provider confirmation. Production transfer execution is disabled unless explicitly configured.
 
-## Ordered increments
+### Migrations (apply in order through the existing migration runner)
 
-1. **Domain invariants (started):** trip-state transition graph, driver/vehicle/document eligibility and validated location freshness. Code: `apps/api/src/rides/ride-domain.ts`. Tests: `apps/api/test/m7-ride-domain.test.ts`. These are pure functions, not a complete API or accepted security mechanism.
-2. **Persistence:** versioned migrations for driver profiles/vehicles/documents, eligibility history, ride requests, dispatch offers, trips/events, incidents and idempotency/outbox. Add FKs/check constraints, partial unique indexes for active assignments, expiry indexes and spatial query indexes. Ensure migration tests use explicitly disposable PostgreSQL/PostGIS.
-3. **Authorization:** Keycloak identity subject and application membership checks for customer, approved driver, dispatcher within assigned area and privileged admin. Scope all reads, writes, room joins and event subscriptions. Deny suspended identities and unauthorized cross-user data.
-4. **Driver workflow:** onboarding, document metadata/private storage, approval/rejection, suspension, document expiry, vehicle verification and driver availability. A role alone must never permit dispatch.
-5. **Ride/fare APIs:** validated pickup/drop-off and requested category, provider-agnostic distance/duration estimate, versioned fare quote with expiry, explicit confirmation and idempotent ride-request creation.
-6. **Dispatch:** eligible-driver proximity search, expiring offers, atomic claim and one-active-trip constraints, durable fencing tokens, reassignment and retryable worker processing. Redis is advisory; PostgreSQL is authoritative.
-7. **Trip and location:** legal transitions, authenticated/consented GPS ingest with sequence/freshness checks, authorised tracking and WebSocket recovery, persisted trip events. Background GPS platform/device verification belongs to Phase 4.
-8. **Finance and safety:** integrate existing M5 payment/ledger contracts with verified charge, earnings and settlement states; never infer payment success from client claims. Add incident and emergency escalation, audit, offline sync safety and dispatcher scoped actions.
-9. **Contracts/acceptance:** versioned OpenAPI, negative authorization tests, concurrent claim tests, idempotency/retries, migration and integration evidence; compatibility review with M7-P2/P3/P4. PR stays draft until complete.
+`0090_ride_dispatch.sql` — driver/vehicle/documents, ride requests, offers, trip events, GPS, incidents and unique active assignment.  
+`0091_ride_quotes.sql` — authoritative expiring quotes, request binding.  
+`0092_ride_operations.sql` — dispatch geofences, generations, bank-reference verification, incident severity, fare/earnings state.  
+`0093_ride_incident_dedup.sql` — incident idempotency and active-driver indexes.  
+`0094_ride_finance_links.sql` — category commission snapshots, payment-to-ride link, payout reservations.  
+`0095_ride_evidence_integrity.sql` — append-only database triggers for trip and financial event histories.  
+`0096_ride_tariffs.sql` — versioned active vehicle-category tariff policies.
 
-## Phase acceptance gates
+### API operations (versioned under `/api/v1`)
 
-- No offers/assignments for unapproved, suspended, expired-document or unavailable drivers.
-- Concurrent accepts cannot double-assign a ride or create conflicting active driver assignments.
-- Illegal trip transitions are rejected and durable trip events accurately reflect state.
-- Location consent, coordinate validity, future timestamps and stale updates are enforced.
-- Passenger, driver, merchant and dispatcher resource scopes prevent unauthorized access.
-- Quotes, verified charges, ledger entries, earnings and reconciled payouts follow finance contracts.
-- Sensitive documents, incidents and emergency data have strict authorization and audit coverage.
-- Generated OpenAPI and locally reproduced unit/integration/DB acceptance tests pass at exact commit SHA.
-- Required M7-P4 physical device/background GPS testing is separately evidenced before milestone acceptance.
+| Actor | Endpoint group | Behavior |
+| --- | --- | --- |
+| Customer | `customer/rides` | Quote, create, list/history, owner-only detail, cancellation before arrival, payment-intent preparation |
+| Driver | `drivers/onboarding`, `drivers/me` | Registration, document metadata submission, availability, payout recipient reference |
+| Driver | `rides/driver/offers`, `rides/offers/:id/accept`, `rides/:id/state` | Own expiring offers, atomic claim and legal trip state transitions |
+| Driver | `rides/driver/location`, `rides/driver/location/revoke` | Explicit consent, fresh sequenced GPS updates and immediate location deletion |
+| Dispatcher | `dispatch/areas/:areaId/rides`, `.../candidates` | Scoped monitoring and geofenced approved nearby drivers |
+| Dispatcher | `dispatch/rides/:id/offers`, `.../match`, `.../reassignment` | Manual and ranked offer generation, fencing and requeue before arrival |
+| Customer/driver/dispatcher | `rides/:id/timeline`, `rides/:id/events` | Resource-scoped state/events; SSE periodically revalidates session and area scope |
+| Customer/driver/dispatcher | `ride-safety/**` | Idempotent SOS/incident reports, dispatcher incident queue and audited resolution |
+| Administrator | `drivers/**/review`, `drivers/**/suspension`, `dispatch/areas`, `admin/ride-tariffs` | MFA-bound, audited review, geofence and tariff commands |
+| Administrator | `admin/rides/:id/payout-reservation`, `admin/ride-payouts/:id/{submit,reconcile}` | Reserve verified payable, submit once, confirm provider reconciliation |
+| Driver | `drivers/me/earnings` | Owned ride financial summaries, not a claim that earnings are settled |
 
-## Verification commands (when environment available)
+All protected endpoints require valid bearer identity and active M2 account state. Customer and driver identity alone never supplies dispatcher resource membership; active dispatch-area membership is checked server-side. Admin controls use the existing elevated ACR / authorized client guard.
+
+### Database invariants
+
+1. Driver must be approved, available, unsuspended at both account and driver levels, with category-matching approved vehicle, current approved documents, active zone membership and fresh consented GPS. These are rechecked when an offer is accepted.
+2. Request row lock and `dispatch_generation` reject expired/stale offers. PostgreSQL partial unique indexes prevent two accepted offers for one ride and conflicting active driver assignments.
+3. Trip transitions are server-controlled, logged with actor and published to the transactionally recorded outbox. Cancellation revokes active offers and clears driver assignment; dispatcher-only reassignment records its exceptional transition.
+4. GPS accepts strictly increasing sequence and observation time, valid coordinates, consent and freshness. Consent withdrawal removes the durable latest location and takes the driver offline.
+5. A customer ride request must match the original quote, customer, coordinates and category. A replayed idempotency key returns the original ride even after quote expiry.
+6. M5 capture is independently provider verified before the ride payment state changes. Driver payouts are reserved against actual M5 operator payable and are never automatically reissued after ambiguous provider responses.
+7. Append-only event tables reject UPDATE and DELETE; administrative review and financial mutations create immutable audit or operation events.
+
+### Configuration and operational prerequisites
+
+- Existing M1/M2/M5 environment variables: `FAJI_DATABASE_URL`, `KEYCLOAK_ISSUER`, `KEYCLOAK_AUDIENCE`, `REDIS_URL`, S3 config, Paystack keys, `PAYMENT_CALLBACK_URL`.
+- `FAJI_RIDE_OPERATOR_BUSINESS_ID`: UUID of a **real, approved ride operating business** with an approved M5 financial policy and isolated environment. No demo or invented finance account is silently provisioned.
+- `FAJI_RIDE_PAYOUT_ENABLED=true`: explicit operator gate for one-shot Paystack transfers. Keep unset until payment sandbox tests, payout rules, fee evidence and recipients are independently accepted.
+- Driver documents use private object-key references and manual privileged reviews. A document key submission **does not prove an S3 upload exists or its bytes are safe**. Sign/verify uploads and enforce object content checks before real onboarding or production use.
+- An administrator provisions active dispatch polygons and grants M2 `dispatch_area` memberships to the appropriate dispatchers and drivers.
+- An administrator publishes a vehicle-category `ride_tariff_policy` before quoting; the first release uses geodesic pricing rather than map-routed distance. Production route-based price validation remains an explicit acceptance dependency.
+- Safety incidents are durably recorded and available to scoped dispatchers; actual 24/7 emergency staffing, escalation notification delivery and contacts require separate operational acceptance.
+
+### One-shot and recurring worker
 
 ```bash
-pnpm --filter @faji/api test
+# Against an explicitly disposable database only until locally accepted
+FAJI_RIDE_WORKER_ONCE=1 pnpm --filter @faji/api worker:rides
+# The recurring worker runs one expiry batch approximately every five seconds.
+pnpm --filter @faji/api worker:rides
+```
+
+Worker safety: it locks ride rows before expiring offers, requeues rides with no live pending offers and increments the dispatch generation. The `ride.payout.*` events are not instructions to transfer money automatically.
+
+### Local review / consolidated verification (NOT YET EXECUTED)
+
+Run only against a **fresh, explicitly disposable PostgreSQL 16 + PostGIS database**, with independent Keycloak and Paystack sandbox fixtures. Do not use development, shared staging or production credentials for the disposable acceptance runner.
+
+```bash
+pnpm install --frozen-lockfile
+pnpm --filter @faji/database typecheck
 pnpm --filter @faji/api typecheck
 pnpm --filter @faji/api lint
+pnpm --filter @faji/api test
+pnpm --filter @faji/api build
+FAJI_M7_DISPOSABLE_DATABASE_ACK=m7-disposable-postgis-only \
+  FAJI_DATABASE_URL='<disposable-postgis-url>' \
+  pnpm --filter @faji/api test:m7:database
 pnpm --filter @faji/api contracts
 ```
 
-The first increment's tests have been committed but **not executed in this connected GitHub environment**. Do not infer full phase acceptance or runtime readiness from these foundational files. The M6 planning milestone can run in parallel; M7 requires identity, location and financial contract readiness and coordination before any live integration.
+Do not run `test:m7:database` on an existing database: it runs migrations and inserts synthetic records. Review and commit the generated `packages/api_contracts/openapi.json` in the same branch after export succeeds.
+
+**Required negative evidence:** unapproved/expired/suspended drivers rejected; invalid geofences, stale consent and overlapping GPS rejected; cross-account ride and incident data denied; simultaneous claim yields exactly one winner; legal trip state graph; expired/revoked offer recovery; persisted event immutability; quote replay; gateway capture only on independently verified receipt; no double payout or unknown provider fee accepted; suspended/MFA-ineligible admins rejected.
+
+**Integration dependencies for the later consolidated acceptance:** M6 planning contracts and M7-P2/P3/P4 client DTO compatibility; device GPS/background behavior on Android/iOS under Phase 4; merchant pickup and cross-platform handoffs under Phase 3/M8; provider-authenticated document upload; road-distance pricing; real notification/push delivery; paid driver settlement tests including OTP, reversals and reconciliation.
+
+## Release decision
+
+**No release authorization.** This branch has implementation commits and acceptance-test code but no verified test output or regenerated OpenAPI snapshot. The project owner requested consolidated local verification as a later, distinct step. Keep this branch unmerged until that evidence is recorded at a pinned exact commit.
