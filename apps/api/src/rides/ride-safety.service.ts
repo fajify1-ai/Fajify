@@ -32,6 +32,18 @@ export class RideSafetyService {
   `,[id,subject]);
   if(!r.rows[0])throw new NotFoundException();return r.rows[0];
  }
+ async areaIncidents(actor:string,areaId:string,limit=50){
+  await this.areas.requireDispatcher(actor,areaId);
+  const result=await this.pool.query(`SELECT incident.id,incident.ride_id,incident.kind,incident.severity,
+     incident.status,incident.created_at
+     FROM ride_incidents incident
+     JOIN ride_requests ride ON ride.id=incident.ride_id
+     JOIN ride_dispatch_areas zone ON zone.id=$1 AND zone.active
+     WHERE incident.status IN ('open','investigating') AND ST_Intersects(zone.boundary,ride.pickup::geometry)
+     ORDER BY CASE incident.severity WHEN 'emergency' THEN 0 WHEN 'urgent' THEN 1 ELSE 2 END,
+      incident.created_at ASC LIMIT $2`,[areaId,limit]);
+  return {areaId,incidents:result.rows};
+ }
  async resolve(actor:string,incidentId:string,areaId:string,next:'investigating'|'resolved'){
   await this.areas.requireDispatcher(actor,areaId);
   const c=await this.pool.connect();
