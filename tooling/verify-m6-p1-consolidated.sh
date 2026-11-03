@@ -38,6 +38,7 @@ run_check api-build no corepack pnpm@9.15.9 --filter @faji/api build
 run_check migrations no corepack pnpm@9.15.9 --filter @faji/database exec node --import tsx scripts/migrate.ts
 run_check migrations-replay no corepack pnpm@9.15.9 --filter @faji/database exec node --import tsx scripts/migrate.ts
 run_check runtime-grants no corepack pnpm@9.15.9 --filter @faji/database exec node --import tsx scripts/grant-m5-runtime.ts
+run_check report-tests yes node --test --test-reporter=tap tooling/m6-verification-report.test.mjs
 run_check database-tests yes bash -c 'cd packages/database && node --import tsx --test --test-reporter=tap test/*.test.ts'
 run_check api-tests yes bash -c 'cd apps/api && node --import tsx --test --test-reporter=tap test/*.test.ts'
 run_check m6-postgres-tests yes corepack pnpm@9.15.9 --filter @faji/api exec node --import tsx --test --test-concurrency=1 --test-reporter=tap test/m6-planning-acceptance.ts
