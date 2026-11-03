@@ -1,6 +1,7 @@
 import {Module} from '@nestjs/common';
 import {IdentityModule} from '../auth/identity.module';
 import {PaymentsModule} from '../payments/payments.module';
+import {CustomerModule} from '../customer/customer.module';
 import {RideController} from './ride.controller';
 import {CustomerRidesController} from './customer-rides.controller';
 import {RideDispatchController} from './ride-dispatch.controller';
@@ -25,7 +26,7 @@ import {RideTariffController} from './ride-tariff.controller';
 import {RideFinanceController} from './ride-finance.controller';
 
 @Module({
- imports:[IdentityModule,PaymentsModule],
+ imports:[IdentityModule,PaymentsModule,CustomerModule],
  controllers:[
   RideController,CustomerRidesController,RideDispatchController,DriverOnboardingController,
   RideAreasController,RideDriverOperationsController,RideLifecycleOperationsController,
