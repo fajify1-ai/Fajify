@@ -830,6 +830,4549 @@
           "merchant-administration"
         ]
       }
+    },
+    "/api/v1/discovery/offerings": {
+      "get": {
+        "operationId": "DiscoveryController_discover_v1",
+        "parameters": [
+          {
+            "name": "branchId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "product",
+                "service",
+                "package",
+                "event"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "location",
+            "required": false,
+            "in": "query",
+            "description": "Literal branch address match; no radius search.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferingPage"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/offerings/{id}": {
+      "get": {
+        "operationId": "DiscoveryController_detail_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferingDetail"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/offerings/{id}/availability": {
+      "get": {
+        "operationId": "DiscoveryController_slots_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlotPage"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/customer/reservations": {
+      "post": {
+        "operationId": "CustomerController_reserve_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerReservationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      },
+      "get": {
+        "operationId": "CustomerController_reservations_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/reservations/{id}": {
+      "get": {
+        "operationId": "CustomerController_reservation_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/reservations/{id}/cancellation": {
+      "post": {
+        "operationId": "CustomerController_cancelReservation_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/orders": {
+      "post": {
+        "operationId": "CustomerController_order_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerOrderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      },
+      "get": {
+        "operationId": "CustomerController_orders_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/orders/{id}": {
+      "get": {
+        "operationId": "CustomerController_orderDetail_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/customer/orders/{id}/cancellation": {
+      "post": {
+        "operationId": "CustomerController_cancelOrder_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-workflows"
+        ]
+      }
+    },
+    "/api/v1/discovery/categories": {
+      "get": {
+        "operationId": "MarketplaceController_categories_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriesView"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/venues": {
+      "get": {
+        "operationId": "MarketplaceController_venues_v1",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "location",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "product",
+                "service",
+                "package",
+                "event"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "branchId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "latitude",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "longitude",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "radiusKm",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VenuePage"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/venues/{id}": {
+      "get": {
+        "operationId": "MarketplaceController_venue_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VenueDetail"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/venues/{id}/reviews": {
+      "get": {
+        "operationId": "MarketplaceController_reviews_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewPage"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/plans": {
+      "get": {
+        "operationId": "MarketplaceController_plans_v1",
+        "parameters": [
+          {
+            "name": "startsAt",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "guests",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 1
+            }
+          },
+          {
+            "name": "currency",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$",
+              "default": "NGN"
+            }
+          },
+          {
+            "name": "maxBudgetMinor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,18})$"
+            }
+          },
+          {
+            "name": "minBudgetMinor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]{0,18})$"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "location",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "product",
+                "service",
+                "package",
+                "event"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "branchId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "latitude",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "longitude",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "radiusKm",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanPage"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/discovery/plans/{id}/quote": {
+      "post": {
+        "operationId": "MarketplaceController_quote_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanQuoteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanQuoteView"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "customer-discovery"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/public-profile": {
+      "put": {
+        "operationId": "MerchantPublicController_profile_v1",
+        "parameters": [
+          {
+            "name": "branchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicProfileInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangedView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-public-content"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/public-media": {
+      "put": {
+        "operationId": "MerchantPublicController_media_v1",
+        "parameters": [
+          {
+            "name": "branchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaReplacement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-public-content"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/packages/{id}/public-options": {
+      "put": {
+        "operationId": "MerchantPublicController_package_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "branchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PackagePublicInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangedView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-public-content"
+        ]
+      }
+    },
+    "/api/v1/customer/profile": {
+      "get": {
+        "operationId": "CustomerAccountController_profile_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      },
+      "patch": {
+        "operationId": "CustomerAccountController_updateProfile_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/wishlist": {
+      "get": {
+        "operationId": "CustomerAccountController_wishlist_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WishlistPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/wishlist/{id}": {
+      "put": {
+        "operationId": "CustomerAccountController_save_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangedView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      },
+      "delete": {
+        "operationId": "CustomerAccountController_unsave_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangedView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/orders/{id}/review": {
+      "put": {
+        "operationId": "CustomerAccountController_orderReview_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivateReviewView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/reservations/{id}/review": {
+      "put": {
+        "operationId": "CustomerAccountController_reservationReview_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivateReviewView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/reviews": {
+      "get": {
+        "operationId": "CustomerAccountController_reviews_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivateReviewPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/reviews/{id}": {
+      "delete": {
+        "operationId": "CustomerAccountController_withdrawReview_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangedView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/notifications": {
+      "get": {
+        "operationId": "CustomerAccountController_notifications_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/notifications/unread-count": {
+      "get": {
+        "operationId": "CustomerAccountController_unread_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnreadView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/notifications/{id}/read": {
+      "put": {
+        "operationId": "CustomerAccountController_read_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/support": {
+      "get": {
+        "operationId": "CustomerAccountController_support_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportCasePage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      },
+      "post": {
+        "operationId": "CustomerAccountController_createSupport_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportCaseView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/support/{id}": {
+      "get": {
+        "operationId": "CustomerAccountController_supportDetail_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportCaseView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/support/{id}/messages": {
+      "get": {
+        "operationId": "CustomerAccountController_messages_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportMessagePage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      },
+      "post": {
+        "operationId": "CustomerAccountController_reply_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportMessageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportMessageView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/support/{id}/closure": {
+      "put": {
+        "operationId": "CustomerAccountController_close_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportCaseView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-account"
+        ]
+      }
+    },
+    "/api/v1/payments/webhooks/paystack": {
+      "post": {
+        "operationId": "PaymentsController_webhook_v1",
+        "parameters": [
+          {
+            "name": "x-paystack-signature",
+            "in": "header",
+            "description": "HMAC-SHA512 over the exact raw request bytes",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event accepted or safely replayed"
+          },
+          "401": {
+            "description": "Signature rejected"
+          },
+          "503": {
+            "description": "Provider verification unavailable; retry notification"
+          }
+        },
+        "summary": "Signed Paystack notification; independently verified before posting funds",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/api/v1/customer/payments/{id}": {
+      "get": {
+        "operationId": "CustomerPaymentsController_payment_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentStatusResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Get the current customer's payment status; this does not assert booking confirmation",
+        "tags": [
+          "customer-payments"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/payments/{id}/reconciliation": {
+      "get": {
+        "operationId": "FinancePaymentsController_reconciliation_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureReconciliationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Audit internal capture consistency; provider statements and settlement are not checked",
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/payments/{id}/provider-recheck": {
+      "post": {
+        "operationId": "PaymentRecoveryController_recheck_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRecheckResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Verified charge differs from local intent or receipt"
+          },
+          "503": {
+            "description": "Provider verification unavailable or transaction not successful; no capture posted"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Recover a missed notification by independently verifying the stored payment reference; no charge is initiated",
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/customer/orders/{id}/payment-intent": {
+      "post": {
+        "operationId": "OrderIntentsController_prepare_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrepareOrderIntentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreparedOrderIntentResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "summary": "Prepare one payment intent from the current customer's authoritative order; checkout remains unavailable",
+        "tags": [
+          "customer-payments"
+        ]
+      }
+    },
+    "/api/v1/customer/paid-holds": {
+      "post": {
+        "operationId": "M5CustomerController_hold_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5HoldInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5HoldResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
+          },
+          "503": {
+            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-finance"
+        ]
+      },
+      "get": {
+        "operationId": "M5CustomerController_holds_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50; default 20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Zero-based row offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5HoldPage"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
+          },
+          "503": {
+            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-finance"
+        ]
+      }
+    },
+    "/api/v1/customer/paid-holds/{id}/cancellation": {
+      "post": {
+        "operationId": "M5CustomerController_cancel_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5HoldResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
+          },
+          "503": {
+            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-finance"
+        ]
+      }
+    },
+    "/api/v1/customer/payments/{id}/checkout": {
+      "post": {
+        "operationId": "M5CustomerController_checkout_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5CheckoutInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5CheckoutResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
+          },
+          "503": {
+            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-finance"
+        ]
+      }
+    },
+    "/api/v1/customer/orders/{id}/payment-retry": {
+      "post": {
+        "operationId": "M5CustomerController_retryOrder_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5OrderRetryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "paymentIntentId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "orderId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "amountMinor": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "currency": {
+                      "type": "string",
+                      "enum": [
+                        "NGN"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "succeeded"
+                      ]
+                    },
+                    "checkoutEnabled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "paymentIntentId",
+                    "orderId",
+                    "amountMinor",
+                    "currency",
+                    "status",
+                    "checkoutEnabled"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
+          },
+          "503": {
+            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-finance"
+        ]
+      }
+    },
+    "/api/v1/customer/payments/{id}/recheck": {
+      "post": {
+        "operationId": "M5CustomerController_recheck_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "paymentIntentId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded"
+                      ]
+                    },
+                    "replayed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "paymentIntentId",
+                    "status",
+                    "replayed"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
+          },
+          "503": {
+            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-finance"
+        ]
+      }
+    },
+    "/api/v1/customer/payments/{id}/refunds": {
+      "post": {
+        "operationId": "M5CustomerController_refund_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5RefundInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5RefundResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
+          },
+          "503": {
+            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-finance"
+        ]
+      }
+    },
+    "/api/v1/customer/refunds": {
+      "get": {
+        "operationId": "M5CustomerController_refunds_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50; default 20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Zero-based row offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5RefundPage"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
+          },
+          "503": {
+            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-finance"
+        ]
+      }
+    },
+    "/api/v1/customer/tickets": {
+      "get": {
+        "operationId": "M5CustomerController_tickets_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50; default 20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Zero-based row offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5TicketPage"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
+          },
+          "503": {
+            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "customer-finance"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/finance": {
+      "get": {
+        "operationId": "M5MerchantController_financeView_v1",
+        "parameters": [
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50; default 20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Zero-based row offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "payableMinor": {
+                      "type": "string",
+                      "pattern": "^-?[0-9]+$"
+                    },
+                    "recoveryDebtMinor": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "policy": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "version": {
+                          "type": "integer"
+                        },
+                        "commissionBps": {
+                          "type": "integer"
+                        },
+                        "gatewayFeeBearer": {
+                          "type": "string",
+                          "enum": [
+                            "platform",
+                            "merchant"
+                          ]
+                        },
+                        "payoutFeeBearer": {
+                          "type": "string",
+                          "enum": [
+                            "platform",
+                            "merchant"
+                          ]
+                        },
+                        "settlementDelayHours": {
+                          "type": "integer"
+                        },
+                        "refundWindowHours": {
+                          "type": "integer"
+                        },
+                        "cancellationCutoffMinutes": {
+                          "type": "integer"
+                        },
+                        "holdMinutes": {
+                          "type": "integer"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "version",
+                        "commissionBps",
+                        "gatewayFeeBearer",
+                        "payoutFeeBearer",
+                        "settlementDelayHours",
+                        "refundWindowHours",
+                        "cancellationCutoffMinutes",
+                        "holdMinutes",
+                        "createdAt"
+                      ],
+                      "nullable": true
+                    },
+                    "payments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "amount_minor": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "commission_minor": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$",
+                            "nullable": true
+                          },
+                          "merchant_minor": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$",
+                            "nullable": true
+                          },
+                          "resolution": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "eligible_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "gateway_fee_minor": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "amount_minor",
+                          "status",
+                          "commission_minor",
+                          "merchant_minor",
+                          "resolution",
+                          "eligible_at",
+                          "gateway_fee_minor"
+                        ]
+                      }
+                    },
+                    "batches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "businessId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "amountMinor": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          },
+                          "recoveredMinor": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "approved",
+                              "submitting",
+                              "pending",
+                              "otp",
+                              "succeeded",
+                              "failed",
+                              "reversed",
+                              "uncertain",
+                              "recovered"
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "businessId",
+                          "amountMinor",
+                          "recoveredMinor",
+                          "status",
+                          "createdAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "payableMinor",
+                    "recoveryDebtMinor",
+                    "policy",
+                    "payments",
+                    "batches"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-finance"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/events/{eventId}/inventory": {
+      "post": {
+        "operationId": "M5MerchantController_inventory_v1",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "branchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5InventoryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "catalogue_id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "capacity": {
+                      "type": "integer"
+                    },
+                    "held": {
+                      "type": "integer"
+                    },
+                    "issued": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "catalogue_id",
+                    "capacity",
+                    "held",
+                    "issued"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-finance"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/tickets/redemption": {
+      "post": {
+        "operationId": "M5MerchantController_redeem_v1",
+        "parameters": [
+          {
+            "name": "branchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5RedeemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "redeemed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "merchant-finance"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/businesses/{businessId}/policies": {
+      "get": {
+        "operationId": "M5AdminController_policies_v1",
+        "parameters": [
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50; default 20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Zero-based row offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "version": {
+                        "type": "integer"
+                      },
+                      "commissionBps": {
+                        "type": "integer"
+                      },
+                      "gatewayFeeBearer": {
+                        "type": "string",
+                        "enum": [
+                          "platform",
+                          "merchant"
+                        ]
+                      },
+                      "payoutFeeBearer": {
+                        "type": "string",
+                        "enum": [
+                          "platform",
+                          "merchant"
+                        ]
+                      },
+                      "settlementDelayHours": {
+                        "type": "integer"
+                      },
+                      "refundWindowHours": {
+                        "type": "integer"
+                      },
+                      "cancellationCutoffMinutes": {
+                        "type": "integer"
+                      },
+                      "holdMinutes": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "version",
+                      "commissionBps",
+                      "gatewayFeeBearer",
+                      "payoutFeeBearer",
+                      "settlementDelayHours",
+                      "refundWindowHours",
+                      "cancellationCutoffMinutes",
+                      "holdMinutes",
+                      "createdAt"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      },
+      "post": {
+        "operationId": "M5AdminController_policy_v1",
+        "parameters": [
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5PolicyInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "version": {
+                      "type": "integer"
+                    },
+                    "commissionBps": {
+                      "type": "integer"
+                    },
+                    "gatewayFeeBearer": {
+                      "type": "string",
+                      "enum": [
+                        "platform",
+                        "merchant"
+                      ]
+                    },
+                    "payoutFeeBearer": {
+                      "type": "string",
+                      "enum": [
+                        "platform",
+                        "merchant"
+                      ]
+                    },
+                    "settlementDelayHours": {
+                      "type": "integer"
+                    },
+                    "refundWindowHours": {
+                      "type": "integer"
+                    },
+                    "cancellationCutoffMinutes": {
+                      "type": "integer"
+                    },
+                    "holdMinutes": {
+                      "type": "integer"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "version",
+                    "commissionBps",
+                    "gatewayFeeBearer",
+                    "payoutFeeBearer",
+                    "settlementDelayHours",
+                    "refundWindowHours",
+                    "cancellationCutoffMinutes",
+                    "holdMinutes",
+                    "createdAt"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/audit": {
+      "get": {
+        "operationId": "M5AdminController_history_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50; default 20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Zero-based row offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "resource_type": {
+                        "type": "string"
+                      },
+                      "resource_id": {
+                        "type": "string"
+                      },
+                      "action": {
+                        "type": "string"
+                      },
+                      "actor": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "resource_type",
+                      "resource_id",
+                      "action",
+                      "actor",
+                      "created_at"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/payments/{id}/checkout-retry": {
+      "post": {
+        "operationId": "M5AdminController_retryCheckout_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5CheckoutResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/payments/{id}/refunds": {
+      "post": {
+        "operationId": "M5AdminController_refund_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5RefundInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5RefundResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/refunds/{id}/decision": {
+      "post": {
+        "operationId": "M5AdminController_decision_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5DecisionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5RefundResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/refunds/{id}/reconciliation": {
+      "post": {
+        "operationId": "M5AdminController_refundCheck_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "terminal": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "terminal"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/refunds/{id}/provider-link": {
+      "post": {
+        "operationId": "M5AdminController_refundLink_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5ProviderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "terminal": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "terminal"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/payments/{id}/external-refunds": {
+      "post": {
+        "operationId": "M5AdminController_adopt_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5ProviderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/businesses/{businessId}/recipients": {
+      "post": {
+        "operationId": "M5AdminController_recipient_v1",
+        "parameters": [
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5RecipientInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "recipient_code": {
+                      "type": "string"
+                    },
+                    "environment": {
+                      "type": "string",
+                      "enum": [
+                        "test",
+                        "live"
+                      ]
+                    },
+                    "active": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "recipient_code",
+                    "environment",
+                    "active"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/recipients/{id}/disable": {
+      "post": {
+        "operationId": "M5AdminController_disable_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "active"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/businesses/{businessId}/settlements": {
+      "post": {
+        "operationId": "M5AdminController_batch_v1",
+        "parameters": [
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5BatchInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "businessId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "amountMinor": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "recoveredMinor": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "approved",
+                        "submitting",
+                        "pending",
+                        "otp",
+                        "succeeded",
+                        "failed",
+                        "reversed",
+                        "uncertain",
+                        "recovered"
+                      ]
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "businessId",
+                    "amountMinor",
+                    "recoveredMinor",
+                    "status",
+                    "createdAt"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/settlements/{id}/otp": {
+      "post": {
+        "operationId": "M5AdminController_otp_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5OtpInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "pending": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/settlements/{id}/cancellation": {
+      "post": {
+        "operationId": "M5AdminController_cancelBatch_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "businessId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "amountMinor": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "recoveredMinor": {
+                      "type": "string",
+                      "pattern": "^[0-9]+$"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "approved",
+                        "submitting",
+                        "pending",
+                        "otp",
+                        "succeeded",
+                        "failed",
+                        "reversed",
+                        "uncertain",
+                        "recovered"
+                      ]
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "businessId",
+                    "amountMinor",
+                    "recoveredMinor",
+                    "status",
+                    "createdAt"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/settlements/{id}/reconciliation": {
+      "post": {
+        "operationId": "M5AdminController_payoutCheck_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "terminal": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "terminal"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/disputes/{providerId}/reconciliation": {
+      "post": {
+        "operationId": "M5AdminController_disputeCheck_v1",
+        "parameters": [
+          {
+            "name": "providerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "terminal": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "terminal"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/disputes/{providerId}/resolution": {
+      "post": {
+        "operationId": "M5AdminController_dispute_v1",
+        "parameters": [
+          {
+            "name": "providerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5DisputeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "pending": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/operations": {
+      "get": {
+        "operationId": "M5AdminController_overview_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50; default 20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Zero-based row offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "refunds": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "intent_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "amount_minor": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "intent_id",
+                          "amount_minor",
+                          "state",
+                          "created_at"
+                        ]
+                      }
+                    },
+                    "payouts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "business_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "amount_minor": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "business_id",
+                          "amount_minor",
+                          "state",
+                          "created_at"
+                        ]
+                      }
+                    },
+                    "disputes": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "provider_id": {
+                            "type": "string"
+                          },
+                          "intent_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "amount_minor": {
+                            "type": "string",
+                            "pattern": "^[0-9]+$"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "resolution": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "provider_id",
+                          "intent_id",
+                          "amount_minor",
+                          "state",
+                          "resolution"
+                        ]
+                      }
+                    },
+                    "exceptions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "intent_id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "provider_id": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "intent_id",
+                          "kind",
+                          "provider_id"
+                        ]
+                      }
+                    },
+                    "jobs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "resource_id": {
+                            "type": "string"
+                          },
+                          "state": {
+                            "type": "string"
+                          },
+                          "attempts": {
+                            "type": "integer"
+                          },
+                          "next_at": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "lease_until": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "last_error": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "resource_id",
+                          "state",
+                          "attempts",
+                          "next_at",
+                          "lease_until",
+                          "last_error"
+                        ]
+                      }
+                    },
+                    "jobCounts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "state": {
+                            "type": "string"
+                          },
+                          "count": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "count"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "refunds",
+                    "payouts",
+                    "disputes",
+                    "exceptions",
+                    "jobs",
+                    "jobCounts"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/jobs/{id}/retry": {
+      "post": {
+        "operationId": "M5AdminController_retryJob_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "queued": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "queued"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
     }
   },
   "info": {
@@ -1159,6 +5702,2429 @@
         },
         "required": [
           "active"
+        ]
+      },
+      "OfferingView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "product",
+              "service",
+              "package",
+              "event"
+            ]
+          },
+          "priceMinor": {
+            "type": "string",
+            "description": "Integer minor units; string preserves bigint precision."
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "businessName",
+          "branchName",
+          "address",
+          "name",
+          "description",
+          "category",
+          "priceMinor",
+          "currency"
+        ]
+      },
+      "OfferingPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OfferingView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "PublicMediaView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "position": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "alt",
+          "position"
+        ]
+      },
+      "EventView": {
+        "type": "object",
+        "properties": {
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "maxGuests": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "startsAt",
+          "endsAt",
+          "maxGuests"
+        ]
+      },
+      "PackageComponentView": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "name",
+          "category",
+          "quantity"
+        ]
+      },
+      "PackageAddonView": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "maxQuantity": {
+            "type": "number"
+          },
+          "priceMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "name",
+          "category",
+          "maxQuantity",
+          "priceMinor",
+          "currency"
+        ]
+      },
+      "PackageView": {
+        "type": "object",
+        "properties": {
+          "pricingModel": {
+            "type": "string",
+            "enum": [
+              "per_group",
+              "per_guest"
+            ]
+          },
+          "minGuests": {
+            "type": "number"
+          },
+          "maxGuests": {
+            "type": "number"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PackageComponentView"
+            }
+          },
+          "addOns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PackageAddonView"
+            }
+          }
+        },
+        "required": [
+          "pricingModel",
+          "minGuests",
+          "maxGuests",
+          "components",
+          "addOns"
+        ]
+      },
+      "OfferingDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "product",
+              "service",
+              "package",
+              "event"
+            ]
+          },
+          "priceMinor": {
+            "type": "string",
+            "description": "Integer minor units; string preserves bigint precision."
+          },
+          "currency": {
+            "type": "string"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicMediaView"
+            }
+          },
+          "event": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventView"
+              }
+            ]
+          },
+          "package": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PackageView"
+              }
+            ]
+          },
+          "customerReservationEnabled": {
+            "type": "boolean"
+          },
+          "customerOrderEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "businessName",
+          "branchName",
+          "address",
+          "name",
+          "description",
+          "category",
+          "priceMinor",
+          "currency",
+          "media",
+          "event",
+          "package",
+          "customerReservationEnabled",
+          "customerOrderEnabled"
+        ]
+      },
+      "SlotView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "catalogueId": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "remaining": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "catalogueId",
+          "startsAt",
+          "endsAt",
+          "remaining"
+        ]
+      },
+      "SlotPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SlotView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "CustomerReservationInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "availabilityId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "guests": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "guestName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "requestKey",
+          "availabilityId",
+          "guests",
+          "guestName"
+        ]
+      },
+      "ReservationView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "availabilityId": {
+            "type": "string"
+          },
+          "guests": {
+            "type": "number"
+          },
+          "guestName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "checked_in",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "availabilityId",
+          "guests",
+          "guestName",
+          "status",
+          "createdAt"
+        ]
+      },
+      "ReservationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "CustomerOrderLine": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "expectedPriceMinor": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,18})$",
+            "description": "Last displayed unit price, in minor units. Server rejects a changed price."
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity",
+          "expectedPriceMinor"
+        ]
+      },
+      "CustomerOrderInput": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerOrderLine"
+            }
+          }
+        },
+        "required": [
+          "branchId",
+          "requestKey",
+          "items"
+        ]
+      },
+      "OrderItemView": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPriceMinor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity",
+          "unitPriceMinor"
+        ]
+      },
+      "OrderDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "placed",
+              "accepted",
+              "preparing",
+              "ready",
+              "fulfilled",
+              "cancelled"
+            ]
+          },
+          "totalMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemView"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "status",
+          "totalMinor",
+          "currency",
+          "createdAt",
+          "items"
+        ]
+      },
+      "OrderView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "placed",
+              "accepted",
+              "preparing",
+              "ready",
+              "fulfilled",
+              "cancelled"
+            ]
+          },
+          "totalMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "status",
+          "totalMinor",
+          "currency",
+          "createdAt"
+        ]
+      },
+      "OrderPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "CategoryView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "product",
+              "service",
+              "package",
+              "event"
+            ]
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "CategoriesView": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryView"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "VenueView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "publicPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "distanceKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "rating": {
+            "type": "string",
+            "description": "Average of visible verified reviews, decimal string."
+          },
+          "reviewCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "businessName",
+          "name",
+          "address",
+          "timezone",
+          "summary",
+          "city",
+          "publicPhone",
+          "latitude",
+          "longitude",
+          "distanceKm",
+          "rating",
+          "reviewCount"
+        ]
+      },
+      "VenuePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VenueView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "BranchHoursView": {
+        "type": "object",
+        "properties": {
+          "weekday": {
+            "type": "number"
+          },
+          "opensMinute": {
+            "type": "number"
+          },
+          "closesMinute": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "weekday",
+          "opensMinute",
+          "closesMinute"
+        ]
+      },
+      "VenueDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "publicPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "distanceKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "rating": {
+            "type": "string",
+            "description": "Average of visible verified reviews, decimal string."
+          },
+          "reviewCount": {
+            "type": "number"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicMediaView"
+            }
+          },
+          "hours": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BranchHoursView"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "businessName",
+          "name",
+          "address",
+          "timezone",
+          "summary",
+          "city",
+          "publicPhone",
+          "latitude",
+          "longitude",
+          "distanceKm",
+          "rating",
+          "reviewCount",
+          "media",
+          "hours"
+        ]
+      },
+      "ReviewView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "number"
+          },
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "author": {
+            "type": "string",
+            "description": "Privacy-preserving label, not account identity."
+          }
+        },
+        "required": [
+          "id",
+          "rating",
+          "body",
+          "createdAt",
+          "author"
+        ]
+      },
+      "ReviewPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "PlanView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "product",
+              "service",
+              "package",
+              "event"
+            ]
+          },
+          "priceMinor": {
+            "type": "string",
+            "description": "Integer minor units; string preserves bigint precision."
+          },
+          "currency": {
+            "type": "string"
+          },
+          "pricingModel": {
+            "type": "string",
+            "enum": [
+              "per_group",
+              "per_guest"
+            ]
+          },
+          "minGuests": {
+            "type": "number"
+          },
+          "maxGuests": {
+            "type": "number"
+          },
+          "groupTotalMinor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "businessName",
+          "branchName",
+          "address",
+          "name",
+          "description",
+          "category",
+          "priceMinor",
+          "currency",
+          "pricingModel",
+          "minGuests",
+          "maxGuests",
+          "groupTotalMinor"
+        ]
+      },
+      "PlanPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "QuoteAddon": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity"
+        ]
+      },
+      "PlanQuoteInput": {
+        "type": "object",
+        "properties": {
+          "guests": {
+            "type": "number"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "addOns": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuoteAddon"
+            }
+          }
+        },
+        "required": [
+          "guests",
+          "addOns"
+        ]
+      },
+      "QuoteLineView": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPriceMinor": {
+            "type": "string"
+          },
+          "totalMinor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity",
+          "unitPriceMinor",
+          "totalMinor"
+        ]
+      },
+      "PlanQuoteView": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "guests": {
+            "type": "number"
+          },
+          "baseMinor": {
+            "type": "string"
+          },
+          "totalMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "addOns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuoteLineView"
+            }
+          },
+          "capacityHeld": {
+            "type": "boolean",
+            "description": "Always false: quotes do not create capacity holds."
+          },
+          "checkoutEnabled": {
+            "type": "boolean",
+            "description": "Always false until M5 paid checkout is integrated."
+          }
+        },
+        "required": [
+          "catalogueId",
+          "guests",
+          "baseMinor",
+          "totalMinor",
+          "currency",
+          "addOns",
+          "capacityHeld",
+          "checkoutEnabled"
+        ]
+      },
+      "PublicProfileInput": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "city": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "publicPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "summary",
+          "city"
+        ]
+      },
+      "ChangedView": {
+        "type": "object",
+        "properties": {
+          "changed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "changed"
+        ]
+      },
+      "MediaInput": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "alt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "alt"
+        ]
+      },
+      "MediaReplacement": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MediaInput"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "MediaPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicMediaView"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "AddonInput": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maxQuantity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "maxQuantity"
+        ]
+      },
+      "PackagePublicInput": {
+        "type": "object",
+        "properties": {
+          "pricingModel": {
+            "type": "string",
+            "enum": [
+              "per_group",
+              "per_guest"
+            ]
+          },
+          "minGuests": {
+            "type": "number"
+          },
+          "maxGuests": {
+            "type": "number"
+          },
+          "addOns": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddonInput"
+            }
+          }
+        },
+        "required": [
+          "pricingModel",
+          "minGuests",
+          "maxGuests",
+          "addOns"
+        ]
+      },
+      "ProfileView": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "displayName",
+          "createdAt"
+        ]
+      },
+      "ProfileInput": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "displayName"
+        ]
+      },
+      "WishlistView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "businessId": {
+            "type": "string"
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "product",
+              "service",
+              "package",
+              "event"
+            ]
+          },
+          "priceMinor": {
+            "type": "string",
+            "description": "Integer minor units; string preserves bigint precision."
+          },
+          "currency": {
+            "type": "string"
+          },
+          "savedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "businessId",
+          "branchId",
+          "businessName",
+          "branchName",
+          "address",
+          "name",
+          "description",
+          "category",
+          "priceMinor",
+          "currency",
+          "savedAt"
+        ]
+      },
+      "WishlistPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WishlistView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "ReviewInput": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "rating",
+          "body"
+        ]
+      },
+      "PrivateReviewView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "number"
+          },
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "author": {
+            "type": "string",
+            "description": "Privacy-preserving label, not account identity."
+          },
+          "branchId": {
+            "type": "string"
+          },
+          "reservationId": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "withdrawn": {
+            "type": "boolean"
+          },
+          "moderationStatus": {
+            "type": "string",
+            "enum": [
+              "visible",
+              "hidden"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "rating",
+          "body",
+          "createdAt",
+          "author",
+          "branchId",
+          "reservationId",
+          "orderId",
+          "withdrawn",
+          "moderationStatus"
+        ]
+      },
+      "PrivateReviewPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrivateReviewView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "NotificationView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "resourceType": {
+            "type": "string",
+            "enum": [
+              "reservation",
+              "order"
+            ]
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "resourceType",
+          "resourceId",
+          "status",
+          "title",
+          "readAt",
+          "createdAt"
+        ]
+      },
+      "NotificationPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "UnreadView": {
+        "type": "object",
+        "properties": {
+          "unread": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "unread"
+        ]
+      },
+      "SupportCaseView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "subject": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "category",
+          "resourceId",
+          "subject",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SupportCasePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportCaseView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "SupportInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "reservation",
+              "order",
+              "account",
+              "other"
+            ]
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "requestKey",
+          "category",
+          "subject",
+          "message"
+        ]
+      },
+      "SupportMessageView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "body",
+          "createdAt"
+        ]
+      },
+      "SupportMessagePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportMessageView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "SupportMessageInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "requestKey",
+          "message"
+        ]
+      },
+      "PaymentStatusResponse": {
+        "type": "object",
+        "properties": {
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "succeeded"
+            ]
+          },
+          "amountMinor": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Integer minor units, encoded as a decimal string"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "NGN"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "paymentIntentId",
+          "status",
+          "amountMinor",
+          "currency",
+          "createdAt",
+          "verifiedAt"
+        ]
+      },
+      "CaptureChecks": {
+        "type": "object",
+        "properties": {
+          "verification": {
+            "type": "boolean"
+          },
+          "receipt": {
+            "type": "boolean"
+          },
+          "journal": {
+            "type": "boolean"
+          },
+          "audit": {
+            "type": "boolean"
+          },
+          "outbox": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "verification",
+          "receipt",
+          "journal",
+          "audit",
+          "outbox"
+        ]
+      },
+      "CaptureReconciliationResponse": {
+        "type": "object",
+        "properties": {
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "succeeded"
+            ]
+          },
+          "amountMinor": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "NGN"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "internal_capture"
+            ]
+          },
+          "providerReconciliation": {
+            "type": "string",
+            "enum": [
+              "not_checked"
+            ]
+          },
+          "internalStatus": {
+            "type": "string",
+            "enum": [
+              "consistent",
+              "inconsistent"
+            ]
+          },
+          "checks": {
+            "$ref": "#/components/schemas/CaptureChecks"
+          },
+          "issues": {
+            "description": "Names of failed internal consistency checks",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "paymentIntentId",
+          "status",
+          "amountMinor",
+          "currency",
+          "scope",
+          "providerReconciliation",
+          "internalStatus",
+          "checks",
+          "issues"
+        ]
+      },
+      "PaymentRecheckResponse": {
+        "type": "object",
+        "properties": {
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded"
+            ]
+          },
+          "replayed": {
+            "type": "boolean",
+            "description": "True when the matching capture was already posted"
+          }
+        },
+        "required": [
+          "paymentIntentId",
+          "status",
+          "replayed"
+        ]
+      },
+      "PrepareOrderIntentInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{8,100}$"
+          }
+        },
+        "required": [
+          "requestKey"
+        ]
+      },
+      "PreparedOrderIntentResponse": {
+        "type": "object",
+        "properties": {
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amountMinor": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "NGN"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "succeeded"
+            ]
+          },
+          "checkoutEnabled": {
+            "type": "boolean",
+            "enum": [
+              false
+            ],
+            "description": "Preparation does not initialize a gateway session or initiate a charge"
+          }
+        },
+        "required": [
+          "paymentIntentId",
+          "orderId",
+          "amountMinor",
+          "currency",
+          "status",
+          "checkoutEnabled"
+        ]
+      },
+      "M5HoldInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "reservation",
+              "ticket"
+            ]
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "guestName": {
+            "type": "string"
+          },
+          "requestKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "sourceId",
+          "quantity",
+          "guestName",
+          "requestKey"
+        ]
+      },
+      "M5HoldResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "reservation",
+              "ticket"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "held",
+              "confirmed",
+              "expired",
+              "cancelled",
+              "late"
+            ]
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reservationId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "businessId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "branchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "catalogueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "availabilityId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "guestName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "amountMinor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "NGN"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "paymentIntentId",
+          "kind",
+          "status",
+          "quantity",
+          "expiresAt",
+          "reservationId",
+          "businessId",
+          "branchId",
+          "catalogueId",
+          "availabilityId",
+          "guestName",
+          "createdAt"
+        ]
+      },
+      "M5HoldPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/M5HoldResponse"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "M5CheckoutInput": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Receipt contact only; never establishes account ownership"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "M5CheckoutResponse": {
+        "type": "object",
+        "properties": {
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "initializing",
+              "ready",
+              "uncertain",
+              "closed",
+              "paid"
+            ]
+          },
+          "checkoutEnabled": {
+            "type": "boolean"
+          },
+          "authorizationUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "accessCode": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "paymentIntentId",
+          "state",
+          "checkoutEnabled"
+        ]
+      },
+      "M5OrderRetryInput": {
+        "type": "object",
+        "properties": {
+          "previousPaymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "previousPaymentIntentId",
+          "requestKey"
+        ]
+      },
+      "M5RefundInput": {
+        "type": "object",
+        "properties": {
+          "requestKey": {
+            "type": "string"
+          },
+          "amountMinor": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,15}$"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "requestKey",
+          "amountMinor",
+          "reason"
+        ]
+      },
+      "M5RefundResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paymentIntentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amountMinor": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "requested",
+              "approved",
+              "submitting",
+              "pending",
+              "processed",
+              "failed",
+              "uncertain",
+              "rejected"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "paymentIntentId",
+          "amountMinor",
+          "status",
+          "reason",
+          "createdAt"
+        ]
+      },
+      "M5RefundPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/M5RefundResponse"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "M5TicketResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "holdId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "issued",
+              "redeemed",
+              "revoked"
+            ]
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "redeemedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "qrToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "holdId",
+          "eventId",
+          "status",
+          "startsAt",
+          "endsAt",
+          "redeemedAt"
+        ]
+      },
+      "M5TicketPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/M5TicketResponse"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "M5InventoryInput": {
+        "type": "object",
+        "properties": {
+          "capacity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "capacity"
+        ]
+      },
+      "M5RedeemInput": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Opaque QR token; do not log"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "M5PolicyInput": {
+        "type": "object",
+        "properties": {
+          "commissionBps": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "gatewayFeeBearer": {
+            "type": "string",
+            "enum": [
+              "platform",
+              "merchant"
+            ]
+          },
+          "payoutFeeBearer": {
+            "type": "string",
+            "enum": [
+              "platform",
+              "merchant"
+            ]
+          },
+          "settlementDelayHours": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 8760
+          },
+          "refundWindowHours": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 8760
+          },
+          "cancellationCutoffMinutes": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 525600
+          },
+          "holdMinutes": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 30
+          }
+        },
+        "required": [
+          "commissionBps",
+          "gatewayFeeBearer",
+          "payoutFeeBearer",
+          "settlementDelayHours",
+          "refundWindowHours",
+          "cancellationCutoffMinutes",
+          "holdMinutes"
+        ]
+      },
+      "M5DecisionInput": {
+        "type": "object",
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "approve"
+        ]
+      },
+      "M5ProviderInput": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]{0,19}$"
+          }
+        },
+        "required": [
+          "providerId"
+        ]
+      },
+      "M5RecipientInput": {
+        "type": "object",
+        "properties": {
+          "recipientCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "recipientCode"
+        ]
+      },
+      "M5BatchInput": {
+        "type": "object",
+        "properties": {
+          "recipientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "requestKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "recipientId",
+          "requestKey"
+        ]
+      },
+      "M5OtpInput": {
+        "type": "object",
+        "properties": {
+          "otp": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "otp"
+        ]
+      },
+      "M5DisputeInput": {
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "merchant-accepted",
+              "declined"
+            ]
+          },
+          "amountMinor": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "uploadedFilename": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "resolution",
+          "amountMinor",
+          "message"
         ]
       }
     }

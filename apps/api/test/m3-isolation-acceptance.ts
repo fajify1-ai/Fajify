@@ -1,3 +1,4 @@
+import {test} from 'node:test';
 import 'reflect-metadata';
 import assert from 'node:assert/strict';
 import {Pool} from 'pg';
@@ -71,4 +72,4 @@ async function main(){
   console.log('PASS: merchant/branch isolation, concurrent revocation lock, staff least-privilege and immediate revocation');
  }finally{await pool.end();}
 }
-main().catch(e=>{console.error('FAIL: M3 isolation acceptance:',e instanceof Error?e.message:'unknown');process.exitCode=1;});
+test('M3 real PostgreSQL tenant scope and concurrent revocation lock',main);
