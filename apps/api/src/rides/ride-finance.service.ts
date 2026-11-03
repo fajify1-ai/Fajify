@@ -102,6 +102,18 @@ export class RideFinanceService {
     WHERE payout.id=$1 AND payout.recipient_ref=bank.payout_recipient_ref AND bank.verified AND driver.status='approved'
     FOR SHARE OF bank,driver`,[payoutId]);
    if(!stillVerified.rowCount)throw new ConflictException('Payout recipient or driver eligibility changed');
+   const risk=await c.query(`SELECT 1 FROM ride_driver_payouts payout
+     JOIN ride_fares fare ON fare.ride_id=payout.ride_id
+     JOIN payment_intents intent ON intent.id=fare.payment_intent_id
+     JOIN payment_receipts receipt ON receipt.intent_id=intent.id
+     WHERE payout.id=$1 AND intent.status='succeeded' AND fare.payment_state='verified'
+       AND fare.settlement_state='submitted'
+       AND NOT EXISTS(SELECT 1 FROM finance_disputes dispute
+         WHERE dispute.intent_id=intent.id AND dispute.state IN ('open','lost'))
+       AND NOT EXISTS(SELECT 1 FROM finance_refunds refund
+         WHERE refund.intent_id=intent.id AND refund.state IN
+           ('requested','approved','submitting','pending','processed','uncertain'))`,[payoutId]);
+   if(!risk.rowCount)throw new ConflictException('Ride payment is no longer eligible for settlement');
    await c.query("UPDATE ride_driver_payouts SET state='submitting',updated_at=now() WHERE id=$1",[payoutId]);
    return p.rows[0];
   });
