@@ -7,7 +7,7 @@ import {AdminRateGuard} from '../auth/admin-rate.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {PageQuery} from '../customer/customer.dto';
 import {pagination,validated} from '../customer/customer-http';
-import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
+import {AdminScopeGuard,RequireAdminScope,RequireAdminScopes} from './admin-scope.guard';
 import {AdminEmptyBodyGuard} from './admin-empty-body.guard';
 import {AdminInsightsService} from './admin-insights.service';
 import {AdminMonitorService} from './admin-monitor.service';
@@ -23,11 +23,11 @@ export class AdminInsightsController{
  @Get('finance/summary') @RequireAdminScope('finance.read') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminFinanceSummary})
  finance(){return this.insights.finance();}
- @Get('reports/overview') @RequireAdminScope('reports.read') @Header('Cache-Control','no-store')
+ @Get('reports/overview') @RequireAdminScopes('reports.read','finance.read') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminReportSummary})
  report(@Query(validated(AdminReportRangeQuery)) q:AdminReportRangeQuery){return this.insights.report(q.days);}
  @Get('reports/businesses/:id') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}})
- @RequireAdminScope('reports.read') @Header('Cache-Control','no-store')
+ @RequireAdminScopes('reports.read','finance.read') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminBusinessReportView})
  business(@Param('id',new ParseUUIDPipe()) id:string){return this.insights.businessReport(id);}
  @Get('integrations/consistency') @RequireAdminScope('integrations.read') @Header('Cache-Control','no-store')

@@ -55,8 +55,8 @@ export class AdminSupportService {
    await c.query('UPDATE customer_support_cases SET updated_at=now() WHERE id=$1',[id]);
    await c.query('INSERT INTO outbox_events(event_type,payload) VALUES($1,$2)',
     ['admin.support.replied',JSON.stringify({caseId:id})]);
-   return added.rows[0];
-  });
+   return {id:added.rows[0].id,createdAt:added.rows[0].createdAt};
+  }).then(reply=>({...reply,body:input.message.trim()}));
  }
  async status(actor:string,id:string,input:{requestKey:string;status:'open'|'closed';reason:string}){
   return this.commands.execute({actor,requestKey:input.requestKey,operation:'support.status',resourceType:'support',resourceId:id,
