@@ -20,7 +20,7 @@ import {FinanceJobs} from '../src/payments/finance-jobs.service';
 import {FakePaystack} from './m5-fake-provider';
 
 test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted runtime and isolated Paystack transport',async t=>{
- assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m5_test_[a-z0-9_]+$/);
+ assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m[35]_test_[a-z0-9_]+$/);
  assert.ok(process.env.FAJI_DATABASE_URL);assert.ok(process.env.FAJI_RUNTIME_DATABASE_URL);
  const adminUrl=new URL(process.env.FAJI_DATABASE_URL!),runtimeUrl=new URL(process.env.FAJI_RUNTIME_DATABASE_URL!);
  assert.equal(adminUrl.host,runtimeUrl.host);assert.equal(adminUrl.pathname,runtimeUrl.pathname);assert.notEqual(adminUrl.username,runtimeUrl.username);

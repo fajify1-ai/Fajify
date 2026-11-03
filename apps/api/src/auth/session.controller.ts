@@ -22,7 +22,8 @@ export class SessionController {
  @Get('me')
  @UseGuards(IdentityGuard,AccountGuard)
  @ApiOperation({summary:'Get validated identity and active-account status'})
- me(@Req() req:{identity:VerifiedIdentity}){
-  return {subject:req.identity.subject,roles:req.identity.roles};
+ async me(@Req() req:{identity:VerifiedIdentity}){
+  const memberships=await this.access.approvedBusinessMemberships(req.identity.subject);
+  return {subject:req.identity.subject,roles:req.identity.roles,memberships};
  }
 }

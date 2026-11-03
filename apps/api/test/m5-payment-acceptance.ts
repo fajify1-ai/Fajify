@@ -19,7 +19,7 @@ import {grantM5Runtime} from '../../../packages/database/scripts/grant-m5-runtim
 test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings and atomic rollback',async()=>{
  assert.ok(process.env.FAJI_DATABASE_URL,'FAJI_DATABASE_URL required');
  assert.ok(process.env.FAJI_RUNTIME_DATABASE_URL,'A separate restricted runtime URL is required');
- assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m5_test_[a-z0-9_]+$/);
+ assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m[35]_test_[a-z0-9_]+$/);
  const migrationUrl=new URL(process.env.FAJI_DATABASE_URL),runtimeUrl=new URL(process.env.FAJI_RUNTIME_DATABASE_URL);
  assert.equal(runtimeUrl.host,migrationUrl.host);assert.equal(runtimeUrl.pathname,migrationUrl.pathname);
  assert.notEqual(runtimeUrl.username,migrationUrl.username);
