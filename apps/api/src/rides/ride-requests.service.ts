@@ -12,6 +12,8 @@ export class RideRequestsService {
   const client=await this.pool.connect();
   try{
    await client.query('BEGIN');
+   const active=await client.query("SELECT 1 FROM account_access access JOIN user_profiles profile ON profile.identity_subject=access.identity_subject WHERE access.identity_subject=$1 AND NOT access.suspended AND NOT profile.suspended",[subject]);
+   if(!active.rowCount)throw new ForbiddenException('Customer account no longer active');
    const q=await client.query<{amount_minor:string;currency:string;expires_at:Date;customer_subject:string;category:string;pickup_lat:number;pickup_lng:number;destination_lat:number;destination_lng:number}>(`SELECT amount_minor::text,currency,expires_at,customer_subject,category,
       ST_Y(pickup::geometry) AS pickup_lat, ST_X(pickup::geometry) AS pickup_lng,
       ST_Y(destination::geometry) AS destination_lat,ST_X(destination::geometry) AS destination_lng
