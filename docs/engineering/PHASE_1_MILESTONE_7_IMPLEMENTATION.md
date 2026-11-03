@@ -24,13 +24,15 @@
 `0096_ride_tariffs.sql` — versioned active vehicle-category tariff policies.
 `0097_ride_payout_reversals.sql` — payout reversal states and immutable fee observations.
 `0098_ride_tariff_integrity.sql` — database enforcement against mutating published tariff history.
+`0099_ride_document_evidence.sql` — verified object metadata snapshot for review.
+`0100_ride_required_documents.sql` — restrict eligible driver document kinds.
 
 ### API operations (versioned under `/api/v1`)
 
 | Actor | Endpoint group | Behavior |
 | --- | --- | --- |
 | Customer | `customer/rides` | Quote, create, list/history, owner-only detail, cancellation before arrival, payment-intent preparation |
-| Driver | `drivers/onboarding`, `drivers/me` | Registration, document metadata submission, availability, payout recipient reference |
+| Driver | `drivers/onboarding`, `drivers/me` | Registration, presigned private document upload and verified metadata submission, availability, payout recipient reference |
 | Driver | `rides/driver/offers`, `rides/offers/:id/accept`, `rides/:id/state` | Own expiring offers, atomic claim and legal trip state transitions |
 | Driver | `rides/driver/location`, `rides/driver/location/revoke` | Explicit consent, fresh sequenced GPS updates and immediate location deletion |
 | Dispatcher | `dispatch/areas/:areaId/rides`, `.../candidates` | Scoped monitoring and geofenced approved nearby drivers |
@@ -45,7 +47,7 @@ All protected endpoints require valid bearer identity and active M2 account stat
 
 ### Database invariants
 
-1. Driver must be approved, available, unsuspended at both account and driver levels, with category-matching approved vehicle, current approved documents, active zone membership and fresh consented GPS. These are rechecked when an offer is accepted.
+1. Driver must be approved, available, unsuspended at both account and driver levels, with category-matching approved vehicle, **all four required approved/current document types** (licence, identification, insurance, vehicle registration), active zone membership and fresh consented GPS. These are rechecked when an offer is accepted.
 2. Request row lock and `dispatch_generation` reject expired/stale offers. PostgreSQL partial unique indexes prevent two accepted offers for one ride and conflicting active driver assignments.
 3. Trip transitions are server-controlled, logged with actor and published to the transactionally recorded outbox. Cancellation revokes active offers and clears driver assignment; dispatcher-only reassignment records its exceptional transition.
 4. GPS accepts strictly increasing sequence and observation time, valid coordinates, consent and freshness. Consent withdrawal removes the durable latest location and takes the driver offline.
@@ -75,7 +77,7 @@ FAJI_RIDE_WORKER_ONCE=1 pnpm --filter @faji/api worker:rides
 pnpm --filter @faji/api worker:rides
 ```
 
-Worker safety: it locks ride rows before expiring offers, requeues rides with no live pending offers and increments the dispatch generation. The `ride.payout.*` events are not instructions to transfer money automatically.
+Worker safety: it locks ride rows before expiring offers, requeues rides with no live pending offers and increments the dispatch generation. Worker also requeues pre-arrival trips if driver approval, document compliance, availability, account status or recent GPS is revoked. Once a passenger is aboard, it retains the trip and opens a deduplicated urgent safety incident. The `ride.payout.*` events are not instructions to transfer money automatically.
 
 ### Local review / consolidated verification (NOT YET EXECUTED)
 
@@ -89,6 +91,7 @@ Run only against a **fresh, explicitly disposable PostgreSQL 16 + PostGIS databa
 pnpm install --frozen-lockfile
 pnpm --filter @faji/database typecheck
 pnpm --filter @faji/api typecheck
+pnpm --filter @faji/api typecheck:m7
 pnpm --filter @faji/api lint
 pnpm --filter @faji/api test
 pnpm --filter @faji/api build
