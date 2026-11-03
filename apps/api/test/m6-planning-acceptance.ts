@@ -113,6 +113,8 @@ test('package booking reserves group and component capacity atomically, retries 
  assert.equal(attribution.plan_id,plan.id);
  assert.equal(attribution.customer_subject,a);
  assert.equal(attribution.plan_revision,plan.revision);
+ await assert.rejects(()=>management.replacePackage(owner,merchantId,branch,pack,[{catalogueId:component,quantity:2}]),ConflictException);
+ await assert.rejects(()=>market.configurePackage(identity(owner),merchantId,branch,pack,{pricingModel:'per_guest',minGuests:2,maxGuests:3,addOns:[]}),ConflictException);
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[packageSlot])).rows[0].reserved,2);
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[componentSlot])).rows[0].reserved,1);
  assert.equal((await planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Test Guest',requestKey:'m6-package-hold-0001'})).id,hold.id);
