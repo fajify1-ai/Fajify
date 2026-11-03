@@ -3,6 +3,7 @@ import {ApiBearerAuth,ApiBody,ApiOkResponse,ApiTags} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
+import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideLifecycleOperations} from './ride-lifecycle-operations.service';
@@ -11,7 +12,7 @@ const reassignSchema=z.object({areaId:z.string().uuid()}).strict();
 type Request={identity:VerifiedIdentity};
 @ApiTags('ride-operations') @ApiBearerAuth('keycloak')
 @Controller({path:'',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,RolesGuard)
+@UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideLifecycleOperationsController {
  constructor(@Inject(RideLifecycleOperations)private readonly service:RideLifecycleOperations,
              @Inject(RideAreasService)private readonly areas:RideAreasService){}
