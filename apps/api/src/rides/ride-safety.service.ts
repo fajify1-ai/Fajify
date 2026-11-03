@@ -57,7 +57,7 @@ export class RideSafetyService {
    const member=await c.query("SELECT 1 FROM resource_memberships m JOIN account_access a ON a.identity_subject=m.identity_subject AND NOT a.suspended JOIN user_profiles p ON p.identity_subject=m.identity_subject AND NOT p.suspended WHERE m.identity_subject=$1 AND m.resource_type='dispatch_area' AND m.resource_id=$2 AND m.role='dispatcher' AND m.active",[actor,areaId]);
    if(!member.rowCount)throw new ForbiddenException('Dispatcher authorization revoked');
    if(incident.rows[0].status==='resolved'||(incident.rows[0].status==='open'&&next==='resolved'))throw new ConflictException('Incident must be investigated first');
-   await c.query(`UPDATE ride_incidents SET status=$2,resolved_at=CASE WHEN $2='resolved' THEN now() ELSE null END WHERE id=$1`,[incidentId,next]);
+   await c.query(`UPDATE ride_incidents SET status=$2::varchar(20),resolved_at=CASE WHEN $2::varchar(20)='resolved' THEN now() ELSE null END WHERE id=$1`,[incidentId,next]);
    await c.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,$2,'ride_incident',$3)",[actor,'ride.incident.'+next,incidentId]);
    await c.query('COMMIT');return {incidentId,status:next};
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
