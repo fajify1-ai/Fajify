@@ -29,6 +29,10 @@ export class RideFinanceService {
    const active=await c.query("SELECT 1 FROM business_onboarding WHERE id=$1 AND status='approved' FOR SHARE",[business]);
    if(!active.rowCount)throw new ConflictException('Ride operator finance account unavailable');
    const policy=await this.ledger.policy(c,business);
+   // The ride tariff owns commission. M5 must not charge it a second time.
+   // Provider processing/transfer fees are absorbed by the operator.
+   if(policy.commission_bps!==0||policy.gateway_fee_bearer!=='platform'||policy.payout_fee_bearer!=='platform')
+    throw new ConflictException('Ride operator requires zero M5 commission and platform-borne gateway/payout fees');
    const id=randomUUID();
    const reference='faji-'+randomUUID();
    await c.query(`INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider_reference,environment,amount_minor,currency)
@@ -65,6 +69,9 @@ export class RideFinanceService {
      WHERE p.id=$1 AND p.status='succeeded' AND p.business_id=$2 AND p.amount_minor=(
        SELECT gross_minor FROM ride_fares WHERE ride_id=$3)`,[row.payment_intent_id,business,rideId]);
    if(!source.rowCount)throw new ConflictException('Verified and allocated M5 capture required');
+   const commission=await c.query<{commission_minor:string}>(`SELECT commission_minor::text FROM ride_fares WHERE ride_id=$1`,[rideId]);
+   await this.ledger.post(c,'ride:'+rideId+':commission',row.payment_intent_id,
+     'merchant_payable:'+business,'platform_revenue',BigInt(commission.rows[0].commission_minor));
    const blocked=await c.query(`SELECT 1 FROM finance_disputes WHERE intent_id=$1 AND state IN ('open','lost')
      UNION SELECT 1 FROM finance_refunds WHERE intent_id=$1 AND state IN ('requested','approved','submitting','pending','processed','uncertain') LIMIT 1`,[row.payment_intent_id]);
    if(blocked.rowCount)throw new ConflictException('Refund or dispute exposure prevents settlement');
