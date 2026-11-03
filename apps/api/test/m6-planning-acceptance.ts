@@ -26,7 +26,18 @@ const admin=new Pool({connectionString:migrationUrl,max:3,connectionTimeoutMilli
 const runtime=new Pool({connectionString:runtimeUrl,max:12,connectionTimeoutMillis:3000});
 const customer=new CustomerService(runtime),access=new AccessService(runtime),business=new BusinessService(runtime,access);
 const market=new MarketplaceService(runtime,customer),management=new ManagementService(runtime,access);
-const gateway=new PaystackGateway(),ledger=new FinanceLedger(runtime),commerce=new CommerceLifecycle(ledger,customer,gateway);
+// Payment HTTP remains entirely synthetic: both initialization and independent capture verification
+// use the fake transport, while real HMAC and capture/ledger checks stay enabled.
+const fakeProvider=new FakePaystack();
+class AcceptancePaystackGateway extends PaystackGateway {
+ override initialize(input:Parameters<PaystackGateway['initialize']>[0]){
+  return super.initialize(input,fakeProvider.fetch);
+ }
+ override verify(reference:string){
+  return super.verify(reference,fakeProvider.fetch);
+ }
+}
+const gateway=new AcceptancePaystackGateway(),ledger=new FinanceLedger(runtime),commerce=new CommerceLifecycle(ledger,customer,gateway);
 const finance=new FinancialOperations(ledger,commerce,gateway),planning=new PlanningService(runtime,customer,commerce);
 const suffix=randomUUID(),owner='m6-owner-'+suffix,a='m6-a-'+suffix,b='m6-b-'+suffix;
 const identity=(subject:string):VerifiedIdentity=>({subject,issuer:'https://fixture.invalid',audience:['faji-api'],roles:['customer'],issuedAt:Math.floor(Date.now()/1000)-2,expiresAt:Math.floor(Date.now()/1000)+3600,sessionId:subject+'-session'});
@@ -48,7 +59,7 @@ before(async()=>{
  await applyMigrations(admin);await applyMigrations(admin);
  await grantM5Runtime(admin,runtimeUrl!);
  await assert.rejects(runtime.query('CREATE TABLE m6_forbidden(id integer)'),{code:'42501'});
- process.env.PAYSTACK_SECRET_KEY='sk_test_m6fixture';
+ process.env.PAYSTACK_SECRET_KEY='sk_test_disposablefixture';
  for(const who of [owner,a,b]){
   await admin.query('INSERT INTO user_profiles(identity_subject) VALUES($1)',[who]);
   await admin.query('INSERT INTO account_access(identity_subject) VALUES($1)',[who]);
@@ -168,16 +179,15 @@ test('expired package holds restore every allocated component exactly once',asyn
 test('provider-verified package capture issues one confirmed reservation without releasing component capacity',async()=>{
  const plan=await newPlan();
  const hold=await planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Paid Guest',requestKey:'m6-paid-package-0001'});
- const fake=new FakePaystack(),oldFetch=globalThis.fetch,oldCallback=process.env.PAYMENT_CALLBACK_URL;
+ const oldCallback=process.env.PAYMENT_CALLBACK_URL;
  try{
-  globalThis.fetch=fake.fetch;
   process.env.PAYMENT_CALLBACK_URL='https://fixture.invalid/payment-callback';
   const payments=new PaymentsService(runtime,gateway,commerce,finance);
   const started=await commerce.checkout(identity(a),hold.paymentIntentId,'customer@example.invalid');
   assert.equal(started.checkoutEnabled,true);
   const intent=(await admin.query<{provider_reference:string;amount_minor:string}>(
    'SELECT provider_reference,amount_minor::text FROM payment_intents WHERE id=$1',[hold.paymentIntentId])).rows[0];
-  const charge=fake.transactions.get(intent.provider_reference)??fake.charge(intent.provider_reference,Number(intent.amount_minor));
+  const charge=fakeProvider.transactions.get(intent.provider_reference)??fakeProvider.charge(intent.provider_reference,Number(intent.amount_minor));
   charge.status='success';charge.fees=15;
   const raw=Buffer.from(JSON.stringify({event:'charge.success',data:{reference:intent.provider_reference}}));
   const signature=createHmac('sha512',process.env.PAYSTACK_SECRET_KEY!).update(raw).digest('hex');
@@ -188,7 +198,6 @@ test('provider-verified package capture issues one confirmed reservation without
   assert.equal((await admin.query('SELECT count(*)::int AS n FROM business_reservations WHERE id=$1',[confirmed.reservation_id])).rows[0].n,1);
   await assert.rejects(()=>customer.cancelReservation(identity(a),confirmed.reservation_id),ConflictException);
  }finally{
-  globalThis.fetch=oldFetch;
   if(oldCallback===undefined)delete process.env.PAYMENT_CALLBACK_URL;else process.env.PAYMENT_CALLBACK_URL=oldCallback;
  }
 });
