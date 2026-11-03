@@ -16,7 +16,12 @@ export class DriverOnboardingService {
    if(driver.rows[0].status==='suspended')throw new ForbiddenException('Driver suspended');
    const vehicle=await client.query<{id:string}>(`INSERT INTO ride_vehicles(driver_id,category,registration)
        VALUES($1,$2,$3) ON CONFLICT(registration) DO NOTHING RETURNING id`,[driverId,category,registration]);
-   if(vehicle.rowCount!==1)throw new ConflictException('Vehicle registration already exists');
+   if(vehicle.rowCount!==1){
+    const existing=await client.query<{id:string;driver_id:string;category:string}>(`SELECT id,driver_id,category FROM ride_vehicles WHERE registration=$1`,[registration]);
+    if(existing.rows[0]?.driver_id!==driverId||existing.rows[0].category!==category)
+     throw new ConflictException('Vehicle registration belongs to a different driver or category');
+    vehicle.rows.push({id:existing.rows[0].id});
+   }
    await client.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'ride.driver.registration','ride_driver',$2)",[subject,driverId]);
    await client.query('COMMIT');
    return {driverId,vehicleId:vehicle.rows[0].id,status:driver.rows[0].status};
