@@ -83,6 +83,14 @@ test('M7 acceptance: owner-only customer reads, idempotent request and quote bin
  const other=await subject('other-customer');
  await assert.rejects(()=>requests.get(other,first.id),{status:404});
  const quoted=await pool.query('SELECT quote_id FROM ride_requests WHERE id=$1',[first.id]);
+ const protectedQuote=quoted.rows[0].quote_id;
+ await assert.rejects(()=>pool.query('UPDATE ride_fare_quotes SET amount_minor=1 WHERE id=$1',[protectedQuote]),{code:'42501'});
+ await assert.rejects(()=>pool.query('DELETE FROM ride_fare_quotes WHERE id=$1',[protectedQuote]),{code:'42501'});
+ const privileges=await runtime.query<{can_update:boolean;can_select:boolean}>(`SELECT
+   has_table_privilege(current_user,'ride_fare_quotes','UPDATE') AS can_update,
+   has_table_privilege(current_user,'ride_fare_quotes','SELECT') AS can_select`);
+ assert.equal(privileges.rows[0].can_update,false);
+ assert.equal(privileges.rows[0].can_select,true);
  const replay=await requests.create(customer,{pickup:coords(),destination:coords(6.53,3.4),category,
    quoteId:quoted.rows[0].quote_id,idempotencyKey:key});
  assert.equal(replay.id,first.id);assert.equal(replay.replayed,true);
