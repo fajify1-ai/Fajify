@@ -11,11 +11,12 @@ import {AdminSupportService} from './admin-support.service';
 import {AdminIncidentService} from './admin-incidents.service';
 import {AdminInsightsService} from './admin-insights.service';
 import {AdminMonitorService} from './admin-monitor.service';
+import {AdminEmptyBodyGuard} from './admin-empty-body.guard';
 
 @Module({
  imports:[IdentityModule],
  controllers:[AdminOperationsController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController],
- providers:[AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
+ providers:[AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
   AdminIncidentService,AdminInsightsService,AdminMonitorService]
 })
 export class AdminOperationsModule {}

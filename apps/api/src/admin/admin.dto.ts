@@ -135,3 +135,42 @@ export class AdminAlertPage {
  @ApiProperty({type:()=>[AdminAlertView]}) items!:AdminAlertView[];
  @ApiProperty({type:Number,nullable:true}) nextOffset!:number|null;
 }
+
+export class AdminModerationResultView extends AdminChangedView {
+ @ApiProperty({enum:['visible','hidden']}) moderationStatus!:string;
+}
+export class AdminRestrictionResultView extends AdminChangedView {
+ @ApiProperty({type:String}) resourceType!:string;
+ @ApiProperty({type:Boolean}) restricted!:boolean;
+}
+export class AdminSupportAssignmentView extends AdminChangedView {
+ @ApiProperty({type:String,nullable:true}) assignedTo!:string|null;
+ @ApiProperty({type:String}) priority!:string;
+}
+export class AdminSupportStatusView extends AdminChangedView {
+ @ApiProperty({type:String}) status!:string;
+}
+export class AdminIncidentStatusView extends AdminChangedView {
+ @ApiProperty({type:String}) state!:string;
+}
+export class AdminSupportMessageView {
+ @ApiProperty({type:String,format:'uuid'}) id!:string;
+ @ApiProperty({type:String}) body!:string;
+ @ApiProperty({type:String,format:'date-time'}) createdAt!:string;
+}
+export class AdminSupportDetailView {
+ @ApiProperty({type:String,format:'uuid'}) id!:string;
+ @ApiProperty({type:String}) customerSubject!:string;
+ @ApiProperty({type:String}) category!:string;
+ @ApiProperty({type:String,nullable:true}) resourceId!:string|null;
+ @ApiProperty({type:String}) subject!:string;
+ @ApiProperty({type:String}) status!:string;
+ @ApiProperty({type:String,nullable:true}) assignedTo!:string|null;
+ @ApiProperty({type:String}) priority!:string;
+ @ApiProperty({type:String,format:'date-time'}) createdAt!:string;
+ @ApiProperty({type:String,format:'date-time'}) updatedAt!:string;
+ @ApiProperty({schema:{type:'object',additionalProperties:false,properties:{
+  items:{type:'array',items:{$ref:'#/components/schemas/AdminSupportMessageView'}},
+  nextOffset:{type:'integer',nullable:true}
+ }}}) messages!: {items:AdminSupportMessageView[];nextOffset:number|null};
+}

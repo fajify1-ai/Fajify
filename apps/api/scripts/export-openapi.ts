@@ -4,6 +4,7 @@ import {isDeepStrictEqual} from 'node:util';
 import {M5_OPERATIONS} from '../src/payments/m5-contracts';
 import {M4_OPERATIONS} from '../src/customer/customer-contracts';
 import {M6_OPERATIONS} from '../src/planning/planning-contracts';
+import {M8_OPERATIONS} from '../src/admin/admin-contracts';
 import {resolve} from 'node:path';
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from '../src/app.module';
@@ -94,6 +95,21 @@ async function run(){
      throw new Error('Missing M6 path parameter: '+contract.path);
    if('paginated' in contract&&contract.paginated&&!operation.parameters?.some(p=>'name' in p&&p.name==='limit'&&p.in==='query'))
     throw new Error('Missing M6 pagination: '+contract.path);
+  }
+
+  for(const contract of M8_OPERATIONS){
+   const op=doc.paths[contract.path]?.[contract.method];
+   if(!op)throw new Error('Missing M8 administrative route: '+contract.method+' '+contract.path);
+   if(!op.security?.some(s=>Object.hasOwn(s,'keycloak')))throw new Error('Missing M8 bearer auth: '+contract.path);
+   if(contract.body&&!op.requestBody)throw new Error('Missing M8 command body: '+contract.path);
+   const response=op.responses[String(contract.status)];
+   if(!response||!('content' in response)||!response.content?.['application/json']?.schema)
+    throw new Error('Missing M8 JSON response schema: '+contract.path);
+   for(const name of [...contract.path.matchAll(/\{([^}]+)\}/g)].map(m=>m[1]))
+    if(!op.parameters?.some(p=>'name' in p&&p.in==='path'&&p.name===name&&p.required))
+     throw new Error('Missing M8 path parameter: '+contract.path);
+   if(contract.paginated&&!op.parameters?.some(p=>'name' in p&&p.in==='query'&&p.name==='limit'))
+    throw new Error('Missing M8 pagination contract: '+contract.path);
   }
   const snapshot=resolve(__dirname,'../../../packages/api_contracts/openapi.json');
   const previous=JSON.parse(readFileSync(snapshot,'utf8')) as typeof doc;

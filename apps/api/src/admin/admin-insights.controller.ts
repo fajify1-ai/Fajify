@@ -1,5 +1,5 @@
 import {Body,Controller,Get,Header,HttpCode,Inject,Param,ParseUUIDPipe,Post,Query,Req,UseGuards,BadRequestException} from '@nestjs/common';
-import {ApiBearerAuth,ApiOkResponse,ApiParam,ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth,ApiBody,ApiOkResponse,ApiParam,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
@@ -8,6 +8,7 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {PageQuery} from '../customer/customer.dto';
 import {pagination,validated} from '../customer/customer-http';
 import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
+import {AdminEmptyBodyGuard} from './admin-empty-body.guard';
 import {AdminInsightsService} from './admin-insights.service';
 import {AdminMonitorService} from './admin-monitor.service';
 import {AdminReportRangeQuery,AdminPagedResult,AdminFinanceSummary,AdminReportSummary,AdminMonitoringSummary,AdminCommandAuditPage,AdminAlertPage,AdminCommandKey,AdminChangedView} from './admin.dto';
@@ -28,7 +29,7 @@ export class AdminInsightsController{
  @Get('monitoring/status') @RequireAdminScope('monitoring.read') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminMonitoringSummary})
  status(){return this.insights.monitoring();}
- @Post('monitoring/check') @HttpCode(200) @RequireAdminScope('incidents.write') @Header('Cache-Control','no-store')
+ @Post('monitoring/check') @UseGuards(AdminEmptyBodyGuard) @ApiBody({required:false,schema:{type:'object',additionalProperties:false}}) @HttpCode(200) @RequireAdminScope('incidents.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({schema:{type:'object',properties:{checkedAt:{type:'string',format:'date-time'},opened:{type:'array',items:{type:'string'}},cleared:{type:'array',items:{type:'string'}}}}})
  check(){return this.monitor.tick();}
  @Get('monitoring/alerts') @RequireAdminScope('monitoring.read') @Header('Cache-Control','no-store')
