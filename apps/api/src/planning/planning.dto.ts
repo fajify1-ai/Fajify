@@ -19,8 +19,8 @@ export class CustomerSavedPlanEditInput extends CustomerSavedPlanInput {
  @ApiProperty({type:Number,minimum:1}) @IsInt() @Min(1) revision!:number;
 }
 export class CustomerSavedPlanListQuery {
- @ApiPropertyOptional({minimum:1,maximum:50,default:20}) @IsOptional() @Type(()=>Number) @IsInt() @Min(1) @Max(50) limit=20;
- @ApiPropertyOptional({minimum:0,maximum:10000,default:0}) @IsOptional() @Type(()=>Number) @IsInt() @Min(0) @Max(10000) offset=0;
+ @ApiPropertyOptional({type:Number,minimum:1,maximum:50,default:20}) @IsOptional() @Type(()=>Number) @IsInt() @Min(1) @Max(50) limit=20;
+ @ApiPropertyOptional({type:Number,minimum:0,maximum:10000,default:0}) @IsOptional() @Type(()=>Number) @IsInt() @Min(0) @Max(10000) offset=0;
 }
 export class CustomerSavedPlanView {
  @ApiProperty({type:String,}) id!:string;
