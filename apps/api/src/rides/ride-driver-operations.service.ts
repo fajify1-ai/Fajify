@@ -14,38 +14,50 @@ export class RideDriverOperations {
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
  }
  async document(subject:string,kind:string,key:string,expiresAt:Date){
-  // Verify the object before storing an untrusted client-supplied reference.
-  await this.objects.verify(key);
+  const owner=await this.pool.query<{id:string}>("SELECT id FROM ride_drivers WHERE identity_subject=$1 AND status<>'suspended'",[subject]);
+  if(!owner.rows[0])throw new ForbiddenException('Driver onboarding unavailable');
+  const driverId=owner.rows[0].id;
+  if(!key.startsWith('private/ride-drivers/'+driverId+'/'+kind+'/')||
+     !/^[A-Za-z0-9_./-]{40,250}$/.test(key)||key.includes('..')||
+     !Number.isFinite(expiresAt.getTime())||expiresAt.getTime()<=Date.now())
+   throw new ConflictException('Invalid private document reference or expiry');
+  const proof=await this.objects.verify(key);
   return this.tx(async c=>{
    const d=await c.query<{id:string;status:string}>('SELECT id,status FROM ride_drivers WHERE identity_subject=$1 FOR UPDATE',[subject]);
-   if(!d.rows[0]||d.rows[0].status==='suspended')throw new ForbiddenException('Driver unavailable');
-   const id=d.rows[0].id;
-   if(!key.startsWith('private/ride-drivers/'+id+'/'+kind+'/')||
-     !/^[A-Za-z0-9_./-]{40,250}$/.test(key)||key.includes('..')||expiresAt.getTime()<=Date.now())
-     throw new ConflictException('Invalid private document reference or expiry');
-   const r=await c.query<{id:string}>(`INSERT INTO ride_driver_documents(driver_id,document_kind,private_object_key,review_status,expires_at)
-      VALUES($1,$2,$3,'pending',$4)
-      ON CONFLICT(driver_id,document_kind) DO UPDATE SET private_object_key=EXCLUDED.private_object_key,
-      review_status='pending',expires_at=EXCLUDED.expires_at RETURNING id`,[id,kind,key,expiresAt]);
-   await c.query("UPDATE ride_drivers SET available=false,updated_at=now() WHERE id=$1",[id]);
-   await c.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'ride.document.submitted','ride_driver_document',$2)",[subject,r.rows[0].id]);
-   return {id:r.rows[0].id,status:'pending'};
+   if(!d.rows[0]||d.rows[0].id!==driverId||d.rows[0].status==='suspended')
+    throw new ForbiddenException('Driver no longer eligible for document submission');
+   const saved=await c.query<{id:string}>("INSERT INTO ride_driver_documents(driver_id,document_kind,private_object_key,review_status,expires_at,object_etag,object_bytes,object_content_type,object_version,object_checked_at) VALUES($1,$2,$3,'pending',$4,$5,$6,$7,$8,now()) ON CONFLICT(driver_id,document_kind) DO UPDATE SET private_object_key=EXCLUDED.private_object_key,review_status='pending',expires_at=EXCLUDED.expires_at,object_etag=EXCLUDED.object_etag,object_bytes=EXCLUDED.object_bytes,object_content_type=EXCLUDED.object_content_type,object_version=EXCLUDED.object_version,object_checked_at=now() RETURNING id",[driverId,kind,key,expiresAt,proof.etag,proof.bytes,proof.contentType,proof.versionId]);
+   await c.query('UPDATE ride_drivers SET available=false,updated_at=now() WHERE id=$1',[driverId]);
+   await c.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'ride.document.submitted','ride_driver_document',$2)",[subject,saved.rows[0].id]);
+   return {id:saved.rows[0].id,status:'pending'};
   });
  }
  async reviewDocument(actor:string,documentId:string,approve:boolean){
-  // Never approve a key that was replaced between storage verification and row locking.
-  const snapshot=await this.pool.query<{private_object_key:string}>('SELECT private_object_key FROM ride_driver_documents WHERE id=$1',[documentId]);
+  const snapshot=await this.pool.query<{private_object_key:string;object_etag:string|null;object_bytes:string|null;object_content_type:string|null;object_version:string|null}>("SELECT private_object_key,object_etag,object_bytes::text,object_content_type,object_version FROM ride_driver_documents WHERE id=$1",[documentId]);
   if(!snapshot.rows[0])throw new NotFoundException();
-  if(approve)await this.objects.verify(snapshot.rows[0].private_object_key);
+  const original=snapshot.rows[0];
+  if(approve){
+   const proof=await this.objects.verify(original.private_object_key);
+   if(proof.etag!==original.object_etag||String(proof.bytes)!==original.object_bytes||
+      proof.contentType!==original.object_content_type||proof.versionId!==original.object_version)
+    throw new ConflictException('Document object evidence changed; resubmit for review');
+  }
   return this.tx(async c=>{
-   const row=await c.query<{driver_id:string;expires_at:Date|null;private_object_key:string}>(`SELECT driver_id,expires_at,private_object_key FROM ride_driver_documents WHERE id=$1 FOR UPDATE`,[documentId]);
+   const row=await c.query<{driver_id:string;expires_at:Date|null;private_object_key:string;object_etag:string|null;object_bytes:string|null;object_content_type:string|null;object_version:string|null}>("SELECT driver_id,expires_at,private_object_key,object_etag,object_bytes::text,object_content_type,object_version FROM ride_driver_documents WHERE id=$1 FOR UPDATE",[documentId]);
    if(!row.rows[0])throw new NotFoundException();
-   if(approve&&row.rows[0].private_object_key!==snapshot.rows[0].private_object_key)
-    throw new ConflictException('Document was replaced during review');
-   if(approve&&(!row.rows[0].expires_at||row.rows[0].expires_at.getTime()<=Date.now()))throw new ConflictException('Document already expired');
-   await c.query("UPDATE ride_driver_documents SET review_status=$2 WHERE id=$1",[documentId,approve?'approved':'rejected']);
-   await c.query('UPDATE ride_drivers SET available=false,updated_at=now() WHERE id=$1',[row.rows[0].driver_id]);
-   await c.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,$2,'ride_driver_document',$3)",[actor,approve?'ride.document.approved':'ride.document.rejected',documentId]);
+   const current=row.rows[0];
+   if(approve&&(current.private_object_key!==original.private_object_key||
+      current.object_etag!==original.object_etag||current.object_bytes!==original.object_bytes||
+      current.object_content_type!==original.object_content_type||current.object_version!==original.object_version))
+    throw new ConflictException('Document replaced during review');
+   if(approve&&(!current.expires_at||current.expires_at.getTime()<=Date.now()))
+    throw new ConflictException('Document already expired');
+   await c.query('UPDATE ride_driver_documents SET review_status=$2 WHERE id=$1',
+     [documentId,approve?'approved':'rejected']);
+   await c.query('UPDATE ride_drivers SET available=false,updated_at=now() WHERE id=$1',
+     [current.driver_id]);
+   await c.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,$2,'ride_driver_document',$3)",
+     [actor,approve?'ride.document.approved':'ride.document.rejected',documentId]);
    return {documentId,status:approve?'approved':'rejected'};
   });
  }
