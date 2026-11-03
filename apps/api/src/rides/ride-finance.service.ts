@@ -95,6 +95,8 @@ export class RideFinanceService {
    await c.query("UPDATE ride_driver_payouts SET state='submitting',updated_at=now() WHERE id=$1",[payoutId]);
    return p.rows[0];
   });
+  // Independently check the recipient again. Ambiguous provider writes are never retried.
+  await this.gateway.recipient(item.recipient_ref);
   // An ambiguous provider response is NOT retried. Recovery verifies the original reference.
   try{
    await this.gateway.transfer(item.provider_reference,item.amount_minor,item.recipient_ref);
