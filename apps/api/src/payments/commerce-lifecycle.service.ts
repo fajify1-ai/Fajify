@@ -106,6 +106,22 @@ export class CommerceLifecycle {
   const h=(await c.query('SELECT *,expires_at>now() AS unexpired FROM paid_holds WHERE intent_id=$1 FOR UPDATE',[p.id])).rows[0];
   if(!h||h.status!=='held'||!h.unexpired)throw new ConflictException('Payment hold expired');
   if(!(await c.query("SELECT 1 FROM business_branches b JOIN business_onboarding m ON m.id=b.business_id JOIN business_catalogue i ON i.branch_id=b.id WHERE i.id=$1 AND i.active AND i.published AND b.active AND m.status='approved' FOR SHARE OF b,m,i",[h.catalogue_id])).rowCount)throw new ConflictException('Offering unavailable');
+  const packageOffer=await c.query<{price_minor:string;pricing_model:string;min_guests:number;max_guests:number}>(`
+   SELECT i.price_minor::text,p.pricing_model,p.min_guests,p.max_guests
+   FROM business_catalogue i JOIN business_public_packages p ON p.catalogue_id=i.id
+   WHERE i.id=$1 AND i.kind='package' AND i.active AND i.published FOR SHARE OF i,p`,[h.catalogue_id]);
+  if(packageOffer.rowCount){
+   const pkg=packageOffer.rows[0],calculated=BigInt(pkg.price_minor)*(pkg.pricing_model==='per_group'?1n:BigInt(h.quantity));
+   if(h.quantity<pkg.min_guests||h.quantity>pkg.max_guests||calculated.toString()!==p.amount_minor)
+    throw new ConflictException('Package price or group configuration changed');
+   const components=await c.query<{availability_id:string}>(`
+    SELECT availability_id FROM package_component_holds WHERE hold_id=$1 AND released_at IS NULL`,[h.id]);
+   if(!components.rowCount||!(await c.query(`
+    SELECT 1 FROM business_package_components pc
+    LEFT JOIN business_catalogue i ON i.id=pc.component_id AND i.business_id=pc.business_id AND i.branch_id=pc.branch_id
+    WHERE pc.package_id=$1 AND (i.id IS NULL OR NOT i.active OR NOT i.published OR i.kind='package')`,[h.catalogue_id])).rowCount===false)
+    throw new ConflictException('Package composition unavailable');
+  }
   if(h.kind==='ticket'){ticketKey(h.key_id);if(!(await c.query('SELECT 1 FROM business_event_config WHERE catalogue_id=$1 AND starts_at>now() FOR SHARE',[h.catalogue_id])).rowCount)throw new ConflictException('Event has started');}
   else if(!(await c.query('SELECT 1 FROM business_availability WHERE id=$1 AND active AND starts_at>now() FOR UPDATE',[h.availability_id])).rowCount)throw new ConflictException('Slot no longer available');
  }
