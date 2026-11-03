@@ -36,6 +36,7 @@ run_check api-types no corepack pnpm@9.15.9 --filter @faji/api typecheck
 run_check m4-test-types no corepack pnpm@9.15.9 --filter @faji/api exec tsc -p tsconfig.m4-tests.json
 run_check m5-test-types no corepack pnpm@9.15.9 --filter @faji/api exec tsc -p tsconfig.m5-tests.json
 run_check m3-test-types no corepack pnpm@9.15.9 --filter @faji/api exec tsc -p tsconfig.m3-tests.json
+run_check membership-test-types no corepack pnpm@9.15.9 --filter @faji/api exec tsc -p tsconfig.membership-tests.json
 run_check lint no corepack pnpm@9.15.9 --filter @faji/api lint
 run_check build no corepack pnpm@9.15.9 --filter @faji/api build
 run_check migrations no corepack pnpm@9.15.9 --filter @faji/database exec node --import tsx scripts/migrate.ts
