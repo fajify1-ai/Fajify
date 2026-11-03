@@ -17,6 +17,7 @@ run(){
  if "$@" >"$FAJI_M7_REPORT_DIR/$name.log" 2>&1; then
   printf '%s\tPASS\n' "$name" >>"$results"
   echo "PASS: $name"
+  return 0
  else
   local status=$?
   printf '%s\tFAIL(%s)\n' "$name" "$status" >>"$results"
@@ -26,6 +27,7 @@ run(){
    echo "FAILURE DETAILS ($name): first test diagnostics" >&2
    grep -n -A 20 -E '^not ok [0-9]+' "$FAJI_M7_REPORT_DIR/$name.log" | head -n 180 >&2 || true
   fi
+  return "$status"
  fi
 }
 run database-typecheck corepack pnpm --filter @faji/database typecheck
@@ -36,8 +38,12 @@ run api-unit corepack pnpm --filter @faji/api test
 run api-build corepack pnpm --filter @faji/api build
 run m7-disposable-postgis corepack pnpm --filter @faji/api test:m7:database
 run existing-database-integrations corepack pnpm --filter @faji/api test:database
-run openapi-export corepack pnpm --filter @faji/api contracts
-run openapi-snapshot-match git diff --exit-code -- packages/api_contracts/openapi.json
+if run openapi-export corepack pnpm --filter @faji/api contracts; then
+ run openapi-snapshot-match git diff --exit-code -- packages/api_contracts/openapi.json
+else
+ printf '%s\tBLOCKED(openapi-export)\n' openapi-snapshot-match >>"$results"
+ echo 'BLOCKED: openapi-snapshot-match (export failed)' >&2
+fi
 run source-whitespace git diff --check
 run branch-clean bash -c 'test -z "$(git status --porcelain)"'
 node - "$results" "$FAJI_M7_REPORT_DIR/acceptance.json" "$source_commit" <<'JS'
