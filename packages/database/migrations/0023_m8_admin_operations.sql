@@ -61,14 +61,21 @@ CREATE TABLE admin_marketplace_restrictions (
 CREATE FUNCTION m8_prevent_restricted_reactivation() RETURNS trigger
  LANGUAGE plpgsql AS $$
 BEGIN
- IF TG_TABLE_NAME='business_branches' AND NEW.active AND NOT OLD.active
-  AND EXISTS(SELECT 1 FROM admin_marketplace_restrictions
-    WHERE resource_type='branch' AND resource_id=NEW.id AND restricted)
- THEN RAISE EXCEPTION 'M8: administrative branch restriction is active'; END IF;
- IF TG_TABLE_NAME='business_catalogue' AND NEW.published AND NOT OLD.published
-  AND EXISTS(SELECT 1 FROM admin_marketplace_restrictions
-    WHERE resource_type='catalogue' AND resource_id=NEW.id AND restricted)
- THEN RAISE EXCEPTION 'M8: administrative catalogue restriction is active'; END IF;
+ IF TG_TABLE_NAME='business_branches' THEN
+  IF NEW.active AND NOT OLD.active
+   AND EXISTS(SELECT 1 FROM admin_marketplace_restrictions
+     WHERE resource_type='branch' AND resource_id=NEW.id AND restricted)
+  THEN
+   RAISE EXCEPTION 'M8: administrative branch restriction is active';
+  END IF;
+ ELSIF TG_TABLE_NAME='business_catalogue' THEN
+  IF NEW.published AND NOT OLD.published
+   AND EXISTS(SELECT 1 FROM admin_marketplace_restrictions
+     WHERE resource_type='catalogue' AND resource_id=NEW.id AND restricted)
+  THEN
+   RAISE EXCEPTION 'M8: administrative catalogue restriction is active';
+  END IF;
+ END IF;
  RETURN NEW;
 END;
 $$;
