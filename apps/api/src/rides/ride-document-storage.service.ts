@@ -34,7 +34,7 @@ export class RideDocumentStorage {
    throw new ServiceUnavailableException('Invalid private document storage endpoint');
   const uri='/'+[bucket,...key.split('/')].map(encodeURIComponent).join('/');
   url.pathname=uri;
-  const date=new Date().toISOString().replace(/[:-]|\\.\\d{3}/g,''),day=date.slice(0,8),
+  const date=new Date().toISOString().replace(/[:-]|\.\d{3}/g,''),day=date.slice(0,8),
    scope=day+'/'+region+'/s3/aws4_request';
   const params:Record<string,string>={
    'X-Amz-Algorithm':'AWS4-HMAC-SHA256',
@@ -44,11 +44,11 @@ export class RideDocumentStorage {
    'X-Amz-SignedHeaders':'content-type;host'
   };
   if(process.env.FAJI_S3_SESSION_TOKEN)params['X-Amz-Security-Token']=process.env.FAJI_S3_SESSION_TOKEN;
-  const query=Object.entries(params).sort(([a],[b])=>a.localeCompare(b))
+  const query=Object.entries(params).sort(([a],[b])=>a<b?-1:a>b?1:0)
    .map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
-  const canonicalHeaders='content-type:'+contentType+'\\nhost:'+url.host+'\\n';
-  const request=['PUT',uri,query,canonicalHeaders,'content-type;host','UNSIGNED-PAYLOAD'].join('\\n');
-  const stringToSign=['AWS4-HMAC-SHA256',date,scope,hex(request)].join('\\n');
+  const canonicalHeaders='content-type:'+contentType+'\nhost:'+url.host+'\n';
+  const request=['PUT',uri,query,canonicalHeaders,'content-type;host','UNSIGNED-PAYLOAD'].join('\n');
+  const stringToSign=['AWS4-HMAC-SHA256',date,scope,hex(request)].join('\n');
   const kDate=sign('AWS4'+secret,day),kRegion=sign(kDate,region),
    kService=sign(kRegion,'s3'),kSigning=sign(kService,'aws4_request');
   const signature=createHmac('sha256',kSigning).update(stringToSign).digest('hex');
