@@ -4,7 +4,7 @@ import {isDeepStrictEqual} from 'node:util';
 import {M5_OPERATIONS} from '../src/payments/m5-contracts';
 import {M4_OPERATIONS} from '../src/customer/customer-contracts';
 import {M6_OPERATIONS} from '../src/planning/planning-contracts';
-import {M8_OPERATIONS} from '../src/admin/admin-contracts';
+import {M8_OPERATIONS,M8_CUSTOMER_OPERATIONS} from '../src/admin/admin-contracts';
 import {resolve} from 'node:path';
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from '../src/app.module';
@@ -97,7 +97,7 @@ async function run(){
     throw new Error('Missing M6 pagination: '+contract.path);
   }
 
-  for(const contract of M8_OPERATIONS){
+  for(const contract of [...M8_OPERATIONS,...M8_CUSTOMER_OPERATIONS]){
    const op=doc.paths[contract.path]?.[contract.method];
    if(!op)throw new Error('Missing M8 administrative route: '+contract.method+' '+contract.path);
    if(!op.security?.some(s=>Object.hasOwn(s,'keycloak')))throw new Error('Missing M8 bearer auth: '+contract.path);

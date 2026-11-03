@@ -2,7 +2,7 @@
  * pagination, declared path params or documented JSON responses.
  */
 export interface AdminOperation {
- path:string;method:'get'|'post';body:boolean;status:200|201;paginated:boolean;
+ path:string;method:'get'|'post'|'put';body:boolean;status:200|201;paginated:boolean;
 }
 const entry=(path:string,method:'get'|'post',body=false,status:200|201=200,paginated=false):AdminOperation=>
  ({path:'/api/v1/admin/'+path,method,body,status,paginated});
@@ -29,4 +29,10 @@ export const M8_OPERATIONS:ReadonlyArray<AdminOperation>=[
  entry('monitoring/alerts','get',false,200,true),
  entry('monitoring/alerts/{id}/acknowledgement','post',true),
  entry('integrations/customers/{subject}/activity','get',false,200,true)
+];
+
+/** M8-owned customer support notification contracts consumed by M8-P2. */
+export const M8_CUSTOMER_OPERATIONS:ReadonlyArray<AdminOperation>=[
+ {path:'/api/v1/customer/support-notifications',method:'get',body:false,status:200,paginated:true},
+ {path:'/api/v1/customer/support-notifications/{id}/read',method:'put',body:false,status:200,paginated:false}
 ];

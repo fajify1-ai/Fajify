@@ -15,6 +15,8 @@ export async function grantM5Runtime(pool:Pool,runtimeUrl:string){
  await pool.query('GRANT SELECT ON admin_scope_grants,admin_scope_grant_events TO '+quoted);
  await pool.query('GRANT SELECT,INSERT ON admin_action_events,admin_command_receipts TO '+quoted);
  await pool.query('GRANT SELECT,INSERT,UPDATE ON admin_marketplace_restrictions,admin_incidents,admin_monitor_signals,admin_alerts TO '+quoted);
+ await pool.query('GRANT SELECT,INSERT,UPDATE ON customer_support_notifications TO '+quoted);
+ await pool.query('GRANT EXECUTE ON FUNCTION m8_notify_support_reply() TO '+quoted);
  await pool.query('GRANT EXECUTE ON FUNCTION m8_prevent_restricted_reactivation() TO '+quoted);
  await pool.query('GRANT EXECUTE ON FUNCTION faji_customer_notification() TO '+quoted);
 }

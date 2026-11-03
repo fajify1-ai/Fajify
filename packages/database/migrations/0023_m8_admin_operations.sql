@@ -165,3 +165,34 @@ $$;
 REVOKE ALL ON FUNCTION m8_scope_grant_identity_guard() FROM PUBLIC;
 CREATE TRIGGER admin_scope_grant_identity_guard BEFORE UPDATE OR DELETE ON admin_scope_grants
  FOR EACH ROW EXECUTE FUNCTION m8_scope_grant_identity_guard();
+
+-- Admin support replies produce one durable, customer-owned in-app notice.
+-- Existing customer_notifications intentionally handles only orders/reservations.
+CREATE TABLE customer_support_notifications (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+ case_id uuid NOT NULL REFERENCES customer_support_cases(id),
+ message_id uuid NOT NULL UNIQUE REFERENCES customer_support_messages(id),
+ customer_subject varchar(255) NOT NULL REFERENCES user_profiles(identity_subject),
+ title varchar(120) NOT NULL DEFAULT 'Support replied',
+ read_at timestamptz,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX customer_support_notifications_owner_idx
+ ON customer_support_notifications(customer_subject,created_at DESC,id DESC);
+CREATE INDEX customer_support_notifications_unread_idx
+ ON customer_support_notifications(customer_subject,created_at DESC)
+ WHERE read_at IS NULL;
+CREATE FUNCTION m8_notify_support_reply() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ IF NEW.author_kind='admin' THEN
+  INSERT INTO customer_support_notifications(case_id,message_id,customer_subject)
+  SELECT s.id,NEW.id,s.customer_subject FROM customer_support_cases s WHERE s.id=NEW.case_id
+  ON CONFLICT(message_id) DO NOTHING;
+ END IF;
+ RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION m8_notify_support_reply() FROM PUBLIC;
+CREATE TRIGGER m8_support_reply_notice AFTER INSERT ON customer_support_messages
+ FOR EACH ROW EXECUTE FUNCTION m8_notify_support_reply();
+REVOKE ALL ON customer_support_notifications FROM PUBLIC;

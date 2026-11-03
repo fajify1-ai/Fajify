@@ -1,5 +1,8 @@
 import {Module} from '@nestjs/common';
 import {IdentityModule} from '../auth/identity.module';
+import {CustomerModule} from '../customer/customer.module';
+import {CustomerSupportNotificationsController} from './customer-support-notifications.controller';
+import {CustomerSupportNotificationsService} from './customer-support-notifications.service';
 import {AdminOperationsController} from './admin.controller';
 import {AdminGovernanceController,AdminSupportController,AdminIncidentController} from './admin-workflows.controller';
 import {AdminInsightsController} from './admin-insights.controller';
@@ -14,9 +17,9 @@ import {AdminMonitorService} from './admin-monitor.service';
 import {AdminEmptyBodyGuard} from './admin-empty-body.guard';
 
 @Module({
- imports:[IdentityModule],
- controllers:[AdminOperationsController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController],
- providers:[AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
+ imports:[IdentityModule,CustomerModule],
+ controllers:[CustomerSupportNotificationsController,AdminOperationsController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController],
+ providers:[CustomerSupportNotificationsService,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
   AdminIncidentService,AdminInsightsService,AdminMonitorService]
 })
 export class AdminOperationsModule {}
