@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {"noEmit": true, "rootDir": "../.."},
+  "include": ["src/**/*.ts", "scripts/export-openapi.ts", "test/m7-*.ts"]
+}
