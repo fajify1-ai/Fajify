@@ -1,8 +1,8 @@
 # M6 · Phase 1 — Experience Planning & Personalization Backend
 
-**Workstream:** M6-P1 — Backend & Platform  
-**Branch:** `feat/m6-p1-planning-engine`  
-**Review:** Draft PR #18 — https://github.com/fajify1-ai/Fajify/pull/18  
+**Workstream:** M6-P1 — Backend & Platform
+**Branch:** `feat/m6-p1-planning-engine`
+**Review:** Draft PR #18 — https://github.com/fajify1-ai/Fajify/pull/18
 **Status:** Implementation changes committed; consolidated local acceptance **not executed**. No GitHub Actions, deployment, or merge.
 
 ## Authoritative scope
