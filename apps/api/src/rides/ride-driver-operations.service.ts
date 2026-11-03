@@ -1,10 +1,11 @@
 import {ConflictException,ForbiddenException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
+import {PaystackGateway} from '../payments/paystack.gateway';
 
 @Injectable()
 export class RideDriverOperations {
- constructor(@Inject(DATABASE_POOL) private readonly pool:Pool){}
+ constructor(@Inject(DATABASE_POOL) private readonly pool:Pool,@Inject(PaystackGateway) private readonly gateway:PaystackGateway){}
  private async tx<T>(work:(c:import('pg').PoolClient)=>Promise<T>):Promise<T>{
   const c=await this.pool.connect();try{
    await c.query('BEGIN');const result=await work(c);await c.query('COMMIT');return result;
@@ -91,6 +92,7 @@ export class RideDriverOperations {
   });
  }
  async verifyBankReference(actor:string,driverId:string,reference:string){
+  await this.gateway.recipient(reference);
   return this.tx(async c=>{
    const r=await c.query('UPDATE ride_driver_bank_refs SET verified=true,updated_at=now() WHERE driver_id=$1 AND payout_recipient_ref=$2 RETURNING driver_id',[driverId,reference]);
    if(!r.rowCount)throw new ConflictException('Payout recipient changed or not found');
