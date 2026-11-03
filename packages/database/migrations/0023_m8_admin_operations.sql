@@ -128,3 +128,27 @@ CREATE TABLE admin_alerts (
 );
 CREATE INDEX admin_alerts_unread_idx ON admin_alerts(created_at DESC,id DESC) WHERE acknowledged_at IS NULL;
 REVOKE ALL ON admin_alerts FROM PUBLIC;
+
+-- Scope changes are operator-controlled and recorded atomically.
+CREATE TABLE admin_scope_grant_events (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+ identity_subject varchar(255) NOT NULL,
+ scope varchar(32) NOT NULL,
+ active boolean NOT NULL,
+ granted_by varchar(255) NOT NULL,
+ occurred_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX admin_scope_grant_events_time_idx ON admin_scope_grant_events(occurred_at DESC,id DESC);
+CREATE TRIGGER admin_scope_grant_events_immutable BEFORE UPDATE OR DELETE ON admin_scope_grant_events
+ FOR EACH ROW EXECUTE FUNCTION m5_immutable_record();
+CREATE FUNCTION m8_audit_scope_grant() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ INSERT INTO admin_scope_grant_events(identity_subject,scope,active,granted_by)
+ VALUES(NEW.identity_subject,NEW.scope,NEW.active,NEW.granted_by);
+ RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION m8_audit_scope_grant() FROM PUBLIC;
+CREATE TRIGGER admin_scope_grant_audit AFTER INSERT OR UPDATE OF active,granted_by ON admin_scope_grants
+ FOR EACH ROW EXECUTE FUNCTION m8_audit_scope_grant();
+REVOKE ALL ON admin_scope_grant_events FROM PUBLIC;
