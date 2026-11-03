@@ -5,12 +5,12 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {CustomerService} from '../customer/customer.service';
 import {CommerceLifecycle} from '../payments/commerce-lifecycle.service';
 import {rankExperiences,type PlanningCandidate} from './recommendation.rules';
-import type {PlanInput,PlanEditInput,PlanFeedbackInput,PlanBookingInput,PlanListQuery} from './planning.dto';
+import type {CustomerSavedPlanInput,CustomerSavedPlanEditInput,CustomerPlanFeedbackInput,CustomerPlanBookingInput,CustomerSavedPlanListQuery} from './planning.dto';
 
 const cols='id,occasion,budget_minor::text AS "budgetMinor",currency,guests,starts_after AS "startsAfter",starts_before AS "startsBefore",location_text AS location,categories,latitude,longitude,radius_km AS "radiusKm",revision,status,created_at AS "createdAt"';
 type Stored={id:string;occasion:string;budgetMinor:string;currency:string;guests:number;startsAfter:Date;startsBefore:Date;location:string|null;categories:string[];latitude:number|null;longitude:number|null;radiusKm:number|null;revision:number;status:string;createdAt:Date};
 const serialized=(row:Stored)=>({...row,startsAfter:row.startsAfter.toISOString(),startsBefore:row.startsBefore.toISOString(),createdAt:row.createdAt.toISOString()});
-const validate=(input:PlanInput)=>{
+const validate=(input:CustomerSavedPlanInput)=>{
  const a=Date.parse(input.startsAfter),b=Date.parse(input.startsBefore);
  if(!Number.isFinite(a)||!Number.isFinite(b)||b<=a||a<=Date.now()||b-a>31*86400000)
   throw new BadRequestException('Planning window must be future, ordered and at most 31 days');
@@ -23,7 +23,7 @@ const validate=(input:PlanInput)=>{
 @Injectable()
 export class PlanningService {
  constructor(@Inject(DATABASE_POOL) private readonly pool:Pool,@Inject(CustomerService) private readonly customer:CustomerService,@Inject(CommerceLifecycle) private readonly commerce:CommerceLifecycle){}
- async create(identity:VerifiedIdentity,input:PlanInput){
+ async create(identity:VerifiedIdentity,input:CustomerSavedPlanInput){
   validate(input);
   return this.customer.withAccountTransaction(identity,async c=>{
    const row=await c.query<Stored>(`INSERT INTO customer_plans(customer_subject,occasion,budget_minor,currency,guests,starts_after,starts_before,location_text,categories,latitude,longitude,radius_km)
@@ -31,7 +31,7 @@ export class PlanningService {
    return serialized(row.rows[0]);
   });
  }
- async list(subject:string,query:PlanListQuery){
+ async list(subject:string,query:CustomerSavedPlanListQuery){
   const rows=await this.pool.query<Stored>(`SELECT ${cols} FROM customer_plans WHERE customer_subject=$1 ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`,[subject,query.limit+1,query.offset]);
   return {items:rows.rows.slice(0,query.limit).map(serialized),nextOffset:rows.rows.length>query.limit?query.offset+query.limit:null};
  }
@@ -96,7 +96,7 @@ export class PlanningService {
     score:r.score,reasons:r.reasons,bookingStatus:'revalidation_required'};
   }),evaluatedAt:new Date().toISOString()};
  }
- async update(identity:VerifiedIdentity,id:string,input:PlanEditInput){
+ async update(identity:VerifiedIdentity,id:string,input:CustomerSavedPlanEditInput){
   validate(input);
   return this.customer.withAccountTransaction(identity,async c=>{
    const existing=await c.query<{revision:number,status:string}>('SELECT revision,status FROM customer_plans WHERE id=$1 AND customer_subject=$2 FOR UPDATE',[id,identity.subject]);
@@ -111,7 +111,7 @@ export class PlanningService {
    return serialized(result.rows[0]);
   });
  }
- async feedback(identity:VerifiedIdentity,id:string,input:PlanFeedbackInput){
+ async feedback(identity:VerifiedIdentity,id:string,input:CustomerPlanFeedbackInput){
   return this.customer.withAccountTransaction(identity,async c=>{
    const owner=await c.query('SELECT 1 FROM customer_plans WHERE id=$1 AND customer_subject=$2 FOR SHARE',[id,identity.subject]);
    if(!owner.rowCount)throw new NotFoundException('Plan not found');
@@ -131,7 +131,7 @@ export class PlanningService {
   return {...result.rows[0],createdAt:result.rows[0].createdAt.toISOString()};
  }
 
- async bookingHold(identity:VerifiedIdentity,id:string,input:PlanBookingInput){
+ async bookingHold(identity:VerifiedIdentity,id:string,input:CustomerPlanBookingInput){
   const plan=await this.get(identity.subject,id);
   if(plan.status!=='draft')throw new ConflictException('Archived plan cannot create a booking');
   if(plan.guests>50)throw new ConflictException('Maximum booking group size is 50; split this plan');
