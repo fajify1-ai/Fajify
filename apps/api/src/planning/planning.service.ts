@@ -7,8 +7,8 @@ import {CommerceLifecycle} from '../payments/commerce-lifecycle.service';
 import {rankExperiences,type PlanningCandidate} from './recommendation.rules';
 import type {CustomerSavedPlanInput,CustomerSavedPlanEditInput,CustomerPlanFeedbackInput,CustomerPlanBookingInput,CustomerSavedPlanListQuery} from './planning.dto';
 
-const cols='id,occasion,budget_minor::text AS "budgetMinor",currency,guests,starts_after AS "startsAfter",starts_before AS "startsBefore",location_text AS location,categories,latitude,longitude,radius_km AS "radiusKm",revision,status,created_at AS "createdAt"';
-type Stored={id:string;occasion:string;budgetMinor:string;currency:string;guests:number;startsAfter:Date;startsBefore:Date;location:string|null;categories:string[];latitude:number|null;longitude:number|null;radiusKm:number|null;revision:number;status:string;createdAt:Date};
+const cols='id,occasion,budget_minor::text AS "budgetMinor",currency,guests,starts_after AS "startsAfter",starts_before AS "startsBefore",location_text AS location,categories,attributes,latitude,longitude,radius_km AS "radiusKm",revision,status,created_at AS "createdAt"';
+type Stored={id:string;occasion:string;budgetMinor:string;currency:string;guests:number;startsAfter:Date;startsBefore:Date;location:string|null;categories:string[];attributes:string[];latitude:number|null;longitude:number|null;radiusKm:number|null;revision:number;status:string;createdAt:Date};
 const serialized=(row:Stored)=>({...row,startsAfter:row.startsAfter.toISOString(),startsBefore:row.startsBefore.toISOString(),createdAt:row.createdAt.toISOString()});
 const validate=(input:CustomerSavedPlanInput)=>{
  const a=Date.parse(input.startsAfter),b=Date.parse(input.startsBefore);
@@ -26,8 +26,8 @@ export class PlanningService {
  async create(identity:VerifiedIdentity,input:CustomerSavedPlanInput){
   validate(input);
   return this.customer.withAccountTransaction(identity,async c=>{
-   const row=await c.query<Stored>(`INSERT INTO customer_plans(customer_subject,occasion,budget_minor,currency,guests,starts_after,starts_before,location_text,categories,latitude,longitude,radius_km)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING ${cols}`,[identity.subject,input.occasion.trim(),input.budgetMinor,input.currency,input.guests,input.startsAfter,input.startsBefore,input.location?.trim()||null,input.categories??[],input.latitude??null,input.longitude??null,input.radiusKm??null]);
+   const row=await c.query<Stored>(`INSERT INTO customer_plans(customer_subject,occasion,budget_minor,currency,guests,starts_after,starts_before,location_text,categories,latitude,longitude,radius_km,attributes)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING ${cols}`,[identity.subject,input.occasion.trim(),input.budgetMinor,input.currency,input.guests,input.startsAfter,input.startsBefore,input.location?.trim()||null,input.categories??[],input.latitude??null,input.longitude??null,input.radiusKm??null,input.attributes??[]]);
    return serialized(row.rows[0]);
   });
  }
@@ -53,10 +53,10 @@ export class PlanningService {
   if(plan.status!=='draft')throw new ConflictException('Archived plan unavailable');
   if(Date.parse(plan.startsAfter)<=Date.now())throw new ConflictException('Planning window has started');
   const rows=await this.pool.query<{
-   id:string;availabilityId:string;businessId:string;branchId:string;name:string;category:string;address:string|null;currency:string;
+   id:string;availabilityId:string;businessId:string;branchId:string;name:string;description:string|null;category:string;address:string|null;currency:string;
    priceMinor:string;pricingModel:string;availableSeats:number;startsAt:Date;
   }>(`SELECT i.id,a.id AS "availabilityId",i.business_id AS "businessId",i.branch_id AS "branchId",
-   i.name,i.kind AS category,COALESCE(b.address,'') AS address,i.currency,i.price_minor::text AS "priceMinor",
+   i.name,i.description,i.kind AS category,COALESCE(b.address,'') AS address,i.currency,i.price_minor::text AS "priceMinor",
    CASE WHEN i.kind='package' THEN p.pricing_model ELSE 'per_guest' END AS "pricingModel",
    (a.capacity-a.reserved) AS "availableSeats",a.starts_at AS "startsAt"
    FROM business_catalogue i
@@ -91,12 +91,12 @@ export class PlanningService {
   // Fetching a bounded set prevents a customer request from scanning unlimited candidate rows.
   if(rows.rows.length>500)throw new ConflictException('Recommendation set too large; narrow planning constraints');
   const candidates:PlanningCandidate[]=rows.rows.map(r=>({
-   id:r.availabilityId,name:r.name,category:r.category,address:r.address??'',currency:r.currency,
+   id:r.availabilityId,name:r.name,description:r.description??undefined,category:r.category,address:r.address??'',currency:r.currency,
    pricePerGuestMinor:r.priceMinor,pricingModel:r.pricingModel==='per_group'?'per_group':'per_guest',
    availableSeats:r.availableSeats,startsAt:r.startsAt.toISOString(),active:true,published:true,merchantApproved:true
   }));
   const ranked=rankExperiences({budgetMinor:plan.budgetMinor,currency:plan.currency,guests:plan.guests,
-   startsAfter:plan.startsAfter,startsBefore:plan.startsBefore,location:plan.location??undefined,categories:plan.categories},candidates);
+   startsAfter:plan.startsAfter,startsBefore:plan.startsBefore,location:plan.location??undefined,categories:plan.categories,occasion:plan.occasion,attributes:plan.attributes},candidates);
   const bySlot=new Map(rows.rows.map(r=>[r.availabilityId,r]));
   return {items:ranked.slice(0,50).map(r=>{
    const original=bySlot.get(r.id)!;
@@ -113,10 +113,10 @@ export class PlanningService {
    if(existing.rows[0].status!=='draft')throw new ConflictException('Archived plan cannot be edited');
    if(existing.rows[0].revision!==input.revision)throw new ConflictException('Plan revision changed; reload before editing');
    const result=await c.query<Stored>(`UPDATE customer_plans SET occasion=$3,budget_minor=$4,currency=$5,guests=$6,
-    starts_after=$7,starts_before=$8,location_text=$9,categories=$10,latitude=$11,longitude=$12,radius_km=$13,
+    starts_after=$7,starts_before=$8,location_text=$9,categories=$10,latitude=$11,longitude=$12,radius_km=$13,attributes=$14,
     revision=revision+1,updated_at=now() WHERE id=$1 AND customer_subject=$2 RETURNING ${cols}`,
     [id,identity.subject,input.occasion.trim(),input.budgetMinor,input.currency,input.guests,input.startsAfter,input.startsBefore,
-     input.location?.trim()||null,input.categories??[],input.latitude??null,input.longitude??null,input.radiusKm??null]);
+     input.location?.trim()||null,input.categories??[],input.latitude??null,input.longitude??null,input.radiusKm??null,input.attributes??[]]);
    return serialized(result.rows[0]);
   });
  }
