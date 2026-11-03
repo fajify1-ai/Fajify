@@ -39,7 +39,7 @@ export class AdminCommandService {
     'INSERT INTO admin_action_events(actor_subject,operation,resource_type,resource_id,outcome,reason) VALUES($1,$2,$3,$4,$5,$6)',
     [actor,operation,resourceType,resourceId,outcome,input.reason??null]);
    await client.query('COMMIT');
-   return result;
+   return JSON.parse(JSON.stringify(result)) as T;
   }catch(error){
    await client.query('ROLLBACK');
    if(['40P01','40001','55P03'].includes((error as {code?:string}).code??''))

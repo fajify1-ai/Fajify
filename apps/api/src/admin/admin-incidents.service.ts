@@ -21,8 +21,11 @@ export class AdminIncidentService {
    const incident=(await c.query(`INSERT INTO admin_incidents(incident_type,resource_id,summary,severity,created_by)
     VALUES($1,$2,$3,$4,$5) RETURNING ${incidentFields}`,
     [input.incidentType,input.resourceId??null,input.summary.trim(),input.severity,actor])).rows[0];
-   if(input.severity==='critical')await c.query('INSERT INTO outbox_events(event_type,payload) VALUES($1,$2)',
-    ['admin.incident.critical',JSON.stringify({incidentId:incident.id,severity:input.severity})]);
+   if(input.severity==='critical'){
+    await c.query('INSERT INTO admin_alerts(incident_id,severity) VALUES($1,$2)',[incident.id,input.severity]);
+    await c.query('INSERT INTO outbox_events(event_type,payload) VALUES($1,$2)',
+     ['admin.incident.critical',JSON.stringify({incidentId:incident.id,severity:input.severity})]);
+   }
    return incident;
   });
  }
