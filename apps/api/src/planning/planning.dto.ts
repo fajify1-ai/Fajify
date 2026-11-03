@@ -5,7 +5,7 @@ export class CustomerSavedPlanInput {
  @ApiProperty({minLength:1,maxLength:80}) @IsString() @Length(1,80) occasion!:string;
  @ApiProperty({pattern:'^(0|[1-9][0-9]{0,18})$'}) @Matches(/^(0|[1-9][0-9]{0,18})$/) budgetMinor!:string;
  @ApiProperty({pattern:'^[A-Z]{3}$'}) @Matches(/^[A-Z]{3}$/) currency!:string;
- @ApiProperty({minimum:1,maximum:100}) @IsInt() @Min(1) @Max(100) guests!:number;
+ @ApiProperty({minimum:1,maximum:50}) @IsInt() @Min(1) @Max(50) guests!:number;
  @ApiProperty({format:'date-time'}) @IsISO8601({strict:true,strictSeparator:true}) startsAfter!:string;
  @ApiProperty({format:'date-time'}) @IsISO8601({strict:true,strictSeparator:true}) startsBefore!:string;
  @ApiPropertyOptional({maxLength:120}) @IsOptional() @IsString() @Length(1,120) location?:string;
