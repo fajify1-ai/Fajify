@@ -1,5 +1,5 @@
-import {BadRequestException,Body,Controller,Inject,Param,ParseUUIDPipe,Post,Req,UseGuards} from '@nestjs/common';
-import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
+import {BadRequestException,Body,ConflictException,Controller,ForbiddenException,Inject,Param,ParseUUIDPipe,Post,Req,UseGuards} from '@nestjs/common';
+import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
@@ -15,7 +15,8 @@ const matching=z.object({areaId:z.string().uuid(),offerCount:z.number().int().mi
 @Controller({path:'dispatch',version:'1'})
 export class RideDispatchController {
  constructor(@Inject(RideRequestsService)private readonly areas:RideAreasService,@Inject(RideService)private readonly rides:RideService){}
- @Post('rides/:id/match')
+ @Post('rides/:id/match') @ApiBody({schema:{type:'object',required:['areaId','offerCount','validForSeconds'],properties:{areaId:{type:'string',format:'uuid'},offerCount:{type:'integer'},validForSeconds:{type:'integer'}}}})
+ @ApiOkResponse({description:'Area-scoped matching; returns offers actually issued'})
  async match(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) rideId:string,@Body() body:unknown){
   const p=matching.safeParse(body);
   if(!p.success)throw new BadRequestException('Invalid dispatch matching request');
@@ -29,13 +30,13 @@ export class RideDispatchController {
     offers.push({driverId:candidate.driverId,offerId:offer.id});
    }catch(error){
     // An offer candidate may disappear or be claimed concurrently.
-    if(!(error instanceof Error))throw error;
-    if(!['ConflictException','ForbiddenException'].includes(error.constructor.name))throw error;
+    if(!(error instanceof ConflictException||error instanceof ForbiddenException))throw error;
    }
   }
   return {rideId,areaId:p.data.areaId,offers};
  }
- @Post('rides/:id/offers')
+ @Post('rides/:id/offers') @ApiBody({schema:{type:'object',required:['driverId','areaId','validForSeconds'],properties:{driverId:{type:'string',format:'uuid'},areaId:{type:'string',format:'uuid'},validForSeconds:{type:'integer'}}}})
+ @ApiOkResponse({description:'Fenced dispatch offer'})
  async offer(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) rideId:string,@Body() body:unknown){
   const p=schema.safeParse(body);
   if(!p.success)throw new BadRequestException('Invalid dispatch offer');
