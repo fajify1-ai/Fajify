@@ -57,6 +57,7 @@ export class CustomerPlanRecommendationView {
  @ApiProperty() score!:number;
  @ApiProperty({type:[String]}) reasons!:string[];
  @ApiProperty({description:'Informational only; revalidate live price, capacity and payment before booking'}) bookingStatus!:string;
+ @ApiProperty({enum:['ticket','free_reservation','paid_hold']}) bookingMethod!:string;
 }
 export class CustomerPlanAlternativeView {
  @ApiProperty() code!:string;
