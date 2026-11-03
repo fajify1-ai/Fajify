@@ -3,8 +3,9 @@ import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {CustomerService} from '../customer/customer.service';
+import {CommerceLifecycle} from '../payments/commerce-lifecycle.service';
 import {rankExperiences,type PlanningCandidate} from './recommendation.rules';
-import type {PlanInput,PlanEditInput,PlanFeedbackInput,PlanListQuery} from './planning.dto';
+import type {PlanInput,PlanEditInput,PlanFeedbackInput,PlanBookingInput,PlanListQuery} from './planning.dto';
 
 const cols='id,occasion,budget_minor::text AS "budgetMinor",currency,guests,starts_after AS "startsAfter",starts_before AS "startsBefore",location_text AS location,categories,latitude,longitude,radius_km AS "radiusKm",revision,status,created_at AS "createdAt"';
 type Stored={id:string;occasion:string;budgetMinor:string;currency:string;guests:number;startsAfter:Date;startsBefore:Date;location:string|null;categories:string[];latitude:number|null;longitude:number|null;radiusKm:number|null;revision:number;status:string;createdAt:Date};
@@ -21,7 +22,7 @@ const validate=(input:PlanInput)=>{
 };
 @Injectable()
 export class PlanningService {
- constructor(@Inject(DATABASE_POOL) private readonly pool:Pool,@Inject(CustomerService) private readonly customer:CustomerService){}
+ constructor(@Inject(DATABASE_POOL) private readonly pool:Pool,@Inject(CustomerService) private readonly customer:CustomerService,@Inject(CommerceLifecycle) private readonly commerce:CommerceLifecycle){}
  async create(identity:VerifiedIdentity,input:PlanInput){
   validate(input);
   return this.customer.withAccountTransaction(identity,async c=>{
@@ -128,6 +129,21 @@ export class PlanningService {
    WHERE f.plan_id=$1 AND f.customer_subject=$2`,[id,subject]);
   if(!result.rowCount)throw new NotFoundException('Feedback not found');
   return {...result.rows[0],createdAt:result.rows[0].createdAt.toISOString()};
+ }
+
+ async bookingHold(identity:VerifiedIdentity,id:string,input:PlanBookingInput){
+  const plan=await this.get(identity.subject,id);
+  if(plan.status!=='draft')throw new ConflictException('Archived plan cannot create a booking');
+  if(plan.guests>50)throw new ConflictException('Maximum booking group size is 50; split this plan');
+  const suggestions=await this.recommend(identity.subject,id);
+  const selected=suggestions.items.find(item=>item.availabilityId===input.availabilityId.toLowerCase());
+  if(!selected)throw new ConflictException('Offering is no longer recommended; refresh the plan');
+  if(!['service','package'].includes(selected.category))throw new ConflictException('Event tickets use the ticket checkout workflow');
+  if(selected.totalMinor!==input.expectedTotalMinor)throw new ConflictException('Recommendation price changed');
+  return this.commerce.hold(identity,{
+   kind:'reservation',sourceId:selected.availabilityId,quantity:plan.guests,
+   guestName:input.guestName,requestKey:input.requestKey,expectedAmountMinor:input.expectedTotalMinor
+  });
  }
 
 }
