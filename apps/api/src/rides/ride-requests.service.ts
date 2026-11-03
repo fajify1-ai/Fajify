@@ -17,7 +17,7 @@ export class RideRequestsService {
    const q=await client.query<{amount_minor:string;currency:string;expires_at:Date;customer_subject:string;category:string;pickup_lat:number;pickup_lng:number;destination_lat:number;destination_lng:number}>(`SELECT amount_minor::text,currency,expires_at,customer_subject,category,
       ST_Y(pickup::geometry) AS pickup_lat, ST_X(pickup::geometry) AS pickup_lng,
       ST_Y(destination::geometry) AS destination_lat,ST_X(destination::geometry) AS destination_lng
-      FROM ride_fare_quotes WHERE id=$1 FOR UPDATE`,[input.quoteId]);
+      FROM ride_fare_quotes WHERE id=$1`,[input.quoteId]);
    const quote=q.rows[0];
    if(!quote||quote.customer_subject!==subject)throw new NotFoundException('Quote unavailable');
    if(quote.category!==input.category)throw new ConflictException('Quote category mismatched');
