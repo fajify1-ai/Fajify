@@ -96,7 +96,57 @@ async function run(){
    if('paginated' in contract&&contract.paginated&&!operation.parameters?.some(p=>'name' in p&&p.name==='limit'&&p.in==='query'))
     throw new Error('Missing M6 pagination: '+contract.path);
   }
-
+  // M7-P1 contract presence and authenticated operation policy.
+  const rides:ReadonlyArray<[string,'get'|'post'|'patch',boolean]>=[
+   ['/api/v1/customer/rides/quotes','post',true],
+   ['/api/v1/customer/rides','post',true],
+   ['/api/v1/customer/rides','get',false],
+   ['/api/v1/customer/rides/{id}','get',false],
+   ['/api/v1/customer/rides/{id}/cancellation','post',false],
+   ['/api/v1/customer/rides/{id}/payment-intent','post',false],
+   ['/api/v1/admin/ride-tariffs','post',true],
+   ['/api/v1/dispatch/rides/{id}/offers','post',true],
+   ['/api/v1/dispatch/rides/{id}/match','post',true],
+   ['/api/v1/dispatch/rides/{id}/reassignment','post',true],
+   ['/api/v1/dispatch/areas','post',true],
+   ['/api/v1/dispatch/areas/{id}','patch',true],
+   ['/api/v1/dispatch/areas/{areaId}/rides/{rideId}/candidates','get',false],
+   ['/api/v1/dispatch/areas/{areaId}/rides','get',false],
+   ['/api/v1/rides/offers/{id}/accept','post',false],
+   ['/api/v1/rides/driver/offers','get',false],
+   ['/api/v1/rides/driver/trips','get',false],
+   ['/api/v1/rides/{id}/state','patch',true],
+   ['/api/v1/rides/driver/location','post',true],
+   ['/api/v1/rides/driver/location/revoke','post',false],
+   ['/api/v1/rides/{id}/timeline','get',false],
+   ['/api/v1/rides/{id}/events','get',false],
+   ['/api/v1/drivers/onboarding','post',true],
+   ['/api/v1/drivers/me','get',false],
+   ['/api/v1/drivers/me/availability','post',true],
+   ['/api/v1/drivers/me/documents/uploads','post',true],
+   ['/api/v1/drivers/me/documents','post',true],
+   ['/api/v1/drivers/me/payout-recipient','post',true],
+   ['/api/v1/drivers/me/earnings','get',false],
+   ['/api/v1/drivers/{id}/review','post',true],
+   ['/api/v1/drivers/documents/{id}/review','post',true],
+   ['/api/v1/drivers/vehicles/{id}/review','post',true],
+   ['/api/v1/drivers/{id}/suspension','post',true],
+   ['/api/v1/drivers/{id}/payout-recipient/verify','post',true],
+   ['/api/v1/ride-safety/rides/{rideId}/incidents','post',true],
+   ['/api/v1/ride-safety/incidents/{id}','get',false],
+   ['/api/v1/ride-safety/areas/{areaId}/incidents','get',false],
+   ['/api/v1/ride-safety/incidents/{id}','patch',true],
+   ['/api/v1/admin/rides/{id}/payout-reservation','post',false],
+   ['/api/v1/admin/ride-payouts/{id}/submit','post',false],
+   ['/api/v1/admin/ride-payouts/{id}/reconcile','post',false]
+  ];
+  for(const [path,method,hasBody] of rides){
+   const op=doc.paths[path]?.[method];
+   if(!op)throw new Error('Missing M7 ride operation: '+method+' '+path);
+   if(!op.security?.some(s=>Object.hasOwn(s,'keycloak')))throw new Error('M7 ride route lacks bearer schema: '+path);
+   if(hasBody&&!op.requestBody)throw new Error('M7 ride operation lacks request schema: '+path);
+   if(!op.responses?.['200']&&!op.responses?.['201'])throw new Error('M7 ride operation lacks a success response: '+path);
+  }
   for(const contract of [...M8_OPERATIONS,...M8_CUSTOMER_OPERATIONS]){
    const op=doc.paths[contract.path]?.[contract.method];
    if(!op)throw new Error('Missing M8 administrative route: '+contract.method+' '+contract.path);

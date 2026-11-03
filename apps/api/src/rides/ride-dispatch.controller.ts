@@ -1,0 +1,47 @@
+import {BadRequestException,Body,ConflictException,Controller,ForbiddenException,Inject,Param,ParseUUIDPipe,Post,Req,UseGuards} from '@nestjs/common';
+import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
+import {z} from 'zod';
+import {IdentityGuard} from '../auth/identity.guard';
+import {AccountGuard} from '../auth/account.guard';
+import {CustomerWriteGuard} from '../customer/customer-write.guard';
+import {RolesGuard,RequireRoles} from '../auth/roles.guard';
+import type {VerifiedIdentity} from '../auth/identity.types';
+import {RideAreasService} from './ride-areas.service';
+import {RideService} from './ride.service';
+const schema=z.object({driverId:z.string().uuid(),areaId:z.string().uuid(),validForSeconds:z.number().int().min(5).max(120)}).strict();
+const matching=z.object({areaId:z.string().uuid(),offerCount:z.number().int().min(1).max(5),validForSeconds:z.number().int().min(5).max(120)}).strict();
+@ApiTags('ride-dispatch') @ApiBearerAuth('keycloak')
+@UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
+@RequireRoles('dispatcher')
+@Controller({path:'dispatch',version:'1'})
+export class RideDispatchController {
+ constructor(@Inject(RideAreasService)private readonly areas:RideAreasService,@Inject(RideService)private readonly rides:RideService){}
+ @Post('rides/:id/match') @ApiBody({schema:{type:'object',required:['areaId','offerCount','validForSeconds'],properties:{areaId:{type:'string',format:'uuid'},offerCount:{type:'integer'},validForSeconds:{type:'integer'}}}})
+ @ApiOkResponse({description:'Area-scoped matching; returns offers actually issued'})
+ async match(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) rideId:string,@Body() body:unknown){
+  const p=matching.safeParse(body);
+  if(!p.success)throw new BadRequestException('Invalid dispatch matching request');
+  await this.areas.requireDispatcher(req.identity.subject,p.data.areaId);
+  const nearby=await this.areas.candidates(req.identity.subject,p.data.areaId,rideId,p.data.offerCount);
+  const offers:{driverId:string;offerId:string}[]=[];
+  for(const candidate of nearby.candidates){
+   try{
+    const offer=await this.rides.offer(rideId,candidate.driverId,req.identity.subject,
+      new Date(Date.now()+p.data.validForSeconds*1000),p.data.areaId);
+    offers.push({driverId:candidate.driverId,offerId:offer.id});
+   }catch(error){
+    // An offer candidate may disappear or be claimed concurrently.
+    if(!(error instanceof ConflictException||error instanceof ForbiddenException))throw error;
+   }
+  }
+  return {rideId,areaId:p.data.areaId,offers};
+ }
+ @Post('rides/:id/offers') @ApiBody({schema:{type:'object',required:['driverId','areaId','validForSeconds'],properties:{driverId:{type:'string',format:'uuid'},areaId:{type:'string',format:'uuid'},validForSeconds:{type:'integer'}}}})
+ @ApiOkResponse({description:'Fenced dispatch offer'})
+ async offer(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) rideId:string,@Body() body:unknown){
+  const p=schema.safeParse(body);
+  if(!p.success)throw new BadRequestException('Invalid dispatch offer');
+  await this.areas.requireDispatcher(req.identity.subject,p.data.areaId);
+  return this.rides.offer(rideId,p.data.driverId,req.identity.subject,new Date(Date.now()+p.data.validForSeconds*1000),p.data.areaId);
+ }
+}
