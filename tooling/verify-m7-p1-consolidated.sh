@@ -26,6 +26,7 @@ run(){
 }
 run database-typecheck corepack pnpm --filter @faji/database typecheck
 run api-typecheck corepack pnpm --filter @faji/api typecheck
+run m7-test-typecheck corepack pnpm --filter @faji/api typecheck:m7
 run api-lint corepack pnpm --filter @faji/api lint
 run api-unit corepack pnpm --filter @faji/api test
 run api-build corepack pnpm --filter @faji/api build
