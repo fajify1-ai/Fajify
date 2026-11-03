@@ -109,6 +109,10 @@ test('package booking reserves group and component capacity atomically, retries 
  const plan=await newPlan();
  const hold=await planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Test Guest',requestKey:'m6-package-hold-0001'});
  assert.equal(hold.status,'held');assert.equal(hold.amountMinor,'20000');
+ const attribution=(await admin.query('SELECT plan_id,customer_subject,plan_revision FROM customer_plan_hold_links WHERE hold_id=$1',[hold.id])).rows[0];
+ assert.equal(attribution.plan_id,plan.id);
+ assert.equal(attribution.customer_subject,a);
+ assert.equal(attribution.plan_revision,plan.revision);
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[packageSlot])).rows[0].reserved,2);
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[componentSlot])).rows[0].reserved,1);
  assert.equal((await planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Test Guest',requestKey:'m6-package-hold-0001'})).id,hold.id);
