@@ -5,6 +5,8 @@ import {resolve} from 'node:path';
 import {after,before,test} from 'node:test';
 import {Pool} from 'pg';
 import {applyMigrations} from '../../../packages/database/scripts/migrate';
+import {assertDisposable} from '../../../packages/database/scripts/disposable-target';
+import {grantM7Runtime} from '../../../packages/database/scripts/grant-m7-runtime';
 import {AccessService} from '../src/auth/access.service';
 import {RideService} from '../src/rides/ride.service';
 import {RideAreasService} from '../src/rides/ride-areas.service';
@@ -21,11 +23,18 @@ if(process.env.FAJI_M7_DISPOSABLE_DATABASE_ACK!==ack)
  throw new Error('Refusing to run M7 acceptance without explicit disposable database acknowledgement');
 const url=process.env.FAJI_DATABASE_URL;
 if(!url)throw new Error('FAJI_DATABASE_URL is required for disposable tests');
+const runtimeUrl=process.env.FAJI_RUNTIME_DATABASE_URL;
+if(!runtimeUrl)throw new Error('FAJI_RUNTIME_DATABASE_URL required for restricted M7 tests');
+const adminLocation=new URL(url),runtimeLocation=new URL(runtimeUrl);
+if(adminLocation.hostname!==runtimeLocation.hostname||adminLocation.port!==runtimeLocation.port||
+   adminLocation.pathname!==runtimeLocation.pathname||adminLocation.username===runtimeLocation.username)
+ throw new Error('M7 runtime and migration roles must be isolated on the same marked database');
 const pool=new Pool({connectionString:url,max:10,connectionTimeoutMillis:3000});
-const access=new AccessService(pool),rides=new RideService(pool),
- areas=new RideAreasService(pool,access),requests=new RideRequestsService(pool,access),
- lifecycle=new RideLifecycleOperations(pool),safety=new RideSafetyService(pool,areas),
- tracking=new RideTrackingService(pool,access);
+const runtime=new Pool({connectionString:runtimeUrl,max:16,connectionTimeoutMillis:3000});
+const access=new AccessService(runtime),rides=new RideService(runtime),
+ areas=new RideAreasService(runtime,access),requests=new RideRequestsService(runtime,access),
+ lifecycle=new RideLifecycleOperations(runtime),safety=new RideSafetyService(runtime,areas),
+ tracking=new RideTrackingService(runtime,access);
 let zone:string,customer:string,dispatcher:string,drivers:{subject:string;id:string}[]=[];
 const category='standard';
 function coords(lat=6.5244,lng=3.3792){return {latitude:lat,longitude:lng};}
@@ -54,7 +63,9 @@ async function request(key=randomUUID()){
  return requests.create(customer,{pickup:coords(),destination:coords(6.53,3.4),category,quoteId:quote.rows[0].id,idempotencyKey:key});
 }
 before(async()=>{
+ await assertDisposable(pool);
  await applyMigrations(pool,resolve(__dirname,'../../../packages/database/migrations'));
+ await grantM7Runtime(pool,runtimeUrl);
  customer=await subject('customer');dispatcher=await subject('dispatcher');
  zone=(await pool.query<{id:string}>(`INSERT INTO ride_dispatch_areas(name,boundary,active)
   VALUES($1,ST_Multi(ST_GeomFromText('POLYGON((3.2 6.4,3.6 6.4,3.6 6.7,3.2 6.7,3.2 6.4))',4326)),true)
@@ -62,7 +73,7 @@ before(async()=>{
  await pool.query("INSERT INTO resource_memberships(identity_subject,resource_type,resource_id,role,active) VALUES($1,'dispatch_area',$2,'dispatcher',true)",[dispatcher,zone]);
  drivers=[await driver(),await driver(),await driver()];
 });
-after(async()=>{await pool.end();});
+after(async()=>{await runtime.end();await pool.end();});
 
 test('M7 acceptance: owner-only customer reads, idempotent request and quote binding',async()=>{
  const key=randomUUID(),first=await request(key);
@@ -110,7 +121,7 @@ test('M7 acceptance: expiry requeues one unassigned request, new generation fenc
  const offer=await rides.offer(ride.id,candidate.id,dispatcher,new Date(Date.now()+90000),zone);
  const beforeGen=(await pool.query<{dispatch_generation:string}>('SELECT dispatch_generation FROM ride_requests WHERE id=$1',[ride.id])).rows[0].dispatch_generation;
  await pool.query("UPDATE ride_dispatch_offers SET expires_at=now()-interval '5 minutes' WHERE id=$1",[offer.id]);
- const outcome=await expireRideOffers(pool);
+ const outcome=await expireRideOffers(runtime);
  assert.ok(outcome.requeued>=1);
  const row=(await pool.query<{status:string;dispatch_generation:string}>('SELECT status,dispatch_generation FROM ride_requests WHERE id=$1',[ride.id])).rows[0];
  assert.equal(row.status,'requested');assert.ok(BigInt(row.dispatch_generation)>BigInt(beforeGen));
@@ -147,7 +158,7 @@ test('M7 acceptance: trip and financial evidence rows are append-only',async()=>
 });
 
 test('M7 acceptance: per-category fare policy versions are serialized and quotes preserve prices',async()=>{
- const tariffs=new RideTariffService(pool),fare=new RideFareService(pool);
+ const tariffs=new RideTariffService(runtime),fare=new RideFareService(runtime);
  const category='category-'+randomUUID().slice(0,8);
  const first=await tariffs.create('test:admin',{category,baseMinor:'500',perKmMinor:'100',commissionBps:500});
  assert.equal(first.version,1);
