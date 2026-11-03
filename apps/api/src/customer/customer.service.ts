@@ -141,6 +141,9 @@ export class CustomerService {
    const row=current.rows[0];
    if(row.status==='cancelled')return this.reservation(c,identity.subject,id);
    if(row.status!=='confirmed')throw new ConflictException('Reservation cannot be cancelled');
+   const paid=await c.query(`SELECT 1 FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id
+    WHERE h.reservation_id=$1 AND h.customer_subject=$2 AND p.status='succeeded' AND h.status='confirmed'`,[id,identity.subject]);
+   if(paid.rowCount)throw new ConflictException('Paid cancellation requires the verified finance refund workflow');
    const released=await c.query(`UPDATE business_availability SET reserved=reserved-$2
     WHERE id=$1 AND starts_at>now() AND reserved>=$2 RETURNING id`,[row.availability_id,row.guests]);
    if(!released.rowCount)throw new ConflictException('Cancellation closes when the slot starts');
