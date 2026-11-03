@@ -86,6 +86,7 @@ export S3_BUCKET=faji
 echo "SOURCE: $(git rev-parse HEAD)"
 echo "DISPOSABLE DATABASE: $FAJI_DISPOSABLE_DATABASE"
 export FAJI_M7_REPORT_DIR="$(mktemp -d /tmp/fajify-m7-report.XXXXXXXX)"
+echo "M7_REPORT_DIR: $FAJI_M7_REPORT_DIR"
 unset PAYSTACK_SECRET_KEY PAYSTACK_PUBLIC_KEY PAYMENT_CALLBACK_URL TICKET_SIGNING_KEYS TICKET_ACTIVE_KEY_ID
 export FAJI_M7_DISPOSABLE_DATABASE_ACK=m7-disposable-postgis-only
 bash tooling/verify-m7-p1-consolidated.sh
