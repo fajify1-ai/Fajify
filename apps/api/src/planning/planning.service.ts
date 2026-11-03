@@ -4,10 +4,10 @@ import {DATABASE_POOL} from '../tokens';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {CustomerService} from '../customer/customer.service';
 import {rankExperiences,type PlanningCandidate} from './recommendation.rules';
-import type {PlanInput,PlanListQuery} from './planning.dto';
+import type {PlanInput,PlanEditInput,PlanFeedbackInput,PlanListQuery} from './planning.dto';
 
-const cols='id,occasion,budget_minor::text AS "budgetMinor",currency,guests,starts_after AS "startsAfter",starts_before AS "startsBefore",location_text AS location,categories,status,created_at AS "createdAt"';
-type Stored={id:string;occasion:string;budgetMinor:string;currency:string;guests:number;startsAfter:Date;startsBefore:Date;location:string|null;categories:string[];status:string;createdAt:Date};
+const cols='id,occasion,budget_minor::text AS "budgetMinor",currency,guests,starts_after AS "startsAfter",starts_before AS "startsBefore",location_text AS location,categories,latitude,longitude,radius_km AS "radiusKm",revision,status,created_at AS "createdAt"';
+type Stored={id:string;occasion:string;budgetMinor:string;currency:string;guests:number;startsAfter:Date;startsBefore:Date;location:string|null;categories:string[];latitude:number|null;longitude:number|null;radiusKm:number|null;revision:number;status:string;createdAt:Date};
 const serialized=(row:Stored)=>({...row,startsAfter:row.startsAfter.toISOString(),startsBefore:row.startsBefore.toISOString(),createdAt:row.createdAt.toISOString()});
 const validate=(input:PlanInput)=>{
  const a=Date.parse(input.startsAfter),b=Date.parse(input.startsBefore);
@@ -15,6 +15,8 @@ const validate=(input:PlanInput)=>{
   throw new BadRequestException('Planning window must be future, ordered and at most 31 days');
  if(!/(Z|[+-][0-9]{2}:[0-9]{2})$/.test(input.startsAfter)||!/(Z|[+-][0-9]{2}:[0-9]{2})$/.test(input.startsBefore))
   throw new BadRequestException('Planning dates require explicit time zones');
+ if((input.latitude===undefined)!==(input.longitude===undefined)||input.radiusKm!==undefined&&input.latitude===undefined)
+  throw new BadRequestException('Both coordinates are required for a radius');
  if(BigInt(input.budgetMinor)>9223372036854775807n)throw new BadRequestException('Budget exceeds supported maximum');
 };
 @Injectable()
@@ -23,8 +25,8 @@ export class PlanningService {
  async create(identity:VerifiedIdentity,input:PlanInput){
   validate(input);
   return this.customer.withAccountTransaction(identity,async c=>{
-   const row=await c.query<Stored>(`INSERT INTO customer_plans(customer_subject,occasion,budget_minor,currency,guests,starts_after,starts_before,location_text,categories)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING ${cols}`,[identity.subject,input.occasion.trim(),input.budgetMinor,input.currency,input.guests,input.startsAfter,input.startsBefore,input.location?.trim()||null,input.categories??[]]);
+   const row=await c.query<Stored>(`INSERT INTO customer_plans(customer_subject,occasion,budget_minor,currency,guests,starts_after,starts_before,location_text,categories,latitude,longitude,radius_km)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING ${cols}`,[identity.subject,input.occasion.trim(),input.budgetMinor,input.currency,input.guests,input.startsAfter,input.startsBefore,input.location?.trim()||null,input.categories??[],input.latitude??null,input.longitude??null,input.radiusKm??null]);
    return serialized(row.rows[0]);
   });
  }
@@ -62,10 +64,12 @@ export class PlanningService {
    JOIN business_availability a ON a.catalogue_id=i.id AND a.branch_id=i.branch_id AND a.business_id=i.business_id
    AND a.active AND a.starts_at>now() AND a.capacity-a.reserved >= $1
    LEFT JOIN business_public_packages p ON p.catalogue_id=i.id
+   LEFT JOIN business_public_profiles geo ON geo.branch_id=i.branch_id
    WHERE i.active AND i.published AND i.kind IN ('service','package','event')
    AND a.starts_at >= $2::timestamptz AND a.starts_at < $3::timestamptz
    AND i.currency=$4 AND ($5::text IS NULL OR b.address ILIKE $5 ESCAPE '\\')
    AND (cardinality($6::text[])=0 OR i.kind=ANY($6::text[]))
+   AND ($7::double precision IS NULL OR ST_DWithin(geo.location,ST_SetSRID(ST_MakePoint($8::double precision,$7::double precision),4326)::geography,COALESCE($9::integer,10)*1000.0))
    AND (i.kind<>'package' OR (
      p.catalogue_id IS NOT NULL AND $1 BETWEEN p.min_guests AND p.max_guests
      AND EXISTS(SELECT 1 FROM business_package_components pc WHERE pc.package_id=i.id)
@@ -73,7 +77,7 @@ export class PlanningService {
        ON component.id=pc.component_id AND component.business_id=pc.business_id AND component.branch_id=pc.branch_id
        WHERE pc.package_id=i.id AND (component.id IS NULL OR NOT component.active OR NOT component.published OR component.kind='package' OR component.currency<>i.currency))
    ))
-   ORDER BY a.starts_at,i.id,a.id LIMIT 501`,[plan.guests,plan.startsAfter,plan.startsBefore,plan.currency,plan.location?('%'+plan.location.replace(/[\\%_]/g,'\\$&')+'%'):null,plan.categories]);
+   ORDER BY a.starts_at,i.id,a.id LIMIT 501`,[plan.guests,plan.startsAfter,plan.startsBefore,plan.currency,plan.location?('%'+plan.location.replace(/[\\%_]/g,'\\$&')+'%'):null,plan.categories,plan.latitude,plan.longitude,plan.radiusKm]);
   // Fetching a bounded set prevents a customer request from scanning unlimited candidate rows.
   if(rows.rows.length>500)throw new ConflictException('Recommendation set too large; narrow planning constraints');
   const candidates:PlanningCandidate[]=rows.rows.map(r=>({
