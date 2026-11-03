@@ -89,7 +89,7 @@ async function run(){
    const response=operation.responses[String(contract.status)];
    if(!response||!('content' in response)||!response.content?.['application/json']?.schema)
     throw new Error('Missing M6 response schema: '+contract.path);
-   for(const name of [...contract.path.matchAll(/\\{([^}]+)\\}/g)].map(m=>m[1]))
+   for(const name of [...contract.path.matchAll(/\{([^}]+)\}/g)].map(m=>m[1]))
     if(!operation.parameters?.some(p=>'name' in p&&p.name===name&&p.in==='path'&&p.required))
      throw new Error('Missing M6 path parameter: '+contract.path);
    if('paginated' in contract&&contract.paginated&&!operation.parameters?.some(p=>'name' in p&&p.name==='limit'&&p.in==='query'))
