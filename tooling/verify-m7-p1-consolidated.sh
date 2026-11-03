@@ -22,6 +22,10 @@ run(){
   printf '%s\tFAIL(%s)\n' "$name" "$status" >>"$results"
   echo "FAIL: $name (exit $status)" >&2
   tail -20 "$FAJI_M7_REPORT_DIR/$name.log" >&2 || true
+  if [[ "$name" == api-unit || "$name" == m7-disposable-postgis ]]; then
+   echo "FAILURE DETAILS ($name): first test diagnostics" >&2
+   grep -n -A 20 -E '^not ok [0-9]+' "$FAJI_M7_REPORT_DIR/$name.log" | head -n 180 >&2 || true
+  fi
  fi
 }
 run database-typecheck corepack pnpm --filter @faji/database typecheck
