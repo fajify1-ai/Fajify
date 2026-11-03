@@ -1,4 +1,4 @@
-import {BadRequestException,ConflictException,ForbiddenException,Inject,Injectable,NotFoundException} from '@nestjs/common';
+import {ConflictException,ForbiddenException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 import {AccessService} from '../auth/access.service';
