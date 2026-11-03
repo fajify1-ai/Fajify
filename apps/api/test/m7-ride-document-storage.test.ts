@@ -58,3 +58,20 @@ test('M7 private document: missing credentials block all metadata checks',async(
   await assert.rejects(()=>new RideDocumentStorage().verify(object),{status:503});
  });
 });
+
+test('M7 private document: signed upload URL has bounded expiry and server-selected key',async()=>{
+ await configured(async()=>{
+  const uploaded=new RideDocumentStorage().presignUpload(
+   '01234567-89ab-4cde-8fab-0123456789ab','licence','application/pdf');
+  assert.match(uploaded.key,/^private\/ride-drivers\/01234567-89ab-4cde-8fab-0123456789ab\/licence\/[0-9a-f-]{36}\.pdf$/);
+  assert.equal(uploaded.method,'PUT');
+  assert.equal(uploaded.expiresInSeconds,300);
+  assert.equal(uploaded.headers['Content-Type'],'application/pdf');
+  const uri=new URL(uploaded.uploadUrl);
+  assert.equal(uri.hostname,'s3.fixture.invalid');
+  assert.equal(uri.searchParams.get('X-Amz-Expires'),'300');
+  assert.equal(uri.searchParams.get('X-Amz-SignedHeaders'),'content-type;host');
+  assert.match(uri.searchParams.get('X-Amz-Signature')??'',/^[a-f0-9]{64}$/);
+  assert.ok(!uploaded.uploadUrl.includes('fixture_secret_material_only'));
+ });
+});
