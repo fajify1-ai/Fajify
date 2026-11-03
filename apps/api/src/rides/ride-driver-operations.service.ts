@@ -2,16 +2,20 @@ import {ConflictException,ForbiddenException,Inject,Injectable,NotFoundException
 import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 import {PaystackGateway} from '../payments/paystack.gateway';
+import {RideDocumentStorage} from './ride-document-storage.service';
 
 @Injectable()
 export class RideDriverOperations {
- constructor(@Inject(DATABASE_POOL) private readonly pool:Pool,@Inject(PaystackGateway) private readonly gateway:PaystackGateway){}
+ constructor(@Inject(DATABASE_POOL) private readonly pool:Pool,@Inject(PaystackGateway) private readonly gateway:PaystackGateway,
+ @Inject(RideDocumentStorage) private readonly objects:RideDocumentStorage){}
  private async tx<T>(work:(c:import('pg').PoolClient)=>Promise<T>):Promise<T>{
   const c=await this.pool.connect();try{
    await c.query('BEGIN');const result=await work(c);await c.query('COMMIT');return result;
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
  }
  async document(subject:string,kind:string,key:string,expiresAt:Date){
+  // Verify the object before storing an untrusted client-supplied reference.
+  await this.objects.verify(key);
   return this.tx(async c=>{
    const d=await c.query<{id:string;status:string}>('SELECT id,status FROM ride_drivers WHERE identity_subject=$1 FOR UPDATE',[subject]);
    if(!d.rows[0]||d.rows[0].status==='suspended')throw new ForbiddenException('Driver unavailable');
@@ -29,9 +33,15 @@ export class RideDriverOperations {
   });
  }
  async reviewDocument(actor:string,documentId:string,approve:boolean){
+  // Never approve a key that was replaced between storage verification and row locking.
+  const snapshot=await this.pool.query<{private_object_key:string}>('SELECT private_object_key FROM ride_driver_documents WHERE id=$1',[documentId]);
+  if(!snapshot.rows[0])throw new NotFoundException();
+  if(approve)await this.objects.verify(snapshot.rows[0].private_object_key);
   return this.tx(async c=>{
-   const row=await c.query<{driver_id:string;expires_at:Date|null}>(`SELECT driver_id,expires_at FROM ride_driver_documents WHERE id=$1 FOR UPDATE`,[documentId]);
+   const row=await c.query<{driver_id:string;expires_at:Date|null;private_object_key:string}>(`SELECT driver_id,expires_at,private_object_key FROM ride_driver_documents WHERE id=$1 FOR UPDATE`,[documentId]);
    if(!row.rows[0])throw new NotFoundException();
+   if(approve&&row.rows[0].private_object_key!==snapshot.rows[0].private_object_key)
+    throw new ConflictException('Document was replaced during review');
    if(approve&&(!row.rows[0].expires_at||row.rows[0].expires_at.getTime()<=Date.now()))throw new ConflictException('Document already expired');
    await c.query("UPDATE ride_driver_documents SET review_status=$2 WHERE id=$1",[documentId,approve?'approved':'rejected']);
    await c.query('UPDATE ride_drivers SET available=false,updated_at=now() WHERE id=$1',[row.rows[0].driver_id]);
