@@ -25,16 +25,17 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 3500),
-    )
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed && mounted) {
-          widget.onFinish();
-        }
-      })
-      ..forward();
+    _controller =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 3500),
+          )
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed && mounted) {
+              widget.onFinish();
+            }
+          })
+          ..forward();
   }
 
   double _progress(double value, double start, double end) {
@@ -90,7 +91,11 @@ class _SplashScreenState extends State<SplashScreen>
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFFFA3F39), Color(0xFFAF1818), Color(0xFFC0392B)],
+                  colors: [
+                    Color(0xFFFA3F39),
+                    Color(0xFFAF1818),
+                    Color(0xFFC0392B),
+                  ],
                   stops: [0.0, 0.55, 1.0],
                 ),
               ),
@@ -115,31 +120,46 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Transform.translate(
                         offset: Offset(0, lerpDouble(12, 0, logoEntrance) ?? 0),
                         child: Transform.scale(
-                          scale: (lerpDouble(0.4, 1.0, logoEntrance) ?? 1) * _pulse(value),
+                          scale:
+                              (lerpDouble(0.4, 1.0, logoEntrance) ?? 1) *
+                              _pulse(value),
                           child: Container(
                             width: logoCircleSize,
                             height: logoCircleSize,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white.withValues(alpha: 0.20),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.30)),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.30),
+                              ),
                             ),
                             alignment: Alignment.center,
                             child: SizedBox(
                               width: logoWidth,
                               height: logoHeight,
                               child: Stack(
-                                children: List.generate(_segments.length, (index) {
+                                children: List.generate(_segments.length, (
+                                  index,
+                                ) {
                                   final segment = _segments[index];
                                   final start = 0.26 + (index * 0.055);
-                                  final progress = _progress(value, start, start + 0.16);
+                                  final progress = _progress(
+                                    value,
+                                    start,
+                                    start + 0.16,
+                                  );
                                   return Positioned.fill(
                                     child: Opacity(
                                       opacity: progress,
                                       child: Transform.translate(
-                                        offset: Offset(0, lerpDouble(8, 0, progress) ?? 0),
+                                        offset: Offset(
+                                          0,
+                                          lerpDouble(8, 0, progress) ?? 0,
+                                        ),
                                         child: Transform.scale(
-                                          scale: lerpDouble(0.94, 1, progress) ?? 1,
+                                          scale:
+                                              lerpDouble(0.94, 1, progress) ??
+                                              1,
                                           child: ClipRect(
                                             clipper: _LogoSegmentClipper(
                                               startFraction: segment.$1,
@@ -175,7 +195,14 @@ class _SplashScreenState extends State<SplashScreen>
 }
 
 class _SplashBlob extends StatelessWidget {
-  const _SplashBlob({this.top, this.bottom, this.left, this.right, required this.size, required this.angle});
+  const _SplashBlob({
+    this.top,
+    this.bottom,
+    this.left,
+    this.right,
+    required this.size,
+    required this.angle,
+  });
   final double? top;
   final double? bottom;
   final double? left;
@@ -185,36 +212,39 @@ class _SplashBlob extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Positioned(
-        top: top,
-        bottom: bottom,
-        left: left,
-        right: right,
-        child: Transform.rotate(
-          angle: angle,
-          child: Container(
-            width: size,
-            height: size * 0.72,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(size),
-            ),
-          ),
+    top: top,
+    bottom: bottom,
+    left: left,
+    right: right,
+    child: Transform.rotate(
+      angle: angle,
+      child: Container(
+        width: size,
+        height: size * 0.72,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(size),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 class _LogoSegmentClipper extends CustomClipper<Rect> {
-  const _LogoSegmentClipper({required this.startFraction, required this.endFraction});
+  const _LogoSegmentClipper({
+    required this.startFraction,
+    required this.endFraction,
+  });
   final double startFraction;
   final double endFraction;
 
   @override
   Rect getClip(Size size) => Rect.fromLTRB(
-        size.width * startFraction,
-        0,
-        size.width * endFraction,
-        size.height,
-      );
+    size.width * startFraction,
+    0,
+    size.width * endFraction,
+    size.height,
+  );
 
   @override
   bool shouldReclip(covariant _LogoSegmentClipper oldClipper) =>

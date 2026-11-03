@@ -12,8 +12,6 @@ Dependencies are locked in `pubspec.lock`. Install Android SDK/JDK for Android,
 and macOS/Xcode for iOS. Use a device/emulator or Chrome for the interactive demo.
 
 ```bash
-git fetch origin
-git switch feat/m1-d3a-business-foundation
 cd apps/business_mobile
 flutter pub get
 flutter devices
@@ -22,9 +20,23 @@ flutter run -d <device-id> --dart-define-from-file=config/development.example.js
 
 For Chrome use `-d chrome`. The Flutter browser build uses hash routes, for example
 `/#/reservations`. Direct protected links return to login first and restore a
-validated local destination after the explicit demo login. A browser refresh
-starts a fresh signed-out session; sample state is intentionally in memory.
-No PostgreSQL, Redis, Keycloak or Docker service is needed for this M1 demo.
+validated local destination after explicit sample login. The example
+configuration explicitly enables sample mode. A browser refresh starts a fresh
+signed-out session; sample state is intentionally in memory. No PostgreSQL,
+Redis, Keycloak or Docker service is needed for sample mode.
+
+For Android/iOS identity integration, create an ignored
+`config/development.local.json` from the example and set `USE_MOCK_SERVICES` to
+`false`, `OIDC_ISSUER` to the realm issuer (for example
+`https://identity.example.test/realms/faji`) and `API_BASE_URL` to the API origin.
+The public client ID defaults to `faji-business-mobile`; the redirect defaults
+to `com.faji.business:/oauth/callback` and must match the Keycloak client and
+platform registration. Then run with
+`--dart-define-from-file=config/development.local.json`. These settings are
+public endpoints/identifiers, not credentials; never add a client secret or
+password to the app or build defines. Keycloak handles sign-in, identity
+registration and password recovery in its system-browser page. Identity
+registration does not apply for, approve, or grant access to a merchant account.
 
 `dev.faji.faji_business` is the **provisional development identifier** for Android
 and iOS. It is not an approved store identifier. Runners were generated using
@@ -35,7 +47,7 @@ artwork and distribution identifiers need product-owner confirmation.
 
 ## Demo walkthrough
 
-1. Open the introduction, then login; choose **Enter demo merchant session**.
+1. Open the introduction, then login; in sample mode choose **Enter sample merchant session**.
 2. Home shows synthetic revenue, table capacity, linked task counts, quick actions,
    a weekly revenue chart and upcoming bookings.
 3. Reservations supports calendar month/day selection, all/pending bookings,
@@ -58,26 +70,44 @@ artwork and distribution identifiers need product-owner confirmation.
     demo to check the access-denied route.
 
 All financial amounts, approvals, scans and service activations are previews.
-There are no live merchant/auth/payment calls, camera permissions or durable
-business writes. Logout and reset restore fixtures. In embedded mode, customer switching clears the merchant demo session and returns
+Sample business workflows do not call live merchant or payment APIs. Live
+identity mode uses Keycloak and the Faji session endpoint only; it does not make
+the sample records authoritative. No camera permissions or durable business
+writes are implemented. Logout and reset restore fixtures. In embedded mode,
+customer switching clears the merchant demo session and returns
 to the main role-selection screen. The standalone runner retains an explanatory
 handoff. See [main-app integration](../../docs/engineering/BUSINESS_MAIN_APP_INTEGRATION.md).
 
 ## Configuration
 
-The committed `config/development.example.json` contains public build settings.
-The default build also uses development mocks. An optional
+The committed `config/development.example.json` contains public sample settings.
+An unconfigured live build fails closed. An optional
 `config/development.local.json` is ignored. Build definitions are visible in the
 compiled app and must never contain credentials.
 
-| Define | M1 setting |
+| Define | Setting |
 | --- | --- |
 | `APP_ENV` | `development` |
-| `USE_MOCK_SERVICES` | `true` |
+| `USE_MOCK_SERVICES` | `true` in the sample configuration; `false` for Keycloak |
+| `OIDC_ISSUER` | Keycloak realm issuer; required when mocks are disabled |
+| `OIDC_CLIENT_ID` | Public Keycloak client; defaults to `faji-business-mobile` |
+| `OIDC_REDIRECT_URI` | Registered callback; defaults to `com.faji.business:/oauth/callback` |
+| `API_BASE_URL` | API origin; required to validate `/api/v1/auth/me` |
 
-Other environments or `USE_MOCK_SERVICES=false` display a configuration error;
-they cannot silently open a demo session. API URLs, issuer/client IDs and redirect
-URIs will be added only with agreed M2 adapters. Client secrets do not belong here.
+Live configuration requires HTTPS endpoints (HTTP is allowed only for localhost)
+and fails closed when required identity settings are absent. Access, refresh and
+ID tokens use platform secure storage. New and restored sessions are validated
+through `/api/v1/auth/me`; accounts without the `merchant` role are denied.
+Server authorization remains authoritative for business resources.
+
+The M2 API currently returns identity roles from `/auth/me` but does not return
+business membership/resource IDs. The app cannot discover or validate an
+approved merchant workspace membership from this contract yet. Existing
+Business screens remain local sample workflows, not merchant records; the
+Phase 1 membership-discovery contract and live business API integration are
+required before those screens can be presented as real merchant data. Android
+physical-device and iOS Keycloak acceptance also require a configured realm,
+API and device environment.
 
 ## Code boundaries
 
@@ -96,12 +126,12 @@ URIs will be added only with agreed M2 adapters. Client secrets do not belong he
 - `integration_test/`: opt-in device/browser walkthrough.
 - `scripts/render_review_test.dart`: opt-in labelled visual review renders.
 
-Future API adapters implement `BusinessRepository`; future Keycloak integration
-implements `IdentityService` and extends session handling for real OIDC lifecycle.
-The UI model classes are fixture models, not published backend contracts. Use
-Authorization Code + PKCE and immutable Keycloak `sub` in M2; backend role,
-resource-membership checks and approved DTO mappings come from D1. The client
-never connects directly to PostgreSQL.
+`KeycloakIdentityService` implements Authorization Code + PKCE using the system
+browser, secure token storage, token refresh, `/api/v1/auth/me` validation,
+current-session revocation and Keycloak logout. Business workflow data still
+uses `MockBusinessRepository`; its UI models are fixtures, not published backend
+contracts. Resource membership and future business operations must be validated
+by Phase 1 server contracts; the client never connects directly to PostgreSQL.
 
 ## Verification
 
