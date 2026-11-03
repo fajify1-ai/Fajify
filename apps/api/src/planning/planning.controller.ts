@@ -4,7 +4,7 @@ import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
 import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
-import {PlanInput,PlanEditInput,PlanFeedbackInput,PlanFeedbackView,PlanListQuery,PlanPage,PlanView,RecommendationPage} from './planning.dto';
+import {PlanInput,PlanEditInput,PlanBookingInput,PlanBookingHoldView,PlanFeedbackInput,PlanFeedbackView,PlanListQuery,PlanPage,PlanView,RecommendationPage} from './planning.dto';
 import {PlanningService} from './planning.service';
 type Request={identity:VerifiedIdentity};
 const strict=<T extends object>(expectedType:new()=>T)=>new ValidationPipe({expectedType,whitelist:true,forbidNonWhitelisted:true,transform:true});
@@ -33,6 +33,11 @@ export class PlanningController {
  @Get(':id/feedback') @ApiOkResponse({type:PlanFeedbackView})
  feedbackDetail(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string){
   return this.planning.feedbackDetail(r.identity.subject,id);
+ }
+
+ @Post(':id/booking-holds') @ApiBody({type:PlanBookingInput}) @ApiCreatedResponse({type:PlanBookingHoldView})
+ bookingHold(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string,@Body(strict(PlanBookingInput)) input:PlanBookingInput){
+  return this.planning.bookingHold(r.identity,id,input);
  }
 
 }
