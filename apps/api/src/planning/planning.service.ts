@@ -156,17 +156,24 @@ export class PlanningService {
   if(plan.status!=='draft')throw new ConflictException('Archived plan cannot create a booking');
   if(plan.revision!==input.revision)throw new ConflictException('Plan changed; refresh before creating a hold');
   if(plan.guests>50)throw new ConflictException('Maximum booking group size is 50; split this plan');
+  const checkoutInput={kind:'reservation' as const,sourceId:input.availabilityId,quantity:plan.guests,
+   guestName:input.guestName,requestKey:input.requestKey,expectedAmountMinor:input.expectedTotalMinor,
+   planId:id,planRevision:input.revision};
+  const existing=await this.pool.query(`
+   SELECT 1 FROM paid_holds h
+   JOIN customer_plan_hold_links link ON link.hold_id=h.id
+   JOIN payment_intents p ON p.id=h.intent_id
+   WHERE h.customer_subject=$1 AND h.request_key=$2 AND link.plan_id=$3
+   AND link.plan_revision=$4 AND h.availability_id=$5 AND h.quantity=$6
+   AND p.amount_minor::text=$7`,[identity.subject,input.requestKey,id,input.revision,input.availabilityId,plan.guests,input.expectedTotalMinor]);
+  if(existing.rowCount)return this.commerce.hold(identity,checkoutInput);
   const suggestions=await this.recommend(identity.subject,id);
   const selected=suggestions.items.find(item=>item.availabilityId===input.availabilityId.toLowerCase());
   if(!selected)throw new ConflictException('Offering is no longer recommended; refresh the plan');
   if(!['service','package'].includes(selected.category))throw new ConflictException('Event tickets use the ticket checkout workflow');
   if(selected.totalMinor==='0')throw new ConflictException('Free services use the customer reservation endpoint');
   if(selected.totalMinor!==input.expectedTotalMinor)throw new ConflictException('Recommendation price changed');
-  return this.commerce.hold(identity,{
-   kind:'reservation',sourceId:selected.availabilityId,quantity:plan.guests,
-   guestName:input.guestName,requestKey:input.requestKey,expectedAmountMinor:input.expectedTotalMinor,
-   planId:id,planRevision:input.revision
-  });
+  return this.commerce.hold(identity,checkoutInput);
  }
 
 }
