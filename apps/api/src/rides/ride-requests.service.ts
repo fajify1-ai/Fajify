@@ -36,6 +36,13 @@ export class RideRequestsService {
    return {id:result.rows[0].id,replayed:false};
   }catch(e){await client.query('ROLLBACK');if((e as {code?:string}).code==='23505')throw new ConflictException('Concurrent idempotent request; retry');throw e;}finally{client.release();}
  }
+ async history(subject:string,limit=20,offset=0){
+  const result=await this.pool.query(`SELECT id,status,category,quote_amount_minor::text AS amount_minor,currency,
+   assigned_driver_id,created_at,updated_at
+   FROM ride_requests WHERE customer_subject=$1 ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`,
+   [subject,limit,offset]);
+  return {items:result.rows,nextOffset:result.rows.length===limit?offset+limit:null};
+ }
  async get(subject:string,id:string){
   const r=await this.pool.query(`SELECT id,status,category,quote_amount_minor::text AS amount_minor,currency,created_at,assigned_driver_id
   FROM ride_requests WHERE id=$1 AND customer_subject=$2`,[id,subject]);
