@@ -33,6 +33,8 @@ export class RideLifecycleOperations {
    if(!['assigned','driver_arriving'].includes(r.status))throw new ConflictException('Trip cannot be reassigned after driver arrival');
    const scope=await c.query("SELECT 1 FROM ride_dispatch_areas a JOIN ride_requests r ON r.id=$2 WHERE a.id=$1 AND a.active AND ST_Intersects(a.boundary,r.pickup::geometry)",[areaId,rideId]);
    if(!scope.rowCount)throw new ForbiddenException('Ride outside assigned dispatch area');
+   const member=await c.query("SELECT 1 FROM resource_memberships m JOIN account_access a ON a.identity_subject=m.identity_subject AND NOT a.suspended JOIN user_profiles p ON p.identity_subject=m.identity_subject AND NOT p.suspended WHERE m.identity_subject=$1 AND m.resource_type='dispatch_area' AND m.resource_id=$2 AND m.role='dispatcher' AND m.active",[actor,areaId]);
+   if(!member.rowCount)throw new ForbiddenException('Dispatcher authorization revoked');
    await c.query("UPDATE ride_requests SET status='requested',assigned_driver_id=NULL,dispatch_generation=dispatch_generation+1,updated_at=now() WHERE id=$1",[rideId]);
    await c.query("UPDATE ride_dispatch_offers SET status='revoked' WHERE ride_id=$1 AND status IN ('accepted','pending')",[rideId]);
    await c.query("INSERT INTO ride_trip_events(ride_id,actor_subject,from_state,to_state) VALUES($1,$2,$3,'requested')",[rideId,actor,r.status]);
