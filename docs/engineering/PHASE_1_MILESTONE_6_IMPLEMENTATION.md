@@ -40,6 +40,7 @@ M6 extends `CommerceLifecycle.hold` to accept package catalogue offerings using 
 - Reserving a package increments the primary availability slot and the matching component availability slots atomically in the customer transaction.
 - `package_component_holds` tracks exact per-component allocations with immutable identity and explicit release timestamp; database trigger validates package, merchant, group quantity and slot alignment.
 - Expiration, unverified cancellation, approved paid cancellation/refund and merchant cancellation restore component quantities with the parent reservation in the same transaction. Paid merchant/customer cancellation cannot bypass M5's finance workflow.
+- Merchant edits to package composition or group-pricing configuration are rejected while active paid holds or unfulfilled paid reservations exist.
 - M5 checkout/verified payment capture checks package price, configured guest limits and component allocation against current merchant configuration. Only a verified successful payment confirms a reservation.
 - M5's existing idempotency key is reused; supplying an expected total prevents stale recommendations from creating a differently priced hold. Exact retries return the original hold even when that hold has consumed the remaining capacity; replay ownership and plan revision are checked under the M5 transaction.
 - Plan-to-hold conversion attribution is inserted alongside the financial hold within the same transaction; finance and booking source-of-truth remain in M5.
@@ -53,6 +54,7 @@ M6 extends `CommerceLifecycle.hold` to accept package catalogue offerings using 
 - `0019_m6_component_integrity.sql`: immutable allocation and cross-tenant/slot/quantity trigger.
 - `0020_m6_plan_hold_attribution.sql`: immutable reference from an M5 hold to the owning plan revision.
 - `0021_m6_conversion_integrity.sql`: database-enforced ownership and revision integrity for conversion records.
+- `0022_m6_evaluation_immutability.sql`: append-only evidence guard for recommendation evaluation history.
 
 All are additive and must be applied in order against an explicitly marked disposable PostgreSQL 16 database. `grant-m5-runtime.ts` adds M6 tables under the restricted runtime role; no new production credentials are committed.
 
@@ -60,6 +62,7 @@ All are additive and must be applied in order against an explicitly marked dispo
 - Unit: `apps/api/test/m6-recommendation.test.ts`, `m6-planning-security.test.ts`, `m6-booking-eligibility.test.ts`.
 - Restricted PostgreSQL & synthetic payment: `apps/api/test/m6-planning-acceptance.ts` — ownership, optimistic revision, feedback, PostGIS, evaluation, package holds, component capacity/expiry/cancellation, replay protection, stale pricing, revoked session and verified synthetic provider capture.
 - OpenAPI registry `apps/api/src/planning/planning-contracts.ts` is checked by `apps/api/scripts/export-openapi.ts`; existing schema names remain separate from M4's `PlanView` and `PlanPage`.
+- `tooling/prepare-m6-p1-contracts.sh` prepares the OpenAPI snapshot locally on the isolated feature branch only; it never pushes, merges or touches a production database.
 - `tooling/verify-m6-p1-consolidated.sh` and `tooling/m6-verification-report.mjs` prepare exact SHA, typecheck, lint, build, migrations/replay, runtime privileges, unit, database, contract, audit and source integrity gates, reporting failure if evidence is missing or incomplete.
 - The generated OpenAPI snapshot is **not yet regenerated or accepted**; it must be generated in the local dependency-installed workspace and committed before the final clean-SHA consolidated run.
 - No claims of tests passing, application deployment, migrations applied, payment provider readiness or Phase/Milestone acceptance are made.
