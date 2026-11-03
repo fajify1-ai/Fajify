@@ -8,7 +8,7 @@ export async function grantM5Runtime(pool:Pool,runtimeUrl:string){
  await pool.query('GRANT SELECT,INSERT,UPDATE,DELETE ON '+mutable.join(',')+' TO '+quoted);
  const state=['payment_intents','payment_terms','checkout_sessions','ticket_inventory','paid_holds','issued_tickets','finance_refunds','merchant_recipients','settlement_batches','finance_disputes','finance_jobs','finance_reconciliation_cases','payment_order_current','package_component_holds'];
  await pool.query('GRANT SELECT,INSERT,UPDATE ON '+state.join(',')+' TO '+quoted);
- const immutable=['payment_receipts','ledger_entries','ledger_accounts','payment_order_links','payment_order_attempts','finance_policies','finance_postings','finance_account_owners','payment_fees','finance_environment','settlement_items','settlement_fees','settlement_fee_returns','finance_consumed_events','finance_operation_events'];
+ const immutable=['payment_receipts','ledger_entries','ledger_accounts','payment_order_links','payment_order_attempts','finance_policies','finance_postings','finance_account_owners','payment_fees','finance_environment','settlement_items','settlement_fees','settlement_fee_returns','finance_consumed_events','finance_operation_events','customer_plan_hold_links'];
  await pool.query('GRANT SELECT,INSERT ON '+immutable.join(',')+' TO '+quoted);
  await pool.query('GRANT SELECT,INSERT,DELETE ON settlement_claims TO '+quoted);
  await pool.query('GRANT SELECT ON finance_all_postings,finance_order_links TO '+quoted);
