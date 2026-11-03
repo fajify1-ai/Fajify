@@ -6,6 +6,7 @@ import {AccountGuard} from '../auth/account.guard';
 import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
+import {AdminRateGuard} from '../auth/admin-rate.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideAreasService} from './ride-areas.service';
 const areaSchema=z.object({name:z.string().trim().min(3).max(120),geojson:z.string().min(20).max(20000)}).strict();
@@ -15,14 +16,14 @@ const toggleSchema=z.object({active:z.boolean()}).strict();
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideAreasController {
  constructor(@Inject(RideAreasService)private readonly areas:RideAreasService){}
- @Post() @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @Post() @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard)
  @ApiBody({schema:{type:'object',required:['name','geojson'],properties:{name:{type:'string'},geojson:{type:'string'}}}})
  @ApiOkResponse({description:'Inactive dispatch boundary pending activation'})
  create(@Req() req:{identity:VerifiedIdentity},@Body() body:unknown){
   const p=areaSchema.safeParse(body);if(!p.success)throw new BadRequestException('Invalid area');
   return this.areas.create(req.identity.subject,p.data.name,p.data.geojson);
  }
- @Patch(':id') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @Patch(':id') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard)
  @ApiBody({schema:{type:'object',required:['active'],properties:{active:{type:'boolean'}}}})
  @ApiOkResponse({description:'Audited geofence activation/deactivation'})
  update(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) id:string,@Body() body:unknown){
