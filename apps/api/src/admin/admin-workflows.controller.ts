@@ -12,7 +12,7 @@ import {AdminReadAuditGuard} from './admin-read-audit.guard';
 import {AdminGovernanceService} from './admin-governance.service';
 import {AdminSupportService} from './admin-support.service';
 import {AdminIncidentService} from './admin-incidents.service';
-import {AdminPagedResult,AdminChangedView,AdminModerateInput,AdminRestrictionInput,AdminAssignInput,AdminReplyInput,AdminSupportStatusInput,AdminIncidentInput,AdminIncidentTransitionInput,AdminIncidentView,AdminSupportListQuery,AdminModerationResultView,AdminRestrictionResultView,AdminSupportAssignmentView,AdminSupportStatusView,AdminIncidentStatusView,AdminSupportMessageView,AdminSupportDetailView} from './admin.dto';
+import {AdminPagedResult,AdminModerateInput,AdminRestrictionInput,AdminAssignInput,AdminReplyInput,AdminSupportStatusInput,AdminIncidentInput,AdminIncidentTransitionInput,AdminIncidentView,AdminSupportListQuery,AdminModerationResultView,AdminRestrictionResultView,AdminSupportAssignmentView,AdminSupportStatusView,AdminIncidentStatusView,AdminSupportMessageView,AdminSupportDetailView} from './admin.dto';
 type ActorRequest={identity:VerifiedIdentity};
 const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard,AdminReadAuditGuard];
 
