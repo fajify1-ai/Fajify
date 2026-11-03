@@ -58,9 +58,14 @@ export class CustomerPlanRecommendationView {
  @ApiProperty({type:[String]}) reasons!:string[];
  @ApiProperty({description:'Informational only; revalidate live price, capacity and payment before booking'}) bookingStatus!:string;
 }
+export class CustomerPlanAlternativeView {
+ @ApiProperty() code!:string;
+ @ApiProperty() description!:string;
+}
 export class CustomerPlanRecommendationPage {
  @ApiProperty({type:()=>[CustomerPlanRecommendationView]}) items!:CustomerPlanRecommendationView[];
- @ApiProperty() evaluatedAt!:string;
+ @ApiProperty({format:'date-time'}) evaluatedAt!:string;
+ @ApiProperty({type:()=>[CustomerPlanAlternativeView]}) alternatives!:CustomerPlanAlternativeView[];
 }
 
 export class CustomerPlanFeedbackInput {
