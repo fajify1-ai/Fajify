@@ -5373,6 +5373,1389 @@
           "finance-admin"
         ]
       }
+    },
+    "/api/v1/rides/driver/offers": {
+      "get": {
+        "operationId": "RideController_offers_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Driver-owned active offer inbox"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/api/v1/rides/driver/trips": {
+      "get": {
+        "operationId": "RideController_trips_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Driver-owned assigned trip history"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/api/v1/rides/offers/{id}/accept": {
+      "post": {
+        "operationId": "RideController_accept_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Concurrently fenced driver assignment"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/api/v1/rides/{id}/state": {
+      "patch": {
+        "operationId": "RideController_transition_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "to"
+                ],
+                "properties": {
+                  "to": {
+                    "type": "string",
+                    "enum": [
+                      "driver_arriving",
+                      "driver_arrived",
+                      "in_progress",
+                      "completed"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authoritative trip transition"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/api/v1/rides/driver/location/revoke": {
+      "post": {
+        "operationId": "RideController_revoke_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Delete consented GPS and set driver offline"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/api/v1/rides/driver/location": {
+      "post": {
+        "operationId": "RideController_location_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "latitude",
+                  "longitude",
+                  "observedAt",
+                  "sequence",
+                  "consentGranted"
+                ],
+                "properties": {
+                  "latitude": {
+                    "type": "number"
+                  },
+                  "longitude": {
+                    "type": "number"
+                  },
+                  "observedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "sequence": {
+                    "type": "integer"
+                  },
+                  "consentGranted": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fresh, sequenced and consented GPS update"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides"
+        ]
+      }
+    },
+    "/api/v1/customer/rides/quotes": {
+      "post": {
+        "operationId": "CustomerRidesController_quote_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "pickup",
+                  "destination",
+                  "category"
+                ],
+                "properties": {
+                  "pickup": {
+                    "type": "object"
+                  },
+                  "destination": {
+                    "type": "object"
+                  },
+                  "category": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "amountMinor": {
+                      "type": "string"
+                    },
+                    "currency": {
+                      "type": "string"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "pricingVersion": {
+                      "type": "string"
+                    },
+                    "distanceBasis": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides-customer"
+        ]
+      }
+    },
+    "/api/v1/customer/rides": {
+      "post": {
+        "operationId": "CustomerRidesController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "pickup",
+                  "destination",
+                  "category",
+                  "quoteId",
+                  "idempotencyKey"
+                ],
+                "properties": {
+                  "pickup": {
+                    "type": "object"
+                  },
+                  "destination": {
+                    "type": "object"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "quoteId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "idempotencyKey": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "replayed": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides-customer"
+        ]
+      },
+      "get": {
+        "operationId": "CustomerRidesController_history_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Current customer ride history"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides-customer"
+        ]
+      }
+    },
+    "/api/v1/customer/rides/{id}": {
+      "get": {
+        "operationId": "CustomerRidesController_get_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Owned ride only"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "rides-customer"
+        ]
+      }
+    },
+    "/api/v1/dispatch/rides/{id}/match": {
+      "post": {
+        "operationId": "RideDispatchController_match_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "areaId",
+                  "offerCount",
+                  "validForSeconds"
+                ],
+                "properties": {
+                  "areaId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "offerCount": {
+                    "type": "integer"
+                  },
+                  "validForSeconds": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Area-scoped matching; returns offers actually issued"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-dispatch"
+        ]
+      }
+    },
+    "/api/v1/dispatch/rides/{id}/offers": {
+      "post": {
+        "operationId": "RideDispatchController_offer_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "driverId",
+                  "areaId",
+                  "validForSeconds"
+                ],
+                "properties": {
+                  "driverId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "areaId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "validForSeconds": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fenced dispatch offer"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-dispatch"
+        ]
+      }
+    },
+    "/api/v1/drivers/onboarding": {
+      "post": {
+        "operationId": "DriverOnboardingController_register_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "vehicleCategory",
+                  "registration"
+                ],
+                "properties": {
+                  "vehicleCategory": {
+                    "type": "string"
+                  },
+                  "registration": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pending driver and vehicle review"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-drivers"
+        ]
+      }
+    },
+    "/api/v1/drivers/me": {
+      "get": {
+        "operationId": "DriverOnboardingController_me_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-drivers"
+        ]
+      }
+    },
+    "/api/v1/drivers/{id}/review": {
+      "post": {
+        "operationId": "DriverOnboardingController_review_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "approve"
+                ],
+                "properties": {
+                  "approve": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Audited privileged driver approval decision"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-drivers"
+        ]
+      }
+    },
+    "/api/v1/dispatch/areas": {
+      "post": {
+        "operationId": "RideAreasController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "geojson"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "geojson": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inactive dispatch boundary pending activation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-dispatch-areas"
+        ]
+      }
+    },
+    "/api/v1/dispatch/areas/{id}": {
+      "patch": {
+        "operationId": "RideAreasController_update_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "active"
+                ],
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Audited geofence activation/deactivation"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-dispatch-areas"
+        ]
+      }
+    },
+    "/api/v1/dispatch/areas/{areaId}/rides": {
+      "get": {
+        "operationId": "RideAreasController_monitor_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Area-scoped active ride and incident overview"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-dispatch-areas"
+        ]
+      }
+    },
+    "/api/v1/dispatch/areas/{areaId}/rides/{rideId}/candidates": {
+      "get": {
+        "operationId": "RideAreasController_candidates_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-dispatch-areas"
+        ]
+      }
+    },
+    "/api/v1/drivers/me/documents/uploads": {
+      "post": {
+        "operationId": "RideDriverOperationsController_upload_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "contentType"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string"
+                  },
+                  "contentType": {
+                    "type": "string",
+                    "enum": [
+                      "application/pdf",
+                      "image/jpeg",
+                      "image/png"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Short-lived private presigned S3 PUT; upload is not yet an approved document"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-driver-operations"
+        ]
+      }
+    },
+    "/api/v1/drivers/me/documents": {
+      "post": {
+        "operationId": "RideDriverOperationsController_document_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "privateObjectKey",
+                  "expiresAt"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "licence",
+                      "identification",
+                      "insurance",
+                      "vehicle_registration"
+                    ]
+                  },
+                  "privateObjectKey": {
+                    "type": "string"
+                  },
+                  "expiresAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Submitted for independent review; upload existence must be validated operationally"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-driver-operations"
+        ]
+      }
+    },
+    "/api/v1/drivers/me/availability": {
+      "post": {
+        "operationId": "RideDriverOperationsController_availability_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "available"
+                ],
+                "properties": {
+                  "available": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-driver-operations"
+        ]
+      }
+    },
+    "/api/v1/drivers/me/payout-recipient": {
+      "post": {
+        "operationId": "RideDriverOperationsController_payout_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "recipientReference"
+                ],
+                "properties": {
+                  "recipientReference": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-driver-operations"
+        ]
+      }
+    },
+    "/api/v1/drivers/documents/{id}/review": {
+      "post": {
+        "operationId": "RideDriverOperationsController_reviewDocument_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "approve"
+                ],
+                "properties": {
+                  "approve": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-driver-operations"
+        ]
+      }
+    },
+    "/api/v1/drivers/vehicles/{id}/review": {
+      "post": {
+        "operationId": "RideDriverOperationsController_reviewVehicle_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "approve"
+                ],
+                "properties": {
+                  "approve": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-driver-operations"
+        ]
+      }
+    },
+    "/api/v1/drivers/{id}/suspension": {
+      "post": {
+        "operationId": "RideDriverOperationsController_suspend_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "suspend"
+                ],
+                "properties": {
+                  "suspend": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-driver-operations"
+        ]
+      }
+    },
+    "/api/v1/drivers/{id}/payout-recipient/verify": {
+      "post": {
+        "operationId": "RideDriverOperationsController_verifyPayout_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "recipientReference"
+                ],
+                "properties": {
+                  "recipientReference": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-driver-operations"
+        ]
+      }
+    },
+    "/api/v1/customer/rides/{id}/cancellation": {
+      "post": {
+        "operationId": "RideLifecycleOperationsController_cancel_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Cancel owned ride before arrival; verified payments require refund review"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-operations"
+        ]
+      }
+    },
+    "/api/v1/dispatch/rides/{id}/reassignment": {
+      "post": {
+        "operationId": "RideLifecycleOperationsController_reassign_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "areaId"
+                ],
+                "properties": {
+                  "areaId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fenced requeue of a ride before driver arrival; requires active area membership"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-operations"
+        ]
+      }
+    },
+    "/api/v1/rides/{id}/timeline": {
+      "get": {
+        "operationId": "RideTrackingController_timeline_v1",
+        "parameters": [
+          {
+            "name": "areaId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "after",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scoped trip state, transition history and fresh driver location"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-tracking"
+        ]
+      }
+    },
+    "/api/v1/rides/{id}/events": {
+      "get": {
+        "operationId": "RideTrackingController_events_v1",
+        "parameters": [
+          {
+            "name": "areaId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-tracking"
+        ]
+      }
+    },
+    "/api/v1/ride-safety/rides/{rideId}/incidents": {
+      "post": {
+        "operationId": "RideSafetyController_report_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "kind",
+                  "severity",
+                  "requestKey"
+                ],
+                "properties": {
+                  "kind": {
+                    "type": "string"
+                  },
+                  "severity": {
+                    "type": "string"
+                  },
+                  "requestKey": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Durable incident and escalation outbox entry, not proof of emergency responder notification"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-safety"
+        ]
+      }
+    },
+    "/api/v1/ride-safety/incidents/{id}": {
+      "get": {
+        "operationId": "RideSafetyController_detail_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-safety"
+        ]
+      },
+      "patch": {
+        "operationId": "RideSafetyController_decide_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "areaId",
+                  "status"
+                ],
+                "properties": {
+                  "areaId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "investigating",
+                      "resolved"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-safety"
+        ]
+      }
+    },
+    "/api/v1/ride-safety/areas/{areaId}/incidents": {
+      "get": {
+        "operationId": "RideSafetyController_queue_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Urgent incidents first, limited to authorized dispatch area"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-safety"
+        ]
+      }
+    },
+    "/api/v1/customer/rides/{id}/payment-intent": {
+      "post": {
+        "operationId": "RideFinanceController_prepare_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "M5 payment intent from authoritative completed ride; use existing verified checkout API"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-finance"
+        ]
+      }
+    },
+    "/api/v1/drivers/me/earnings": {
+      "get": {
+        "operationId": "RideFinanceController_earnings_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Owned ride earnings, never an assertion of payout"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-finance"
+        ]
+      }
+    },
+    "/api/v1/admin/rides/{id}/payout-reservation": {
+      "post": {
+        "operationId": "RideFinanceController_reserve_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-finance"
+        ]
+      }
+    },
+    "/api/v1/admin/ride-payouts/{id}/submit": {
+      "post": {
+        "operationId": "RideFinanceController_submit_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-finance"
+        ]
+      }
+    },
+    "/api/v1/admin/ride-payouts/{id}/reconcile": {
+      "post": {
+        "operationId": "RideFinanceController_reconcile_v1",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-finance"
+        ]
+      }
+    },
+    "/api/v1/admin/ride-tariffs": {
+      "post": {
+        "operationId": "RideTariffController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "category",
+                  "baseMinor",
+                  "perKmMinor",
+                  "commissionBps"
+                ],
+                "properties": {
+                  "category": {
+                    "type": "string"
+                  },
+                  "baseMinor": {
+                    "type": "string"
+                  },
+                  "perKmMinor": {
+                    "type": "string"
+                  },
+                  "commissionBps": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New active category tariff with immutable version history"
+          }
+        },
+        "security": [
+          {
+            "keycloak": []
+          }
+        ],
+        "tags": [
+          "ride-fare-policy"
+        ]
+      }
     }
   },
   "info": {
