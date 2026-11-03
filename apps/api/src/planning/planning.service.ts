@@ -69,6 +69,7 @@ export class PlanningService {
    WHERE i.active AND i.published AND i.kind IN ('service','package','event')
    AND (i.kind<>'package' OR i.price_minor>0)
    AND (i.price_minor=0 OR EXISTS(SELECT 1 FROM finance_policies fp WHERE fp.business_id=i.business_id))
+   AND i.price_minor::numeric * CASE WHEN i.kind='package' AND p.pricing_model='per_group' THEN 1 ELSE $1 END <= 9007199254740991::numeric
    AND (i.kind<>'event' OR EXISTS(
     SELECT 1 FROM ticket_inventory ti JOIN business_event_config event ON event.catalogue_id=ti.catalogue_id
     WHERE ti.catalogue_id=i.id AND ti.capacity-ti.issued-ti.held>=$1 AND event.starts_at=a.starts_at AND event.starts_at>now()
