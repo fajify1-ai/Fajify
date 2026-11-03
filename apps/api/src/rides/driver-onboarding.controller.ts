@@ -6,6 +6,7 @@ import {AccountGuard} from '../auth/account.guard';
 import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
+import {AdminRateGuard} from '../auth/admin-rate.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {DriverOnboardingService} from './driver-onboarding.service';
 const register=z.object({vehicleCategory:z.string().trim().min(1).max(32),registration:z.string().trim().min(3).max(40)}).strict();
@@ -23,7 +24,7 @@ export class DriverOnboardingController {
  }
  @Get('me') @RequireRoles('driver')
  me(@Req() req:{identity:VerifiedIdentity}){return this.service.status(req.identity.subject);}
- @Post(':id/review') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @Post(':id/review') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard)
  @ApiBody({schema:{type:'object',required:['approve'],properties:{approve:{type:'boolean'}}}})
  @ApiOkResponse({description:'Audited privileged driver approval decision'})
  review(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) id:string,@Body() body:unknown){
