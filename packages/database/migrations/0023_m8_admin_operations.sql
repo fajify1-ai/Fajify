@@ -115,3 +115,16 @@ CREATE TABLE admin_monitor_signals (
  last_checked_at timestamptz NOT NULL DEFAULT now()
 );
 REVOKE ALL ON admin_monitor_signals FROM PUBLIC;
+
+-- Persistent admin-inbox alerts, not claims of email/push provider delivery.
+CREATE TABLE admin_alerts (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+ incident_id uuid NOT NULL UNIQUE REFERENCES admin_incidents(id),
+ severity varchar(8) NOT NULL CHECK(severity IN ('low','medium','high','critical')),
+ acknowledged_by varchar(255),
+ acknowledged_at timestamptz,
+ created_at timestamptz NOT NULL DEFAULT now(),
+ CHECK((acknowledged_by IS NULL)=(acknowledged_at IS NULL))
+);
+CREATE INDEX admin_alerts_unread_idx ON admin_alerts(created_at DESC,id DESC) WHERE acknowledged_at IS NULL;
+REVOKE ALL ON admin_alerts FROM PUBLIC;

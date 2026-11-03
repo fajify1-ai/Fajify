@@ -121,3 +121,17 @@ export class AdminMonitoringSummary {
  @ApiProperty({type:String,enum:['unverified'],description:'No external provider probe is performed'}) providerHealth!:string;
  @ApiProperty({type:String,format:'date-time'}) checkedAt!:string;
 }
+
+export class AdminAlertView {
+ @ApiProperty({type:String,format:'uuid'}) id!:string;
+ @ApiProperty({type:String,format:'uuid'}) incidentId!:string;
+ @ApiProperty({type:String}) severity!:string;
+ @ApiProperty({type:String,nullable:true,format:'date-time'}) acknowledgedAt!:string|null;
+ @ApiProperty({type:String,format:'date-time'}) createdAt!:string;
+ @ApiProperty({type:String}) summary!:string;
+ @ApiProperty({type:String}) state!:string;
+}
+export class AdminAlertPage {
+ @ApiProperty({type:()=>[AdminAlertView]}) items!:AdminAlertView[];
+ @ApiProperty({type:Number,nullable:true}) nextOffset!:number|null;
+}

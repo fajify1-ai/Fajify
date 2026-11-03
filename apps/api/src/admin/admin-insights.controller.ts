@@ -1,4 +1,4 @@
-import {Controller,Get,Header,HttpCode,Inject,Param,Post,Query,Req,UseGuards,BadRequestException} from '@nestjs/common';
+import {Body,Controller,Get,Header,HttpCode,Inject,Param,ParseUUIDPipe,Post,Query,Req,UseGuards,BadRequestException} from '@nestjs/common';
 import {ApiBearerAuth,ApiOkResponse,ApiParam,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
@@ -10,7 +10,7 @@ import {pagination,validated} from '../customer/customer-http';
 import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
 import {AdminInsightsService} from './admin-insights.service';
 import {AdminMonitorService} from './admin-monitor.service';
-import {AdminReportRangeQuery,AdminPagedResult,AdminFinanceSummary,AdminReportSummary,AdminMonitoringSummary,AdminCommandAuditPage} from './admin.dto';
+import {AdminReportRangeQuery,AdminPagedResult,AdminFinanceSummary,AdminReportSummary,AdminMonitoringSummary,AdminCommandAuditPage,AdminAlertPage,AdminCommandKey,AdminChangedView} from './admin.dto';
 type ActorRequest={identity:VerifiedIdentity};
 const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard];
 
@@ -31,6 +31,14 @@ export class AdminInsightsController{
  @Post('monitoring/check') @HttpCode(200) @RequireAdminScope('incidents.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({schema:{type:'object',properties:{checkedAt:{type:'string',format:'date-time'},opened:{type:'array',items:{type:'string'}},cleared:{type:'array',items:{type:'string'}}}}})
  check(){return this.monitor.tick();}
+ @Get('monitoring/alerts') @RequireAdminScope('monitoring.read') @Header('Cache-Control','no-store')
+ @pagination() @ApiOkResponse({type:AdminAlertPage})
+ alerts(@Query(validated(PageQuery)) q:PageQuery){return this.monitor.alerts(q);}
+ @Post('monitoring/alerts/:id/acknowledgement') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}})
+ @HttpCode(200) @RequireAdminScope('incidents.write') @Header('Cache-Control','no-store') @ApiOkResponse({type:AdminChangedView})
+ acknowledge(@Req()r:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminCommandKey)) body:AdminCommandKey){
+  return this.monitor.acknowledge(r.identity.subject,id,body.requestKey);
+ }
  @Get('operations/command-audit') @RequireAdminScope('audit.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminCommandAuditPage})
  actionAudit(@Query(validated(PageQuery)) q:PageQuery){return this.insights.commandAudit(q);}

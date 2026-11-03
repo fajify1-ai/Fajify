@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {ConflictException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
@@ -50,7 +51,7 @@ export class AdminSupportService {
    if(count.rows[0].count>=100)throw new ConflictException('Support message limit reached');
    const added=await c.query(
     'INSERT INTO customer_support_messages(case_id,request_key,body,author_kind,author_subject) VALUES($1,$2,$3,\'admin\',$4) RETURNING id,body,created_at AS "createdAt"',
-    [id,input.requestKey,input.message.trim(),actor]);
+    [id,'m8_'+createHash('sha256').update(actor+':'+input.requestKey).digest('hex'),input.message.trim(),actor]);
    await c.query('UPDATE customer_support_cases SET updated_at=now() WHERE id=$1',[id]);
    await c.query('INSERT INTO outbox_events(event_type,payload) VALUES($1,$2)',
     ['admin.support.replied',JSON.stringify({caseId:id})]);

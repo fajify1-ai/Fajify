@@ -1,7 +1,9 @@
-import {Inject,Injectable} from '@nestjs/common';
+import {Inject,Injectable,NotFoundException} from '@nestjs/common';
 import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 import {AdminInsightsService} from './admin-insights.service';
+import {AdminCommandService} from './admin-command.service';
+import type {PageQuery} from '../customer/customer.dto';
 
 /** An operator may schedule this tick using a supervised process or invoke
  * the authenticated endpoint. Never assumes that an outbox entry was delivered.
@@ -10,7 +12,8 @@ import {AdminInsightsService} from './admin-insights.service';
 @Injectable()
 export class AdminMonitorService {
  constructor(@Inject(DATABASE_POOL)private readonly pool:Pool,
-  @Inject(AdminInsightsService)private readonly insights:AdminInsightsService){}
+  @Inject(AdminInsightsService)private readonly insights:AdminInsightsService,
+  @Inject(AdminCommandService)private readonly commands:AdminCommandService){}
  async tick(){
   const status=await this.insights.monitoring();
   const checks=[
@@ -41,6 +44,7 @@ export class AdminMonitorService {
       [check.key,incident.id]);
      await c.query("INSERT INTO admin_action_events(actor_subject,operation,resource_type,resource_id,outcome,reason) VALUES('system:m8-monitor','monitor.signal_opened','incident',$1,'applied',$2)",
       [incident.id,check.key]);
+     await c.query('INSERT INTO admin_alerts(incident_id,severity) VALUES($1,$2)',[incident.id,check.severity]);
      await c.query('INSERT INTO outbox_events(event_type,payload) VALUES($1,$2)',
       ['admin.incident.'+check.severity,JSON.stringify({incidentId:incident.id,signal:check.key})]);
      opened.push(check.key);
@@ -55,4 +59,21 @@ export class AdminMonitorService {
    return {checkedAt:status.checkedAt,opened,cleared};
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
  }
+ async alerts(q:PageQuery){
+  const r=await this.pool.query(
+   'SELECT a.id,a.incident_id AS "incidentId",a.severity,a.acknowledged_at AS "acknowledgedAt",a.created_at AS "createdAt",i.summary,i.state '+
+   'FROM admin_alerts a JOIN admin_incidents i ON i.id=a.incident_id ORDER BY a.created_at DESC,a.id DESC LIMIT $1 OFFSET $2',
+   [q.limit+1,q.offset]);
+  return {items:r.rows.slice(0,q.limit),nextOffset:r.rows.length>q.limit?q.offset+q.limit:null};
+ }
+ async acknowledge(actor:string,id:string,requestKey:string){
+  return this.commands.execute({actor,requestKey,operation:'monitor.alert_acknowledge',resourceType:'alert',resourceId:id,payload:{}},async c=>{
+   const alert=await c.query('SELECT acknowledged_at FROM admin_alerts WHERE id=$1 FOR UPDATE',[id]);
+   if(!alert.rowCount)throw new NotFoundException('Alert not found');
+   if(alert.rows[0].acknowledged_at)return {id,changed:false};
+   await c.query('UPDATE admin_alerts SET acknowledged_at=now(),acknowledged_by=$2 WHERE id=$1',[id,actor]);
+   return {id,changed:true};
+  });
+ }
+
 }
