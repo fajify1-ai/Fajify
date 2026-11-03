@@ -8,12 +8,13 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {PageQuery} from '../customer/customer.dto';
 import {pagination,validated} from '../customer/customer-http';
 import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
+import {AdminReadAuditGuard} from './admin-read-audit.guard';
 import {AdminGovernanceService} from './admin-governance.service';
 import {AdminSupportService} from './admin-support.service';
 import {AdminIncidentService} from './admin-incidents.service';
 import {AdminPagedResult,AdminChangedView,AdminModerateInput,AdminRestrictionInput,AdminAssignInput,AdminReplyInput,AdminSupportStatusInput,AdminIncidentInput,AdminIncidentTransitionInput,AdminIncidentView,AdminSupportListQuery,AdminModerationResultView,AdminRestrictionResultView,AdminSupportAssignmentView,AdminSupportStatusView,AdminIncidentStatusView,AdminSupportMessageView,AdminSupportDetailView} from './admin.dto';
 type ActorRequest={identity:VerifiedIdentity};
-const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard];
+const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard,AdminReadAuditGuard];
 
 @ApiTags('admin-governance') @ApiBearerAuth('keycloak')
 @Controller({path:'admin/governance',version:'1'}) @UseGuards(...guards)

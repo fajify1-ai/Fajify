@@ -15,11 +15,12 @@ import {AdminIncidentService} from './admin-incidents.service';
 import {AdminInsightsService} from './admin-insights.service';
 import {AdminMonitorService} from './admin-monitor.service';
 import {AdminEmptyBodyGuard} from './admin-empty-body.guard';
+import {AdminReadAuditGuard} from './admin-read-audit.guard';
 
 @Module({
  imports:[IdentityModule,CustomerModule],
  controllers:[CustomerSupportNotificationsController,AdminOperationsController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController],
- providers:[CustomerSupportNotificationsService,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
+ providers:[CustomerSupportNotificationsService,AdminReadAuditGuard,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
   AdminIncidentService,AdminInsightsService,AdminMonitorService]
 })
 export class AdminOperationsModule {}

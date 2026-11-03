@@ -11,6 +11,7 @@ import {AdminRateGuard} from '../src/auth/admin-rate.guard';
 import {AccessService} from '../src/auth/access.service';
 import {IDENTITY_VERIFIER} from '../src/auth/identity.types';
 import {AdminScopeGuard,RequireAdminScope} from '../src/admin/admin-scope.guard';
+import {AdminReadAuditGuard} from '../src/admin/admin-read-audit.guard';
 import {AdminGovernanceController,AdminSupportController,AdminIncidentController} from '../src/admin/admin-workflows.controller';
 import {AdminInsightsController} from '../src/admin/admin-insights.controller';
 import {AdminGovernanceService} from '../src/admin/admin-governance.service';
@@ -75,6 +76,7 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
   providers:[
    IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,
    {provide:AdminScopeGuard,useValue:{canActivate:()=>true}},
+   {provide:AdminReadAuditGuard,useValue:{canActivate:()=>true}},
    {provide:AccessService,useValue:{
     state:async()=>({suspended,revokedAfter:null}),sessionRevoked:async()=>revoked,
     allowPrivilegedRequest:async()=>rate}},

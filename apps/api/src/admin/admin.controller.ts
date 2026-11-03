@@ -9,6 +9,7 @@ import {pagination,validated} from '../customer/customer-http';
 import {AdminAuditPage,AdminOverviewView} from './admin.dto';
 import {AdminOperationsService} from './admin.service';
 import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
+import {AdminReadAuditGuard} from './admin-read-audit.guard';
 
 /** M8-P1: privileged read-only operational foundation.
  * Admin scope is server enforced (Keycloak signed identity, active session,
@@ -17,7 +18,7 @@ import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
 @ApiTags('admin-operations')
 @ApiBearerAuth('keycloak')
 @Controller({path:'admin/operations',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard)
+@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard,AdminReadAuditGuard)
 export class AdminOperationsController {
  constructor(@Inject(AdminOperationsService) private readonly operations:AdminOperationsService){}
  @Get('overview') @RequireAdminScope('operations.read')

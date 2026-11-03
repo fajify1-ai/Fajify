@@ -8,12 +8,13 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {PageQuery} from '../customer/customer.dto';
 import {pagination,validated} from '../customer/customer-http';
 import {AdminScopeGuard,RequireAdminScope,RequireAdminScopes} from './admin-scope.guard';
+import {AdminReadAuditGuard} from './admin-read-audit.guard';
 import {AdminEmptyBodyGuard} from './admin-empty-body.guard';
 import {AdminInsightsService} from './admin-insights.service';
 import {AdminMonitorService} from './admin-monitor.service';
 import {AdminReportRangeQuery,AdminPagedResult,AdminFinanceSummary,AdminReportSummary,AdminMonitoringSummary,AdminCommandAuditPage,AdminAlertPage,AdminCommandKey,AdminChangedView,AdminConsistencyView,AdminBusinessReportView} from './admin.dto';
 type ActorRequest={identity:VerifiedIdentity};
-const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard];
+const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard,AdminReadAuditGuard];
 
 @ApiTags('admin-finance-reports') @ApiBearerAuth('keycloak')
 @Controller({path:'admin',version:'1'}) @UseGuards(...guards)
