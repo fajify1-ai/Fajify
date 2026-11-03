@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {rankExperiences,type PlanningCandidate,type PlanningPreferences} from '../src/planning/recommendation.rules';
+const p:PlanningPreferences={guests:3,budgetMinor:'900000',currency:'NGN',startsAfter:'2027-01-01T00:00:00Z',startsBefore:'2027-01-03T00:00:00Z'};
+const v:PlanningCandidate={id:'a',name:'Package',address:'Lagos',currency:'NGN',category:'package',pricePerGuestMinor:'900000',pricingModel:'per_group',availableSeats:3,startsAt:'2027-01-02T12:00:00Z',active:true,published:true,merchantApproved:true};
+test('exact-budget fixed group package is eligible',()=>assert.equal(rankExperiences(p,[v])[0]?.totalMinor,'900000'));
+test('same price per guest is not affordable for three attendees',()=>assert.equal(rankExperiences(p,[{...v,pricingModel:'per_guest'}]).length,0));
+test('unapproved merchant never appears in output',()=>assert.equal(rankExperiences(p,[{...v,merchantApproved:false}]).length,0));
+test('insufficient stock never appears in output',()=>assert.equal(rankExperiences(p,[{...v,availableSeats:2}]).length,0));
+test('currency mismatch never appears in output',()=>assert.equal(rankExperiences(p,[{...v,currency:'USD'}]).length,0));
