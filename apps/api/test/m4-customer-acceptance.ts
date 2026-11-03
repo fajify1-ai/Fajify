@@ -19,7 +19,7 @@ const identity=(subject:string):VerifiedIdentity=>({subject,issuer:'https://fixt
 let business:string,branch:string,free:string,paid:string,product:string,foreign:string;
 let merchant:BusinessService;
 before(async()=>{
- assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m[45]_test_[a-z0-9_]+$/);
+ assert.match(process.env.FAJI_DISPOSABLE_DATABASE??'',/^fajify_m[345]_test_[a-z0-9_]+$/);
  assert.ok(process.env.FAJI_RUNTIME_DATABASE_URL);assert.ok(process.env.FAJI_DATABASE_URL);
  await assertDisposable(admin);await assertDisposable(runtime);
  const migrationTarget=new URL(process.env.FAJI_DATABASE_URL!),runtimeTarget=new URL(process.env.FAJI_RUNTIME_DATABASE_URL!);
