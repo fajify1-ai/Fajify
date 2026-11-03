@@ -77,6 +77,15 @@ export class PlanningService {
      AND NOT EXISTS(SELECT 1 FROM business_package_components pc LEFT JOIN business_catalogue component
        ON component.id=pc.component_id AND component.business_id=pc.business_id AND component.branch_id=pc.branch_id
        WHERE pc.package_id=i.id AND (component.id IS NULL OR NOT component.active OR NOT component.published OR component.kind='package' OR component.currency<>i.currency))
+     AND NOT EXISTS (
+      SELECT 1 FROM business_package_components pc
+      WHERE pc.package_id=i.id AND NOT EXISTS (
+       SELECT 1 FROM business_availability ca
+       WHERE ca.catalogue_id=pc.component_id AND ca.business_id=i.business_id AND ca.branch_id=i.branch_id
+       AND ca.active AND ca.starts_at=a.starts_at AND ca.starts_at>now()
+       AND ca.capacity-ca.reserved>=pc.quantity * CASE WHEN p.pricing_model='per_guest' THEN $1 ELSE 1 END
+      )
+     )
    ))
    ORDER BY a.starts_at,i.id,a.id LIMIT 501`,[plan.guests,plan.startsAfter,plan.startsBefore,plan.currency,plan.location?('%'+plan.location.replace(/[\\%_]/g,'\\$&')+'%'):null,plan.categories,plan.latitude,plan.longitude,plan.radiusKm]);
   // Fetching a bounded set prevents a customer request from scanning unlimited candidate rows.
