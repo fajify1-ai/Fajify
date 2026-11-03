@@ -48,9 +48,9 @@ Schedule only through reviewed operational orchestration, with managed secrets a
 - Provider health reports `unverified`: independent authenticated provider probes, gateway outage policy and routing/notification delivery are further operational acceptance steps.
 
 ## 5. Rollout and recovery
-- Before integration: regenerate and commit M8 OpenAPI from a clean local branch, then run `bash tooling/run-m8-p1-disposable.sh`; inspect `acceptance.json`, all TAP counts, exact SHA and cleanup.
+- Before integration: regenerate and commit the **combined M7+M8** OpenAPI from a clean local branch, then run `bash tooling/run-m8-p1-disposable.sh`; inspect `acceptance.json`, all TAP counts, exact SHA and cleanup.
 - Apply additive migrations using the approved migrator and restricted grants; back up first. Do **not** drop M8 tables during rollback while older application versions may still reference audit, case or restriction state.
 - If a release fails, revert the application binary/configuration while retaining compatible additive schema, and investigate in an isolated environment. Never disable audit triggers, scopes or financial idempotency to make acceptance green.
 - Do not enable GitHub Actions, deploy production, or merge a draft PR on the basis of this handoff alone.
 
-Known dependency: Live booking-to-ride and order-to-delivery integration awaits accepted M7 contracts; automatically requesting a ride without user authorization is forbidden.
+Accepted M7-P1 ride/dispatch/fare contracts were merged into the M8 source tree at `d45215af3de7c7bb590c9486af728f5bebd22b6e`. Customers may associate **an existing ride** with an existing service reservation using M8's `/api/v1/customer/integrations/booking-rides` API. Require explicit `consent:true`, strict ownership and a geocoded venue destination within 250m; a link does not create/pay for a ride, alter driver dispatch or expose real-time GPS. Unlinking a historical association does not cancel the ride. M8 PostGIS schema `0102_m8_booking_ride_links.sql` follows M7 migration `0101`. Never treat the passenger ride state machine as delivery/courier fulfillment; that workflow needs its own domain contract.

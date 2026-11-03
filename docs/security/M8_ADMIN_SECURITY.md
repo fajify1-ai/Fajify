@@ -17,6 +17,7 @@
 - A customer attempts to read or mark another customer's support notification → ownership-filtered result or not found; missing/invalid/revoked customer token → denied. An admin reply creates one notice by unique message ID; a customer's own reply creates no admin notice.
 - Case escalation to an inactive/unauthorized assignee, or assignment of a closed case → denied. Closed case reply → denied. Public customer messages remain owner-visible, with admin author attribution not leaked through legacy M4 customer read projections.
 - Forbidden incident transition or attempt to resolve a still-active monitored failure → denied.
+- A customer submits a booking/ride link to a venue without geocoded coordinates, to another customer's booking/ride, with a distant ride destination, with cancelled state or without consent → rejected; database trigger separately checks both ownerships and PostGIS distance. An unlinked record remains immutable history; a replacement ride requires a fresh association.
 - Missing provider evidence → no financial capture/settlement success inferred. No M8 service moves money directly.
 - Audit/command rows are append-only. Sensitive provider credentials, OTP, ticket QR, message bodies and raw provider payloads are not included in M8 operation history or command replay receipts.
 
@@ -26,6 +27,6 @@
 - PostgreSQL runtime currently serves several modules; verify least privileges and avoid unreviewed raw SQL access. No claimed row-level security on pooled global-administrator reads.
 - Database backup/restore, incident response exercises and tamper recovery. SQL-level database superusers remain an ultimate trust boundary.
 - Finance reporting and outbox monitoring require operational dashboards and manual reconciliation; an unconsumed outbox row is not evidence of an externally delivered alert.
-- M7 draft delivery, user consent, driver eligibility and location privacy must clear before implementing live booking-to-ride or order-to-delivery handoff.
+- M7-P1 has now merged with reported local acceptance. M8 booking-to-ride is allowed only for an already existing, customer-owned ride, explicit opt-in and server/DB-checked 250m venue destination proximity. It makes no ride requests or payments and returns no GPS coordinates. Customer ride assignment, safety, device consent and fare/payout eligibility remain M7-owned. Courier order-to-delivery remains blocked pending separately authorized delivery contracts.
 
 Acceptance: strict typecheck/lint/build, generated additive OpenAPI, synthetic HTTP negative tests, isolated restricted PostgreSQL migrations and replay, transactional/concurrency/idempotency checks, finance/identity contract review and explicit release authorization. A draft PR is never an accepted release.
