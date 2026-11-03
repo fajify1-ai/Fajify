@@ -41,7 +41,8 @@ M6 extends `CommerceLifecycle.hold` to accept package catalogue offerings using 
 - `package_component_holds` tracks exact per-component allocations with immutable identity and explicit release timestamp; database trigger validates package, merchant, group quantity and slot alignment.
 - Expiration, unverified cancellation, approved paid cancellation/refund and merchant cancellation restore component quantities with the parent reservation in the same transaction. Paid merchant/customer cancellation cannot bypass M5's finance workflow.
 - M5 checkout/verified payment capture checks package price, configured guest limits and component allocation against current merchant configuration. Only a verified successful payment confirms a reservation.
-- M5's existing idempotency key is reused; supplying an expected total prevents stale recommendations from creating a differently priced hold.
+- M5's existing idempotency key is reused; supplying an expected total prevents stale recommendations from creating a differently priced hold. Exact retries return the original hold even when that hold has consumed the remaining capacity; replay ownership and plan revision are checked under the M5 transaction.
+- Plan-to-hold conversion attribution is inserted alongside the financial hold within the same transaction; finance and booking source-of-truth remain in M5.
 - Merchant add-on selection is not part of M6's initial base-package paid hold: the existing public quote supports add-on preview only. Any expansion to add-on paid holds requires separate financial policy and inventory integration.
 
 ## Migrations
@@ -50,6 +51,8 @@ M6 extends `CommerceLifecycle.hold` to accept package catalogue offerings using 
 - `0017_m6_package_capacity.sql`: component capacity allocation records.
 - `0018_m6_attributes_evaluation.sql`: attributes and recommendation evaluation counts.
 - `0019_m6_component_integrity.sql`: immutable allocation and cross-tenant/slot/quantity trigger.
+- `0020_m6_plan_hold_attribution.sql`: immutable reference from an M5 hold to the owning plan revision.
+- `0021_m6_conversion_integrity.sql`: database-enforced ownership and revision integrity for conversion records.
 
 All are additive and must be applied in order against an explicitly marked disposable PostgreSQL 16 database. `grant-m5-runtime.ts` adds M6 tables under the restricted runtime role; no new production credentials are committed.
 
