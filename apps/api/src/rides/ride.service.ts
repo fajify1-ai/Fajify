@@ -28,7 +28,7 @@ export class RideService {
        d.available, EXISTS(SELECT 1 FROM ride_requests r WHERE r.assigned_driver_id=d.id AND r.status IN ('assigned','driver_arriving','driver_arrived','in_progress')) AS active
      FROM ride_drivers d WHERE d.id=$1 FOR UPDATE`,[driverId]);
    const x=d.rows[0];
-   const documents=await client.query<{valid:boolean}>(`SELECT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=$1 AND x.review_status='approved' AND x.expires_at>now()) AND NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=$1 AND (x.review_status<>'approved' OR x.expires_at IS NULL OR x.expires_at<=now())) AS valid`,[driverId]);
+   const documents=await client.query<{valid:boolean}>(`SELECT ((SELECT COUNT(DISTINCT x.document_kind) FROM ride_driver_documents x WHERE x.driver_id=$1 AND x.review_status='approved' AND x.expires_at>now())=4) AND NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=$1 AND (x.review_status<>'approved' OR x.expires_at IS NULL OR x.expires_at<=now())) AS valid`,[driverId]);
    if(!documents.rows[0]?.valid)throw new ForbiddenException('Driver documents ineligible');
    if(!x||!canOfferRideToDriver({approved:x.approved,suspended:x.suspended,vehicleApproved:x.vehicle_approved,documentsExpireAt:x.expires_at,available:x.available,hasActiveAssignment:x.active},new Date()))throw new ForbiddenException('Driver ineligible');
    const eligible=await client.query("SELECT 1 FROM ride_drivers d JOIN account_access acc ON acc.identity_subject=d.identity_subject AND acc.suspended=false JOIN user_profiles p ON p.identity_subject=d.identity_subject AND p.suspended=false JOIN ride_driver_locations l ON l.driver_id=d.id AND l.consent_granted AND l.observed_at>now()-interval '30 seconds' JOIN ride_dispatch_areas a ON a.id=$2 AND a.active JOIN ride_requests r ON r.id=$3 WHERE d.id=$1 AND ST_Intersects(a.boundary,l.position::geometry) AND ST_DWithin(l.position,r.pickup,20000) AND EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved AND v.category=r.category) AND EXISTS(SELECT 1 FROM resource_memberships m WHERE m.identity_subject=d.identity_subject AND m.resource_type='dispatch_area' AND m.resource_id=a.id AND m.role='driver' AND m.active)",[driverId,areaId,rideId]);
@@ -87,7 +87,7 @@ export class RideService {
    const eligibility=await client.query<{eligible:boolean}>(`SELECT (
      d.status='approved' AND d.available
      AND EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved AND v.category=(SELECT category FROM ride_requests WHERE id=$2))
-     AND EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND x.review_status='approved' AND x.expires_at>now())
+     AND ((SELECT COUNT(DISTINCT x.document_kind) FROM ride_driver_documents x WHERE x.driver_id=d.id AND x.review_status='approved' AND x.expires_at>now())=4)
      AND NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND (x.review_status<>'approved' OR x.expires_at<=now() OR x.expires_at IS NULL))
      AND NOT EXISTS(SELECT 1 FROM ride_requests r WHERE r.assigned_driver_id=d.id AND r.status IN ('assigned','driver_arriving','driver_arrived','in_progress'))
      ) AS eligible FROM ride_drivers d WHERE d.id=$1`,[driver_id,ride_id]);
