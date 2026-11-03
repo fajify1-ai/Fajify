@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import {before,after,test} from 'node:test';
 import assert from 'node:assert/strict';
-import {randomUUID} from 'node:crypto';
+import {createHmac,randomUUID} from 'node:crypto';
 import {Pool} from 'pg';
 import {ConflictException,ForbiddenException,NotFoundException} from '@nestjs/common';
 import {assertDisposable} from '../../../packages/database/scripts/disposable-target';
@@ -17,6 +17,8 @@ import {CommerceLifecycle} from '../src/payments/commerce-lifecycle.service';
 import {FinanceLedger} from '../src/payments/finance-ledger.service';
 import {FinancialOperations} from '../src/payments/financial-operations.service';
 import {PaystackGateway} from '../src/payments/paystack.gateway';
+import {PaymentsService} from '../src/payments/payments.service';
+import {FakePaystack} from './m5-fake-provider';
 import type {VerifiedIdentity} from '../src/auth/identity.types';
 
 const migrationUrl=process.env.FAJI_DATABASE_URL, runtimeUrl=process.env.FAJI_RUNTIME_DATABASE_URL;
@@ -126,4 +128,32 @@ test('revoked session cannot update plans or give feedback',async()=>{
  const plan=await newPlan(b);
  await access.revokeSession(b,identity(b).sessionId!);
  await assert.rejects(()=>planning.feedback(identity(b),plan.id,{rating:5}),ForbiddenException);
+});
+
+test('provider-verified package capture issues one confirmed reservation without releasing component capacity',async()=>{
+ const plan=await newPlan();
+ const hold=await planning.bookingHold(identity(a),plan.id,{availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Paid Guest',requestKey:'m6-paid-package-0001'});
+ const fake=new FakePaystack(),oldFetch=globalThis.fetch,oldCallback=process.env.PAYMENT_CALLBACK_URL;
+ try{
+  globalThis.fetch=fake.fetch;
+  process.env.PAYMENT_CALLBACK_URL='https://fixture.invalid/payment-callback';
+  const payments=new PaymentsService(runtime,gateway,commerce,finance);
+  const started=await commerce.checkout(identity(a),hold.paymentIntentId,'customer@example.invalid');
+  assert.equal(started.checkoutEnabled,true);
+  const intent=(await admin.query<{provider_reference:string;amount_minor:string}>(
+   'SELECT provider_reference,amount_minor::text FROM payment_intents WHERE id=$1',[hold.paymentIntentId])).rows[0];
+  const charge=fake.transactions.get(intent.provider_reference)??fake.charge(intent.provider_reference,Number(intent.amount_minor));
+  charge.status='success';charge.fees=15;
+  const raw=Buffer.from(JSON.stringify({event:'charge.success',data:{reference:intent.provider_reference}}));
+  const signature=createHmac('sha512',process.env.PAYSTACK_SECRET_KEY!).update(raw).digest('hex');
+  await Promise.all([payments.webhook(raw,signature),payments.webhook(raw,signature)]);
+  const confirmed=(await admin.query('SELECT reservation_id,status FROM paid_holds WHERE id=$1',[hold.id])).rows[0];
+  assert.equal(confirmed.status,'confirmed');assert.ok(confirmed.reservation_id);
+  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[componentSlot])).rows[0].reserved,1);
+  assert.equal((await admin.query('SELECT count(*)::int AS n FROM business_reservations WHERE id=$1',[confirmed.reservation_id])).rows[0].n,1);
+  await assert.rejects(()=>customer.cancelReservation(identity(a),confirmed.reservation_id),ConflictException);
+ }finally{
+  globalThis.fetch=oldFetch;
+  if(oldCallback===undefined)delete process.env.PAYMENT_CALLBACK_URL;else process.env.PAYMENT_CALLBACK_URL=oldCallback;
+ }
 });
