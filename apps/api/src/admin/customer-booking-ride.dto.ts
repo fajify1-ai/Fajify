@@ -5,7 +5,7 @@ export class CustomerBookingRideInput {
  @ApiProperty({type:String,format:'uuid'}) @IsUUID() rideId!:string;
  @ApiProperty({type:String,pattern:'^[A-Za-z0-9_-]{8,100}$'})
  @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey!:string;
- @ApiProperty({type:Boolean,enum:[true],description:'Explicit consent to associate an existing ride with this reservation. Does not create or pay for a ride.'})
+ @ApiProperty({type:Boolean,description:'Explicit consent to associate an existing ride with this reservation. Does not create or pay for a ride.'})
  @Equals(true) consent!:true;
 }
 export class CustomerBookingRideView {

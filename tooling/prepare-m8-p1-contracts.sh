@@ -15,12 +15,13 @@ corepack pnpm@9.15.9 install --frozen-lockfile
 # OpenAPI module initialization validates configuration but must not contact these endpoints.
 # Use explicitly nonproduction placeholders for contract generation only.
 export NODE_ENV=test
-export FAJI_DATABASE_URL="${FAJI_DATABASE_URL:-postgresql://faji_contract_only:unused@127.0.0.1:5432/faji_contract_unconnected}"
-export REDIS_URL="${REDIS_URL:-redis://127.0.0.1:6379}"
-export KEYCLOAK_ISSUER="${KEYCLOAK_ISSUER:-http://localhost:8080/realms/faji}"
-export KEYCLOAK_AUDIENCE="${KEYCLOAK_AUDIENCE:-faji-api}"
-export S3_ENDPOINT="${S3_ENDPOINT:-http://localhost:9000}"
-export S3_BUCKET="${S3_BUCKET:-faji-contract-only}"
+unset PAYSTACK_SECRET_KEY PAYSTACK_PUBLIC_KEY PAYMENT_CALLBACK_URL TICKET_SIGNING_KEYS TICKET_ACTIVE_KEY_ID
+export FAJI_DATABASE_URL='postgresql://faji_contract_only:unused@127.0.0.1:1/faji_contract_unconnected'
+export REDIS_URL='redis://127.0.0.1:1'
+export KEYCLOAK_ISSUER='http://localhost:8080/realms/faji'
+export KEYCLOAK_AUDIENCE='faji-api'
+export S3_ENDPOINT='http://localhost:9000'
+export S3_BUCKET='faji-contract-only'
 corepack pnpm@9.15.9 --filter @faji/api contracts
 git diff --check
 unexpected="$(git status --porcelain | grep -vE '^ M packages/api_contracts/openapi.json$' || true)"
@@ -37,4 +38,4 @@ else
  echo 'Generated OpenAPI snapshot committed locally.'
 fi
 printf 'Prepared exact source SHA: %s\n' "$(git rev-parse HEAD)"
-echo 'Next: configure explicitly marked disposable M8 database, then run bash tooling/verify-m8-p1-consolidated.sh'
+echo 'Next: run bash tooling/run-m8-p1-disposable.sh on the clean committed source SHA'
