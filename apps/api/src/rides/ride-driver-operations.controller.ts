@@ -10,6 +10,7 @@ import {AdminRateGuard} from '../auth/admin-rate.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideDriverOperations} from './ride-driver-operations.service';
 type Request={identity:VerifiedIdentity};
+const upload=z.object({kind:z.enum(['licence','identification','insurance','vehicle_registration']),contentType:z.enum(['application/pdf','image/jpeg','image/png'])}).strict();
 const doc=z.object({kind:z.enum(['licence','identification','insurance','vehicle_registration']),privateObjectKey:z.string().min(40).max(250),expiresAt:z.string().datetime({offset:true})}).strict();
 const review=z.object({approve:z.boolean()}).strict();
 const active=z.object({available:z.boolean()}).strict();
@@ -23,6 +24,13 @@ function parse<T>(schema:z.ZodType<T>,body:unknown):T{
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideDriverOperationsController {
  constructor(@Inject(RideDriverOperations)private readonly ops:RideDriverOperations){}
+ @Post('me/documents/uploads') @RequireRoles('driver')
+ @ApiBody({schema:{type:'object',required:['kind','contentType'],properties:{kind:{type:'string'},contentType:{type:'string',enum:['application/pdf','image/jpeg','image/png']}}}})
+ @ApiOkResponse({description:'Short-lived private presigned S3 PUT; upload is not yet an approved document'})
+ upload(@Req() r:Request,@Body() body:unknown){
+  const parsed=parse(upload,body);
+  return this.ops.beginUpload(r.identity.subject,parsed.kind,parsed.contentType);
+ }
  @Post('me/documents') @RequireRoles('driver')
  @ApiBody({schema:{type:'object',required:['kind','privateObjectKey','expiresAt'],properties:{kind:{type:'string',enum:['licence','identification','insurance','vehicle_registration']},privateObjectKey:{type:'string'},expiresAt:{type:'string',format:'date-time'}}}})
  @ApiOkResponse({description:'Submitted for independent review; upload existence must be validated operationally'})
