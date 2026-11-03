@@ -25,11 +25,46 @@ export class CommerceLifecycle {
    const eligible=await c.query("SELECT 1 FROM business_branches b JOIN business_onboarding m ON m.id=b.business_id WHERE b.id=$1 AND b.business_id=$2 AND b.active AND m.status='approved' FOR SHARE OF b,m",[source.branch_id,source.business_id]);
    if(!eligible.rowCount)throw new ConflictException('Merchant unavailable');
    const item=(await c.query('SELECT *,price_minor::text FROM business_catalogue WHERE id=$1 AND active AND published FOR SHARE',[source.catalogue_id])).rows[0];
-   if(!item||item.currency!=='NGN'||item.kind!==(input.kind==='ticket'?'event':'service'))throw new ConflictException('Paid offering unavailable');
-   const amount=minor((BigInt(item.price_minor)*BigInt(input.quantity)).toString()),policy=await this.ledger.policy(c,source.business_id);
+   if(!item||item.currency!=='NGN'||(input.kind==='ticket'?item.kind!=='event':!['service','package'].includes(item.kind)))throw new ConflictException('Paid offering unavailable');
+   let multiplier=BigInt(input.quantity);
+   let packageComponents:{catalogueId:string;quantity:number}[]=[];
+   if(item.kind==='package'){
+    const configured=(await c.query<{pricing_model:string;min_guests:number;max_guests:number}>(
+     'SELECT pricing_model,min_guests,max_guests FROM business_public_packages WHERE catalogue_id=$1',[source.catalogue_id])).rows[0];
+    if(!configured||input.quantity<configured.min_guests||input.quantity>configured.max_guests)throw new ConflictException('Package group size unavailable');
+    multiplier=configured.pricing_model==='per_group'?1n:BigInt(input.quantity);
+    const componentRows=await c.query<{catalogue_id:string;quantity:number;kind:string;active:boolean;published:boolean;currency:string}>(
+     `SELECT component.id AS catalogue_id,pc.quantity,component.kind,component.active,component.published,component.currency
+      FROM business_package_components pc
+      JOIN business_catalogue component ON component.id=pc.component_id AND component.business_id=pc.business_id AND component.branch_id=pc.branch_id
+      WHERE pc.package_id=$1 AND pc.business_id=$2 AND pc.branch_id=$3 ORDER BY component.id FOR SHARE OF component`,
+     [source.catalogue_id,source.business_id,source.branch_id]);
+    if(!componentRows.rowCount||componentRows.rows.some(row=>!row.active||!row.published||row.kind==='package'||row.currency!==item.currency))
+     throw new ConflictException('Package component unavailable');
+    packageComponents=componentRows.rows.map(row=>({catalogueId:row.catalogue_id,quantity:row.quantity*(configured.pricing_model==='per_guest'?input.quantity:1)}));
+    if(packageComponents.some(row=>!Number.isSafeInteger(row.quantity)||row.quantity<1||row.quantity>100000))
+     throw new ConflictException('Package component quantity unavailable');
+   }
+   const amount=minor((BigInt(item.price_minor)*multiplier).toString()),policy=await this.ledger.policy(c,source.business_id);
+   const componentSlots:{id:string;quantity:number}[]=[];
    if(input.kind==='reservation'){
     const updated=await c.query("UPDATE business_availability SET reserved=reserved+$2 WHERE id=$1 AND active AND starts_at>now()+$3*interval '1 minute' AND reserved+$2<=capacity RETURNING id",[input.sourceId,input.quantity,policy.hold_minutes]);
     if(!updated.rowCount)throw new ConflictException('Slot unavailable');
+    if(packageComponents.length){
+     const parent=(await c.query<{starts_at:Date}>('SELECT starts_at FROM business_availability WHERE id=$1',[input.sourceId])).rows[0];
+     for(const line of packageComponents){
+      const selected=await c.query<{id:string}>(`
+       SELECT a.id FROM business_availability a JOIN business_catalogue i ON i.id=a.catalogue_id
+       WHERE a.catalogue_id=$1 AND a.business_id=$2 AND a.branch_id=$3
+       AND a.starts_at=$4::timestamptz AND a.active AND a.starts_at>now()
+       AND i.active AND i.published AND a.capacity-a.reserved>=$5
+       ORDER BY a.id LIMIT 1 FOR UPDATE OF a`,[line.catalogueId,source.business_id,source.branch_id,parent.starts_at,line.quantity]);
+      if(!selected.rowCount)throw new ConflictException('Package component slot unavailable');
+      const taken=await c.query('UPDATE business_availability SET reserved=reserved+$2 WHERE id=$1 AND reserved+$2<=capacity RETURNING id',[selected.rows[0].id,line.quantity]);
+      if(!taken.rowCount)throw new ConflictException('Package component capacity exhausted');
+      componentSlots.push({id:selected.rows[0].id,quantity:line.quantity});
+     }
+    }
    }else{
     const event=await c.query("SELECT 1 FROM business_event_config WHERE catalogue_id=$1 AND starts_at>now()+$2*interval '1 minute' FOR SHARE",[source.catalogue_id,policy.hold_minutes]);
     if(!event.rowCount)throw new ConflictException('Event unavailable');
@@ -42,6 +77,7 @@ export class CommerceLifecycle {
    await this.ledger.terms(c,p,policy.id);
    const hold=(await c.query(`INSERT INTO paid_holds(id,intent_id,customer_subject,business_id,branch_id,catalogue_id,kind,availability_id,quantity,guest_name,request_key,expires_at,key_id)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,now()+$12*interval '1 minute',$13) RETURNING *`,[id,intent,who.subject,source.business_id,source.branch_id,source.catalogue_id,input.kind,input.kind==='reservation'?input.sourceId:null,input.quantity,input.guestName.trim(),input.requestKey,policy.hold_minutes,key])).rows[0];
+   for(const line of componentSlots)await c.query('INSERT INTO package_component_holds(hold_id,availability_id,quantity) VALUES($1,$2,$3)',[id,line.id,line.quantity]);
    await this.ledger.event(c,'hold',id,'created',who.subject);return this.holdProjection({...hold,amount_minor:amount.toString(),currency:'NGN'});
   });
  }
