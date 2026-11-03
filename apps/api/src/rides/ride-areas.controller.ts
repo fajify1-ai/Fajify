@@ -1,5 +1,5 @@
 import {BadRequestException,Body,Controller,Get,Inject,Param,ParseUUIDPipe,Patch,Post,Query,Req,UseGuards} from '@nestjs/common';
-import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
@@ -15,11 +15,15 @@ const toggleSchema=z.object({active:z.boolean()}).strict();
 export class RideAreasController {
  constructor(@Inject(RideAreasService)private readonly areas:RideAreasService){}
  @Post() @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @ApiBody({schema:{type:'object',required:['name','geojson'],properties:{name:{type:'string'},geojson:{type:'string'}}}})
+ @ApiOkResponse({description:'Inactive dispatch boundary pending activation'})
  create(@Req() req:{identity:VerifiedIdentity},@Body() body:unknown){
   const p=areaSchema.safeParse(body);if(!p.success)throw new BadRequestException('Invalid area');
   return this.areas.create(req.identity.subject,p.data.name,p.data.geojson);
  }
  @Patch(':id') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @ApiBody({schema:{type:'object',required:['active'],properties:{active:{type:'boolean'}}}})
+ @ApiOkResponse({description:'Audited geofence activation/deactivation'})
  update(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) id:string,@Body() body:unknown){
   const p=toggleSchema.safeParse(body);if(!p.success)throw new BadRequestException('Invalid active state');
   return this.areas.setActive(req.identity.subject,id,p.data.active);
