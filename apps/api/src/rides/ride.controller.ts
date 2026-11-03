@@ -1,4 +1,4 @@
-import {Body, Controller, Inject, Param, ParseUUIDPipe, Patch, Post, Req, UseGuards, ValidationPipe} from '@nestjs/common';
+import {BadRequestException,Body, Controller, Get, Inject, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards, ValidationPipe} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
 import {IsBoolean,IsIn,IsInt,IsISO8601,IsLatitude,IsLongitude,Min} from 'class-validator';
 import {IdentityGuard} from '../auth/identity.guard';
@@ -25,6 +25,18 @@ const strict = new ValidationPipe({whitelist:true,forbidNonWhitelisted:true,tran
 @Controller({path:'rides',version:'1'})
 export class RideController {
  constructor(@Inject(RideService)private readonly rides:RideService){}
+ @Get('driver/offers') @ApiOkResponse({description:'Driver-owned active offer inbox'})
+ offers(@Req() request:AuthRequest,@Query('limit') raw?:string){
+  const limit=raw===undefined?20:Number(raw);
+  if(!Number.isInteger(limit)||limit<1||limit>50)throw new BadRequestException('Invalid limit');
+  return this.rides.driverOffers(request.identity.subject,limit);
+ }
+ @Get('driver/trips') @ApiOkResponse({description:'Driver-owned assigned trip history'})
+ trips(@Req() request:AuthRequest,@Query('limit') raw?:string){
+  const limit=raw===undefined?20:Number(raw);
+  if(!Number.isInteger(limit)||limit<1||limit>50)throw new BadRequestException('Invalid limit');
+  return this.rides.driverTrips(request.identity.subject,limit);
+ }
  @Post('offers/:id/accept') @ApiOkResponse({description:'Concurrently fenced driver assignment'})
  accept(@Req() request:AuthRequest,@Param('id',ParseUUIDPipe) id:string){
   return this.rides.acceptOffer(id,request.identity.subject);
