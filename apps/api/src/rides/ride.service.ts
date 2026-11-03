@@ -19,6 +19,8 @@ export class RideService {
    if(!['requested','offered'].includes(ride.rows[0].status))throw new ConflictException('Ride not accepting offers');
    const zone=await client.query("SELECT 1 FROM ride_dispatch_areas a JOIN ride_requests r ON r.id=$2 WHERE a.id=$1 AND a.active AND ST_Intersects(a.boundary,r.pickup::geometry)",[areaId,rideId]);
    if(!zone.rowCount)throw new ForbiddenException('Pickup outside active dispatch area');
+   const auth=await client.query("SELECT 1 FROM resource_memberships m JOIN account_access a ON a.identity_subject=m.identity_subject AND NOT a.suspended JOIN user_profiles p ON p.identity_subject=m.identity_subject AND NOT p.suspended WHERE m.identity_subject=$1 AND m.resource_type='dispatch_area' AND m.resource_id=$2 AND m.role='dispatcher' AND m.active",[actor,areaId]);
+   if(!auth.rowCount)throw new ForbiddenException('Dispatch authorization revoked');
    const d=await client.query<{approved:boolean;suspended:boolean;vehicle_approved:boolean;expires_at:Date|null;available:boolean;active:boolean}>(`
      SELECT d.status='approved' AS approved,d.status='suspended' AS suspended,
        EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved) AS vehicle_approved,
@@ -107,6 +109,8 @@ export class RideService {
    const r=await client.query<{status:TripState;identity_subject:string}>(`SELECT r.status,d.identity_subject FROM ride_requests r JOIN ride_drivers d ON d.id=r.assigned_driver_id WHERE r.id=$1 FOR UPDATE OF r`,[rideId]);
    if(r.rowCount!==1)throw new NotFoundException();
    if(r.rows[0].identity_subject!==actorSubject)throw new ForbiddenException();
+   const eligibleActor=await client.query("SELECT 1 FROM ride_drivers d JOIN account_access a ON a.identity_subject=d.identity_subject AND NOT a.suspended JOIN user_profiles p ON p.identity_subject=d.identity_subject AND NOT p.suspended WHERE d.identity_subject=$1 AND d.status='approved'",[actorSubject]);
+   if(!eligibleActor.rowCount)throw new ForbiddenException('Driver authorization revoked');
    try{assertTripTransition(r.rows[0].status,to);}catch{throw new ConflictException('Illegal trip transition');}
    // Driver commands may only advance operational trip states, not override dispatch decisions.
    if(!['driver_arriving','driver_arrived','in_progress','completed'].includes(to))throw new ForbiddenException();
@@ -146,7 +150,7 @@ export class RideService {
   if(!Number.isSafeInteger(sequence)||sequence<0||!isUsableDriverPosition({latitude,longitude,recordedAt:observedAt,consentGranted},new Date(),30000))throw new ConflictException('Invalid or stale position');
   const result=await this.pool.query(`INSERT INTO ride_driver_locations(driver_id,position,observed_at,sequence,consent_granted)
    SELECT d.id,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography,$4,$5,$6
-   FROM ride_drivers d WHERE d.identity_subject=$1 AND d.status='approved' AND d.available
+   FROM ride_drivers d JOIN account_access a ON a.identity_subject=d.identity_subject AND NOT a.suspended JOIN user_profiles profile ON profile.identity_subject=d.identity_subject AND NOT profile.suspended WHERE d.identity_subject=$1 AND d.status='approved' AND d.available
    ON CONFLICT(driver_id) DO UPDATE SET position=EXCLUDED.position,observed_at=EXCLUDED.observed_at,sequence=EXCLUDED.sequence,consent_granted=EXCLUDED.consent_granted,updated_at=now()
    WHERE ride_driver_locations.sequence<EXCLUDED.sequence AND ride_driver_locations.observed_at<EXCLUDED.observed_at
    RETURNING driver_id`,[subject,longitude,latitude,observedAt,sequence,consentGranted]);
