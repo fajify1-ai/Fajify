@@ -34,6 +34,18 @@ export class RideAreasService {
    await c.query('COMMIT');return {areaId,active};
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
  }
+ async monitor(subject:string,areaId:string,limit=50){
+  await this.requireDispatcher(subject,areaId);
+  const r=await this.pool.query(`SELECT ride.id,ride.status,ride.category,ride.created_at,
+   ride.assigned_driver_id,
+   ST_Y(ride.pickup::geometry) AS pickup_lat,ST_X(ride.pickup::geometry) AS pickup_lng,
+   (SELECT count(*)::int FROM ride_incidents i WHERE i.ride_id=ride.id AND i.status<>'resolved') AS open_incidents
+   FROM ride_requests ride JOIN ride_dispatch_areas area ON area.id=$1 AND area.active
+   WHERE ride.status IN ('requested','offered','assigned','driver_arriving','driver_arrived','in_progress')
+     AND ST_Intersects(area.boundary,ride.pickup::geometry)
+   ORDER BY ride.created_at DESC LIMIT $2`,[areaId,limit]);
+  return {areaId,rides:r.rows};
+ }
  async candidates(subject:string,areaId:string,rideId:string,limit:number){
   await this.requireDispatcher(subject,areaId);
   const rows=await this.pool.query<{driver_id:string;metres:number}>(`SELECT d.id AS driver_id,
