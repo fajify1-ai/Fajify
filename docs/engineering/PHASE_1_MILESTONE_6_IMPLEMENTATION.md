@@ -69,9 +69,9 @@ All are additive and must be applied in order against an explicitly marked dispo
 
 ## Required local finalization (user-authorized only after engineering freeze)
 1. Reconcile `origin/main` and parallel migrations and review M5/M6 cross-domain API changes with owners.
-2. Locally regenerate and commit `packages/api_contracts/openapi.json` using the pinned workspace tools; verify no unrelated M4/M5 schema drift.
+2. Run `bash tooling/prepare-m6-p1-contracts.sh` locally to regenerate and commit `packages/api_contracts/openapi.json`. The script supplies non-production placeholder URLs to satisfy NestJS startup validation without connecting to live services; verify no unrelated M4/M5 schema drift.
 3. Provision an isolated, uniquely named `fajify_m6_test_...` PostgreSQL 16 database with the server-side disposable marker, a distinct least-privileged runtime role, and **synthetic** payment test credentials.
-4. Run `bash tooling/verify-m6-p1-consolidated.sh` on the exact, clean implementation SHA, and analyze `acceptance.json` and logs. Address any failures and rerun at the new exact SHA.
+4. Prefer `bash tooling/run-m6-p1-disposable.sh` on the exact clean implementation SHA: it creates a unique marked disposable PostgreSQL 16/PostGIS cluster, separate migrator/runtime roles, configures synthetic-only environment, invokes the consolidated verifier and removes the cluster on exit. If an already marked isolated M6 database is explicitly configured, run `bash tooling/verify-m6-p1-consolidated.sh` instead. Analyze `acceptance.json` and logs. Address any failures and rerun at the new exact SHA.
 5. Verify M4/M5 regressions in their required separate disposable M4/M5 fixtures where applicable; M6's marker is deliberately not allowed to impersonate those acceptance environments.
 6. Obtain contract and finance owner review, then move the draft PR toward merge only after all critical gates pass.
 
