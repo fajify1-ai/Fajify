@@ -8,7 +8,7 @@
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --max-warnings=0",
-    "test": "node --import tsx --test test/*.test.ts",
+    "test": "node scripts/run-unit-tests.mjs",
     "contracts": "node --import tsx scripts/export-openapi.ts",
     "test:database": "node --import tsx --test test/*.database.test.ts",
     "test:m5:database": "node --import tsx --test --test-concurrency=1 test/m5-payment-acceptance.ts test/m5-lifecycle-acceptance.ts",
