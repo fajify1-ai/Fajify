@@ -107,13 +107,13 @@ test('PostGIS filters distance and recommendation evidence remains owner-scoped'
 });
 test('package booking reserves group and component capacity atomically, retries safely, releases once',async()=>{
  const plan=await newPlan();
- const hold=await planning.bookingHold(identity(a),plan.id,{availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Test Guest',requestKey:'m6-package-hold-0001'});
+ const hold=await planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Test Guest',requestKey:'m6-package-hold-0001'});
  assert.equal(hold.status,'held');assert.equal(hold.amountMinor,'20000');
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[packageSlot])).rows[0].reserved,2);
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[componentSlot])).rows[0].reserved,1);
- assert.equal((await planning.bookingHold(identity(a),plan.id,{availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Test Guest',requestKey:'m6-package-hold-0001'})).id,hold.id);
+ assert.equal((await planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Test Guest',requestKey:'m6-package-hold-0001'})).id,hold.id);
  const other=await newPlan(b);
- await assert.rejects(()=>planning.bookingHold(identity(b),other.id,{availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Other Guest',requestKey:'m6-package-hold-0002'}),ConflictException);
+ await assert.rejects(()=>planning.bookingHold(identity(b),other.id,{revision:other.revision,availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Other Guest',requestKey:'m6-package-hold-0002'}),ConflictException);
  await commerce.cancel(identity(a),hold.id);
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[packageSlot])).rows[0].reserved,0);
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[componentSlot])).rows[0].reserved,0);
@@ -121,7 +121,7 @@ test('package booking reserves group and component capacity atomically, retries 
 });
 test('stale displayed package amount cannot create a hold',async()=>{
  const plan=await newPlan();
- await assert.rejects(()=>planning.bookingHold(identity(a),plan.id,{availabilityId:packageSlot,expectedTotalMinor:'19999',guestName:'Test Guest',requestKey:'m6-package-stale-0001'}),ConflictException);
+ await assert.rejects(()=>planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'19999',guestName:'Test Guest',requestKey:'m6-package-stale-0001'}),ConflictException);
  assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[packageSlot])).rows[0].reserved,0);
 });
 test('revoked session cannot update plans or give feedback',async()=>{
@@ -132,7 +132,7 @@ test('revoked session cannot update plans or give feedback',async()=>{
 
 test('provider-verified package capture issues one confirmed reservation without releasing component capacity',async()=>{
  const plan=await newPlan();
- const hold=await planning.bookingHold(identity(a),plan.id,{availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Paid Guest',requestKey:'m6-paid-package-0001'});
+ const hold=await planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Paid Guest',requestKey:'m6-paid-package-0001'});
  const fake=new FakePaystack(),oldFetch=globalThis.fetch,oldCallback=process.env.PAYMENT_CALLBACK_URL;
  try{
   globalThis.fetch=fake.fetch;
@@ -160,7 +160,7 @@ test('provider-verified package capture issues one confirmed reservation without
 
 test('expired package holds restore every allocated component exactly once',async()=>{
  const plan=await newPlan();
- const hold=await planning.bookingHold(identity(a),plan.id,{availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Expiry Guest',requestKey:'m6-expiry-package-0001'});
+ const hold=await planning.bookingHold(identity(a),plan.id,{revision:plan.revision,availabilityId:packageSlot,expectedTotalMinor:'20000',guestName:'Expiry Guest',requestKey:'m6-expiry-package-0001'});
  const c=await admin.connect();
  try{
   await assertDisposable(admin);await c.query('BEGIN');
