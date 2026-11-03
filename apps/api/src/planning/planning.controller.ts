@@ -1,10 +1,10 @@
-import {Body,Controller,Get,Param,ParseUUIDPipe,Post,Query,Req,UseGuards,ValidationPipe} from '@nestjs/common';
+import {Body,Controller,Get,Put,Param,ParseUUIDPipe,Post,Query,Req,UseGuards,ValidationPipe} from '@nestjs/common';
 import {ApiBearerAuth,ApiBody,ApiCreatedResponse,ApiOkResponse,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
 import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
-import {PlanInput,PlanListQuery,PlanPage,PlanView,RecommendationPage} from './planning.dto';
+import {PlanInput,PlanEditInput,PlanFeedbackInput,PlanFeedbackView,PlanListQuery,PlanPage,PlanView,RecommendationPage} from './planning.dto';
 import {PlanningService} from './planning.service';
 type Request={identity:VerifiedIdentity};
 const strict=<T extends object>(expectedType:new()=>T)=>new ValidationPipe({expectedType,whitelist:true,forbidNonWhitelisted:true,transform:true});
@@ -22,4 +22,17 @@ export class PlanningController {
  recommendations(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string){return this.planning.recommend(r.identity.subject,id);}
  @Post(':id/archive') @ApiCreatedResponse({type:PlanView})
  archive(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string){return this.planning.archive(r.identity,id);}
+ @Put(':id') @ApiBody({type:PlanEditInput}) @ApiOkResponse({type:PlanView})
+ update(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string,@Body(strict(PlanEditInput)) input:PlanEditInput){
+  return this.planning.update(r.identity,id,input);
+ }
+ @Post(':id/feedback') @ApiBody({type:PlanFeedbackInput}) @ApiCreatedResponse({type:PlanFeedbackView})
+ feedback(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string,@Body(strict(PlanFeedbackInput)) input:PlanFeedbackInput){
+  return this.planning.feedback(r.identity,id,input);
+ }
+ @Get(':id/feedback') @ApiOkResponse({type:PlanFeedbackView})
+ feedbackDetail(@Req() r:Request,@Param('id',ParseUUIDPipe) id:string){
+  return this.planning.feedbackDetail(r.identity.subject,id);
+ }
+
 }
