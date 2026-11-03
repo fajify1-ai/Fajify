@@ -44,6 +44,7 @@ export class AdminInsightsController{
  alerts(@Query(validated(PageQuery)) q:PageQuery){return this.monitor.alerts(q);}
  @Post('monitoring/alerts/:id/acknowledgement') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}})
  @HttpCode(200) @RequireAdminScope('incidents.write') @Header('Cache-Control','no-store') @ApiOkResponse({type:AdminChangedView})
+ @ApiBody({type:AdminCommandKey})
  acknowledge(@Req()r:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminCommandKey)) body:AdminCommandKey){
   return this.monitor.acknowledge(r.identity.subject,id,body.requestKey);
  }
