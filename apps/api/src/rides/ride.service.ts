@@ -102,6 +102,20 @@ export class RideService {
   }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
  }
 
+ async revokeLocation(subject:string){
+  const client=await this.pool.connect();
+  try{
+   await client.query('BEGIN');
+   const driver=await client.query<{id:string}>('SELECT id FROM ride_drivers WHERE identity_subject=$1 FOR UPDATE',[subject]);
+   if(!driver.rows[0])throw new NotFoundException('Driver unavailable');
+   await client.query('DELETE FROM ride_driver_locations WHERE driver_id=$1',[driver.rows[0].id]);
+   await client.query('UPDATE ride_drivers SET available=false,updated_at=now() WHERE id=$1',[driver.rows[0].id]);
+   await client.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'ride.location.consent_withdrawn','ride_driver',$2)",[subject,driver.rows[0].id]);
+   await client.query("INSERT INTO outbox_events(event_type,payload) VALUES('ride.location.revoked',$1)",[JSON.stringify({driverId:driver.rows[0].id})]);
+   await client.query('COMMIT');return {consentGranted:false,available:false};
+  }catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}
+ }
+
  async location(subject:string,latitude:number,longitude:number,observedAt:Date,sequence:number,consentGranted:boolean) {
   if(!Number.isSafeInteger(sequence)||sequence<0||!isUsableDriverPosition({latitude,longitude,recordedAt:observedAt,consentGranted},new Date(),30000))throw new ConflictException('Invalid or stale position');
   const result=await this.pool.query(`INSERT INTO ride_driver_locations(driver_id,position,observed_at,sequence,consent_granted)
