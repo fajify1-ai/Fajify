@@ -1,5 +1,5 @@
 import {Controller,Get,Header,HttpCode,Inject,Param,Post,Query,Req,UseGuards,BadRequestException} from '@nestjs/common';
-import {ApiBearerAuth,ApiOkResponse,ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth,ApiOkResponse,ApiParam,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
@@ -34,7 +34,7 @@ export class AdminInsightsController{
  @Get('operations/command-audit') @RequireAdminScope('audit.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminCommandAuditPage})
  actionAudit(@Query(validated(PageQuery)) q:PageQuery){return this.insights.commandAudit(q);}
- @Get('integrations/customers/:subject/activity') @RequireAdminScope('integrations.read') @Header('Cache-Control','no-store')
+ @Get('integrations/customers/:subject/activity') @ApiParam({name:'subject',type:String}) @RequireAdminScope('integrations.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminPagedResult})
  activity(@Req()r:ActorRequest,@Param('subject') subject:string,@Query(validated(PageQuery)) q:PageQuery){
   if(!subject||subject.length>255)throw new BadRequestException('Invalid subject');

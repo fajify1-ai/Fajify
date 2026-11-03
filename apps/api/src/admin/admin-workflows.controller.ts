@@ -28,17 +28,17 @@ export class AdminGovernanceController {
  @Get('restrictions') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminPagedResult})
  restrictions(@Query(validated(PageQuery)) q:PageQuery){return this.service.restrictions(q);}
- @Post('reviews/:id/moderation') @HttpCode(200) @RequireAdminScope('governance.write') @Header('Cache-Control','no-store')
+ @Post('reviews/:id/moderation') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @HttpCode(200) @RequireAdminScope('governance.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminChangedView})
  moderate(@Req() req:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminModerateInput)) body:AdminModerateInput){
   return this.service.moderation(req.identity.subject,id,body);
  }
- @Post('branches/:id/restriction') @HttpCode(200) @RequireAdminScope('governance.write') @Header('Cache-Control','no-store')
+ @Post('branches/:id/restriction') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @HttpCode(200) @RequireAdminScope('governance.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminChangedView})
  branch(@Req() req:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminRestrictionInput)) body:AdminRestrictionInput){
   return this.service.restriction(req.identity.subject,'branch',id,body);
  }
- @Post('catalogue/:id/restriction') @HttpCode(200) @RequireAdminScope('governance.write') @Header('Cache-Control','no-store')
+ @Post('catalogue/:id/restriction') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @HttpCode(200) @RequireAdminScope('governance.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminChangedView})
  catalogue(@Req() req:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminRestrictionInput)) body:AdminRestrictionInput){
   return this.service.restriction(req.identity.subject,'catalogue',id,body);
@@ -52,20 +52,20 @@ export class AdminSupportController {
  @Get('cases') @RequireAdminScope('support.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminPagedResult})
  cases(@Query(validated(AdminSupportListQuery)) q:AdminSupportListQuery){return this.service.cases(q,q.state??'open');}
- @Get('cases/:id') @RequireAdminScope('support.read') @Header('Cache-Control','no-store')
+ @Get('cases/:id') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @RequireAdminScope('support.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminPagedResult})
  detail(@Param('id',new ParseUUIDPipe()) id:string,@Query(validated(PageQuery)) q:PageQuery){return this.service.detail(id,q);}
- @Post('cases/:id/assignment') @HttpCode(200) @RequireAdminScope('support.write') @Header('Cache-Control','no-store')
+ @Post('cases/:id/assignment') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @HttpCode(200) @RequireAdminScope('support.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminChangedView})
  assign(@Req() req:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminAssignInput)) body:AdminAssignInput){
   return this.service.assign(req.identity.subject,id,{...body,assignee:body.assignee??null});
  }
- @Post('cases/:id/messages') @HttpCode(200) @RequireAdminScope('support.write') @Header('Cache-Control','no-store')
+ @Post('cases/:id/messages') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @HttpCode(200) @RequireAdminScope('support.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminPagedResult})
  reply(@Req() req:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminReplyInput)) body:AdminReplyInput){
   return this.service.reply(req.identity.subject,id,body);
  }
- @Post('cases/:id/status') @HttpCode(200) @RequireAdminScope('support.write') @Header('Cache-Control','no-store')
+ @Post('cases/:id/status') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @HttpCode(200) @RequireAdminScope('support.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminChangedView})
  status(@Req() req:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminSupportStatusInput)) body:AdminSupportStatusInput){
   return this.service.status(req.identity.subject,id,body);
@@ -84,7 +84,7 @@ export class AdminIncidentController {
  create(@Req() req:ActorRequest,@Body(validated(AdminIncidentInput)) body:AdminIncidentInput){
   return this.service.create(req.identity.subject,body);
  }
- @Post(':id/status') @HttpCode(200) @RequireAdminScope('incidents.write') @Header('Cache-Control','no-store')
+ @Post(':id/status') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @HttpCode(200) @RequireAdminScope('incidents.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminChangedView})
  transition(@Req() req:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminIncidentTransitionInput)) body:AdminIncidentTransitionInput){
   return this.service.transition(req.identity.subject,id,body);

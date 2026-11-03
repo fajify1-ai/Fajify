@@ -6,6 +6,7 @@ import request from 'supertest';
 import type {Pool} from 'pg';
 import {AdminOperationsController} from '../src/admin/admin.controller';
 import {AdminOperationsService} from '../src/admin/admin.service';
+import {AdminScopeGuard} from '../src/admin/admin-scope.guard';
 import {IdentityGuard} from '../src/auth/identity.guard';
 import {AccountGuard} from '../src/auth/account.guard';
 import {PrivilegedGuard} from '../src/auth/privileged.guard';
@@ -39,6 +40,7 @@ async function fixture(){
  };
  const module=await Test.createTestingModule({controllers:[AdminOperationsController],providers:[
   IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,
+  {provide:AdminScopeGuard,useValue:{canActivate:()=>true}},
   {provide:AccessService,useValue:access},{provide:IDENTITY_VERIFIER,useValue:verifier},
   {provide:AdminOperationsService,useValue:service}
  ]}).compile();

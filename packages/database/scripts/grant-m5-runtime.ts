@@ -12,6 +12,10 @@ export async function grantM5Runtime(pool:Pool,runtimeUrl:string){
  await pool.query('GRANT SELECT,INSERT ON '+immutable.join(',')+' TO '+quoted);
  await pool.query('GRANT SELECT,INSERT,DELETE ON settlement_claims TO '+quoted);
  await pool.query('GRANT SELECT ON finance_all_postings,finance_order_links TO '+quoted);
+ await pool.query('GRANT SELECT ON admin_scope_grants TO '+quoted);
+ await pool.query('GRANT SELECT,INSERT ON admin_action_events,admin_command_receipts TO '+quoted);
+ await pool.query('GRANT SELECT,INSERT,UPDATE ON admin_marketplace_restrictions,admin_incidents,admin_monitor_signals TO '+quoted);
+ await pool.query('GRANT EXECUTE ON FUNCTION m8_prevent_restricted_reactivation() TO '+quoted);
  await pool.query('GRANT EXECUTE ON FUNCTION faji_customer_notification() TO '+quoted);
 }
 async function main(){
