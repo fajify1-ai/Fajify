@@ -1,4 +1,4 @@
-import {BadRequestException,ConflictException,ForbiddenException,Inject,Injectable,NotFoundException} from '@nestjs/common';
+import {BadRequestException,ConflictException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 import type {VerifiedIdentity} from '../auth/identity.types';
@@ -11,6 +11,8 @@ const cols='id,occasion,budget_minor::text AS "budgetMinor",currency,guests,star
 type Stored={id:string;occasion:string;budgetMinor:string;currency:string;guests:number;startsAfter:Date;startsBefore:Date;location:string|null;categories:string[];attributes:string[];latitude:number|null;longitude:number|null;radiusKm:number|null;revision:number;status:string;createdAt:Date};
 const serialized=(row:Stored)=>({...row,startsAfter:row.startsAfter.toISOString(),startsBefore:row.startsBefore.toISOString(),createdAt:row.createdAt.toISOString()});
 const validate=(input:CustomerSavedPlanInput)=>{
+ if(!input.occasion.trim())throw new BadRequestException('Occasion is required');
+ if(input.attributes?.some(v=>!v.trim()))throw new BadRequestException('Blank planning preference');
  const a=Date.parse(input.startsAfter),b=Date.parse(input.startsBefore);
  if(!Number.isFinite(a)||!Number.isFinite(b)||b<=a||a<=Date.now()||b-a>31*86400000)
   throw new BadRequestException('Planning window must be future, ordered and at most 31 days');
