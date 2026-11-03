@@ -3,6 +3,7 @@ import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
+import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideFareService} from './ride-fare.service';
 import {RideRequestsService} from './ride-requests.service';
@@ -16,7 +17,8 @@ function parse<T>(schema:z.ZodType<T>,input:unknown):T{
  return checked.data;
 }
 @ApiTags('rides-customer') @ApiBearerAuth('keycloak')
-@UseGuards(IdentityGuard,AccountGuard)
+@UseGuards(IdentityGuard,AccountGuard,RolesGuard)
+@RequireRoles('customer')
 @Controller({path:'customer/rides',version:'1'})
 export class CustomerRidesController {
  constructor(@Inject(RideFareService)private readonly fares:RideFareService,@Inject(RideRequestsService)private readonly rides:RideRequestsService){}
