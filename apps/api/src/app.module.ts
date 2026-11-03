@@ -7,5 +7,6 @@ import {BusinessModule} from './business/business.module';
 import {PaymentsModule} from './payments/payments.module';
 import {CustomerModule} from './customer/customer.module';
 import {validateEnvironment} from './config';
-@Module({imports:[ConfigModule.forRoot({isGlobal:true,validate:validateEnvironment}),DatabaseModule,IdentityModule,BusinessModule,CustomerModule,PaymentsModule],controllers:[HealthController]})
+import {RideModule} from './rides/ride.module';
+@Module({imports:[ConfigModule.forRoot({isGlobal:true,validate:validateEnvironment}),DatabaseModule,IdentityModule,BusinessModule,CustomerModule,PaymentsModule,RideModule],controllers:[HealthController]})
 export class AppModule {}
