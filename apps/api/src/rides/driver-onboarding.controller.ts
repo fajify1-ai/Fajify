@@ -1,5 +1,5 @@
 import {BadRequestException,Body,Controller,Get,Inject,Param,ParseUUIDPipe,Post,Req,UseGuards} from '@nestjs/common';
-import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
+import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
@@ -13,7 +13,8 @@ const decision=z.object({approve:z.boolean()}).strict();
 @Controller({path:'drivers',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,RolesGuard)
 export class DriverOnboardingController {
  constructor(@Inject(DriverOnboardingService)private readonly service:DriverOnboardingService){}
- @Post('onboarding') @RequireRoles('driver')
+ @Post('onboarding') @RequireRoles('driver') @ApiBody({schema:{type:'object',required:['vehicleCategory','registration'],properties:{vehicleCategory:{type:'string'},registration:{type:'string'}}}})
+ @ApiOkResponse({description:'Pending driver and vehicle review'})
  register(@Req() req:{identity:VerifiedIdentity},@Body() body:unknown) {
   const parsed=register.safeParse(body);
   if(!parsed.success)throw new BadRequestException('Invalid driver registration');
@@ -22,6 +23,8 @@ export class DriverOnboardingController {
  @Get('me') @RequireRoles('driver')
  me(@Req() req:{identity:VerifiedIdentity}){return this.service.status(req.identity.subject);}
  @Post(':id/review') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard)
+ @ApiBody({schema:{type:'object',required:['approve'],properties:{approve:{type:'boolean'}}}})
+ @ApiOkResponse({description:'Audited privileged driver approval decision'})
  review(@Req() req:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) id:string,@Body() body:unknown){
   const parsed=decision.safeParse(body);
   if(!parsed.success)throw new BadRequestException('Invalid review decision');
