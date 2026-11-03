@@ -14,7 +14,8 @@
     "test:m5:database": "node --import tsx --test --test-concurrency=1 test/m5-payment-acceptance.ts test/m5-lifecycle-acceptance.ts",
     "worker:finance": "node dist/payments/m5-worker.js",
     "worker:rides": "node dist/rides/ride-expiry.worker.js",
-    "test:m7:database": "node --import tsx --test --test-concurrency=1 test/m7-ride-dispatch-acceptance.ts"
+    "test:m7:database": "node --import tsx --test --test-concurrency=1 test/m7-ride-dispatch-acceptance.ts",
+    "typecheck:m7": "tsc --noEmit -p tsconfig.m7-tests.json"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
