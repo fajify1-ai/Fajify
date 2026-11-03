@@ -1,4 +1,4 @@
-import {ConflictException,Inject,Injectable,NotFoundException} from '@nestjs/common';
+import {BadRequestException,ConflictException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 import {CustomerService} from '../customer/customer.service';
@@ -15,6 +15,7 @@ const columns='id,reservation_id AS "reservationId",ride_id AS "rideId",status,c
 export class CustomerBookingRideService {
  constructor(@Inject(DATABASE_POOL)private readonly pool:Pool,@Inject(CustomerService)private readonly customer:CustomerService){}
  async bind(identity:VerifiedIdentity,input:CustomerBookingRideInput):Promise<CustomerBookingRideView>{
+  if(input.consent!==true)throw new BadRequestException('Explicit customer association consent required');
   return this.customer.withAccountTransaction(identity,async c=>{
    const prior=await c.query<CustomerBookingRideView>(
     `SELECT ${columns} FROM customer_booking_ride_links WHERE customer_subject=$1 AND request_key=$2`,

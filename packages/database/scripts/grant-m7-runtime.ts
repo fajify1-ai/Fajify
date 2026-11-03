@@ -18,6 +18,8 @@ export async function grantM7Runtime(pool:Pool,runtimeUrl:string){
  await pool.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ride_driver_locations TO '+named);
  const appendOnly=['ride_fare_quotes','ride_trip_events','ride_financial_events','ride_payment_links'];
  await pool.query('GRANT SELECT,INSERT ON '+appendOnly.join(',')+' TO '+named);
+ await pool.query('GRANT SELECT,INSERT,UPDATE ON customer_booking_ride_links TO '+named);
+ await pool.query('GRANT EXECUTE ON FUNCTION m8_booking_ride_guard() TO '+named);
 }
 async function main(){
  if(!process.env.FAJI_DATABASE_URL||!process.env.FAJI_RUNTIME_DATABASE_URL)

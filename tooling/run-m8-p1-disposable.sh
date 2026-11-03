@@ -50,6 +50,7 @@ SQL
 export FAJI_DATABASE_URL="postgresql://m8_migrator:$FAJI_MIGRATION_PASSWORD@127.0.0.1:$pg_port/$FAJI_DISPOSABLE_DATABASE"
 export FAJI_RUNTIME_DATABASE_URL="postgresql://m8_runtime:$FAJI_RUNTIME_PASSWORD@127.0.0.1:$pg_port/$FAJI_DISPOSABLE_DATABASE"
 export FAJI_KEYCLOAK_TEST_URL="postgresql://m8_runtime:$FAJI_RUNTIME_PASSWORD@127.0.0.1:$pg_port/keycloak_m1_sentinel"
+export FAJI_M7_DISPOSABLE_DATABASE_ACK=m7-disposable-postgis-only
 export NODE_ENV=test
 export REDIS_URL="redis://127.0.0.1:6379"
 export KEYCLOAK_ISSUER="http://localhost:8080/realms/faji"

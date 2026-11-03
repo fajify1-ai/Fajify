@@ -33,14 +33,17 @@ run_check disposable-preflight no corepack pnpm@9.15.9 --filter @faji/database e
 run_check database-types no corepack pnpm@9.15.9 --filter @faji/database typecheck
 run_check api-types no corepack pnpm@9.15.9 --filter @faji/api typecheck
 run_check m8-test-types no corepack pnpm@9.15.9 --filter @faji/api exec tsc -p tsconfig.m8-tests.json
+run_check m7-test-types no corepack pnpm@9.15.9 --filter @faji/api typecheck:m7
 run_check api-lint no corepack pnpm@9.15.9 --filter @faji/api lint
 run_check api-build no corepack pnpm@9.15.9 --filter @faji/api build
 run_check migrations no corepack pnpm@9.15.9 --filter @faji/database exec node --import tsx scripts/migrate.ts
 run_check migrations-replay no corepack pnpm@9.15.9 --filter @faji/database exec node --import tsx scripts/migrate.ts
-run_check runtime-grants no corepack pnpm@9.15.9 --filter @faji/database exec node --import tsx scripts/grant-m5-runtime.ts
+run_check runtime-grants no corepack pnpm@9.15.9 --filter @faji/database exec node --import tsx scripts/grant-m7-runtime.ts
 run_check report-tests yes node --test --test-reporter=tap tooling/m8-verification-report.test.mjs
 run_check database-tests yes bash -c 'cd packages/database && node --import tsx --test --test-reporter=tap test/*.test.ts'
-run_check api-tests yes bash -c 'cd apps/api && node --import tsx --test --test-reporter=tap test/*.test.ts'
+run_check api-tests yes corepack pnpm@9.15.9 --filter @faji/api test
+run_check m7-postgres-tests yes corepack pnpm@9.15.9 --filter @faji/api test:m7:database
+run_check legacy-database-tests yes corepack pnpm@9.15.9 --filter @faji/api test:database
 run_check m8-postgres-tests yes corepack pnpm@9.15.9 --filter @faji/api exec node --import tsx --test --test-concurrency=1 --test-reporter=tap test/m8-postgres-acceptance.ts
 run_check contracts no corepack pnpm@9.15.9 --filter @faji/api contracts
 run_check contract-snapshot no git diff --exit-code -- packages/api_contracts/openapi.json
