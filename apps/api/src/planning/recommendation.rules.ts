@@ -19,6 +19,7 @@ export interface PlanningCandidate {
   address: string;
   currency: string;
   pricePerGuestMinor: string;
+  pricingModel?: 'per_guest'|'per_group';
   availableSeats: number;
   startsAt: string;
   active: boolean;
@@ -60,7 +61,7 @@ export function rankExperiences(input: PlanningPreferences, candidates: readonly
     if (starts<from || starts>=to) continue;
     if (location && !candidate.address.toLocaleLowerCase().includes(location)) continue;
     if (categories.size && !categories.has(candidate.category.toLocaleLowerCase())) continue;
-    const total=amount(candidate.pricePerGuestMinor)*BigInt(input.guests);
+    const total=amount(candidate.pricePerGuestMinor)*(candidate.pricingModel==='per_group'?1n:BigInt(input.guests));
     if (total>budget) continue;
     // Prefer closer budget fit and earlier availability, but never relax hard constraints.
     const budgetFit=budget===0n ? 100 : Number((total*100n)/budget);
