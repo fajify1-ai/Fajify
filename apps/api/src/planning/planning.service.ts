@@ -67,6 +67,12 @@ export class PlanningService {
    LEFT JOIN business_public_packages p ON p.catalogue_id=i.id
    LEFT JOIN business_public_profiles geo ON geo.branch_id=i.branch_id
    WHERE i.active AND i.published AND i.kind IN ('service','package','event')
+   AND (i.kind<>'package' OR i.price_minor>0)
+   AND (i.price_minor=0 OR EXISTS(SELECT 1 FROM finance_policies fp WHERE fp.business_id=i.business_id))
+   AND (i.kind<>'event' OR EXISTS(
+    SELECT 1 FROM ticket_inventory ti JOIN business_event_config event ON event.catalogue_id=ti.catalogue_id
+    WHERE ti.catalogue_id=i.id AND ti.capacity-ti.issued-ti.held>=$1 AND event.starts_at=a.starts_at AND event.starts_at>now()
+   ))
    AND a.starts_at >= $2::timestamptz AND a.starts_at < $3::timestamptz
    AND i.currency=$4 AND ($5::text IS NULL OR b.address ILIKE $5 ESCAPE '\\')
    AND (cardinality($6::text[])=0 OR i.kind=ANY($6::text[]))
@@ -104,7 +110,7 @@ export class PlanningService {
    const original=bySlot.get(r.id)!;
    return {id:original.id,availabilityId:r.id,businessId:original.businessId,branchId:original.branchId,name:original.name,
     category:original.category,startsAt:original.startsAt.toISOString(),totalMinor:r.totalMinor,currency:original.currency,
-    score:r.score,reasons:r.reasons,bookingStatus:'revalidation_required'};
+    score:r.score,reasons:r.reasons,bookingStatus:'revalidation_required',bookingMethod:original.category==='event'?'ticket':r.totalMinor==='0'?'free_reservation':'paid_hold'};
   }),evaluatedAt:new Date().toISOString(),alternatives:ranked.length?[]:[{code:'refine_criteria',description:'No experience meets every selected constraint; adjust budget, date, location or category before retrying.'}]};
  }
  async update(identity:VerifiedIdentity,id:string,input:CustomerSavedPlanEditInput){
@@ -150,6 +156,7 @@ export class PlanningService {
   const selected=suggestions.items.find(item=>item.availabilityId===input.availabilityId.toLowerCase());
   if(!selected)throw new ConflictException('Offering is no longer recommended; refresh the plan');
   if(!['service','package'].includes(selected.category))throw new ConflictException('Event tickets use the ticket checkout workflow');
+  if(selected.totalMinor==='0')throw new ConflictException('Free services use the customer reservation endpoint');
   if(selected.totalMinor!==input.expectedTotalMinor)throw new ConflictException('Recommendation price changed');
   return this.commerce.hold(identity,{
    kind:'reservation',sourceId:selected.availabilityId,quantity:plan.guests,
