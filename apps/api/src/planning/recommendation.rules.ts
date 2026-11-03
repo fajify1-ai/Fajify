@@ -47,7 +47,7 @@ const timestamp = (raw: string): number => {
   return ms;
 };
 export function rankExperiences(input: PlanningPreferences, candidates: readonly PlanningCandidate[]): RankedExperience[] {
-  if (!Number.isSafeInteger(input.guests) || input.guests < 1 || input.guests > 100)
+  if (!Number.isSafeInteger(input.guests) || input.guests < 1 || input.guests > 50)
     throw new Error('Invalid group size');
   const budget=amount(input.budgetMinor);
   if (!/^[A-Z]{3}$/.test(input.currency)) throw new Error('Invalid currency');
