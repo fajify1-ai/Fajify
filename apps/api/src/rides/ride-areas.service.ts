@@ -60,7 +60,7 @@ export class RideAreasService {
       AND ST_Intersects(a.boundary,l.position::geometry)
       AND ST_DWithin(l.position,r.pickup,20000)
       AND EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved AND v.category=r.category)
-      AND EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND x.review_status='approved' AND x.expires_at>now())
+      AND ((SELECT COUNT(DISTINCT x.document_kind) FROM ride_driver_documents x WHERE x.driver_id=d.id AND x.review_status='approved' AND x.expires_at>now())=4)
       AND NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND (x.review_status<>'approved' OR x.expires_at IS NULL OR x.expires_at<=now()))
       AND EXISTS(SELECT 1 FROM resource_memberships m WHERE m.identity_subject=d.identity_subject AND m.resource_type='dispatch_area' AND m.resource_id=a.id AND m.role='driver' AND m.active)
       AND NOT EXISTS(SELECT 1 FROM ride_requests other WHERE other.assigned_driver_id=d.id AND other.status IN ('assigned','driver_arriving','driver_arrived','in_progress'))
