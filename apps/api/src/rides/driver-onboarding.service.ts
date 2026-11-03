@@ -42,7 +42,7 @@ export class DriverOnboardingService {
    if(approve){
     const valid=await client.query<{allowed:boolean}>(`SELECT
      EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=$1 AND v.approved) AND
-     EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=$1 AND x.review_status='approved' AND x.expires_at>now()) AND
+     ((SELECT COUNT(DISTINCT x.document_kind) FROM ride_driver_documents x WHERE x.driver_id=$1 AND x.review_status='approved' AND x.expires_at>now())=4) AND
      NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=$1 AND (x.review_status<>'approved' OR x.expires_at IS NULL OR x.expires_at<=now())) AS allowed`,[driverId]);
     if(!valid.rows[0]?.allowed)throw new ConflictException('Vehicle and current documents must be approved');
    }
