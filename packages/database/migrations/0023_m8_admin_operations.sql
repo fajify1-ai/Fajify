@@ -106,3 +106,12 @@ CREATE TABLE admin_incidents (
 );
 CREATE INDEX admin_incidents_queue_idx ON admin_incidents(state,severity,updated_at DESC,id DESC);
 REVOKE ALL ON admin_incidents FROM PUBLIC;
+
+-- Signal deduplication is independent of notification delivery.
+CREATE TABLE admin_monitor_signals (
+ signal_key varchar(80) PRIMARY KEY,
+ incident_id uuid REFERENCES admin_incidents(id),
+ active boolean NOT NULL DEFAULT false,
+ last_checked_at timestamptz NOT NULL DEFAULT now()
+);
+REVOKE ALL ON admin_monitor_signals FROM PUBLIC;

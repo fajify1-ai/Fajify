@@ -1,0 +1,83 @@
+import {Inject,Injectable,NotFoundException} from '@nestjs/common';
+import {Pool} from 'pg';
+import {DATABASE_POOL} from '../tokens';
+import type {PageQuery} from '../customer/customer.dto';
+import type {AdminFinanceSummary,AdminMonitoringSummary,AdminReportSummary} from './admin.dto';
+
+function page<T>(rows:T[],q:PageQuery){return {items:rows.slice(0,q.limit),nextOffset:rows.length>q.limit?q.offset+q.limit:null};}
+@Injectable()
+export class AdminInsightsService {
+ constructor(@Inject(DATABASE_POOL)private readonly pool:Pool){}
+ /** Independently verified provider capture and final reconciliation objects;
+  * never combine unverified browser redirects with completed payment totals.
+  */
+ async finance():Promise<AdminFinanceSummary>{
+  const r=await this.pool.query<AdminFinanceSummary>(`
+   SELECT
+    (SELECT COALESCE(sum(p.amount_minor),0)::text FROM payment_intents p
+      JOIN payment_receipts x ON x.intent_id=p.id WHERE p.status='succeeded') AS "capturedMinor",
+    (SELECT COALESCE(sum(amount_minor),0)::text FROM finance_refunds WHERE state='processed') AS "refundedMinor",
+    (SELECT COALESCE(sum(amount_minor),0)::text FROM settlement_batches WHERE state='succeeded') AS "settledMinor",
+    (SELECT count(*)::int FROM finance_reconciliation_cases WHERE state='open') AS "openReconciliationCases",
+    (SELECT count(*)::int FROM finance_disputes WHERE state='open') AS "openDisputes",
+    (SELECT count(*)::int FROM finance_refunds WHERE state='uncertain') AS "uncertainRefunds"`);
+  return r.rows[0];
+ }
+ /** Lookback period applies to each source's own creation timestamp.
+  * Ledger-backed revenue may be negative after compensating reversals.
+  */
+ async report(days:number):Promise<AdminReportSummary>{
+  const r=await this.pool.query<AdminReportSummary>(`
+   SELECT
+    (SELECT count(*)::int FROM user_profiles WHERE created_at>=now()-$1::integer*interval '1 day') AS customers,
+    (SELECT count(*)::int FROM business_onboarding WHERE status='approved' AND created_at>=now()-$1::integer*interval '1 day') AS "approvedBusinesses",
+    (SELECT count(*)::int FROM business_orders WHERE created_at>=now()-$1::integer*interval '1 day') AS "createdOrders",
+    (SELECT count(*)::int FROM business_reservations WHERE created_at>=now()-$1::integer*interval '1 day') AS "createdReservations",
+    (SELECT count(*)::int FROM issued_tickets WHERE created_at>=now()-$1::integer*interval '1 day') AS "issuedTickets",
+    (SELECT COALESCE(sum(p.amount_minor),0)::text FROM payment_receipts x JOIN payment_intents p ON p.id=x.intent_id
+      WHERE x.verified_at>=now()-$1::integer*interval '1 day' AND p.status='succeeded') AS "verifiedCaptureMinor",
+    (SELECT COALESCE(sum(CASE WHEN j.credit_account_id=a.id THEN j.amount_minor ELSE -j.amount_minor END),0)::text
+      FROM ledger_accounts a JOIN finance_all_postings j ON a.id IN(j.debit_account_id,j.credit_account_id)
+      WHERE a.code='platform_revenue' AND j.created_at>=now()-$1::integer*interval '1 day') AS "ledgerPlatformRevenueMinor"`,
+   [days]);
+  return {...r.rows[0],days,currency:'NGN'};
+ }
+ async monitoring():Promise<AdminMonitoringSummary>{
+  const r=await this.pool.query<Omit<AdminMonitoringSummary,'providerHealth'|'checkedAt'>>(`
+   SELECT
+    (SELECT count(*)::int FROM finance_jobs WHERE state='dead') AS "deadFinanceJobs",
+    (SELECT count(*)::int FROM finance_jobs WHERE state='running' AND lease_until<now()) AS "expiredFinanceLeases",
+    (SELECT count(*)::int FROM finance_jobs WHERE state='queued' AND next_at<now()-interval '5 minutes') AS "overdueFinanceJobs",
+    (SELECT count(*)::int FROM finance_reconciliation_cases WHERE state='open') AS "openFinanceExceptions",
+    (SELECT count(*)::int FROM outbox_events WHERE published_at IS NULL AND created_at<now()-interval '5 minutes') AS "staleOutboxEvents"`);
+  return {...r.rows[0],providerHealth:'unverified',checkedAt:new Date().toISOString()};
+ }
+ async commandAudit(q:PageQuery){
+  const result=await this.pool.query(
+   'SELECT id,actor_subject AS "actorSubject",operation,resource_type AS "resourceType",resource_id AS "resourceId",outcome,reason,occurred_at AS "occurredAt" '+
+   'FROM admin_action_events ORDER BY occurred_at DESC,id DESC LIMIT $1 OFFSET $2',[q.limit+1,q.offset]);
+  return page(result.rows,q);
+ }
+ /** Global support/operations scope, but every investigation read is itself
+  * attributed in the append-only administrative action history.
+  */
+ async activity(actor:string,subject:string,q:PageQuery){
+  const c=await this.pool.connect();
+  try{
+   await c.query('BEGIN');
+   const found=await c.query('SELECT 1 FROM user_profiles WHERE identity_subject=$1',[subject]);
+   if(!found.rowCount)throw new NotFoundException('Customer not found');
+   const events=await c.query(`
+    SELECT id,'order'::text AS kind,status::text AS status,created_at AS "createdAt" FROM business_orders WHERE customer_subject=$1
+    UNION ALL SELECT id,'reservation'::text,status::text,created_at FROM business_reservations WHERE customer_subject=$1
+    UNION ALL SELECT id,'paid_hold'::text,status::text,created_at FROM paid_holds WHERE customer_subject=$1
+    UNION ALL SELECT id,'plan'::text,status::text,created_at FROM customer_plans WHERE customer_subject=$1
+    UNION ALL SELECT id,'support'::text,status::text,created_at FROM customer_support_cases WHERE customer_subject=$1
+    ORDER BY "createdAt" DESC,id DESC LIMIT $2 OFFSET $3`,[subject,q.limit+1,q.offset]);
+   await c.query("INSERT INTO admin_action_events(actor_subject,operation,resource_type,resource_id,outcome) VALUES($1,'integration.customer_history_read','customer',$2,'applied')",
+    [actor,subject]);
+   await c.query('COMMIT');
+   return page(events.rows,q);
+  }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
+ }
+}

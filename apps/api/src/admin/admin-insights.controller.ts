@@ -1,0 +1,43 @@
+import {Controller,Get,Header,HttpCode,Inject,Param,Post,Query,Req,UseGuards,BadRequestException} from '@nestjs/common';
+import {ApiBearerAuth,ApiOkResponse,ApiTags} from '@nestjs/swagger';
+import {IdentityGuard} from '../auth/identity.guard';
+import {AccountGuard} from '../auth/account.guard';
+import {PrivilegedGuard} from '../auth/privileged.guard';
+import {AdminRateGuard} from '../auth/admin-rate.guard';
+import type {VerifiedIdentity} from '../auth/identity.types';
+import {PageQuery} from '../customer/customer.dto';
+import {pagination,validated} from '../customer/customer-http';
+import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
+import {AdminInsightsService} from './admin-insights.service';
+import {AdminMonitorService} from './admin-monitor.service';
+import {AdminReportRangeQuery,AdminPagedResult,AdminFinanceSummary,AdminReportSummary,AdminMonitoringSummary,AdminCommandAuditPage} from './admin.dto';
+type ActorRequest={identity:VerifiedIdentity};
+const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard];
+
+@ApiTags('admin-finance-reports') @ApiBearerAuth('keycloak')
+@Controller({path:'admin',version:'1'}) @UseGuards(...guards)
+export class AdminInsightsController{
+ constructor(@Inject(AdminInsightsService)private readonly insights:AdminInsightsService,
+ @Inject(AdminMonitorService)private readonly monitor:AdminMonitorService){}
+ @Get('finance/summary') @RequireAdminScope('finance.read') @Header('Cache-Control','no-store')
+ @ApiOkResponse({type:AdminFinanceSummary})
+ finance(){return this.insights.finance();}
+ @Get('reports/overview') @RequireAdminScope('reports.read') @Header('Cache-Control','no-store')
+ @ApiOkResponse({type:AdminReportSummary})
+ report(@Query(validated(AdminReportRangeQuery)) q:AdminReportRangeQuery){return this.insights.report(q.days);}
+ @Get('monitoring/status') @RequireAdminScope('monitoring.read') @Header('Cache-Control','no-store')
+ @ApiOkResponse({type:AdminMonitoringSummary})
+ status(){return this.insights.monitoring();}
+ @Post('monitoring/check') @HttpCode(200) @RequireAdminScope('incidents.write') @Header('Cache-Control','no-store')
+ @ApiOkResponse({schema:{type:'object',properties:{checkedAt:{type:'string',format:'date-time'},opened:{type:'array',items:{type:'string'}},cleared:{type:'array',items:{type:'string'}}}}})
+ check(){return this.monitor.tick();}
+ @Get('operations/command-audit') @RequireAdminScope('audit.read') @Header('Cache-Control','no-store')
+ @pagination() @ApiOkResponse({type:AdminCommandAuditPage})
+ actionAudit(@Query(validated(PageQuery)) q:PageQuery){return this.insights.commandAudit(q);}
+ @Get('integrations/customers/:subject/activity') @RequireAdminScope('integrations.read') @Header('Cache-Control','no-store')
+ @pagination() @ApiOkResponse({type:AdminPagedResult})
+ activity(@Req()r:ActorRequest,@Param('subject') subject:string,@Query(validated(PageQuery)) q:PageQuery){
+  if(!subject||subject.length>255)throw new BadRequestException('Invalid subject');
+  return this.insights.activity(r.identity.subject,subject,q);
+ }
+}
