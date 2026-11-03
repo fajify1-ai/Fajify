@@ -80,4 +80,41 @@ export class AdminInsightsService {
    return page(events.rows,q);
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
  }
+ /** Cross-domain consistency checks report problems; they never repair an
+  * authoritative financial, reservation or planning record in place.
+  */
+ async consistency(){
+  const r=await this.pool.query(`
+   SELECT
+    (SELECT count(*)::int FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id
+     WHERE h.status='confirmed' AND NOT EXISTS(SELECT 1 FROM payment_receipts x WHERE x.intent_id=p.id))
+       AS "confirmedUnverifiedHolds",
+    (SELECT count(*)::int FROM payment_receipts x LEFT JOIN ledger_entries j ON j.intent_id=x.intent_id
+     WHERE j.id IS NULL) AS "unpostedVerifiedCaptures",
+    (SELECT count(*)::int FROM customer_plan_hold_links l
+     LEFT JOIN paid_holds h ON h.id=l.hold_id
+     WHERE h.id IS NULL) AS "orphanPlanHolds",
+    (SELECT count(*)::int FROM paid_holds h
+     JOIN business_catalogue i ON i.id=h.catalogue_id AND i.kind='package'
+     WHERE h.status IN('held','confirmed') AND NOT EXISTS(
+      SELECT 1 FROM package_component_holds ch WHERE ch.hold_id=h.id AND ch.released_at IS NULL))
+       AS "packageHoldsMissingComponents"`);
+  return r.rows[0];
+ }
+ async businessReport(id:string){
+  const found=await this.pool.query('SELECT id,display_name AS "displayName",status FROM business_onboarding WHERE id=$1',[id]);
+  if(!found.rowCount)throw new NotFoundException('Business not found');
+  const data=await this.pool.query(`
+   SELECT
+    (SELECT count(*)::int FROM business_branches WHERE business_id=$1 AND active) AS "activeBranches",
+    (SELECT count(*)::int FROM business_orders WHERE business_id=$1 AND status='fulfilled') AS "fulfilledOrders",
+    (SELECT count(*)::int FROM business_reservations WHERE business_id=$1 AND status='completed') AS "completedReservations",
+    (SELECT COALESCE(sum(p.amount_minor),0)::text FROM payment_intents p
+     JOIN payment_receipts r ON r.intent_id=p.id WHERE p.business_id=$1) AS "verifiedCapturedMinor",
+    (SELECT COALESCE(sum(r.amount_minor),0)::text FROM finance_refunds r
+     JOIN payment_intents p ON p.id=r.intent_id WHERE p.business_id=$1 AND r.state='processed') AS "processedRefundMinor",
+    (SELECT COALESCE(sum(amount_minor),0)::text FROM settlement_batches WHERE business_id=$1 AND state='succeeded') AS "settledMinor"`,[id]);
+  return {...found.rows[0],...data.rows[0],currency:'NGN'};
+ }
+
 }

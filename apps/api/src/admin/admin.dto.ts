@@ -175,3 +175,22 @@ export class AdminSupportDetailView {
  @ApiProperty({type:String,format:'date-time'}) updatedAt!:string;
  @ApiProperty({type:()=>AdminSupportMessagePage}) messages!:AdminSupportMessagePage;
 }
+
+export class AdminConsistencyView {
+ @ApiProperty({type:Number}) confirmedUnverifiedHolds!:number;
+ @ApiProperty({type:Number}) unpostedVerifiedCaptures!:number;
+ @ApiProperty({type:Number}) orphanPlanHolds!:number;
+ @ApiProperty({type:Number}) packageHoldsMissingComponents!:number;
+}
+export class AdminBusinessReportView {
+ @ApiProperty({type:String,format:'uuid'}) id!:string;
+ @ApiProperty({type:String}) displayName!:string;
+ @ApiProperty({type:String}) status!:string;
+ @ApiProperty({type:Number}) activeBranches!:number;
+ @ApiProperty({type:Number}) fulfilledOrders!:number;
+ @ApiProperty({type:Number}) completedReservations!:number;
+ @ApiProperty({type:String}) verifiedCapturedMinor!:string;
+ @ApiProperty({type:String}) processedRefundMinor!:string;
+ @ApiProperty({type:String}) settledMinor!:string;
+ @ApiProperty({type:String}) currency!:string;
+}

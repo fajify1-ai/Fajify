@@ -24,6 +24,7 @@ export const M8_OPERATIONS:ReadonlyArray<AdminOperation>=[
  entry('incidents','post',true,201),
  entry('incidents/{id}/status','post',true),
  entry('finance/summary','get'),entry('reports/overview','get'),
+ entry('reports/businesses/{id}','get'),entry('integrations/consistency','get'),
  entry('monitoring/status','get'),entry('monitoring/check','post',false),
  entry('monitoring/alerts','get',false,200,true),
  entry('monitoring/alerts/{id}/acknowledgement','post',true),

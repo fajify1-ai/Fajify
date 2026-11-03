@@ -35,6 +35,8 @@ export class AdminIncidentService {
    const old=await c.query<{state:State}>('SELECT state FROM admin_incidents WHERE id=$1 FOR UPDATE',[id]);
    if(!old.rowCount)throw new NotFoundException('Incident not found');
    const current=old.rows[0].state;
+   if(input.state==='resolved'&&(await c.query('SELECT 1 FROM admin_monitor_signals WHERE incident_id=$1 AND active=true',[id])).rowCount)
+    throw new ConflictException('Active monitoring signal must clear before incident resolution');
    const next:Record<State,readonly State[]>={
     open:['investigating','resolved'],investigating:['mitigated','resolved'],
     mitigated:['investigating','resolved'],resolved:['investigating']

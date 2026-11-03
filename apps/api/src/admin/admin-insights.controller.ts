@@ -11,7 +11,7 @@ import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
 import {AdminEmptyBodyGuard} from './admin-empty-body.guard';
 import {AdminInsightsService} from './admin-insights.service';
 import {AdminMonitorService} from './admin-monitor.service';
-import {AdminReportRangeQuery,AdminPagedResult,AdminFinanceSummary,AdminReportSummary,AdminMonitoringSummary,AdminCommandAuditPage,AdminAlertPage,AdminCommandKey,AdminChangedView} from './admin.dto';
+import {AdminReportRangeQuery,AdminPagedResult,AdminFinanceSummary,AdminReportSummary,AdminMonitoringSummary,AdminCommandAuditPage,AdminAlertPage,AdminCommandKey,AdminChangedView,AdminConsistencyView,AdminBusinessReportView} from './admin.dto';
 type ActorRequest={identity:VerifiedIdentity};
 const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard];
 
@@ -26,6 +26,13 @@ export class AdminInsightsController{
  @Get('reports/overview') @RequireAdminScope('reports.read') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminReportSummary})
  report(@Query(validated(AdminReportRangeQuery)) q:AdminReportRangeQuery){return this.insights.report(q.days);}
+ @Get('reports/businesses/:id') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}})
+ @RequireAdminScope('reports.read') @Header('Cache-Control','no-store')
+ @ApiOkResponse({type:AdminBusinessReportView})
+ business(@Param('id',new ParseUUIDPipe()) id:string){return this.insights.businessReport(id);}
+ @Get('integrations/consistency') @RequireAdminScope('integrations.read') @Header('Cache-Control','no-store')
+ @ApiOkResponse({type:AdminConsistencyView})
+ consistency(){return this.insights.consistency();}
  @Get('monitoring/status') @RequireAdminScope('monitoring.read') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminMonitoringSummary})
  status(){return this.insights.monitoring();}
