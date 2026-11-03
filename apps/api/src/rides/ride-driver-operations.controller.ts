@@ -3,6 +3,7 @@ import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
+import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
@@ -18,7 +19,7 @@ function parse<T>(schema:z.ZodType<T>,body:unknown):T{
 }
 @ApiTags('ride-driver-operations') @ApiBearerAuth('keycloak')
 @Controller({path:'drivers',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,RolesGuard)
+@UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideDriverOperationsController {
  constructor(@Inject(RideDriverOperations)private readonly ops:RideDriverOperations){}
  @Post('me/documents') @RequireRoles('driver')
