@@ -20,7 +20,8 @@ export class AdminInsightsService {
     (SELECT COALESCE(sum(amount_minor),0)::text FROM settlement_batches WHERE state='succeeded') AS "settledMinor",
     (SELECT count(*)::int FROM finance_reconciliation_cases WHERE state='open') AS "openReconciliationCases",
     (SELECT count(*)::int FROM finance_disputes WHERE state='open') AS "openDisputes",
-    (SELECT count(*)::int FROM finance_refunds WHERE state='uncertain') AS "uncertainRefunds"`);
+    (SELECT count(*)::int FROM finance_refunds WHERE state='uncertain') AS "uncertainRefunds",
+    (SELECT COALESCE(sum(amount_minor),0)::text FROM ride_driver_payouts WHERE state='reconciled') AS "reconciledRideDriverPayoutMinor"`);
   return r.rows[0];
  }
  /** Lookback period applies to each source's own creation timestamp.
@@ -34,6 +35,9 @@ export class AdminInsightsService {
     (SELECT count(*)::int FROM business_orders WHERE created_at>=now()-$1::integer*interval '1 day') AS "createdOrders",
     (SELECT count(*)::int FROM business_reservations WHERE created_at>=now()-$1::integer*interval '1 day') AS "createdReservations",
     (SELECT count(*)::int FROM issued_tickets WHERE created_at>=now()-$1::integer*interval '1 day') AS "issuedTickets",
+    (SELECT count(*)::int FROM ride_requests WHERE created_at>=now()-$1::integer*interval '1 day') AS "requestedRides",
+    (SELECT count(*)::int FROM ride_requests WHERE status='completed' AND created_at>=now()-$1::integer*interval '1 day') AS "completedRides",
+    (SELECT COALESCE(sum(gross_minor),0)::text FROM ride_fares WHERE payment_state='verified' AND verified_at>=now()-$1::integer*interval '1 day') AS "verifiedRideGrossMinor",
     (SELECT COALESCE(sum(p.amount_minor),0)::text FROM payment_receipts x JOIN payment_intents p ON p.id=x.intent_id
       WHERE x.verified_at>=now()-$1::integer*interval '1 day' AND p.status='succeeded') AS "verifiedCaptureMinor",
     (SELECT COALESCE(sum(CASE WHEN j.credit_account_id=a.id THEN j.amount_minor ELSE -j.amount_minor END),0)::text
@@ -49,7 +53,8 @@ export class AdminInsightsService {
     (SELECT count(*)::int FROM finance_jobs WHERE state='running' AND lease_until<now()) AS "expiredFinanceLeases",
     (SELECT count(*)::int FROM finance_jobs WHERE state='queued' AND next_at<now()-interval '5 minutes') AS "overdueFinanceJobs",
     (SELECT count(*)::int FROM finance_reconciliation_cases WHERE state='open') AS "openFinanceExceptions",
-    (SELECT count(*)::int FROM outbox_events WHERE published_at IS NULL AND created_at<now()-interval '5 minutes') AS "staleOutboxEvents"`);
+    (SELECT count(*)::int FROM outbox_events WHERE published_at IS NULL AND created_at<now()-interval '5 minutes') AS "staleOutboxEvents",
+    (SELECT count(*)::int FROM ride_incidents WHERE status<>'resolved' AND severity IN('urgent','emergency')) AS "openUrgentRideIncidents"`);
   return {...r.rows[0],providerHealth:'unverified',checkedAt:new Date().toISOString()};
  }
  async commandAudit(q:PageQuery){
@@ -75,6 +80,8 @@ export class AdminInsightsService {
     UNION ALL SELECT id,'paid_hold'::text,status::text,created_at FROM paid_holds WHERE customer_subject=$1
     UNION ALL SELECT id,'plan'::text,status::text,created_at FROM customer_plans WHERE customer_subject=$1
     UNION ALL SELECT id,'support'::text,status::text,created_at FROM customer_support_cases WHERE customer_subject=$1
+    UNION ALL SELECT id,'ride'::text,status::text,created_at FROM ride_requests WHERE customer_subject=$1
+    UNION ALL SELECT id,'booking_ride_link'::text,status::text,created_at FROM customer_booking_ride_links WHERE customer_subject=$1
     ORDER BY "createdAt" DESC,id DESC LIMIT $2 OFFSET $3`,[subject,q.limit+1,q.offset]);
    await c.query("INSERT INTO admin_action_events(actor_subject,operation,resource_type,resource_id,outcome) VALUES($1,'integration.customer_history_read','customer',$2,'applied')",
     [actor,subject]);
@@ -100,7 +107,13 @@ export class AdminInsightsService {
      JOIN business_catalogue i ON i.id=h.catalogue_id AND i.kind='package'
      WHERE h.status IN('held','confirmed') AND NOT EXISTS(
       SELECT 1 FROM package_component_holds ch WHERE ch.hold_id=h.id AND ch.released_at IS NULL))
-       AS "packageHoldsMissingComponents"`);
+       AS "packageHoldsMissingComponents",
+    (SELECT count(*)::int FROM customer_booking_ride_links link
+      JOIN ride_requests ride ON ride.id=link.ride_id WHERE link.status='active' AND ride.status='cancelled')
+      AS "linksWithCancelledRides",
+    (SELECT count(*)::int FROM customer_booking_ride_links link
+      JOIN business_reservations r ON r.id=link.reservation_id WHERE link.status='active' AND r.status='cancelled')
+      AS "linksWithCancelledReservations"`);
   return r.rows[0];
  }
  async businessReport(id:string){
@@ -111,6 +124,8 @@ export class AdminInsightsService {
     (SELECT count(*)::int FROM business_branches WHERE business_id=$1 AND active) AS "activeBranches",
     (SELECT count(*)::int FROM business_orders WHERE business_id=$1 AND status='fulfilled') AS "fulfilledOrders",
     (SELECT count(*)::int FROM business_reservations WHERE business_id=$1 AND status='completed') AS "completedReservations",
+    (SELECT count(*)::int FROM customer_booking_ride_links link JOIN business_reservations r ON r.id=link.reservation_id
+      WHERE r.business_id=$1 AND link.status='active') AS "linkedCustomerRides",
     (SELECT COALESCE(sum(p.amount_minor),0)::text FROM payment_intents p
      JOIN payment_receipts r ON r.intent_id=p.id WHERE p.business_id=$1) AS "verifiedCapturedMinor",
     (SELECT COALESCE(sum(r.amount_minor),0)::text FROM finance_refunds r

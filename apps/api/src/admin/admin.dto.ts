@@ -100,6 +100,7 @@ export class AdminFinanceSummary {
  @ApiProperty({type:Number}) openReconciliationCases!:number;
  @ApiProperty({type:Number}) openDisputes!:number;
  @ApiProperty({type:Number}) uncertainRefunds!:number;
+ @ApiProperty({type:String}) reconciledRideDriverPayoutMinor!:string;
 }
 export class AdminReportSummary {
  @ApiProperty({type:Number}) days!:number;
@@ -108,6 +109,9 @@ export class AdminReportSummary {
  @ApiProperty({type:Number}) createdOrders!:number;
  @ApiProperty({type:Number}) createdReservations!:number;
  @ApiProperty({type:Number}) issuedTickets!:number;
+ @ApiProperty({type:Number}) requestedRides!:number;
+ @ApiProperty({type:Number}) completedRides!:number;
+ @ApiProperty({type:String}) verifiedRideGrossMinor!:string;
  @ApiProperty({type:String}) verifiedCaptureMinor!:string;
  @ApiProperty({type:String}) ledgerPlatformRevenueMinor!:string;
  @ApiProperty({type:String}) currency!:string;
@@ -118,6 +122,7 @@ export class AdminMonitoringSummary {
  @ApiProperty({type:Number}) overdueFinanceJobs!:number;
  @ApiProperty({type:Number}) openFinanceExceptions!:number;
  @ApiProperty({type:Number}) staleOutboxEvents!:number;
+ @ApiProperty({type:Number}) openUrgentRideIncidents!:number;
  @ApiProperty({type:String,enum:['unverified'],description:'No external provider probe is performed'}) providerHealth!:string;
  @ApiProperty({type:String,format:'date-time'}) checkedAt!:string;
 }
@@ -181,6 +186,8 @@ export class AdminConsistencyView {
  @ApiProperty({type:Number}) unpostedVerifiedCaptures!:number;
  @ApiProperty({type:Number}) orphanPlanHolds!:number;
  @ApiProperty({type:Number}) packageHoldsMissingComponents!:number;
+ @ApiProperty({type:Number}) linksWithCancelledRides!:number;
+ @ApiProperty({type:Number}) linksWithCancelledReservations!:number;
 }
 export class AdminBusinessReportView {
  @ApiProperty({type:String,format:'uuid'}) id!:string;
@@ -189,6 +196,7 @@ export class AdminBusinessReportView {
  @ApiProperty({type:Number}) activeBranches!:number;
  @ApiProperty({type:Number}) fulfilledOrders!:number;
  @ApiProperty({type:Number}) completedReservations!:number;
+ @ApiProperty({type:Number}) linkedCustomerRides!:number;
  @ApiProperty({type:String}) verifiedCapturedMinor!:string;
  @ApiProperty({type:String}) processedRefundMinor!:string;
  @ApiProperty({type:String}) settledMinor!:string;

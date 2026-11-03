@@ -19,9 +19,9 @@ export class AdminIncidentService {
   return this.commands.execute({actor,requestKey:input.requestKey,operation:'incident.create',resourceType:'incident',resourceId:input.requestKey,
    payload:input},async c=>{
    if(input.resourceId){
-    if(input.incidentType!=='booking'&&input.incidentType!=='order')
+    if(input.incidentType!=='booking'&&input.incidentType!=='order'&&input.incidentType!=='ride')
      throw new BadRequestException('External incident linkage is not verified for this domain');
-    const table=input.incidentType==='booking'?'business_reservations':'business_orders';
+    const table=input.incidentType==='booking'?'business_reservations':input.incidentType==='ride'?'ride_requests':'business_orders';
     const source=await c.query('SELECT 1 FROM '+table+' WHERE id=$1',[input.resourceId]);
     if(!source.rowCount)throw new NotFoundException('Incident source not found');
    }

@@ -20,6 +20,7 @@ export class AdminMonitorService {
    {key:'finance_dead_jobs',open:status.deadFinanceJobs>0,severity:'critical',summary:'Finance jobs reached the dead-letter state'},
    {key:'finance_expired_leases',open:status.expiredFinanceLeases>0,severity:'high',summary:'Finance jobs have expired execution leases'},
    {key:'finance_overdue_jobs',open:status.overdueFinanceJobs>0,severity:'high',summary:'Finance jobs are overdue for execution'},
+   {key:'ride_urgent_incidents',open:status.openUrgentRideIncidents>0,severity:'critical',summary:'Urgent ride safety incidents require investigation'},
   ] as const;
   const c=await this.pool.connect();
   const opened:string[]=[],cleared:string[]=[];
