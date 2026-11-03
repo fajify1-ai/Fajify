@@ -11,7 +11,7 @@ const MAX_DOCUMENT_BYTES=10*1024*1024;
  */
 @Injectable()
 export class RideDocumentStorage {
- async verify(key:string,transport:typeof fetch=fetch):Promise<{etag:string;bytes:number;contentType:string}>{
+ async verify(key:string,transport:typeof fetch=fetch):Promise<{etag:string;bytes:number;contentType:string;versionId:string|null}>{
   const endpoint=process.env.S3_ENDPOINT,bucket=process.env.S3_BUCKET;
   const access=process.env.FAJI_S3_ACCESS_KEY_ID,secret=process.env.FAJI_S3_SECRET_ACCESS_KEY;
   const region=process.env.FAJI_S3_REGION??'us-east-1';
@@ -58,6 +58,9 @@ export class RideDocumentStorage {
   if(!Number.isSafeInteger(length)||length<1||length>MAX_DOCUMENT_BYTES||!types.has(contentType)||
      !/^"[^"]{1,128}"$/.test(etag))
    throw new UnprocessableEntityException('Private document metadata violates size/type/integrity policy');
-  return {etag,bytes:length,contentType};
+  const versionId=response.headers.get('x-amz-version-id');
+  if(versionId!==null&&(versionId.length>200||!/^[A-Za-z0-9._+=/-]{1,200}$/.test(versionId)))
+   throw new UnprocessableEntityException('Unsupported object version identifier');
+  return {etag,bytes:length,contentType,versionId};
  }
 }
