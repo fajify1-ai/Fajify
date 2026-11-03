@@ -30,11 +30,13 @@ From an **unprivileged** account and a clean checkout of this branch:
 corepack pnpm install --frozen-lockfile
 corepack pnpm --filter @faji/api typecheck:m7
 # First generate, review and commit a current OpenAPI snapshot.
-corepack pnpm --filter @faji/api contracts
+bash tooling/export-m7-contracts-offline.sh
 git diff -- packages/api_contracts/openapi.json
 # After reviewing the diff, commit the snapshot before the one-shot acceptance.
 bash tooling/run-m7-p1-disposable.sh
 ```
+
+**Offline export:** the helper uses syntactically valid, non-functional loopback configuration values only to instantiate the NestJS API schema. It does not require or authenticate to real PostgreSQL, Redis, Keycloak or S3 services. If it fails, inspect the error and do not accept or commit the generated artifact without reviewing it.
 
 The launcher verifies the exact source revision, creates an isolated PostgreSQL 16/PostGIS database, applies migrations and restricted roles, executes relevant tests/static checks/contract gates, produces a machine-readable acceptance report, then removes the cluster. A PASS requires all checks and cleanup to succeed. Do not present the branch as release-ready if any gate fails.
 
