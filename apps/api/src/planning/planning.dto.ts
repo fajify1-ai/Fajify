@@ -13,6 +13,7 @@ export class CustomerSavedPlanInput {
  @ApiPropertyOptional({type:Number,minimum:-180,maximum:180}) @IsOptional() @IsNumber() @Min(-180) @Max(180) longitude?:number;
  @ApiPropertyOptional({type:Number,minimum:1,maximum:100}) @IsOptional() @IsInt() @Min(1) @Max(100) radiusKm?:number;
  @ApiPropertyOptional({type:[String],maxItems:8}) @IsOptional() @IsArray() @ArrayMaxSize(8) @IsIn(['service','package','event'],{each:true}) categories?:string[];
+ @ApiPropertyOptional({type:[String],maxItems:8}) @IsOptional() @IsArray() @ArrayMaxSize(8) @IsString({each:true}) @Length(1,40,{each:true}) attributes?:string[];
 }
 export class CustomerSavedPlanEditInput extends CustomerSavedPlanInput {
  @ApiProperty({type:Number,minimum:1}) @IsInt() @Min(1) revision!:number;
@@ -32,6 +33,7 @@ export class CustomerSavedPlanView {
  @ApiProperty({format:'date-time'}) startsBefore!:string;
  @ApiPropertyOptional({nullable:true}) location!:string|null;
  @ApiProperty({type:[String]}) categories!:string[];
+ @ApiProperty({type:[String]}) attributes!:string[];
  @ApiPropertyOptional({type:Number,nullable:true}) latitude!:number|null;
  @ApiPropertyOptional({type:Number,nullable:true}) longitude!:number|null;
  @ApiPropertyOptional({type:Number,nullable:true}) radiusKm!:number|null;
