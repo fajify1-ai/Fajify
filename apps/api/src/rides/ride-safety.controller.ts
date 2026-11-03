@@ -1,4 +1,4 @@
-import {BadRequestException,Body,Controller,Get,Inject,Param,ParseUUIDPipe,Patch,Post,Req,UseGuards} from '@nestjs/common';
+import {BadRequestException,Body,Controller,Get,Inject,Param,ParseUUIDPipe,Patch,Post,Query,Req,UseGuards} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
@@ -24,6 +24,13 @@ export class RideSafetyController {
  }
  @Get('incidents/:id') @RequireRoles('customer','driver')
  detail(@Req() r:Auth,@Param('id',ParseUUIDPipe) id:string){return this.safety.details(r.identity.subject,id);}
+ @Get('areas/:areaId/incidents') @RequireRoles('dispatcher')
+ @ApiOkResponse({description:'Urgent incidents first, limited to authorized dispatch area'})
+ queue(@Req() r:Auth,@Param('areaId',ParseUUIDPipe) areaId:string,@Query('limit') raw?:string){
+  const limit=raw===undefined?50:Number(raw);
+  if(!Number.isInteger(limit)||limit<1||limit>100)throw new BadRequestException('Invalid queue limit');
+  return this.safety.areaIncidents(r.identity.subject,areaId,limit);
+ }
  @Patch('incidents/:id') @RequireRoles('dispatcher')
  @ApiBody({schema:{type:'object',required:['areaId','status'],properties:{areaId:{type:'string',format:'uuid'},status:{type:'string',enum:['investigating','resolved']}}}})
  decide(@Req() r:Auth,@Param('id',ParseUUIDPipe) id:string,@Body() body:unknown){
