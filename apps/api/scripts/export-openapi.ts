@@ -107,6 +107,7 @@ async function run(){
    ['/api/v1/drivers/onboarding','post',true],
    ['/api/v1/drivers/me','get',false],
    ['/api/v1/drivers/me/availability','post',true],
+   ['/api/v1/drivers/me/documents/uploads','post',true],
    ['/api/v1/drivers/me/documents','post',true],
    ['/api/v1/drivers/me/payout-recipient','post',true],
    ['/api/v1/drivers/me/earnings','get',false],
