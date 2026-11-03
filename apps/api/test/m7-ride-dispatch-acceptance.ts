@@ -16,7 +16,7 @@ import {RideSafetyService} from '../src/rides/ride-safety.service';
 import {RideTrackingService} from '../src/rides/ride-tracking.service';
 import {RideTariffService} from '../src/rides/ride-tariff.service';
 import {RideFareService} from '../src/rides/ride-fare.service';
-import {expireRideOffers} from '../src/rides/ride-expiry.worker';
+import {expireRideOffers,recoverIneligibleAssignments} from '../src/rides/ride-expiry.worker';
 
 const ack='m7-disposable-postgis-only';
 if(process.env.FAJI_M7_DISPOSABLE_DATABASE_ACK!==ack)
@@ -198,4 +198,34 @@ test('M7 acceptance: restricted runtime cannot alter schema, delete trip evidenc
  assert.equal(state.rows[0].grant,true);
  const noDelete=await runtime.query<{allowed:boolean}>(`SELECT has_table_privilege(current_user,'ride_trip_events','DELETE') AS allowed`);
  assert.equal(noDelete.rows[0].allowed,false);
+});
+
+test('M7 acceptance: suspended driver is released and pre-arrival ride requeued',async()=>{
+ const d=await driver(),ride=await request();
+ const offer=await rides.offer(ride.id,d.id,dispatcher,new Date(Date.now()+90000),zone);
+ await rides.acceptOffer(offer.id,d.subject);
+ await pool.query("UPDATE ride_drivers SET status='suspended' WHERE id=$1",[d.id]);
+ const result=await recoverIneligibleAssignments(runtime);
+ assert.ok(result.requeued>=1);
+ const state=await pool.query<{status:string;assigned_driver_id:string|null}>('SELECT status,assigned_driver_id FROM ride_requests WHERE id=$1',[ride.id]);
+ assert.equal(state.rows[0].status,'requested');
+ assert.equal(state.rows[0].assigned_driver_id,null);
+ await assert.rejects(()=>rides.acceptOffer(offer.id,d.subject),{status:409});
+});
+test('M7 acceptance: in-trip driver suspension escalates only once, without unsafe automated reassignment',async()=>{
+ const d=await driver(),ride=await request();
+ const offer=await rides.offer(ride.id,d.id,dispatcher,new Date(Date.now()+90000),zone);
+ await rides.acceptOffer(offer.id,d.subject);
+ await rides.transition(ride.id,d.subject,'driver_arriving');
+ await rides.transition(ride.id,d.subject,'driver_arrived');
+ await rides.transition(ride.id,d.subject,'in_progress');
+ await pool.query("UPDATE account_access SET suspended=true WHERE identity_subject=$1",[d.subject]);
+ const first=await recoverIneligibleAssignments(runtime),second=await recoverIneligibleAssignments(runtime);
+ assert.ok(first.escalated>=1);
+ assert.equal(second.escalated,0);
+ const state=await pool.query<{status:string}>('SELECT status FROM ride_requests WHERE id=$1',[ride.id]);
+ assert.equal(state.rows[0].status,'in_progress');
+ const i=await pool.query<{severity:string}>(`SELECT severity FROM ride_incidents WHERE ride_id=$1 AND kind='driver_ineligible'`,[ride.id]);
+ assert.equal(i.rowCount,1);assert.equal(i.rows[0].severity,'urgent');
+ await assert.rejects(()=>rides.transition(ride.id,d.subject,'completed'),{status:403});
 });
