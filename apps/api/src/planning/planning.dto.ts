@@ -1,6 +1,6 @@
 import {ApiProperty,ApiPropertyOptional} from '@nestjs/swagger';
 import {Type} from 'class-transformer';
-import {ArrayMaxSize,IsArray,IsIn,IsInt,IsISO8601,IsOptional,IsString,Length,Matches,Max,Min} from 'class-validator';
+import {ArrayMaxSize,IsArray,IsIn,IsInt,IsISO8601,IsOptional,IsString,IsNumber,Length,Matches,Max,Min} from 'class-validator';
 export class PlanInput {
  @ApiProperty({minLength:1,maxLength:80}) @IsString() @Length(1,80) occasion!:string;
  @ApiProperty({pattern:'^(0|[1-9][0-9]{0,18})$'}) @Matches(/^(0|[1-9][0-9]{0,18})$/) budgetMinor!:string;
@@ -9,6 +9,9 @@ export class PlanInput {
  @ApiProperty({format:'date-time'}) @IsISO8601({strict:true,strictSeparator:true}) startsAfter!:string;
  @ApiProperty({format:'date-time'}) @IsISO8601({strict:true,strictSeparator:true}) startsBefore!:string;
  @ApiPropertyOptional({maxLength:120}) @IsOptional() @IsString() @Length(1,120) location?:string;
+ @ApiPropertyOptional({type:Number,minimum:-90,maximum:90}) @IsOptional() @IsNumber() @Min(-90) @Max(90) latitude?:number;
+ @ApiPropertyOptional({type:Number,minimum:-180,maximum:180}) @IsOptional() @IsNumber() @Min(-180) @Max(180) longitude?:number;
+ @ApiPropertyOptional({type:Number,minimum:1,maximum:100}) @IsOptional() @IsInt() @Min(1) @Max(100) radiusKm?:number;
  @ApiPropertyOptional({type:[String],maxItems:8}) @IsOptional() @IsArray() @ArrayMaxSize(8) @IsIn(['service','package','event'],{each:true}) categories?:string[];
 }
 export class PlanEditInput extends PlanInput {}
@@ -26,6 +29,9 @@ export class PlanView {
  @ApiProperty({format:'date-time'}) startsBefore!:string;
  @ApiPropertyOptional({nullable:true}) location!:string|null;
  @ApiProperty({type:[String]}) categories!:string[];
+ @ApiPropertyOptional({type:Number,nullable:true}) latitude!:number|null;
+ @ApiPropertyOptional({type:Number,nullable:true}) longitude!:number|null;
+ @ApiPropertyOptional({type:Number,nullable:true}) radiusKm!:number|null;
  @ApiProperty({enum:['draft','archived']}) status!:string;
  @ApiProperty({format:'date-time'}) createdAt!:string;
 }
@@ -50,4 +56,16 @@ export class RecommendationView {
 export class RecommendationPage {
  @ApiProperty({type:()=>[RecommendationView]}) items!:RecommendationView[];
  @ApiProperty() evaluatedAt!:string;
+}
+
+export class PlanFeedbackInput {
+ @ApiProperty({type:Number,minimum:1,maximum:5}) @IsInt() @Min(1) @Max(5) rating!:number;
+ @ApiPropertyOptional({type:String,maxLength:500}) @IsOptional() @IsString() @Length(1,500) comment?:string;
+}
+export class PlanFeedbackView {
+ @ApiProperty() id!:string;
+ @ApiProperty() planId!:string;
+ @ApiProperty() rating!:number;
+ @ApiProperty({nullable:true,type:String}) comment!:string|null;
+ @ApiProperty({format:'date-time'}) createdAt!:string;
 }
