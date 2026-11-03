@@ -164,6 +164,8 @@ test('M7 acceptance: per-category fare policy versions are serialized and quotes
  assert.equal(stored.rows[0].commission_bps,500);
  assert.equal(stored.rows[0].amount_minor,quoted.amountMinor);
  assert.equal(stored.rows[0].policy_id,first.id);
+ await assert.rejects(()=>pool.query('UPDATE ride_tariff_policies SET base_minor=1 WHERE id=$1',[first.id]),{code:'42501'});
+ await assert.rejects(()=>pool.query('DELETE FROM ride_tariff_policies WHERE id=$1',[first.id]),{code:'42501'});
  assert.equal((await pool.query('SELECT count(*)::int AS n FROM ride_tariff_policies WHERE category=$1 AND active',[category])).rows[0].n,1);
 });
 test('M7 acceptance: driver matching rejects out-of-scope dispatch and disabled accounts',async()=>{
