@@ -87,6 +87,14 @@ export class CommerceLifecycle {
   if(h.status!=='held')return;
   if(h.kind==='ticket')await c.query('UPDATE ticket_inventory SET held=held-$2 WHERE catalogue_id=$1',[h.catalogue_id,h.quantity]);
   else await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1',[h.availability_id,h.quantity]);
+  const components=await c.query<{availability_id:string;quantity:number}>(`
+   SELECT availability_id,quantity FROM package_component_holds
+   WHERE hold_id=$1 AND released_at IS NULL ORDER BY availability_id FOR UPDATE`,[h.id]);
+  for(const line of components.rows){
+   const result=await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1 AND reserved>=$2 RETURNING id',[line.availability_id,line.quantity]);
+   if(!result.rowCount)throw new ConflictException('Package component release failed');
+  }
+  await c.query('UPDATE package_component_holds SET released_at=now() WHERE hold_id=$1 AND released_at IS NULL',[h.id]);
   await c.query('UPDATE paid_holds SET status=$2 WHERE id=$1',[h.id,status]);
  }
  async validatePurchase(c:PoolClient,p:FinanceIntent){
