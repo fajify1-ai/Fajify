@@ -11,6 +11,7 @@ export class PlanInput {
  @ApiPropertyOptional({maxLength:120}) @IsOptional() @IsString() @Length(1,120) location?:string;
  @ApiPropertyOptional({type:[String],maxItems:8}) @IsOptional() @IsArray() @ArrayMaxSize(8) @IsIn(['service','package','event'],{each:true}) categories?:string[];
 }
+export class PlanEditInput extends PlanInput {}
 export class PlanListQuery {
  @ApiPropertyOptional({minimum:1,maximum:50,default:20}) @IsOptional() @Type(()=>Number) @IsInt() @Min(1) @Max(50) limit=20;
  @ApiPropertyOptional({minimum:0,maximum:10000,default:0}) @IsOptional() @Type(()=>Number) @IsInt() @Min(0) @Max(10000) offset=0;
