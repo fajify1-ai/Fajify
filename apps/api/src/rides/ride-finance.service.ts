@@ -36,7 +36,7 @@ export class RideFinanceService {
       [id,subject,business,'ride-'+rideId,reference,environment,ride.rows[0].gross_minor]);
    await c.query('INSERT INTO ride_payment_links(ride_id,intent_id) VALUES($1,$2)',[rideId,id]);
    await c.query('UPDATE ride_fares SET payment_intent_id=$2 WHERE ride_id=$1',[rideId,id]);
-   const intent:FinanceIntent={id,customer_subject:subject,business_id:business,request_key:'ride-'+rideId,amount_minor:ride.rows[0].gross_minor,currency:'NGN',environment,provider_reference:reference,status:'pending'};
+   const intent:FinanceIntent={id,customer_subject:subject,business_id:business,amount_minor:ride.rows[0].gross_minor,currency:'NGN',environment,provider_reference:reference,status:'pending'};
    await this.ledger.terms(c,intent,policy.id);
    await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('ride.payment.prepared',$1)",[JSON.stringify({rideId,paymentIntentId:id})]);
    return {rideId,paymentIntentId:id,replayed:false};
