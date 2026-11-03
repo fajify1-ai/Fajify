@@ -7,7 +7,7 @@ import {FinanceLedger,minor,type FinanceIntent} from './finance-ledger.service';
 import {PaystackGateway} from './paystack.gateway';
 import {parseTicketToken,ticketKey,ticketNonce,ticketToken} from './ticket-token';
 
-export type HoldInput={kind:'reservation'|'ticket';sourceId:string;quantity:number;guestName:string;requestKey:string};
+export type HoldInput={kind:'reservation'|'ticket';sourceId:string;quantity:number;guestName:string;requestKey:string;expectedAmountMinor?:string};
 @Injectable()
 export class CommerceLifecycle {
  constructor(@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CustomerService)readonly customers:CustomerService,@Inject(PaystackGateway)readonly gateway:PaystackGateway){}
@@ -16,7 +16,7 @@ export class CommerceLifecycle {
   const environment=this.gateway.environment();const key=input.kind==='ticket'?ticketKey().keyId:null;
   return this.customers.withAccountTransaction(who,async c=>{
    const prior=(await c.query('SELECT h.*,p.amount_minor::text,p.currency FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id WHERE h.customer_subject=$1 AND h.request_key=$2',[who.subject,input.requestKey])).rows[0];
-   if(prior){if(prior.kind!==input.kind||prior.quantity!==input.quantity||prior.guest_name!==input.guestName.trim()||(prior.availability_id??prior.catalogue_id)!==input.sourceId.toLowerCase())throw new ConflictException('Hold retry key conflict');return this.holdProjection(prior);}
+   if(prior){if(prior.kind!==input.kind||prior.quantity!==input.quantity||prior.guest_name!==input.guestName.trim()||(prior.availability_id??prior.catalogue_id)!==input.sourceId.toLowerCase()||(input.expectedAmountMinor!==undefined&&prior.amount_minor!==input.expectedAmountMinor))throw new ConflictException('Hold retry key conflict');return this.holdProjection(prior);}
    let source;
    if(input.kind==='reservation')source=(await c.query('SELECT catalogue_id,business_id,branch_id FROM business_availability WHERE id=$1',[input.sourceId])).rows[0];
    else source=(await c.query('SELECT id AS catalogue_id,business_id,branch_id FROM business_catalogue WHERE id=$1',[input.sourceId])).rows[0];
@@ -46,6 +46,8 @@ export class CommerceLifecycle {
      throw new ConflictException('Package component quantity unavailable');
    }
    const amount=minor((BigInt(item.price_minor)*multiplier).toString()),policy=await this.ledger.policy(c,source.business_id);
+   if(input.expectedAmountMinor!==undefined&&amount.toString()!==input.expectedAmountMinor)
+    throw new ConflictException('Offering price changed; refresh the recommendation');
    const componentSlots:{id:string;quantity:number}[]=[];
    if(input.kind==='reservation'){
     const updated=await c.query("UPDATE business_availability SET reserved=reserved+$2 WHERE id=$1 AND active AND starts_at>now()+$3*interval '1 minute' AND reserved+$2<=capacity RETURNING id",[input.sourceId,input.quantity,policy.hold_minutes]);
