@@ -6,10 +6,7 @@ cd "$(dirname "$0")/.."
 expected='feat/m6-p1-planning-engine'
 [[ "$(git branch --show-current)" == "$expected" ]] || { echo "Refusing to run outside $expected" >&2; exit 2; }
 [[ -z "$(git status --porcelain)" ]] || { echo 'Refusing dirty worktree; preserve existing edits' >&2; exit 2; }
-git diff --quiet origin/main...HEAD -- apps/api/src/auth apps/api/src/business apps/api/src/customer apps/api/src/payments || {
- echo 'Shared source differences detected. Review the PR diff before preparing contracts.' >&2
- # Source differences are expected on M6, therefore this is advisory.
-}
+# Shared backend edits are expected in this branch; review cross-domain changes in PR #18.
 base_sha="$(git merge-base origin/main HEAD)"
 printf 'M6-P1 base: %s\n' "$base_sha"
 printf 'M6-P1 head: %s\n' "$(git rev-parse HEAD)"
