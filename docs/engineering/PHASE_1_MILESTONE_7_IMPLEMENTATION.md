@@ -57,9 +57,12 @@ All protected endpoints require valid bearer identity and active M2 account stat
 
 - Existing M1/M2/M5 environment variables: `FAJI_DATABASE_URL`, `KEYCLOAK_ISSUER`, `KEYCLOAK_AUDIENCE`, `REDIS_URL`, S3 config, Paystack keys, `PAYMENT_CALLBACK_URL`.
 - `FAJI_RIDE_OPERATOR_BUSINESS_ID`: UUID of a **real, approved ride operating business** with an approved M5 financial policy and isolated environment. No demo or invented finance account is silently provisioned.
+  - Financial policy **must** have `commission_bps=0`, `gateway_fee_bearer=platform`, `payout_fee_bearer=platform`. M7 snapshots ride commission, posts an idempotent commission reclassification from the operator payable to platform revenue before reserving driver earnings, and refuses misconfigured double commission.
+  - Provider reversals create compensating ledger postings, and transfer-fee refunds are reconciled from independently verified provider evidence. Unknown fee information blocks final settlement.
 - `FAJI_RIDE_PAYOUT_ENABLED=true`: explicit operator gate for one-shot Paystack transfers. Keep unset until payment sandbox tests, payout rules, fee evidence and recipients are independently accepted.
 - Driver documents use private object-key references and manual privileged reviews. A document key submission **does not prove an S3 upload exists or its bytes are safe**. Sign/verify uploads and enforce object content checks before real onboarding or production use.
 - An administrator provisions active dispatch polygons and grants M2 `dispatch_area` memberships to the appropriate dispatchers and drivers.
+- Authenticated write commands reuse M4's database-backed `CustomerWriteGuard` (60 requests/minute with tighter shared support/payment buckets). This applies to driver GPS ingestion as well as customer and dispatcher writes.
 - An administrator publishes a vehicle-category `ride_tariff_policy` before quoting; the first release uses geodesic pricing rather than map-routed distance. Production route-based price validation remains an explicit acceptance dependency.
 - Safety incidents are durably recorded and available to scoped dispatchers; actual 24/7 emergency staffing, escalation notification delivery and contacts require separate operational acceptance.
 
@@ -76,7 +79,7 @@ Worker safety: it locks ride rows before expiring offers, requeues rides with no
 
 ### Local review / consolidated verification (NOT YET EXECUTED)
 
-The preferred consolidated acceptance invocation is `bash tooling/run-m7-p1-disposable.sh` from a clean checkout on this branch as an unprivileged user. It provisions and destroys a marked isolated PostgreSQL 16/PostGIS cluster, runs the M7 database suite alongside existing API static/unit/build checks, exports OpenAPI, requires the snapshot to be current and writes `FAJI_M7_REPORT_DIR/acceptance.json` with exact source SHA and cleanup outcome. This launch script is **committed but has not been executed here**. It deliberately fails until an accepted, freshly generated OpenAPI snapshot is committed; do not bypass the comparison gate.
+The preferred consolidated acceptance invocation is `bash tooling/run-m7-p1-disposable.sh` from a clean checkout on this branch as an unprivileged user. It provisions and destroys a marked isolated PostgreSQL 16/PostGIS cluster, applies checked M5+M7 grants to a separate restricted runtime DB role, runs the M7 database suite alongside existing API static/unit/build checks, exports OpenAPI, requires the snapshot to be current and writes `FAJI_M7_REPORT_DIR/acceptance.json` with exact source SHA and cleanup outcome. This launch script is **committed but has not been executed here**. It deliberately fails until an accepted, freshly generated OpenAPI snapshot is committed; do not bypass the comparison gate.
 
 ### Manual verification commands, if diagnosing a failing consolidated gate
 
