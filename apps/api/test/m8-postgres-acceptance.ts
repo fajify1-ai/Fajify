@@ -10,6 +10,10 @@ import {AdminSupportService} from '../src/admin/admin-support.service';
 import {AdminIncidentService} from '../src/admin/admin-incidents.service';
 import {AdminInsightsService} from '../src/admin/admin-insights.service';
 import {AdminMonitorService} from '../src/admin/admin-monitor.service';
+import {CustomerBookingRideService} from '../src/admin/customer-booking-ride.service';
+import {CustomerService} from '../src/customer/customer.service';
+import {AccessService} from '../src/auth/access.service';
+import {RideRequestsService} from '../src/rides/ride-requests.service';
 
 test('M8 restricted PostgreSQL: scope grants, immutable commands, moderation barriers, support and incidents',async()=>{
  if(!process.env.FAJI_DATABASE_URL||!process.env.FAJI_RUNTIME_DATABASE_URL)throw Error('Explicit disposable M8 database URLs required');
@@ -36,6 +40,62 @@ test('M8 restricted PostgreSQL: scope grants, immutable commands, moderation bar
   const item=(await migrator.query(
    "INSERT INTO business_catalogue(business_id,branch_id,name,kind,price_minor,published) VALUES($1,$2,'M8 Test Service','service',1000,true) RETURNING id",
    [business,branch])).rows[0].id;
+  // M8.5: real M4 free booking + accepted M7 fare quote/ride + consented association.
+  await migrator.query("INSERT INTO business_public_profiles(branch_id,business_id,latitude,longitude,city) VALUES($1,$2,6.5244,3.3792,'Lagos')",[branch,business]);
+  const freeItem=(await migrator.query(
+   "INSERT INTO business_catalogue(business_id,branch_id,name,kind,price_minor,published) VALUES($1,$2,'M8 Free Appointment','service',0,true) RETURNING id",
+   [business,branch])).rows[0].id;
+  const slot=(await migrator.query(
+   "INSERT INTO business_availability(business_id,branch_id,catalogue_id,starts_at,ends_at,capacity) VALUES($1,$2,$3,now()+interval '1 day',now()+interval '26 hours',10) RETURNING id",
+   [business,branch,freeItem])).rows[0].id;
+  const customerIdentity={
+   subject:customer,issuer:'https://identity.invalid/realms/faji',audience:['faji-api'],
+   roles:['customer'],issuedAt:Math.floor(Date.now()/1000)-10,
+   expiresAt:Math.floor(Date.now()/1000)+600
+  };
+  const customers=new CustomerService(runtime);
+  const booked=await customers.reserve(customerIdentity,{availabilityId:slot,guests:1,guestName:'M8 integration customer',requestKey:'m8-reserve-001'});
+  const requests=new RideRequestsService(runtime,new AccessService(runtime));
+  async function createRide(destination={latitude:6.5244,longitude:3.3792}){
+   const quote=(await migrator.query(
+    `INSERT INTO ride_fare_quotes(customer_subject,pickup,destination,category,amount_minor,pricing_version,expires_at)
+     VALUES($1,ST_SetSRID(ST_MakePoint(3.36,6.51),4326)::geography,
+     ST_SetSRID(ST_MakePoint($2,$3),4326)::geography,'standard',25000,'m8-synthetic',now()+interval '5 minutes') RETURNING id`,
+    [customer,destination.longitude,destination.latitude])).rows[0].id;
+   return requests.create(customer,{pickup:{latitude:6.51,longitude:3.36},destination,
+    category:'standard',quoteId:quote,idempotencyKey:'m8-ride-'+randomUUID()});
+  }
+  const ride=await createRide();
+  const linkService=new CustomerBookingRideService(runtime,customers);
+  const input={reservationId:booked.id,rideId:ride.id,requestKey:'m8-booking-ride-001',consent:true as const};
+  const associated=await linkService.bind(customerIdentity,input);
+  assert.equal(associated.status,'active');
+  assert.deepEqual(await linkService.bind(customerIdentity,input),associated);
+  await assert.rejects(linkService.bind(customerIdentity,{...input,requestKey:'m8-booking-ride-002'}),{status:409});
+  await assert.rejects(linkService.bind({...customerIdentity,subject:owner},{...input,requestKey:'m8-owner-denied-001'}),{status:404});
+  await assert.rejects(linkService.bind(customerIdentity,{...input,requestKey:'m8-consent-denied-001',consent:false as unknown as true}),{status:400});
+  const unlinked=await linkService.unlink(customerIdentity,associated.id);
+  assert.equal(unlinked.status,'cancelled');
+  assert.equal((await linkService.unlink(customerIdentity,associated.id)).status,'cancelled');
+  await assert.rejects(migrator.query(
+   'INSERT INTO customer_booking_ride_links(customer_subject,reservation_id,ride_id,request_key) VALUES($1,$2,$3,$4)',
+   [owner,booked.id,ride.id,'m8-forged-subject-001']));
+  const farRide=await createRide({latitude:6.63,longitude:3.46});
+  await assert.rejects(linkService.bind(customerIdentity,{
+   reservationId:booked.id,rideId:farRide.id,requestKey:'m8-wrong-venue-001',consent:true
+  }),{status:409});
+  const nextRide=await createRide();
+  const rebooked=await linkService.bind(customerIdentity,{
+   reservationId:booked.id,rideId:nextRide.id,requestKey:'m8-booking-ride-003',consent:true
+  });
+  assert.equal(rebooked.status,'active');
+  const linkedPage=await linkService.list(customer,{limit:5,offset:0});
+  assert.equal(linkedPage.items.length,2);
+  const secondAccount='m8-outsider-'+id;
+  await migrator.query('INSERT INTO user_profiles(identity_subject) VALUES($1)',[secondAccount]);
+  await migrator.query('INSERT INTO account_access(identity_subject) VALUES($1)',[secondAccount]);
+  assert.equal((await linkService.list(secondAccount,{limit:5,offset:0})).items.length,0);
+  await assert.rejects(linkService.unlink({...customerIdentity,subject:secondAccount},rebooked.id),{status:404});
   const order=(await migrator.query(
    "INSERT INTO business_orders(business_id,branch_id,customer_subject,status,total_minor,currency) VALUES($1,$2,$3,'fulfilled',1000,'NGN') RETURNING id",
    [business,branch,customer])).rows[0].id;
@@ -85,13 +145,22 @@ test('M8 restricted PostgreSQL: scope grants, immutable commands, moderation bar
   const activity=await insights.activity(admin,customer,{limit:10,offset:0});
   assert.ok(activity.items.some(x=>x.kind==='order'));
   assert.ok(activity.items.some(x=>x.kind==='support'));
+  assert.ok(activity.items.some(x=>x.kind==='ride'));
+  assert.ok(activity.items.some(x=>x.kind==='booking_ride_link'));
+  assert.equal((await insights.businessReport(business)).linkedCustomerRides,1);
   const finance=await insights.finance();assert.match(finance.capturedMinor,/^[0-9]+$/);
   const reports=await insights.report(30);assert.equal(reports.currency,'NGN');
   const merchantReport=await insights.businessReport(business);assert.equal(merchantReport.activeBranches,1);
   const consistency=await insights.consistency();assert.equal(consistency.confirmedUnverifiedHolds,0);
+  // M7 safety issues also surface as deduplicated M8 critical operator alerts.
+  await migrator.query(
+   "INSERT INTO ride_incidents(ride_id,reporter_subject,kind,severity,request_key) VALUES($1,$2,'safety','urgent',$3)",
+   [nextRide.id,customer,'m8-safety-'+randomUUID()]);
   const monitor=new AdminMonitorService(runtime,insights,cmd);
   await migrator.query("INSERT INTO finance_jobs(kind,resource_id,state,attempts) VALUES('m8synthetic',$1,'dead',8)",[id]);
   const first=await monitor.tick();assert.ok(first.opened.includes('finance_dead_jobs'));
+  assert.ok(first.opened.includes('ride_urgent_incidents'));
+  assert.ok((await insights.monitoring()).openUrgentRideIncidents>=1);
   const second=await monitor.tick();assert.equal(second.opened.length,0);
   const linked=(await runtime.query("SELECT incident_id FROM admin_monitor_signals WHERE signal_key='finance_dead_jobs'")).rows[0];
   await assert.rejects(incidents.transition(admin,linked.incident_id,{requestKey:'monitor-m8-close-001',state:'resolved',reason:'Cannot resolve while job is still dead'}));
