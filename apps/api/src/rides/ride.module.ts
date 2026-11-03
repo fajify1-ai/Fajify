@@ -13,6 +13,7 @@ import {RideFareService} from './ride-fare.service';
 import {RideRequestsService} from './ride-requests.service';
 import {DriverOnboardingService} from './driver-onboarding.service';
 import {RideDriverOperations} from './ride-driver-operations.service';
+import {RideDocumentStorage} from './ride-document-storage.service';
 import {RideDriverOperationsController} from './ride-driver-operations.controller';
 import {RideLifecycleOperations} from './ride-lifecycle-operations.service';
 import {RideLifecycleOperationsController} from './ride-lifecycle-operations.controller';
@@ -34,7 +35,7 @@ import {RideFinanceController} from './ride-finance.controller';
  ],
  providers:[
   RideService,RideFareService,RideRequestsService,DriverOnboardingService,
-  RideAreasService,RideDriverOperations,RideLifecycleOperations,
+  RideAreasService,RideDriverOperations,RideDocumentStorage,RideLifecycleOperations,
   RideTrackingService,RideSafetyService,RideFinanceService,RideTariffService
  ]
 })
