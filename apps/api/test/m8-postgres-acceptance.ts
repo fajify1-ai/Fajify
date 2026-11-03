@@ -74,6 +74,7 @@ test('M8 restricted PostgreSQL: scope grants, immutable commands, moderation bar
   assert.equal((await runtime.query('SELECT count(*)::int AS total FROM customer_support_notifications WHERE case_id=$1',[supportId])).rows[0].total,1);
   await assert.rejects(runtime.query('DELETE FROM customer_support_notifications WHERE id=$1',[notifications.rows[0].id]));
   await support.status(admin,supportId,{requestKey:'close-m8-001',status:'closed',reason:'The support case was resolved'});
+  await assert.rejects(support.assign(admin,supportId,{requestKey:'assign-m8-closed',assignee:admin,priority:'high',reason:'Cannot assign after case closure'}));
   await assert.rejects(support.reply(admin,supportId,{requestKey:'reply-m8-002',message:'Cannot reply after closure.'}));
   const incidents=new AdminIncidentService(runtime,cmd);
   const opened=await incidents.create(admin,{requestKey:'incident-m8-001',incidentType:'platform',summary:'Synthetic operational incident',severity:'high'});

@@ -24,9 +24,10 @@ export class AdminSupportService {
  async assign(actor:string,id:string,input:{requestKey:string;assignee:string|null;priority:'low'|'normal'|'high'|'urgent';reason:string}){
   return this.commands.execute({actor,requestKey:input.requestKey,operation:'support.assign',resourceType:'support',resourceId:id,
    payload:input,reason:input.reason},async c=>{
-   const existing=await c.query<{assigned_to:string|null;priority:string}>(
-    'SELECT assigned_to,priority FROM customer_support_cases WHERE id=$1 FOR UPDATE',[id]);
+   const existing=await c.query<{assigned_to:string|null;priority:string;status:string}>(
+    'SELECT assigned_to,priority,status FROM customer_support_cases WHERE id=$1 FOR UPDATE',[id]);
    if(!existing.rowCount)throw new NotFoundException('Support case not found');
+   if(existing.rows[0].status!=='open')throw new ConflictException('Closed case cannot be assigned');
    if(input.assignee){
     const granted=await c.query(`SELECT 1 FROM admin_scope_grants g
       JOIN account_access a ON a.identity_subject=g.identity_subject AND a.suspended=false

@@ -15,7 +15,7 @@
 - Concurrent moderation and merchant reactivation → database-level restricted flag prevents merchant bypass. Lifting a restriction restores the merchant's former enabled/publication value.
 - Admin acting on their own review or self-owned merchant resource → denied.
 - A customer attempts to read or mark another customer's support notification → ownership-filtered result or not found; missing/invalid/revoked customer token → denied. An admin reply creates one notice by unique message ID; a customer's own reply creates no admin notice.
-- Case escalation to an inactive/unauthorized assignee → denied. Closed case reply → denied. Public customer messages remain owner-visible, with admin author attribution not leaked through legacy M4 customer read projections.
+- Case escalation to an inactive/unauthorized assignee, or assignment of a closed case → denied. Closed case reply → denied. Public customer messages remain owner-visible, with admin author attribution not leaked through legacy M4 customer read projections.
 - Forbidden incident transition or attempt to resolve a still-active monitored failure → denied.
 - Missing provider evidence → no financial capture/settlement success inferred. No M8 service moves money directly.
 - Audit/command rows are append-only. Sensitive provider credentials, OTP, ticket QR, message bodies and raw provider payloads are not included in M8 operation history or command replay receipts.

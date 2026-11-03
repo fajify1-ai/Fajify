@@ -51,6 +51,8 @@ export class AdminIncidentService {
    if(current===input.state)return {id,state:current,changed:false};
    if(!next[current].includes(input.state))throw new ConflictException('Illegal incident transition');
    await c.query('UPDATE admin_incidents SET state=$2,updated_at=now() WHERE id=$1',[id,input.state]);
+   await c.query('INSERT INTO outbox_events(event_type,payload) VALUES($1,$2)',
+    ['admin.incident.state_changed',JSON.stringify({incidentId:id,state:input.state})]);
    return {id,state:input.state,changed:true};
   });
  }
