@@ -13,6 +13,14 @@ export class RideDriverOperations {
    await c.query('BEGIN');const result=await work(c);await c.query('COMMIT');return result;
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
  }
+ async beginUpload(subject:string,kind:'licence'|'identification'|'insurance'|'vehicle_registration',contentType:string){
+  const row=await this.pool.query<{id:string}>(`SELECT d.id FROM ride_drivers d
+   JOIN account_access access ON access.identity_subject=d.identity_subject AND NOT access.suspended
+   JOIN user_profiles profile ON profile.identity_subject=d.identity_subject AND NOT profile.suspended
+   WHERE d.identity_subject=$1 AND d.status<>'suspended'`,[subject]);
+  if(!row.rows[0])throw new ForbiddenException('Driver not eligible to upload documents');
+  return this.objects.presignUpload(row.rows[0].id,kind,contentType);
+ }
  async document(subject:string,kind:string,key:string,expiresAt:Date){
   const owner=await this.pool.query<{id:string}>("SELECT id FROM ride_drivers WHERE identity_subject=$1 AND status<>'suspended'",[subject]);
   if(!owner.rows[0])throw new ForbiddenException('Driver onboarding unavailable');
