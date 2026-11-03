@@ -6,5 +6,7 @@ import {RideFareService} from './ride-fare.service';
 import {RideRequestsService} from './ride-requests.service';
 import {CustomerRidesController} from './customer-rides.controller';
 import {RideDispatchController} from './ride-dispatch.controller';
-@Module({imports:[IdentityModule],controllers:[RideController,CustomerRidesController,RideDispatchController],providers:[RideService,RideFareService,RideRequestsService]})
+import {DriverOnboardingService} from './driver-onboarding.service';
+import {DriverOnboardingController} from './driver-onboarding.controller';
+@Module({imports:[IdentityModule],controllers:[RideController,CustomerRidesController,RideDispatchController,DriverOnboardingController],providers:[RideService,RideFareService,RideRequestsService,DriverOnboardingService]})
 export class RideModule {}
