@@ -33,6 +33,60 @@ export async function expireRideOffers(pool:Pool,limit=100):Promise<{expired:num
  return {expired,requeued};
 }
 
+/** Handle approved-driver suspension, manual offline and revoked account while preserving in-trip safety. */
+export async function recoverIneligibleAssignments(pool:Pool,limit=100):Promise<{requeued:number;escalated:number}>{
+ if(!Number.isInteger(limit)||limit<1||limit>1000)throw Error('Invalid batch limit');
+ const candidates=await pool.query<{id:string}>(`
+  SELECT ride.id FROM ride_requests ride
+  JOIN ride_drivers driver ON driver.id=ride.assigned_driver_id
+  LEFT JOIN account_access account ON account.identity_subject=driver.identity_subject
+  LEFT JOIN user_profiles profile ON profile.identity_subject=driver.identity_subject
+  WHERE ride.status IN ('assigned','driver_arriving','driver_arrived','in_progress')
+   AND (driver.status<>'approved' OR NOT driver.available
+       OR COALESCE(account.suspended,true) OR COALESCE(profile.suspended,true)
+       OR NOT EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=driver.id AND v.approved AND v.category=ride.category)
+       OR NOT EXISTS(SELECT 1 FROM ride_driver_documents doc WHERE doc.driver_id=driver.id AND doc.review_status='approved' AND doc.expires_at>now())
+       OR EXISTS(SELECT 1 FROM ride_driver_documents doc WHERE doc.driver_id=driver.id AND (doc.review_status<>'approved' OR doc.expires_at<=now() OR doc.expires_at IS NULL))
+       OR NOT EXISTS(SELECT 1 FROM ride_driver_locations l WHERE l.driver_id=driver.id AND l.consent_granted AND l.observed_at>now()-interval '2 minutes'))
+  ORDER BY ride.id LIMIT $1`,[limit]);
+ let requeued=0,escalated=0;
+ for(const candidate of candidates.rows){
+  const c=await pool.connect();
+  try{
+   await c.query('BEGIN');
+   const r=await c.query<{id:string;status:string;assigned_driver_id:string|null}>(`SELECT id,status,assigned_driver_id FROM ride_requests WHERE id=$1 FOR UPDATE SKIP LOCKED`,[candidate.id]);
+   const ride=r.rows[0];
+   if(!ride||!ride.assigned_driver_id){await c.query('ROLLBACK');continue;}
+   const driver=await c.query<{ineligible:boolean}>(`
+     SELECT (d.status<>'approved' OR NOT d.available OR COALESCE(a.suspended,true) OR COALESCE(p.suspended,true)
+       OR NOT EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved AND v.category=(SELECT category FROM ride_requests WHERE id=$2))
+       OR NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND x.review_status='approved' AND x.expires_at>now())
+       OR EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND (x.review_status<>'approved' OR x.expires_at<=now() OR x.expires_at IS NULL))
+       OR NOT EXISTS(SELECT 1 FROM ride_driver_locations l WHERE l.driver_id=d.id AND l.consent_granted AND l.observed_at>now()-interval '2 minutes')) AS ineligible
+     FROM ride_drivers d LEFT JOIN account_access a ON a.identity_subject=d.identity_subject
+     LEFT JOIN user_profiles p ON p.identity_subject=d.identity_subject WHERE d.id=$1`,[ride.assigned_driver_id,ride.id]);
+   if(!driver.rows[0]?.ineligible){await c.query('ROLLBACK');continue;}
+   if(['assigned','driver_arriving'].includes(ride.status)){
+    await c.query("UPDATE ride_requests SET status='requested',assigned_driver_id=NULL,dispatch_generation=dispatch_generation+1,updated_at=now() WHERE id=$1",[ride.id]);
+    await c.query("UPDATE ride_dispatch_offers SET status='revoked' WHERE ride_id=$1 AND status IN ('pending','accepted')",[ride.id]);
+    await c.query("INSERT INTO ride_trip_events(ride_id,actor_subject,from_state,to_state) VALUES($1,'system:m7-eligibility',$2,'requested')",[ride.id,ride.status]);
+    await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('ride.dispatch.requeue',$1)",[JSON.stringify({rideId:ride.id,reason:'driver_ineligible'})]);
+    requeued++;
+   }else if(['driver_arrived','in_progress'].includes(ride.status)){
+    const incident=await c.query<{id:string}>(`INSERT INTO ride_incidents(ride_id,reporter_subject,kind,severity,request_key)
+      VALUES($1,'system:m7','driver_ineligible','urgent','system:driver_ineligible')
+      ON CONFLICT(ride_id,reporter_subject,request_key) DO NOTHING RETURNING id`,[ride.id]);
+    if(incident.rowCount){
+     await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('ride.safety.urgent',$1)",[JSON.stringify({rideId:ride.id,incidentId:incident.rows[0].id})]);
+     escalated++;
+    }
+   }
+   await c.query('COMMIT');
+  }catch(error){await c.query('ROLLBACK');throw error;}finally{c.release();}
+ }
+ return {requeued,escalated};
+}
+
 /** Operator-controlled worker: requires isolated service credentials to the application DB. */
 export async function runRideExpiryWorker(){
  const url=process.env.FAJI_DATABASE_URL;
@@ -40,13 +94,13 @@ export async function runRideExpiryWorker(){
  const pool=new Pool({connectionString:url,max:2,connectionTimeoutMillis:3000,statement_timeout:5000});
  try{
   if(process.env.FAJI_RIDE_WORKER_ONCE==='1'){
-   console.log(JSON.stringify(await expireRideOffers(pool)));return;
+   console.log(JSON.stringify({offers:await expireRideOffers(pool),assignments:await recoverIneligibleAssignments(pool)}));return;
   }
   let stopping=false;
   process.on('SIGTERM',()=>{stopping=true;});
   process.on('SIGINT',()=>{stopping=true;});
   while(!stopping){
-   try{const result=await expireRideOffers(pool);if(result.expired)console.log(JSON.stringify(result));}
+   try{const offers=await expireRideOffers(pool),assignments=await recoverIneligibleAssignments(pool);if(offers.expired||assignments.requeued||assignments.escalated)console.log(JSON.stringify({offers,assignments}));}
    catch(error){console.error('Ride expiry cycle failed',error instanceof Error?error.message:'unknown');}
    await new Promise<void>(resolve=>setTimeout(resolve,5000));
   }
