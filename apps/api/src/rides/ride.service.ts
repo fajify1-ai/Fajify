@@ -24,6 +24,8 @@ export class RideService {
        d.available, EXISTS(SELECT 1 FROM ride_requests r WHERE r.assigned_driver_id=d.id AND r.status IN ('assigned','driver_arriving','driver_arrived','in_progress')) AS active
      FROM ride_drivers d WHERE d.id=$1 FOR UPDATE`,[driverId]);
    const x=d.rows[0];
+   const documents=await client.query<{valid:boolean}>(`SELECT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=$1 AND x.review_status='approved' AND x.expires_at>now()) AND NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=$1 AND (x.review_status<>'approved' OR x.expires_at IS NULL OR x.expires_at<=now())) AS valid`,[driverId]);
+   if(!documents.rows[0]?.valid)throw new ForbiddenException('Driver documents ineligible');
    if(!x||!canOfferRideToDriver({approved:x.approved,suspended:x.suspended,vehicleApproved:x.vehicle_approved,documentsExpireAt:x.expires_at,available:x.available,hasActiveAssignment:x.active},new Date()))throw new ForbiddenException('Driver ineligible');
    const offer=await client.query<{id:string}>(`INSERT INTO ride_dispatch_offers(ride_id,driver_id,expires_at)
       VALUES($1,$2,$3) RETURNING id`,[rideId,driverId,expiresAt]);
