@@ -75,7 +75,7 @@ export async function recoverIneligibleAssignments(pool:Pool,limit=100):Promise<
    }else if(['driver_arrived','in_progress'].includes(ride.status)){
     const incident=await c.query<{id:string}>(`INSERT INTO ride_incidents(ride_id,reporter_subject,kind,severity,request_key)
       VALUES($1,'system:m7','driver_ineligible','urgent','system:driver_ineligible')
-      ON CONFLICT(ride_id,reporter_subject,request_key) DO NOTHING RETURNING id`,[ride.id]);
+      ON CONFLICT(ride_id,reporter_subject,request_key) WHERE request_key IS NOT NULL DO NOTHING RETURNING id`,[ride.id]);
     if(incident.rowCount){
      await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('ride.safety.urgent',$1)",[JSON.stringify({rideId:ride.id,incidentId:incident.rows[0].id})]);
      escalated++;
