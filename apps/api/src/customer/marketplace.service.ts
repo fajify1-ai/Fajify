@@ -189,6 +189,8 @@ export class MarketplaceService {
    await this.merchant(c,identity.subject,businessId,branchId);
    const pack=await c.query("SELECT currency FROM business_catalogue WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND kind='package' AND active FOR UPDATE",[id,businessId,branchId]);
    if(!pack.rowCount)throw new NotFoundException('Package unavailable');
+   const active=await c.query("SELECT 1 FROM paid_holds h LEFT JOIN business_reservations r ON r.id=h.reservation_id WHERE h.catalogue_id=$1 AND h.business_id=$2 AND h.branch_id=$3 AND (h.status='held' OR (h.status='confirmed' AND r.status IN ('confirmed','checked_in'))) LIMIT 1",[id,businessId,branchId]);
+   if(active.rowCount)throw new ConflictException('Package has active paid commitments');
    if(input.addOns.length){
     const products=await c.query("SELECT id FROM business_catalogue WHERE id=ANY($1::uuid[]) AND business_id=$2 AND branch_id=$3 AND kind IN ('product','service') AND active AND published AND currency=$4 ORDER BY id FOR SHARE",[input.addOns.map(v=>v.catalogueId),businessId,branchId,pack.rows[0].currency]);
     if(products.rowCount!==input.addOns.length)throw new ConflictException('Invalid add-on branch, currency or publication');

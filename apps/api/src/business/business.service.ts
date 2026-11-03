@@ -78,7 +78,24 @@ export class BusinessService {
    const previous=await c.query<{status:ReservationState;guests:number;availability_id:string}>('SELECT status,guests,availability_id FROM business_reservations WHERE id=$1 AND business_id=$2 AND branch_id=$3 FOR UPDATE',[id,businessId,branchId]);
    if(!previous.rowCount)throw new NotFoundException('Reservation not found');
    const from=previous.rows[0];if(!reservationNext[from.status].includes(to))throw new ConflictException('Illegal reservation transition');
-   if(to==='cancelled')await c.query('UPDATE business_availability SET reserved=reserved-$4 WHERE id=$1 AND business_id=$2 AND branch_id=$3',[from.availability_id,businessId,branchId,from.guests]);
+   if(to==='cancelled'){
+    const paid=await c.query(`
+     SELECT 1 FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id
+     WHERE h.reservation_id=$1 AND p.status='succeeded' AND h.status='confirmed'`,[id]);
+    if(paid.rowCount)throw new ConflictException('Paid reservation cancellation requires the verified finance refund workflow');
+    const released=await c.query('UPDATE business_availability SET reserved=reserved-$4 WHERE id=$1 AND business_id=$2 AND branch_id=$3 AND reserved>=$4 RETURNING id',[from.availability_id,businessId,branchId,from.guests]);
+    if(!released.rowCount)throw new ConflictException('Insufficient reserved capacity for cancellation');
+    const components=await c.query<{availability_id:string;quantity:number}>(`
+     SELECT pc.availability_id,pc.quantity FROM package_component_holds pc
+     JOIN paid_holds h ON h.id=pc.hold_id
+     WHERE h.reservation_id=$1 AND pc.released_at IS NULL ORDER BY pc.availability_id FOR UPDATE OF pc`,[id]);
+    for(const component of components.rows){
+     const freed=await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1 AND reserved>=$2 RETURNING id',[component.availability_id,component.quantity]);
+     if(!freed.rowCount)throw new ConflictException('Package component release failed');
+    }
+    await c.query(`UPDATE package_component_holds pc SET released_at=now() FROM paid_holds h
+     WHERE pc.hold_id=h.id AND h.reservation_id=$1 AND pc.released_at IS NULL`,[id]);
+   }
    const r=await c.query('UPDATE business_reservations SET status=$2,updated_at=now() WHERE id=$1 RETURNING *',[id,to]);await this.emit(c,'business.reservation.'+to,businessId,id);return r.rows[0];});
  }
  async placeOrder(subject:string,businessId:string,branchId:string,input:{customerSubject:string;items:{catalogueId:string;quantity:number}[];requestKey?:string}){

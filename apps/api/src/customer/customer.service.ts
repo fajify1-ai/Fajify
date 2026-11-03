@@ -141,9 +141,22 @@ export class CustomerService {
    const row=current.rows[0];
    if(row.status==='cancelled')return this.reservation(c,identity.subject,id);
    if(row.status!=='confirmed')throw new ConflictException('Reservation cannot be cancelled');
+   const paid=await c.query(`SELECT 1 FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id
+    WHERE h.reservation_id=$1 AND h.customer_subject=$2 AND p.status='succeeded' AND h.status='confirmed'`,[id,identity.subject]);
+   if(paid.rowCount)throw new ConflictException('Paid cancellation requires the verified finance refund workflow');
    const released=await c.query(`UPDATE business_availability SET reserved=reserved-$2
     WHERE id=$1 AND starts_at>now() AND reserved>=$2 RETURNING id`,[row.availability_id,row.guests]);
    if(!released.rowCount)throw new ConflictException('Cancellation closes when the slot starts');
+   const components=await c.query<{availability_id:string;quantity:number}>(`
+    SELECT pc.availability_id,pc.quantity FROM package_component_holds pc
+    JOIN paid_holds h ON h.id=pc.hold_id
+    WHERE h.reservation_id=$1 AND pc.released_at IS NULL ORDER BY pc.availability_id FOR UPDATE OF pc`,[id]);
+   for(const component of components.rows){
+    const capacity=await c.query('UPDATE business_availability SET reserved=reserved-$2 WHERE id=$1 AND reserved>=$2 AND starts_at>now() RETURNING id',[component.availability_id,component.quantity]);
+    if(!capacity.rowCount)throw new ConflictException('Package cancellation capacity release failed');
+   }
+   await c.query(`UPDATE package_component_holds pc SET released_at=now()
+    FROM paid_holds h WHERE pc.hold_id=h.id AND h.reservation_id=$1 AND pc.released_at IS NULL`,[id]);
    await c.query("UPDATE business_reservations SET status='cancelled',updated_at=now() WHERE id=$1",[id]);
    await c.query('INSERT INTO outbox_events(event_type,payload) VALUES($1,$2)',['business.reservation.cancelled',JSON.stringify({businessId:row.business_id,resourceId:id,source:'customer'})]);
    return this.reservation(c,identity.subject,id);
