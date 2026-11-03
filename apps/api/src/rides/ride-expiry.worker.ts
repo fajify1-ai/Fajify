@@ -45,7 +45,7 @@ export async function recoverIneligibleAssignments(pool:Pool,limit=100):Promise<
    AND (driver.status<>'approved' OR NOT driver.available
        OR COALESCE(account.suspended,true) OR COALESCE(profile.suspended,true)
        OR NOT EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=driver.id AND v.approved AND v.category=ride.category)
-       OR NOT EXISTS(SELECT 1 FROM ride_driver_documents doc WHERE doc.driver_id=driver.id AND doc.review_status='approved' AND doc.expires_at>now())
+       OR ((SELECT COUNT(DISTINCT doc.document_kind) FROM ride_driver_documents doc WHERE doc.driver_id=driver.id AND doc.review_status='approved' AND doc.expires_at>now())<4)
        OR EXISTS(SELECT 1 FROM ride_driver_documents doc WHERE doc.driver_id=driver.id AND (doc.review_status<>'approved' OR doc.expires_at<=now() OR doc.expires_at IS NULL))
        OR NOT EXISTS(SELECT 1 FROM ride_driver_locations l WHERE l.driver_id=driver.id AND l.consent_granted AND l.observed_at>now()-interval '2 minutes'))
   ORDER BY ride.id LIMIT $1`,[limit]);
@@ -60,7 +60,7 @@ export async function recoverIneligibleAssignments(pool:Pool,limit=100):Promise<
    const driver=await c.query<{ineligible:boolean}>(`
      SELECT (d.status<>'approved' OR NOT d.available OR COALESCE(a.suspended,true) OR COALESCE(p.suspended,true)
        OR NOT EXISTS(SELECT 1 FROM ride_vehicles v WHERE v.driver_id=d.id AND v.approved AND v.category=(SELECT category FROM ride_requests WHERE id=$2))
-       OR NOT EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND x.review_status='approved' AND x.expires_at>now())
+       OR NOT ((SELECT COUNT(DISTINCT x.document_kind) FROM ride_driver_documents x WHERE x.driver_id=d.id AND x.review_status='approved' AND x.expires_at>now())=4)
        OR EXISTS(SELECT 1 FROM ride_driver_documents x WHERE x.driver_id=d.id AND (x.review_status<>'approved' OR x.expires_at<=now() OR x.expires_at IS NULL))
        OR NOT EXISTS(SELECT 1 FROM ride_driver_locations l WHERE l.driver_id=d.id AND l.consent_granted AND l.observed_at>now()-interval '2 minutes')) AS ineligible
      FROM ride_drivers d LEFT JOIN account_access a ON a.identity_subject=d.identity_subject
