@@ -5,6 +5,7 @@ import {AccountGuard} from '../auth/account.guard';
 import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
+import {AdminRateGuard} from '../auth/admin-rate.guard';
 import {FinanceEmptyBodyGuard} from '../payments/m5-lifecycle.controller';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideFinanceService} from './ride-finance.service';
@@ -25,15 +26,15 @@ export class RideFinanceController {
   if(!Number.isInteger(limit)||limit<1||limit>50)throw new BadRequestException('Invalid limit');
   return this.finance.earnings(r.identity.subject,limit);
  }
- @Post('admin/rides/:id/payout-reservation') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,FinanceEmptyBodyGuard)
+ @Post('admin/rides/:id/payout-reservation') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard,FinanceEmptyBodyGuard)
  reserve(@Req() r:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) id:string){
   return this.finance.reservePayout(r.identity.subject,id);
  }
- @Post('admin/ride-payouts/:id/submit') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,FinanceEmptyBodyGuard)
+ @Post('admin/ride-payouts/:id/submit') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard,FinanceEmptyBodyGuard)
  submit(@Req() r:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) id:string){
   return this.finance.submitPayout(r.identity.subject,id);
  }
- @Post('admin/ride-payouts/:id/reconcile') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,FinanceEmptyBodyGuard)
+ @Post('admin/ride-payouts/:id/reconcile') @RequireRoles('platform-admin') @UseGuards(PrivilegedGuard,AdminRateGuard,FinanceEmptyBodyGuard)
  reconcile(@Req() r:{identity:VerifiedIdentity},@Param('id',ParseUUIDPipe) id:string){
   return this.finance.reconcilePayout(r.identity.subject,id);
  }
