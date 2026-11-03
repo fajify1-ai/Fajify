@@ -3,6 +3,7 @@ import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
 import {z} from 'zod';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
+import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideSafetyService} from './ride-safety.service';
@@ -12,7 +13,7 @@ const resolveSchema=z.object({areaId:z.string().uuid(),status:z.enum(['investiga
 type Auth={identity:VerifiedIdentity};
 @ApiTags('ride-safety') @ApiBearerAuth('keycloak')
 @Controller({path:'ride-safety',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,RolesGuard)
+@UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideSafetyController {
  constructor(@Inject(RideSafetyService)private readonly safety:RideSafetyService){}
  @Post('rides/:rideId/incidents') @RequireRoles('customer','driver')
