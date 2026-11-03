@@ -3,6 +3,7 @@ import {ApiBearerAuth,ApiTags,ApiBody,ApiOkResponse} from '@nestjs/swagger';
 import {IsBoolean,IsIn,IsInt,IsISO8601,IsLatitude,IsLongitude,Min} from 'class-validator';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
+import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideService} from './ride.service';
@@ -21,7 +22,7 @@ class TripTransitionInput {
 type AuthRequest={identity:VerifiedIdentity};
 const strict = new ValidationPipe({whitelist:true,forbidNonWhitelisted:true,transform:true});
 @ApiTags('rides') @ApiBearerAuth('keycloak')
-@UseGuards(IdentityGuard,AccountGuard,RolesGuard) @RequireRoles('driver')
+@UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard) @RequireRoles('driver')
 @Controller({path:'rides',version:'1'})
 export class RideController {
  constructor(@Inject(RideService)private readonly rides:RideService){}
