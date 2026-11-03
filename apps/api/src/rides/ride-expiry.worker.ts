@@ -3,8 +3,12 @@ import {Pool} from 'pg';
 /** Run at most one batch per invocation; safe across worker replicas. */
 export async function expireRideOffers(pool:Pool,limit=100):Promise<{expired:number;requeued:number}>{
  if(!Number.isInteger(limit)||limit<1||limit>1000)throw Error('Invalid batch limit');
- const ids=await pool.query<{ride_id:string}>(`SELECT DISTINCT ride_id FROM ride_dispatch_offers
-  WHERE status='pending' AND expires_at<=now() ORDER BY ride_id LIMIT $1`,[limit]);
+ const ids=await pool.query<{ride_id:string}>(`SELECT ride_id FROM (
+   SELECT DISTINCT ride_id FROM ride_dispatch_offers WHERE status='pending' AND expires_at<=now()
+   UNION
+   SELECT id AS ride_id FROM ride_requests r WHERE status='offered'
+     AND NOT EXISTS (SELECT 1 FROM ride_dispatch_offers o WHERE o.ride_id=r.id AND o.status='pending' AND o.expires_at>now())
+  ) x ORDER BY ride_id LIMIT $1`,[limit]);
  let expired=0,requeued=0;
  for(const {ride_id} of ids.rows){
   const c=await pool.connect();
