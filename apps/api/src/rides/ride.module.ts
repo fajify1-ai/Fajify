@@ -20,6 +20,8 @@ import {RideTrackingController} from './ride-tracking.controller';
 import {RideSafetyService} from './ride-safety.service';
 import {RideSafetyController} from './ride-safety.controller';
 import {RideFinanceService} from './ride-finance.service';
+import {RideTariffService} from './ride-tariff.service';
+import {RideTariffController} from './ride-tariff.controller';
 import {RideFinanceController} from './ride-finance.controller';
 
 @Module({
@@ -27,12 +29,12 @@ import {RideFinanceController} from './ride-finance.controller';
  controllers:[
   RideController,CustomerRidesController,RideDispatchController,DriverOnboardingController,
   RideAreasController,RideDriverOperationsController,RideLifecycleOperationsController,
-  RideTrackingController,RideSafetyController,RideFinanceController
+  RideTrackingController,RideSafetyController,RideFinanceController,RideTariffController
  ],
  providers:[
   RideService,RideFareService,RideRequestsService,DriverOnboardingService,
   RideAreasService,RideDriverOperations,RideLifecycleOperations,
-  RideTrackingService,RideSafetyService,RideFinanceService
+  RideTrackingService,RideSafetyService,RideFinanceService,RideTariffService
  ]
 })
 export class RideModule {}
