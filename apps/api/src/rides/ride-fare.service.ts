@@ -25,7 +25,7 @@ export class RideFareService {
   // Geodesic distance is NOT a routing distance. Tariff is a provisional upper-level quote
   // model configured by operations; no external map estimate is implied.
   const minor=rate.base+Math.ceil(metres/1000)*rate.perKm;
-  if(!Number.isSafeInteger(minor)||minor<0)throw new ServiceUnavailableException('Fare exceeds safe range');
+  if(!Number.isSafeInteger(minor)||minor<1)throw new ServiceUnavailableException('Fare exceeds safe range');
   const r=await this.pool.query<{id:string;expires_at:Date}>(`INSERT INTO ride_fare_quotes(
    customer_subject,pickup,destination,category,amount_minor,pricing_version,commission_bps,expires_at)
    VALUES($1,ST_SetSRID(ST_MakePoint($2,$3),4326)::geography,
