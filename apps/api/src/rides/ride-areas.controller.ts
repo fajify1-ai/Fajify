@@ -28,6 +28,13 @@ export class RideAreasController {
   const p=toggleSchema.safeParse(body);if(!p.success)throw new BadRequestException('Invalid active state');
   return this.areas.setActive(req.identity.subject,id,p.data.active);
  }
+ @Get(':areaId/rides') @RequireRoles('dispatcher')
+ @ApiOkResponse({description:'Area-scoped active ride and incident overview'})
+ monitor(@Req() req:{identity:VerifiedIdentity},@Param('areaId',ParseUUIDPipe) areaId:string,@Query('limit') raw?:string){
+  const limit=raw===undefined?50:Number(raw);
+  if(!Number.isInteger(limit)||limit<1||limit>100)throw new BadRequestException('Invalid monitor limit');
+  return this.areas.monitor(req.identity.subject,areaId,limit);
+ }
  @Get(':areaId/rides/:rideId/candidates') @RequireRoles('dispatcher')
  candidates(@Req() req:{identity:VerifiedIdentity},@Param('areaId',ParseUUIDPipe) areaId:string,@Param('rideId',ParseUUIDPipe) rideId:string,@Query('limit') raw?:string){
   const limit=raw===undefined?20:Number(raw);
