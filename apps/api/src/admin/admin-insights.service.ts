@@ -30,7 +30,7 @@ export class AdminInsightsService {
   const r=await this.pool.query<AdminReportSummary>(`
    SELECT
     (SELECT count(*)::int FROM user_profiles WHERE created_at>=now()-$1::integer*interval '1 day') AS customers,
-    (SELECT count(*)::int FROM business_onboarding WHERE status='approved' AND created_at>=now()-$1::integer*interval '1 day') AS "approvedBusinesses",
+    (SELECT count(*)::int FROM business_onboarding WHERE status='approved' AND reviewed_at>=now()-$1::integer*interval '1 day') AS "approvedBusinesses",
     (SELECT count(*)::int FROM business_orders WHERE created_at>=now()-$1::integer*interval '1 day') AS "createdOrders",
     (SELECT count(*)::int FROM business_reservations WHERE created_at>=now()-$1::integer*interval '1 day') AS "createdReservations",
     (SELECT count(*)::int FROM issued_tickets WHERE created_at>=now()-$1::integer*interval '1 day') AS "issuedTickets",

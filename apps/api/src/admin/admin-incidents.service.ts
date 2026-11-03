@@ -1,4 +1,4 @@
-import {ConflictException,Inject,Injectable,NotFoundException} from '@nestjs/common';
+import {BadRequestException,ConflictException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 import type {PageQuery} from '../customer/customer.dto';
@@ -18,6 +18,13 @@ export class AdminIncidentService {
  async create(actor:string,input:{requestKey:string;incidentType:IncidentType;resourceId?:string;summary:string;severity:Severity}){
   return this.commands.execute({actor,requestKey:input.requestKey,operation:'incident.create',resourceType:'incident',resourceId:input.requestKey,
    payload:input},async c=>{
+   if(input.resourceId){
+    if(input.incidentType!=='booking'&&input.incidentType!=='order')
+     throw new BadRequestException('External incident linkage is not verified for this domain');
+    const table=input.incidentType==='booking'?'business_reservations':'business_orders';
+    const source=await c.query('SELECT 1 FROM '+table+' WHERE id=$1',[input.resourceId]);
+    if(!source.rowCount)throw new NotFoundException('Incident source not found');
+   }
    const incident=(await c.query(`INSERT INTO admin_incidents(incident_type,resource_id,summary,severity,created_by)
     VALUES($1,$2,$3,$4,$5) RETURNING ${incidentFields}`,
     [input.incidentType,input.resourceId??null,input.summary.trim(),input.severity,actor])).rows[0];

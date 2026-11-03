@@ -26,6 +26,7 @@ test('M8 restricted PostgreSQL: scope grants, immutable commands, moderation bar
    await migrator.query('INSERT INTO admin_scope_grants(identity_subject,scope,granted_by) VALUES($1,$2,$3)',[admin,scope,'operator:test']);
   }
   assert.equal((await runtime.query('SELECT 1 FROM admin_scope_grants WHERE identity_subject=$1',[admin])).rowCount,5);
+  assert.equal((await runtime.query('SELECT count(*)::int AS total FROM admin_scope_grant_events WHERE identity_subject=$1',[admin])).rows[0].total,5);
   await assert.rejects(runtime.query("UPDATE admin_scope_grants SET active=false WHERE identity_subject=$1",[admin]));
   const business=(await migrator.query(
    "INSERT INTO business_onboarding(applicant_subject,display_name,status,reviewer_subject,reviewed_at) VALUES($1,'M8 Test Venue','approved','test-approver',now()) RETURNING id",
@@ -77,10 +78,14 @@ test('M8 restricted PostgreSQL: scope grants, immutable commands, moderation bar
   assert.ok(activity.items.some(x=>x.kind==='support'));
   const finance=await insights.finance();assert.match(finance.capturedMinor,/^[0-9]+$/);
   const reports=await insights.report(30);assert.equal(reports.currency,'NGN');
+  const merchantReport=await insights.businessReport(business);assert.equal(merchantReport.activeBranches,1);
+  const consistency=await insights.consistency();assert.equal(consistency.confirmedUnverifiedHolds,0);
   const monitor=new AdminMonitorService(runtime,insights,cmd);
   await migrator.query("INSERT INTO finance_jobs(kind,resource_id,state,attempts) VALUES('m8synthetic',$1,'dead',8)",[id]);
   const first=await monitor.tick();assert.ok(first.opened.includes('finance_dead_jobs'));
   const second=await monitor.tick();assert.equal(second.opened.length,0);
+  const linked=(await runtime.query("SELECT incident_id FROM admin_monitor_signals WHERE signal_key='finance_dead_jobs'")).rows[0];
+  await assert.rejects(incidents.transition(admin,linked.incident_id,{requestKey:'monitor-m8-close-001',state:'resolved',reason:'Cannot resolve while job is still dead'}));
   const alerts=await monitor.alerts({limit:20,offset:0});assert.ok(alerts.items.length>=1);
   const ack=await monitor.acknowledge(admin,alerts.items[0].id,'alert-m8-001');assert.equal(ack.changed,true);
   const events=await migrator.query("SELECT id FROM admin_action_events WHERE actor_subject=$1 LIMIT 1",[admin]);
