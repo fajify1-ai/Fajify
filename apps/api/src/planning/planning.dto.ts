@@ -82,6 +82,7 @@ export class CustomerPlanFeedbackView {
 }
 
 export class CustomerPlanBookingInput {
+ @ApiProperty({type:Number,minimum:1}) @IsInt() @Min(1) revision!:number;
  @ApiProperty({type:String,format:'uuid'}) @IsUUID() availabilityId!:string;
  @ApiProperty({type:String,pattern:'^(0|[1-9][0-9]{0,18})$'}) @Matches(/^(0|[1-9][0-9]{0,18})$/) expectedTotalMinor!:string;
  @ApiProperty({type:String,minLength:1,maxLength:120}) @IsString() @Length(1,120) @Matches(/\S/) guestName!:string;
