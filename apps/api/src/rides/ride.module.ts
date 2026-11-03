@@ -1,14 +1,38 @@
 import {Module} from '@nestjs/common';
 import {IdentityModule} from '../auth/identity.module';
+import {PaymentsModule} from '../payments/payments.module';
 import {RideController} from './ride.controller';
-import {RideService} from './ride.service';
-import {RideAreasService} from './ride-areas.service';
-import {RideAreasController} from './ride-areas.controller';
-import {RideFareService} from './ride-fare.service';
-import {RideRequestsService} from './ride-requests.service';
 import {CustomerRidesController} from './customer-rides.controller';
 import {RideDispatchController} from './ride-dispatch.controller';
-import {DriverOnboardingService} from './driver-onboarding.service';
 import {DriverOnboardingController} from './driver-onboarding.controller';
-@Module({imports:[IdentityModule],controllers:[RideController,CustomerRidesController,RideDispatchController,DriverOnboardingController,RideAreasController],providers:[RideService,RideFareService,RideRequestsService,DriverOnboardingService,RideAreasService]})
+import {RideAreasController} from './ride-areas.controller';
+import {RideAreasService} from './ride-areas.service';
+import {RideService} from './ride.service';
+import {RideFareService} from './ride-fare.service';
+import {RideRequestsService} from './ride-requests.service';
+import {DriverOnboardingService} from './driver-onboarding.service';
+import {RideDriverOperations} from './ride-driver-operations.service';
+import {RideDriverOperationsController} from './ride-driver-operations.controller';
+import {RideLifecycleOperations} from './ride-lifecycle-operations.service';
+import {RideLifecycleOperationsController} from './ride-lifecycle-operations.controller';
+import {RideTrackingService} from './ride-tracking.service';
+import {RideTrackingController} from './ride-tracking.controller';
+import {RideSafetyService} from './ride-safety.service';
+import {RideSafetyController} from './ride-safety.controller';
+import {RideFinanceService} from './ride-finance.service';
+import {RideFinanceController} from './ride-finance.controller';
+
+@Module({
+ imports:[IdentityModule,PaymentsModule],
+ controllers:[
+  RideController,CustomerRidesController,RideDispatchController,DriverOnboardingController,
+  RideAreasController,RideDriverOperationsController,RideLifecycleOperationsController,
+  RideTrackingController,RideSafetyController,RideFinanceController
+ ],
+ providers:[
+  RideService,RideFareService,RideRequestsService,DriverOnboardingService,
+  RideAreasService,RideDriverOperations,RideLifecycleOperations,
+  RideTrackingService,RideSafetyService,RideFinanceService
+ ]
+})
 export class RideModule {}
