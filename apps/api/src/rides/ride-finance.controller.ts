@@ -2,6 +2,7 @@ import {BadRequestException,Controller,Get,Inject,Param,ParseUUIDPipe,Post,Query
 import {ApiBearerAuth,ApiTags,ApiOkResponse,ApiParam} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
+import {CustomerWriteGuard} from '../customer/customer-write.guard';
 import {RolesGuard,RequireRoles} from '../auth/roles.guard';
 import {PrivilegedGuard} from '../auth/privileged.guard';
 import {FinanceEmptyBodyGuard} from '../payments/m5-lifecycle.controller';
@@ -9,7 +10,7 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideFinanceService} from './ride-finance.service';
 @ApiTags('ride-finance') @ApiBearerAuth('keycloak')
 @Controller({path:'',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,RolesGuard)
+@UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideFinanceController {
  constructor(@Inject(RideFinanceService)private readonly finance:RideFinanceService){}
  @Post('customer/rides/:id/payment-intent') @RequireRoles('customer') @UseGuards(FinanceEmptyBodyGuard)
