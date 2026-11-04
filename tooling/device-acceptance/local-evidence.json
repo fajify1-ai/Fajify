@@ -1,5 +1,5 @@
 {
-  "date": "2026-11-03",
+  "date": "2026-11-04",
   "branch": "acceptance/m2-private-device",
   "inputs": {
     "main": "9210c02bd4ddfd5a41c5906f35ef32a99e81e3bd",
@@ -11,90 +11,45 @@
     "pnpm": "9.15.9",
     "docker": "UNAVAILABLE",
     "postgresql": "UNAVAILABLE",
+    "qemu": "UNAVAILABLE",
     "flutter": "UNAVAILABLE",
+    "androidSdk": "UNAVAILABLE_LICENSE_NOT_ACCEPTED",
     "adb": "UNAVAILABLE",
-    "physicalAndroid": "UNAVAILABLE"
+    "physicalAndroid": "UNAVAILABLE",
+    "kvm": "UNAVAILABLE"
   },
   "checks": [
-    {
-      "command": "pnpm install --frozen-lockfile",
-      "result": "PASS",
-      "note": "Invoked npx pnpm@9.15.9; bundled pnpm 11.25.0 was rejected by frozen-lockfile config mismatch; lockfile unchanged"
-    },
-    {
-      "command": "pnpm --filter @faji/api test",
-      "result": "PASS",
-      "tests": 175,
-      "failures": 0,
-      "skipped": 0
-    },
-    {
-      "command": "pnpm --filter @faji/api typecheck",
-      "result": "PASS"
-    },
-    {
-      "command": "pnpm --filter @faji/api lint",
-      "result": "PASS"
-    },
-    {
-      "command": "pnpm --filter @faji/api build",
-      "result": "PASS"
-    },
-    {
-      "command": "pnpm --filter @faji/customer-web test",
-      "result": "PASS",
-      "tests": 58,
-      "failures": 0,
-      "skipped": 0
-    },
-    {
-      "command": "pnpm --filter @faji/customer-web typecheck",
-      "result": "PASS"
-    },
-    {
-      "command": "pnpm --filter @faji/customer-web build",
-      "result": "PASS",
-      "note": "Next 15.5.28; build-generated next-env.d.ts change restored"
-    },
-    {
-      "command": "python3 -m unittest discover -s tooling/device-acceptance -p 'test_*.py' -v",
-      "result": "PASS",
-      "tests": 8
-    },
-    {
-      "command": "node --check tooling/device-acceptance/live.mjs",
-      "result": "PASS"
-    },
-    {
-      "command": "python3 -m py_compile tooling/device-acceptance/harness.py",
-      "result": "PASS"
-    },
-    {
-      "command": "node tooling/check-workspace.mjs",
-      "result": "PASS",
-      "note": "Structure only"
-    },
-    {
-      "command": "git diff --check",
-      "result": "PASS"
-    }
+    {"command": "pnpm --filter @faji/api test", "result": "PASS", "tests": 175, "failures": 0, "skipped": 0},
+    {"command": "pnpm --filter @faji/api typecheck", "result": "PASS"},
+    {"command": "pnpm --filter @faji/api lint", "result": "PASS"},
+    {"command": "pnpm --filter @faji/api build", "result": "PASS"},
+    {"command": "pnpm --filter @faji/customer-web test", "result": "PASS", "tests": 58, "failures": 0, "skipped": 0},
+    {"command": "pnpm --filter @faji/customer-web typecheck", "result": "PASS"},
+    {"command": "pnpm --filter @faji/customer-web build", "result": "PASS"},
+    {"command": "python3 -m unittest discover -s tooling/device-acceptance -p test_*.py -v", "result": "PASS", "tests": 8},
+    {"command": "node --test tooling/device-acceptance/*.test.mjs", "result": "PASS", "tests": 8, "failures": 0},
+    {"command": "node --check tooling/device-acceptance/live.mjs", "result": "PASS"},
+    {"command": "python3 -m py_compile tooling/device-acceptance/harness.py tooling/device-acceptance/vm/run-vm.py", "result": "PASS"},
+    {"command": "git diff --check", "result": "PASS"}
   ],
   "unexecuted": [
-    "Docker Compose runtime validation and startup",
-    "live Keycloak 26.8.1 browser-code/PKCE/API checks",
-    "real PostgreSQL membership suite",
-    "Flutter analyze/test/debug APK builds",
-    "Android 15 device cases",
-    "registration/verification/recovery email cases",
-    "confidential customer-web OIDC/durable PostgreSQL acceptance"
+    "fresh isolated Keycloak 26.8.1 and PostgreSQL acceptance run after PKCE test correction",
+    "database migration and least-privilege runtime suite",
+    "Flutter analyze/test for both applications and debug APK builds",
+    "Android 15 emulator or physical-device browser/AppAuth journeys; Android SDK license approval is still pending and KVM is absent",
+    "verification and password-recovery email journeys",
+    "private HTTPS/Tailscale edge and administrative-route tests",
+    "confidential customer-web OIDC, TLS PostgreSQL session store and multi-instance tests"
   ],
   "mergeReady": false,
   "decision": "NO-GO",
   "blockers": [
-    "Business native identity adapter drops memberships required by current main",
-    "Fresh signup lacks application enrollment/approval handoff",
-    "Live server, database, device, email and web evidence absent"
+    "live server and database checks need a fresh run",
+    "Flutter tests/builds and Android 15 device acceptance are not run",
+    "Android SDK license terms have not been accepted",
+    "email and private-edge journeys are not run",
+    "confidential customer-web OIDC acceptance is not run"
   ],
-  "preservation": "Developer PR branches and main not changed; both heads integrated only into a new acceptance branch",
-  "exposure": "No service started, no public endpoint created, no existing database or volume accessed"
+  "preservation": "Developer PR branches and main not changed; both heads integrated only into acceptance/m2-private-device",
+  "exposure": "No public endpoint started; no production credentials or live customer data used; no existing database volume accessed"
 }

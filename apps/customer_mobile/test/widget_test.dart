@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:faji_business/faji_business.dart' show BusinessConfig;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:faji_app/features/auth/presentation/screens/business_login_screen.dart';
@@ -9,7 +10,9 @@ Future<void> openRoles(WidgetTester tester) async {
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
-  await tester.pumpWidget(const FajiApp());
+  await tester.pumpWidget(
+    const FajiApp(businessConfig: BusinessConfig(useMocks: true)),
+  );
   await tester.pump(const Duration(seconds: 4));
   await tester.pumpAndSettle();
 }
@@ -124,11 +127,16 @@ void main() {
     await tester.tap(find.text('Register Your Business'));
     await tester.pumpAndSettle();
     expect(find.text('Register Your Business'), findsOneWidget);
-    expect(find.text('Business name'), findsOneWidget);
+    expect(
+      find.textContaining(
+        'Identity registration is unavailable in sample mode',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Dashboard'), findsNothing);
     expect(find.byKey(const ValueKey('enter-demo')), findsNothing);
-    await tester.ensureVisible(find.text('Sign In'));
-    await tester.tap(find.text('Sign In'));
+    await tester.ensureVisible(find.text('Back to Sign In'));
+    await tester.tap(find.text('Back to Sign In'));
     await tester.pumpAndSettle();
     expect(find.text('Welcome to Faji Business'), findsOneWidget);
   });

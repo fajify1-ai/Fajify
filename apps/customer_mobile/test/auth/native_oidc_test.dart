@@ -85,9 +85,13 @@ class Accounts implements NativeAccountVerifier {
   String subject = 'subject';
   Object? error;
   int checks = 0;
+  bool enrolled = false;
   @override
-  Future<String> verify(String accessToken) async {
+  Future<void> revoke(String accessToken) async {}
+  @override
+  Future<String> verify(String accessToken, {bool enroll = false}) async {
     checks++;
+    enrolled = enroll;
     if (error != null) throw error!;
     return subject;
   }
@@ -412,6 +416,21 @@ void main() {
     },
   );
 
+  test('registration reports pending approval and clears the OIDC session', () async {
+    final repo = repository();
+    await expectLater(
+      repo.registerInBrowser(),
+      throwsA(
+        isA<AuthFailure>()
+            .having((error) => error.code, 'pending account', AuthErrorCode.disabled)
+            .having((error) => error.message, 'approval message', contains('awaiting approval')),
+      ),
+    );
+    expect(accounts.enrolled, isTrue);
+    expect(gateway.logouts, 1);
+    expect(store.value, isNull);
+  });
+
   test('UserInfo verifies email and backend binds customer subject', () async {
     final calls = <String>[];
     final identity = CustomerIdentityClient(
@@ -447,6 +466,36 @@ void main() {
     expect(await verifier.verify('access-fixture'), 'subject');
     expect(calls.last, '/api/v1/auth/me');
     expect(calls, hasLength(3));
+  });
+
+  test('registration enrolls a verified subject but never creates a session', () async {
+    final calls = <String>[];
+    final verifier = OidcAccountVerifier(
+      settings(),
+      request: (uri, token) async {
+        calls.add(uri.path);
+        return token == null
+            ? (
+                statusCode: 200,
+                body: jsonEncode({
+                  'issuer': settings().issuer.toString(),
+                  'userinfo_endpoint': '${settings().issuer}/userinfo-fixture',
+                }),
+              )
+            : (statusCode: 200, body: '{"sub":"subject","email_verified":true}');
+      },
+      post: (uri, token) async {
+        calls.add(uri.path);
+        return (
+          statusCode: 201,
+          body: '{"subject":"subject","status":"pending_approval"}',
+        );
+      },
+    );
+
+    expect(await verifier.verify('access-fixture', enroll: true), 'subject');
+    expect(calls, isNot(contains('/api/v1/auth/me')));
+    expect(calls.last, '/api/v1/auth/enroll');
   });
 
   test(

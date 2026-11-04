@@ -13,7 +13,8 @@ typedef OidcJsonRequest = Future<IdentityResponse> Function(
 );
 
 abstract interface class NativeAccountVerifier {
-  Future<String> verify(String accessToken);
+  Future<String> verify(String accessToken, {bool enroll = false});
+  Future<void> revoke(String accessToken);
 }
 
 /// Do not decode an ID token and call its claims verified. AppAuth performs
@@ -24,12 +25,35 @@ class OidcAccountVerifier implements NativeAccountVerifier {
     this.settings, {
     OidcJsonRequest? request,
     CustomerIdentityClient? identity,
+    IdentityRequest? post,
   }) : _request = request ?? platform.requestOidcJson,
+       _post = post ?? platform.postIdentityAction,
        _identity =
            identity ?? CustomerIdentityClient(apiOrigin: settings.apiOrigin);
   final NativeOidcSettings settings;
   final OidcJsonRequest _request;
   final CustomerIdentityClient _identity;
+  final IdentityRequest _post;
+
+  Future<Map<String, dynamic>> _action(String path, String token) async {
+    final result = await _post(
+      settings.apiOrigin.resolve(path),
+      token,
+    ).timeout(const Duration(seconds: 10));
+    if (result.statusCode != 201) throw const FormatException();
+    final body = jsonDecode(result.body);
+    if (body is! Map<String, dynamic>) throw const FormatException();
+    return body;
+  }
+
+  @override
+  Future<void> revoke(String accessToken) async {
+    final body = await _action(
+      '/api/v1/auth/sessions/revoke-current',
+      accessToken,
+    );
+    if (body['revoked'] != true) throw const FormatException();
+  }
 
   Future<Map<String, dynamic>> _get(Uri uri, String? token) async {
     final result = await _request(
@@ -45,7 +69,7 @@ class OidcAccountVerifier implements NativeAccountVerifier {
   }
 
   @override
-  Future<String> verify(String accessToken) async {
+  Future<String> verify(String accessToken, {bool enroll = false}) async {
     try {
       final discovery = await _get(
         Uri.parse('${settings.issuer}/.well-known/openid-configuration'),
@@ -73,6 +97,16 @@ class OidcAccountVerifier implements NativeAccountVerifier {
           AuthErrorCode.verificationRequired,
           'Please verify your email before signing in.',
         );
+      }
+      if (enroll) {
+        final body = await _action('/api/v1/auth/enroll', accessToken);
+        if (body['subject'] != subject ||
+            body['status'] != 'pending_approval') {
+          throw const FormatException();
+        }
+        // Enrollment deliberately leaves new accounts suspended. Do not call
+        // /auth/me or store a usable client session for a pending account.
+        return subject;
       }
       await _identity.load(accessToken: accessToken, expectedSubject: subject);
       return subject;

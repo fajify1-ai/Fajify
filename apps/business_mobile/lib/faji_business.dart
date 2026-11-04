@@ -2,3 +2,4 @@
 library;
 
 export 'app/business_app.dart' show BusinessApp;
+export 'core/config.dart' show BusinessConfig;

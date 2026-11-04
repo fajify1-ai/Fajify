@@ -4,7 +4,7 @@ import {randomBytes} from 'node:crypto';
 
 const origin=process.env.FAJI_KC_ORIGIN;
 const adminPassword=process.env.KC_BOOTSTRAP_ADMIN_PASSWORD;
-assert.match(origin??'',/^http:\/\/127\.0\.0\.1:\d+$/);
+assert.match(origin??'',/^(?:http:\/\/127\.0\.0\.1|https:\/\/localhost):\d+$/);
 assert.ok(adminPassword);
 const realmApi=origin+'/admin/realms/faji';
 const form=p=>new URLSearchParams(p).toString();
@@ -18,7 +18,7 @@ async function request(url,opts={},expected=204){
 }
 const auth=await fetch(origin+'/realms/master/protocol/openid-connect/token',{
  method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},
- body:form({grant_type:'password',client_id:'admin-cli',username:'m2_acceptance_admin',password:adminPassword})
+ body:form({grant_type:'password',client_id:'admin-cli',username:process.env.KC_BOOTSTRAP_ADMIN_USERNAME ?? 'm2_acceptance_admin',password:adminPassword})
 });
 assert.equal(auth.status,200,'bootstrap admin token');
 const access=(await auth.json()).access_token;
@@ -120,7 +120,7 @@ try{
    const location=res.headers.get('location');
    assert.ok(location,'redirect Location required');
    const dest=new URL(location,origin);
-   if(dest.protocol!=='http:')return {response:res,external:true};
+   if(dest.protocol!==new URL(origin).protocol)return {response:res,external:true};
    res=await fetch(safeUrl(dest),{redirect:'manual',headers:{cookie:cookieHeader()}});
    captureCookies(res);
   }
@@ -168,7 +168,7 @@ try{
    captureCookies(res);
    if([301,302,303,307,308].includes(res.status)){
     const target=res.headers.get('location');
-    if(target){const next=new URL(target,origin);if(next.protocol==='http:')verification=await followAction(next);}
+    if(target){const next=new URL(target,origin);if(next.protocol===new URL(origin).protocol)verification=await followAction(next);}
    }
   }
  }

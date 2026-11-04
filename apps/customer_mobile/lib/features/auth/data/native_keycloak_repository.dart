@@ -68,6 +68,7 @@ class NativeKeycloakRepository
     NativeOidcTokens tokens,
     int generation, {
     String? expectedSubject,
+    bool enroll = false,
   }) async {
     _issued =
         tokens; // Retained only to end an in-flight browser session on logout.
@@ -78,10 +79,26 @@ class NativeKeycloakRepository
         tokens.idToken.isEmpty) {
       throw const FormatException();
     }
-    final subject = await accounts.verify(tokens.accessToken);
+    final subject = await accounts.verify(tokens.accessToken, enroll: enroll);
     _current(generation);
     if (expectedSubject != null && subject != expectedSubject) {
       throw const FormatException();
+    }
+    if (enroll) {
+      try {
+        await gateway.endSession(tokens);
+      } catch (_) {
+        throw const AuthFailure(
+          AuthErrorCode.operationFailed,
+          'Your account is awaiting approval, but sign-out could not be confirmed.',
+        );
+      } finally {
+        _issued = null;
+      }
+      throw const AuthFailure(
+        AuthErrorCode.disabled,
+        'Your account is awaiting approval. You can sign in after it is approved.',
+      );
     }
     if (!tokens.expiresAt.isAfter(_clock())) throw const FormatException();
     await store.write(
@@ -133,7 +150,11 @@ class NativeKeycloakRepository
       () async => (await _guard(() async {
         _current(generation);
         await _forget();
-        return _accept(await gateway.authorize(journey: journey), generation);
+        return _accept(
+          await gateway.authorize(journey: journey),
+          generation,
+          enroll: journey == CustomerAuthJourney.registration,
+        );
       }))!,
     );
   }
@@ -241,8 +262,25 @@ class NativeKeycloakRepository
       }
       // Local removal is mandatory even when the browser end-session fails.
       if (tokens != null) {
+        var revokeFailed = false;
+        if (tokens.accessToken.isNotEmpty &&
+            tokens.expiresAt.isAfter(_clock())) {
+          try {
+            await accounts.revoke(tokens.accessToken);
+          } catch (_) {
+            revokeFailed = true;
+          }
+        }
         try {
           await gateway.endSession(tokens);
+          if (revokeFailed) {
+            throw const AuthFailure(
+              AuthErrorCode.operationFailed,
+              'Application session revocation could not be confirmed.',
+            );
+          }
+        } on AuthFailure {
+          rethrow;
         } catch (_) {
           throw const AuthFailure(
             AuthErrorCode.operationFailed,

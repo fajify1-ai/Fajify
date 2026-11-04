@@ -12,8 +12,9 @@ Future<({int statusCode, String body})> requestIdentity(
 /// Shared bounded transport for discovery, UserInfo and active-account checks.
 Future<({int statusCode, String body})> requestOidcJson(
   Uri endpoint,
-  String? accessToken,
-) async {
+  String? accessToken, {
+  String method = 'GET',
+}) async {
   if (endpoint.scheme != 'https' ||
       endpoint.userInfo.isNotEmpty ||
       endpoint.hasFragment) {
@@ -22,7 +23,7 @@ Future<({int statusCode, String body})> requestOidcJson(
   final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
   try {
     return await (() async {
-      final request = await client.getUrl(endpoint);
+      final request = await client.openUrl(method, endpoint);
       request.followRedirects = false;
       if (accessToken != null) {
         request.headers.set(
@@ -33,7 +34,7 @@ Future<({int statusCode, String body})> requestOidcJson(
       request.headers.set(HttpHeaders.acceptHeader, 'application/json');
       request.headers.set(HttpHeaders.cacheControlHeader, 'no-store');
       final response = await request.close();
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         return (statusCode: response.statusCode, body: '');
       }
       if (response.headers.contentType?.mimeType != 'application/json') {
@@ -52,3 +53,8 @@ Future<({int statusCode, String body})> requestOidcJson(
     client.close(force: true);
   }
 }
+
+Future<({int statusCode, String body})> postIdentityAction(
+  Uri uri,
+  String token,
+) => requestOidcJson(uri, token, method: 'POST');

@@ -183,7 +183,7 @@ def up(state, c):
         env = {**os.environ, 'FAJI_DATABASE_URL': f"postgresql://postgres:{pw['app']}@127.0.0.1:{c['ports']['appdb']}/{c['database']}"}
         run(['pnpm', '--filter', '@faji/database', 'migrate'], cwd=REPO, env=env)
         docker(state, c, 'exec', '-T', 'appdb', 'psql', '-U', 'postgres', '-d', c['database'], '-v', 'ON_ERROR_STOP=1',
-               input='REVOKE CREATE ON SCHEMA public FROM PUBLIC; GRANT USAGE ON SCHEMA public TO faji_device_runtime; GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO faji_device_runtime; GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public TO faji_device_runtime;', text=True, stdout=subprocess.DEVNULL)
+               input='REVOKE CREATE ON SCHEMA public FROM PUBLIC; GRANT USAGE ON SCHEMA public TO faji_device_runtime; GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events,revoked_identity_sessions,business_onboarding TO faji_device_runtime; GRANT SELECT ON business_branches TO faji_device_runtime; GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA public TO faji_device_runtime;', text=True, stdout=subprocess.DEVNULL)
         run(['node', str(REPO / 'tooling/device-acceptance/live.mjs'), 'seed', str(state)], cwd=REPO)
         docker(state, c, '--profile', 'api', 'up', '-d', 'api', 'edge')
         with (state / 'image-evidence.txt').open('w') as evidence:

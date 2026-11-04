@@ -150,11 +150,7 @@ class LoginPage extends StatelessWidget {
 }
 
 class IdentityHandoffPage extends StatelessWidget {
-  const IdentityHandoffPage({
-    super.key,
-    required this.controller,
-    this.onExit,
-  });
+  const IdentityHandoffPage({super.key, required this.controller, this.onExit});
 
   final BusinessController controller;
   final VoidCallback? onExit;
@@ -182,7 +178,7 @@ class IdentityHandoffPage extends StatelessWidget {
               )
             else
               FilledButton(
-                onPressed: controller.signingIn ? null : controller.signIn,
+                onPressed: controller.signingIn ? null : controller.register,
                 child: Text(
                   controller.signingIn
                       ? 'Connecting…'

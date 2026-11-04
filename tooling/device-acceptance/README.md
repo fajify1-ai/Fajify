@@ -1,6 +1,8 @@
 # Fajify PR #14 / #15 private Android acceptance
 
-**Current decision: NO-GO.** This harness is implemented and source-tested, but its Docker/Tailscale runtime and real Android flows have not run in ChatGPT Work. It never merges a PR. Both developer heads are preserved as merge parents on `acceptance/m2-private-device`.
+**Current decision: NO-GO.** The current checkout passes 175 API tests, 58 customer-web tests, 8 harness policy tests, 8 transport/HTTP tests, API typecheck/lint/build, and customer-web typecheck/build. The isolated database/Keycloak run did not complete: one PKCE check made an incorrect assumption about where Keycloak rejects a request; that check now verifies rejection at authorization or code exchange, but needs a fresh live run. Flutter analysis/tests, APK builds, Android 15, email journeys, private HTTPS edge, and confidential customer-web OIDC remain unverified. Do not merge either developer PR until every release gate below passes. Both developer heads are preserved as merge parents on `acceptance/m2-private-device`.
+
+The current execution environment has Node 24.22.1 and the JavaScript project dependencies, but no Flutter SDK, Android SDK, adb, Docker, PostgreSQL or QEMU. The Android SDK manager stopped at Google's license prompt. No license was accepted. `/dev/kvm` is unavailable, so even an installed emulator would need slow software emulation. No service or public endpoint was started. The remaining laptop and Android setup commands are below.
 
 ## Reviewed source snapshot
 
@@ -14,8 +16,8 @@ The branch integrates these heads locally without changing either developer ref 
 
 ## Review findings and merge blockers
 
-1. **Confirmed Business integration defect:** `KeycloakIdentityService._loadIdentity()` constructs `BusinessIdentity(subject, roles)` and discards `/auth/me.memberships`. Main's `BusinessIdentity.canAccessBusiness` requires nonempty `businessMemberships`. A valid approved merchant is therefore denied. Fix parsing/validation on a reviewed integration or developer branch and add adapter tests for approved, malformed, missing, revoked and foreign memberships. The harness deliberately does not mask this with mock services or alter the developer implementation.
-2. **Fresh customer signup needs application onboarding:** both mobile adapters rely on `/auth/me`; public Keycloak registration alone creates no active `user_profiles`/`account_access` records. The backend `POST /auth/enroll` is pending approval by design, and neither mobile identity adapter calls it. Decide and implement the intended enrollment/approval handoff before claiming full registration acceptance. Seeded active users only prove existing-account login, not fresh-account onboarding.
+1. **Business membership fix is implemented, pending Flutter execution:** the acceptance branch now validates `/auth/me.memberships` against approved business scopes, picks a returned membership, and checks the same subject/scope again before protected actions. A Dart unit test covers accepted, malformed, pending, wrong-type, and role-only entries. Flutter is unavailable here, so these changes still need analyze/test plus live API/device validation.
+2. **Fresh signup now has an explicit pending-approval handoff, pending execution:** Customer and Business registration call `POST /auth/enroll`, which derives the subject from the verified token and provisions a suspended account. Both clients clear local tokens, end the Keycloak browser session, and report that approval is pending; neither treats registration as active access. Customer tests cover this behavior but await Flutter execution. Verify both journeys against live Keycloak and the API before acceptance.
 3. **Realm runtime setup:** source has exact redirects, public clients, `faji-api` audience mapping, S256, disabled native password/implicit grants, email verification and recovery policies. It does not configure SMTP or explicit post-logout redirects. The isolated copy adds a local mail sink and exact logout redirects. Seed tooling reconciles Keycloak's default customer composite and binds the existing privileged password+OTP flow by runtime UUID. These changes never modify the checked-in realm or another server.
 4. **Device evidence missing:** debug APK build/install, merged AppAuth receiver, Chrome Custom Tab login/state/nonce/callback, refresh/restore, logout/cancellation, email verification/recovery, suspension, membership revocation and cross-app regressions all need real Android 15 evidence. Neither previous PR-reported tests nor this branch's unit tests replace it.
 5. **Customer web remains a separate release gate:** #14 includes Next.js authentication. The source realm has no confidential customer-web client. Its live confidential client, exact HTTPS callbacks, PostgreSQL TLS, encrypted durable session stores, multi-instance behavior and browser journeys are not provisioned by this native harness. Leave web authentication disabled until separately accepted. PR #14 must not be called fully accepted while this remains outstanding.
@@ -108,6 +110,28 @@ The `database` action runs the API PostgreSQL suite with distinct runtime/migrat
 The automatic live suite is **implemented but not yet executed** here. It checks both clients through real browser HTML forms and code exchange over verified HTTPS: missing/plain/wrong PKCE, native password-grant denial, code replay, real API bearer validation, ID/tampered-token rejection, default customer role, approved merchant membership, foreign-business denial, suspension, refresh, current-session revocation and IdP logout. It also denies a role-only merchant and a suspended fixture. It is not AppAuth/system-browser/device automation. Results always retain `mergeReady: false` because device/email/web gates are separate.
 
 ## Install and run on Android 15
+
+For a software-emulated Android 15 target, the Android SDK licenses must first be reviewed and accepted interactively. The SDK manager will prompt for each license; do not pipe `yes` into it. API 35 is Android 15. Install the Android 36 compile platform used by the current Flutter toolchain and a Google Play API 35 image so Tailscale can be installed on the emulator:
+
+```bash
+export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
+export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/emulator:$PATH"
+sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
+  "platform-tools" "platforms;android-35" "platforms;android-36" \
+  "emulator" "system-images;android-35;google_apis_playstore;x86_64"
+avdmanager --sdk_root="$ANDROID_SDK_ROOT" create avd \
+  --name Faji-Android-15 \
+  --package "system-images;android-35;google_apis_playstore;x86_64"
+```
+
+Run this in its own terminal. Software emulation is slow and can take several minutes to boot. Sign Tailscale into the same approved private tailnet used by the test server, then confirm Android reports API 35 / Android 15 before running the APK commands below:
+
+```bash
+ANDROID_I_WANT_MY_TCG=yes emulator -avd Faji-Android-15 -accel off -no-snapshot -no-boot-anim
+```
+
+`sdkmanager --licenses` prompts for each package license, and emulator software acceleration requires opting in with `ANDROID_I_WANT_MY_TCG=yes`; these are documented Android SDK controls. See [SDK manager license acceptance](https://developer.android.com/tools/sdkmanager#accept-licenses) and [emulator command-line options](https://developer.android.com/studio/run/emulator-commandline#accel).
 
 Unlock the phone, enable USB debugging and approve this laptop. Sign Android Tailscale into the same private tailnet. In Android Chrome open `https://YOUR_NODE.YOUR_TAILNET.ts.net/realms/faji/.well-known/openid-configuration`; require a valid certificate with no warning before continuing. A certificate warning is a hard failure, not a reason to bypass verification.
 

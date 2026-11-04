@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:faji_business/faji_business.dart' show BusinessConfig;
+
 import 'package:flutter/material.dart';
 
 import 'core/theme/faji_theme.dart';
@@ -31,7 +33,12 @@ Future<void> main() async {
 }
 
 class FajiApp extends StatefulWidget {
-  const FajiApp({super.key, this.authController});
+  const FajiApp({
+    super.key,
+    this.authController,
+    this.businessConfig = BusinessConfig.fromBuild,
+  });
+  final BusinessConfig businessConfig;
   final AuthController? authController;
 
   @override
@@ -114,7 +121,8 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
       ),
       routes: {
         FajiRoutes.roleSelection: (_) => const RoleSelectionScreen(),
-        FajiRoutes.businessLogin: (_) => const BusinessLoginScreen(),
+        FajiRoutes.businessLogin: (_) =>
+            BusinessLoginScreen(config: widget.businessConfig),
         FajiRoutes.rideLogin: (_) => const RideLoginScreen(),
         FajiRoutes.forgotPassword: (_) => const ForgotPasswordScreen(),
         FajiRoutes.userHome: (_) => CustomerAccessGate(

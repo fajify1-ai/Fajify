@@ -75,7 +75,11 @@ class KeycloakIdentityService implements IdentityService {
   }
 
   @override
-  Future<BusinessIdentity> signIn() async {
+  Future<BusinessIdentity> signIn() => _authorize(register: false);
+
+  Future<BusinessIdentity> register() => _authorize(register: true);
+
+  Future<BusinessIdentity> _authorize({required bool register}) async {
     if (kIsWeb) {
       throw const IdentityFailure(
         'Keycloak sign-in is currently supported on Android and iOS only.',
@@ -89,7 +93,7 @@ class KeycloakIdentityService implements IdentityService {
           issuer: _issuer,
           discoveryUrl: _discoveryUrl,
           scopes: _scopes,
-          promptValues: const ['login'],
+          promptValues: register ? const ['create'] : const ['login'],
           allowInsecureConnections: _allowsLocalHttp,
         ),
       );
@@ -99,6 +103,42 @@ class KeycloakIdentityService implements IdentityService {
         await _clearTokens();
         throw const IdentityFailure(
           'Keycloak did not return a usable access token.',
+        );
+      }
+      if (register) {
+        final enrollment = await _send(
+          _client.post(
+            _api('auth/enroll'),
+            headers: {'Authorization': 'Bearer $accessToken'},
+          ),
+        );
+        if (enrollment.statusCode != 201) {
+          await _clearTokens();
+          throw const IdentityFailure(
+            'Account enrollment could not be confirmed.',
+          );
+        }
+        try {
+          final idToken = response.idToken;
+          if (idToken == null || idToken.isEmpty) {
+            throw const IdentityFailure(
+              'Account enrollment was submitted, but sign-out could not be confirmed.',
+            );
+          }
+          await _appAuth.endSession(
+            EndSessionRequest(
+              idTokenHint: idToken,
+              postLogoutRedirectUrl: config.oidcRedirectUri,
+              issuer: _issuer,
+              discoveryUrl: _discoveryUrl,
+              allowInsecureConnections: _allowsLocalHttp,
+            ),
+          );
+        } finally {
+          await _clearTokens();
+        }
+        throw const IdentityFailure(
+          'Your business account is awaiting approval. You can sign in after it is approved.',
         );
       }
       final identity = await _loadIdentity(accessToken);
@@ -221,6 +261,7 @@ class KeycloakIdentityService implements IdentityService {
     return BusinessIdentity(
       subject: payload['subject'] as String,
       roles: (payload['roles'] as List).cast<String>().toSet(),
+      businessMemberships: approvedBusinessIds(payload['memberships']),
     );
   }
 
@@ -346,4 +387,23 @@ class KeycloakIdentityService implements IdentityService {
     }
     if (failure != null) throw failure;
   }
+}
+
+/// Accept only the active business scopes returned by the API's /auth/me contract.
+Set<String> approvedBusinessIds(Object? memberships) {
+  if (memberships is! List) return {};
+  final uuid = RegExp(
+    r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+    caseSensitive: false,
+  );
+  return {
+    for (final entry in memberships)
+      if (entry is Map &&
+          entry['resourceType'] == 'business' &&
+          entry['status'] == 'approved' &&
+          const {'owner', 'manager', 'staff'}.contains(entry['role']) &&
+          entry['resourceId'] is String &&
+          uuid.hasMatch(entry['resourceId'] as String))
+        entry['resourceId'] as String,
+  };
 }

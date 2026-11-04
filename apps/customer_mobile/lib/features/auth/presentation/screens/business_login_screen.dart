@@ -7,7 +7,11 @@ import '../../../../core/theme/faji_colors.dart';
 
 /// Business starts with a choice; selecting either action never signs in.
 class BusinessLoginScreen extends StatefulWidget {
-  const BusinessLoginScreen({super.key});
+  const BusinessLoginScreen({
+    super.key,
+    this.config = BusinessConfig.fromBuild,
+  });
+  final BusinessConfig config;
 
   @override
   State<BusinessLoginScreen> createState() => _BusinessLoginScreenState();
@@ -22,6 +26,7 @@ class _BusinessLoginScreenState extends State<BusinessLoginScreen> {
     if (destination != null) {
       return BusinessApp(
         embedded: true,
+        config: widget.config,
         initialLocation: destination,
         onExit: () => Navigator.of(context).pop(),
       );

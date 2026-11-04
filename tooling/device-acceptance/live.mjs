@@ -3,6 +3,9 @@ import {createHash, randomBytes} from 'node:crypto';
 import {readFileSync, writeFileSync, statSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {resolve} from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {transport} from './transport.mjs';
+import {http, json} from './http.mjs';
 
 const [action, directory, fixtureName, operation] = process.argv.slice(2);
 const state = resolve(directory ?? '');
@@ -10,26 +13,14 @@ assert.equal(statSync(state).mode & 0o077, 0, 'state must be private');
 const config = JSON.parse(readFileSync(state + '/state.json', 'utf8'));
 assert.equal(config.marker, 'fajify-device-acceptance-v1');
 assert.match(config.database, /^fajify_m2_test_device_[a-f0-9]{12}$/);
-assert.match(config.origin, /^https:\/\/[a-z0-9-]+\.[a-z0-9-]+\.ts\.net$/);
-assert.equal(process.env.NODE_TLS_REJECT_UNAUTHORIZED, undefined, 'TLS override prohibited');
-assert.equal(process.env.NODE_EXTRA_CA_CERTS, undefined, 'Use normal public trust roots');
-const origin = config.origin;
+const {localVm, origin, apiOrigin, adminOrigin} = transport(config, state);
 const issuer = origin + '/realms/faji';
-const adminOrigin = 'http://127.0.0.1:' + config.ports.admin;
 const {Pool} = createRequire(new URL('../../apps/api/package.json', import.meta.url))('pg');
 const pool = new Pool({host: '127.0.0.1', port: config.ports.appdb, user: 'postgres',
-  password: config.passwords.app, database: config.database, max: 2});
+  password: config.passwords.app, database: config.database, max: 2,
+  ...(localVm ? {ssl: {rejectUnauthorized: true, ca: readFileSync(state + '/ca.pem')}} : {})});
 const save = (name, object) => writeFileSync(state + '/' + name, JSON.stringify(object, null, 2) + '\n', {mode: 0o600});
 const formHeaders = {'content-type': 'application/x-www-form-urlencoded'};
-async function http(url, options = {}) {
-  const response = await fetch(url, {redirect: 'manual', signal: AbortSignal.timeout(15000), ...options});
-  return response;
-}
-async function json(url, options = {}, status = 200) {
-  const response = await http(url, options);
-  assert.equal(response.status, status, 'HTTP status at ' + new URL(url).pathname);
-  return status === 204 ? undefined : response.json();
-}
 const businesses = ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'];
 async function admin() {
   const token = await json(adminOrigin + '/realms/master/protocol/openid-connect/token', {
@@ -76,15 +67,19 @@ async function seed() {
   console.log('PASS: synthetic identities, default role, privileged OTP binding and isolated application fixtures provisioned; credentials in private fixtures.json');
 }
 
-async function authorize(clientId, user) {
+async function authorize(clientId, user, proof = 'S256') {
   const scheme = clientId === 'faji-customer-mobile' ? 'com.faji.customer' : 'com.faji.business';
   const redirect = scheme + ':/oauth/callback';
   const verifier = randomBytes(32).toString('base64url');
   const stateValue = randomBytes(24).toString('hex');
   const url = new URL(issuer + '/protocol/openid-connect/auth');
-  url.search = new URLSearchParams({client_id: clientId, redirect_uri: redirect, response_type: 'code',
-    scope: 'openid profile email', state: stateValue, nonce: randomBytes(24).toString('hex'),
-    code_challenge: createHash('sha256').update(verifier).digest('base64url'), code_challenge_method: 'S256'});
+  const params = new URLSearchParams({client_id: clientId, redirect_uri: redirect, response_type: 'code',
+    scope: 'openid profile email', state: stateValue, nonce: randomBytes(24).toString('hex')});
+  if (proof !== 'missing') {
+    params.set('code_challenge', proof === 'plain' ? verifier : createHash('sha256').update(verifier).digest('base64url'));
+    params.set('code_challenge_method', proof);
+  }
+  url.search = params;
   const cookies = new Map();
   function capture(response) {
     for (const entry of response.headers.getSetCookie()) {
@@ -103,6 +98,7 @@ async function authorize(clientId, user) {
   for (let step = 0; step < 8 && [302,303].includes(response.status); step++) {
     response = await http(safe(response.headers.get('location')), {headers: {cookie: cookie()}}); capture(response);
   }
+  if (response.status === 400) return {rejected: true};
   assert.equal(response.status, 200, 'login form');
   const html = await response.text();
   const tag = [...html.matchAll(/<form\b([^>]*)>/gi)].map(match => match[1]).find(value => /id=["']kc-form-login["']/.test(value));
@@ -125,12 +121,15 @@ async function authorize(clientId, user) {
   assert.ok(callback.searchParams.get('code'));
   return {code: callback.searchParams.get('code'), verifier, redirect, clientId};
 }
-const exchange = (grant, verifier = grant.verifier) => http(issuer + '/protocol/openid-connect/token', {
-  method: 'POST', headers: formHeaders, body: new URLSearchParams({grant_type: 'authorization_code',
-    client_id: grant.clientId, redirect_uri: grant.redirect, code: grant.code, code_verifier: verifier})});
+const exchange = (grant, verifier = grant.verifier) => {
+  const params = new URLSearchParams({grant_type: 'authorization_code', client_id: grant.clientId,
+    redirect_uri: grant.redirect, code: grant.code});
+  if (verifier !== null) params.set('code_verifier', verifier);
+  return http(issuer + '/protocol/openid-connect/token', {method: 'POST', headers: formHeaders, body: params});
+};
 const bearer = token => ({authorization: 'Bearer ' + token});
 async function apiStatus(path, token, status, method = 'GET') {
-  const response = await http(origin + '/api/v1/' + path, {method, headers: token ? bearer(token) : {}});
+  const response = await http(apiOrigin + '/api/v1/' + path, {method, headers: token ? bearer(token) : {}});
   assert.equal(response.status, status, 'API status at ' + path);
   return response;
 }
@@ -143,11 +142,18 @@ async function check() {
     assert.equal(discovery.issuer, issuer);
     for (const key of ['authorization_endpoint','token_endpoint','jwks_uri','userinfo_endpoint','end_session_endpoint'])
       assert.ok(discovery[key].startsWith(issuer + '/protocol/openid-connect/'));
-    for (const path of ['/admin/', '/realms/master/.well-known/openid-configuration'])
-      assert.equal((await http(origin + path)).status, 404);
-    await json(origin + '/api/v1/health/ready');
+    if (!localVm) {
+      for (const path of ['/admin/', '/realms/master/.well-known/openid-configuration'])
+        assert.equal((await http(origin + path)).status, 404);
+    }
+    await json(apiOrigin + '/api/v1/health/ready');
     await apiStatus('auth/me', null, 401);
-    passed('private HTTPS discovery, readiness, administrative route denial and missing bearer rejection');
+    if (localVm) {
+      const boundary = spawnSync(process.execPath, [new URL('./loopback-boundary.mjs', import.meta.url).pathname, state], {env: process.env, encoding: 'utf8', timeout: 30000});
+      assert.equal(boundary.status, 0, 'strict TLS and database role boundary checks');
+      passed('untrusted CA and wrong hostname rejected; database TLS and least-privilege runtime confirmed');
+    }
+    passed(localVm ? 'loopback HTTPS discovery, readiness and missing bearer rejection (private edge not exercised)' : 'private HTTPS discovery, readiness, administrative route denial and missing bearer rejection');
     const adminApi = await admin();
     for (const clientId of ['faji-customer-mobile', 'faji-business-mobile']) {
       const [client] = await adminApi('/clients?clientId=' + clientId);
@@ -157,9 +163,11 @@ async function check() {
       assert.equal(client.implicitFlowEnabled, false);
       const user = clientId.includes('customer') ? fixtures.customer : fixtures.merchantA;
       for (const mode of ['missing', 'plain']) {
-        const params = new URLSearchParams({client_id: clientId, redirect_uri: client.redirectUris[0], response_type: 'code', scope: 'openid'});
-        if (mode === 'plain') {params.set('code_challenge', 'a'.repeat(43)); params.set('code_challenge_method', 'plain');}
-        assert.equal((await http(issuer + '/protocol/openid-connect/auth?' + params)).status, 400, mode + ' PKCE must fail');
+        const probe = await authorize(clientId, user, mode);
+        if (!probe.rejected) {
+          const verifier = mode === 'missing' ? null : probe.verifier;
+          assert.equal((await exchange(probe, verifier)).status, 400, mode + ' PKCE must fail at code exchange');
+        }
       }
       const passwordGrant = await http(issuer + '/protocol/openid-connect/token', {method: 'POST', headers: formHeaders,
         body: new URLSearchParams({grant_type: 'password', client_id: clientId, username: user.username, password: user.password})});
@@ -209,7 +217,7 @@ async function check() {
       await apiStatus('businesses/' + businesses[0] + '/branches', tokens.access_token, 403);
     }
     passed('merchant role without membership and suspended fixture denied protected resources');
-    save('live-results.json', {result: 'PASS', source: JSON.parse(readFileSync(state + '/source.json', 'utf8')).commit,
+    save('live-results.json', {result: 'PASS', transport: config.transport ?? 'tailscale', source: JSON.parse(readFileSync(state + '/source.json', 'utf8')).commit,
       timestamp: new Date().toISOString(), checks: results, physicalDevice: 'PENDING', emailJourneys: 'PENDING', mergeReady: false});
   } catch (error) {
     save('live-results.json', {result: 'FAIL', checks: results, physicalDevice: 'PENDING', mergeReady: false});
@@ -231,10 +239,23 @@ async function control() {
 }
 try {
   if (action === 'seed') await seed();
-  else if (action === 'check') await check();
+  else if (action === 'check') {
+    await check();
+    if (localVm) {
+      const mail = spawnSync(process.execPath, ['tooling/keycloak-m2-email-acceptance.mjs'], {
+        encoding: 'utf8', timeout: 120000,
+        env: {...process.env, FAJI_KC_ORIGIN: origin, KC_BOOTSTRAP_ADMIN_USERNAME: 'device_admin', KC_BOOTSTRAP_ADMIN_PASSWORD: config.passwords.admin},
+      });
+      const checks = mail.stdout?.split('\n').filter(line => /^(PASS|LIMITATION):/.test(line)) ?? [];
+      const result = mail.status !== 0 ? 'FAIL' : checks.some(line => line.startsWith('LIMITATION')) ? 'PARTIAL' : 'PASS';
+      save('email-results.json', {result, checks});
+      console.log('Email server journeys: '+result);
+    }
+  }
   else if (action === 'control') await control();
   else throw Error('Unknown action');
-} catch {
-  console.error('FAIL: device harness ' + action + '; response bodies, credentials and token-bearing URLs withheld');
+} catch (error) {
+  const location = error?.stack?.split('\n').find(line => line.trim().startsWith('at '))?.trim() ?? 'unknown location';
+  console.error('FAIL: device harness ' + action + '; ' + location + '; response bodies, credentials and token-bearing URLs withheld');
   process.exitCode = 1;
 } finally {await pool.end();}

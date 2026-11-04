@@ -16,8 +16,11 @@ class BusinessController extends ChangeNotifier {
   final IdentityService identity;
   SessionStatus session = SessionStatus.signedOut;
   String businessId = 'demo-lagos';
-  String get businessName =>
-      businessId == 'demo-island' ? 'Demo Island' : 'Demo Lagos';
+  String get businessName => identity is! MockIdentityService
+      ? 'Business workspace'
+      : businessId == 'demo-island'
+      ? 'Demo Island'
+      : 'Demo Lagos';
   LoadState state = LoadState.loading;
   BusinessSnapshot data = BusinessSnapshot.empty;
   BusinessIdentity? account;
@@ -55,6 +58,8 @@ class BusinessController extends ChangeNotifier {
           : SessionStatus.denied;
       _lastValidatedDestination = null;
       if (session == SessionStatus.merchant) {
+        if (identity is! MockIdentityService)
+          businessId = restored.businessMemberships.first;
         await reload();
       } else {
         error = 'The backend did not confirm an approved business membership.';
@@ -69,7 +74,9 @@ class BusinessController extends ChangeNotifier {
 
   Future<void> signIn() => _authenticate();
 
-  Future<void> _authenticate() async {
+  Future<void> register() => _authenticate(register: true);
+
+  Future<void> _authenticate({bool register = false}) async {
     if (signingIn) return;
     signingIn = true;
     error = null;
@@ -77,7 +84,10 @@ class BusinessController extends ChangeNotifier {
     _authGeneration++;
     _emit();
     try {
-      final authenticated = await identity.signIn();
+      final service = identity;
+      final authenticated = register && service is KeycloakIdentityService
+          ? await service.register()
+          : await service.signIn();
       if (_disposed || generation != _generation) return;
       account = authenticated;
       session = authenticated.canAccessBusiness
@@ -85,6 +95,8 @@ class BusinessController extends ChangeNotifier {
           : SessionStatus.denied;
       _lastValidatedDestination = null;
       if (session == SessionStatus.merchant) {
+        if (identity is! MockIdentityService)
+          businessId = authenticated.businessMemberships.first;
         signingIn = false;
         _emit();
         await reload();
@@ -170,8 +182,7 @@ class BusinessController extends ChangeNotifier {
     }
     final authGeneration = _authGeneration;
     final existingCheck = _accessCheck;
-    if (existingCheck != null &&
-        _accessCheckGeneration == authGeneration) {
+    if (existingCheck != null && _accessCheckGeneration == authGeneration) {
       return existingCheck;
     }
 
@@ -199,8 +210,13 @@ class BusinessController extends ChangeNotifier {
           session != SessionStatus.merchant) {
         return false;
       }
+      final prior = account;
       account = validated;
-      if (validated == null || !validated.canAccessBusiness) {
+      if (validated == null ||
+          !validated.canAccessBusiness ||
+          validated.subject != prior?.subject ||
+          (identity is! MockIdentityService &&
+              !validated.businessMemberships.contains(businessId))) {
         session = SessionStatus.denied;
         error = 'Your account no longer has an approved business membership.';
         data = BusinessSnapshot.empty;
@@ -230,7 +246,9 @@ class BusinessController extends ChangeNotifier {
 
   Future<void> selectBusiness(String id) async {
     if (session != SessionStatus.merchant ||
-        !['demo-lagos', 'demo-island'].contains(id)) {
+        !(identity is MockIdentityService
+            ? ['demo-lagos', 'demo-island'].contains(id)
+            : account?.businessMemberships.contains(id) == true)) {
       return;
     }
     _generation++;

@@ -9,3 +9,8 @@ Future<({int statusCode, String body})> requestOidcJson(
   Uri endpoint,
   String? accessToken,
 ) async => throw UnsupportedError('Native identity transport required');
+
+Future<({int statusCode, String body})> postIdentityAction(
+  Uri uri,
+  String token,
+) async => throw UnsupportedError('Native identity transport required');
