@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:faji_business/app/business_app.dart';
 import 'package:faji_business/core/business_controller.dart';
+import 'package:faji_business/core/config.dart';
 import 'package:faji_business/core/services.dart';
 
 void main() {
@@ -44,7 +45,11 @@ void main() {
         await tester.pumpWidget(
           RepaintBoundary(
             key: root,
-            child: BusinessApp(controller: c, initialLocation: route),
+            child: BusinessApp(
+              controller: c,
+              initialLocation: route,
+              config: const BusinessConfig(),
+            ),
           ),
         );
         await tester.pumpAndSettle();
