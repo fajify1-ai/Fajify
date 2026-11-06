@@ -29,7 +29,7 @@ The architecture supports Android, iOS and web. The backend is a **NestJS modula
 | Files | S3-compatible storage | Public imagery, private documents and receipts |
 | Payments | Paystack or Flutterwave | Gateway integration; provider to be configured |
 | Maps | Google Maps | Search, geocoding, routes, distances |
-| Mobile push | Firebase Cloud Messaging + Apple Push Notification service | Push delivery only; **not Firebase as application database** |
+| Mobile push | Provider-independent notification delivery adapter (selection pending) | No delivery provider enabled until approved |
 | Email | Amazon SES or equivalent transactional provider | Transactional messages |
 | Web UI | Tailwind CSS / shadcn/ui | Responsive web styles and components |
 | Contracts | OpenAPI | API schema and typed client generation |
@@ -37,7 +37,7 @@ The architecture supports Android, iOS and web. The backend is a **NestJS modula
 | Workspaces | pnpm / Turborepo / Melos | JS/TS and Flutter monorepo orchestration |
 | Containers and delivery | Docker, GitHub, managed hosting | Reproducible infrastructure and deployment |
 
-The source specification explicitly permits alternatives for payment gateway, email provider and hosting; those vendor alternatives are not claims that a particular account or production deployment has been configured. Firebase Cloud Messaging is a push transport, **not** the application database or core backend.
+The source specification explicitly permits alternatives for payment gateway, email provider and hosting; those vendor alternatives are not claims that a particular account or production deployment has been configured. Notification provider selection remains pending; Firebase is outside the target architecture.
 
 ## 3. Application topology
 ```text

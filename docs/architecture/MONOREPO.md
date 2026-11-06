@@ -12,4 +12,4 @@ Customer Flutter: `apps/customer_mobile`. Business Flutter: `apps/business_mobil
 - Flutter/Dart for mobile
 - Payment gateway: select and integrate Paystack or Flutterwave in a later milestone
 
-Scaffolding directories do **not** represent implemented features. Existing Firebase integrations in the legacy app are preserved only for incremental migration.
+Scaffolding directories do **not** represent implemented features. Customer application integrations use provider-independent repository boundaries; unavailable customer contracts fail explicitly. See `../engineering/M2_P2_FIREBASE_REMOVAL.md`.

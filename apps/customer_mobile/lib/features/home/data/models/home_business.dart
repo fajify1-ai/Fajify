@@ -34,7 +34,7 @@ class HomeBusiness {
   final bool isApproved;
   final bool isPlaceholder;
 
-  factory HomeBusiness.fromFirestore(String id, Map<String, dynamic> data) {
+  factory HomeBusiness.fromMap(String id, Map<String, dynamic> data) {
     final price = data['priceMin'];
     final rating = data['rating'];
     final rawCategories = data['categories'];

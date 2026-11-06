@@ -22,7 +22,11 @@ class PlanBookingScreen extends StatelessWidget {
           child: Text(
             'Booking coming next\n\n${plan.title}\n${plan.businessName}',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),

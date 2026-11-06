@@ -1,3 +1,5 @@
+> Historical evidence below is superseded for current development by [M2-P2 Firebase removal](../engineering/M2_P2_FIREBASE_REMOVAL.md). The product owner's 2026-10-26 instruction authorizes removal before customer APIs exist, using typed unavailable boundaries.
+
 # Customer runtime acceptance and backend migration
 
 Status recorded 2026-10-23: Flutter customer app builds locally. Full application migration and runtime acceptance remain outstanding.

@@ -1,13 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../data/repositories/customer_profile_repository.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/faji_colors.dart';
 
 class HomeHeader extends StatefulWidget {
-  const HomeHeader({super.key});
+  const HomeHeader({
+    super.key,
+    this.repository = const UnavailableCustomerProfileRepository(),
+  });
+  final CustomerProfileRepository repository;
 
   @override
   State<HomeHeader> createState() => _HomeHeaderState();
@@ -26,69 +29,19 @@ class _HomeHeaderState extends State<HomeHeader> {
   }
 
   Future<void> _loadHeader() async {
-    final user = FirebaseAuth.instance.currentUser;
-    final now = DateTime.now();
-    final today = _dateKey(now);
-    var greeting = _greetingForTime(now);
-    var name = _fallbackName(user);
-    String? photoUrl;
-    var firstEntry = false;
-
+    CustomerProfile? profile;
     try {
-      if (user != null) {
-        final preferences = await SharedPreferences.getInstance();
-        final key = 'last_home_greeting_date_${user.uid}';
-        final lastDate = preferences.getString(key);
-        firstEntry = lastDate != today;
-        greeting = firstEntry ? _greetingForTime(now) : 'Welcome Back';
-
-        try {
-          final snapshot = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .get();
-          final data = snapshot.data();
-          final firestoreName = data?['fullName'];
-          final firestorePhoto =
-              data?['photoUrl'] ??
-              data?['profileImage'] ??
-              data?['profileImageUrl'];
-          if (firestoreName is String && firestoreName.trim().isNotEmpty) {
-            name = firestoreName.trim();
-          }
-          if (firestorePhoto is String && firestorePhoto.trim().isNotEmpty) {
-            photoUrl = firestorePhoto.trim();
-          }
-        } catch (_) {
-          // Auth and local fallbacks keep the header usable while offline.
-        }
-
-        if (firstEntry) {
-          await preferences.setString(key, today);
-        }
-      }
+      profile = await widget.repository.loadCurrentProfile();
     } catch (_) {
-      greeting = user == null ? _greetingForTime(now) : greeting;
+      // Preserve the header with an explicit unavailable state.
     }
-
     if (!mounted) return;
     setState(() {
-      _greeting = greeting;
-      _name = name;
-      _photoUrl = photoUrl;
+      _greeting = _greetingForTime(DateTime.now());
+      _name = profile?.fullName ?? 'Profile unavailable';
+      _photoUrl = profile?.photoUrl;
       _loading = false;
     });
-  }
-
-  String _fallbackName(User? user) {
-    final displayName = user?.displayName?.trim();
-    if (displayName != null && displayName.isNotEmpty) return displayName;
-    final email = user?.email;
-    if (email != null && email.contains('@')) {
-      final username = email.split('@').first.trim();
-      if (username.isNotEmpty) return username;
-    }
-    return 'Faji User';
   }
 
   @override
@@ -171,12 +124,6 @@ class _HomeHeaderState extends State<HomeHeader> {
       ],
     );
   }
-}
-
-String _dateKey(DateTime date) {
-  final month = date.month.toString().padLeft(2, '0');
-  final day = date.day.toString().padLeft(2, '0');
-  return '${date.year}-$month-$day';
 }
 
 String _greetingForTime(DateTime time) {

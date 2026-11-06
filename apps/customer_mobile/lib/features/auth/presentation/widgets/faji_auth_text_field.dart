@@ -16,7 +16,10 @@ class FajiAuthTextField extends StatelessWidget {
     this.obscureText = false,
     this.validator,
     this.onChanged,
+    this.autofillHints,
+    this.recoveryAppearance = false,
   });
+
   final TextEditingController controller;
   final String hint;
   final TextInputType? keyboardType;
@@ -28,6 +31,11 @@ class FajiAuthTextField extends StatelessWidget {
   final bool obscureText;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
+  final Iterable<String>? autofillHints;
+
+  /// Existing recovery field uses theme padding/focus borders and text size.
+  final bool recoveryAppearance;
+
   @override
   Widget build(BuildContext context) => TextFormField(
     controller: controller,
@@ -35,6 +43,7 @@ class FajiAuthTextField extends StatelessWidget {
     textInputAction: textInputAction,
     readOnly: readOnly,
     obscureText: obscureText,
+    autofillHints: autofillHints,
     onTap: onTap,
     onFieldSubmitted: (_) {
       if (textInputAction == TextInputAction.next) {
@@ -43,7 +52,10 @@ class FajiAuthTextField extends StatelessWidget {
     },
     validator: validator,
     onChanged: onChanged,
-    style: const TextStyle(color: FajiColors.textPrimaryDark, fontSize: 16),
+    style: TextStyle(
+      color: FajiColors.textPrimaryDark,
+      fontSize: recoveryAppearance ? null : 16,
+    ),
     decoration: InputDecoration(
       hintText: hint,
       prefixText: prefixText,
@@ -55,19 +67,25 @@ class FajiAuthTextField extends StatelessWidget {
       hintStyle: const TextStyle(color: FajiColors.textSecondaryDark),
       filled: true,
       fillColor: const Color(0xFF252525),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
+      contentPadding: recoveryAppearance
+          ? null
+          : const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: FajiColors.primary, width: 1),
-      ),
+      enabledBorder: recoveryAppearance
+          ? null
+          : OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+      focusedBorder: recoveryAppearance
+          ? null
+          : OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: FajiColors.primary, width: 1),
+            ),
     ),
   );
 }
