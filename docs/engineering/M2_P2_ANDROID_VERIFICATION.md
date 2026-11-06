@@ -1,5 +1,11 @@
 # Android verification preparation — 2026-10-27
 
+Follow-up: command-line tools are now installed and local Flutter SDK/JDK paths
+configured. See [M2_P2_ANDROID_SETUP_PROGRESS.md](M2_P2_ANDROID_SETUP_PROGRESS.md)
+for actual results and the pending interactive license/package step. The original
+setup instructions below remain the reference; do not repeat the download over an
+existing installation.
+
 ## Confirmed local state
 
 Flutter 3.47.8 / Dart 3.13.7: `C:\Users\omola\develop\flutter`.

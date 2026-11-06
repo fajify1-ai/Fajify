@@ -123,6 +123,50 @@ void main() {
     expect(c.data.orders, isEmpty);
     expect(await c.advance('order-1'), isFalse);
   });
+  test(
+    'identity role from the auth service controls Business access',
+    () async {
+      final controller = BusinessController(
+        repository: repository,
+        identity: _StaticIdentity({'customer'}),
+      );
+      await controller.signIn();
+      expect(controller.session, SessionStatus.denied);
+      expect(controller.data.orders, isEmpty);
+      expect(controller.error, contains('business membership'));
+      controller.dispose();
+    },
+  );
+  test(
+    'merchant role without backend membership does not open workspace',
+    () async {
+      final controller = BusinessController(
+        repository: repository,
+        identity: _StaticIdentity({'merchant'}, businessMemberships: {}),
+      );
+      await controller.signIn();
+      expect(controller.session, SessionStatus.denied);
+      expect(controller.data.orders, isEmpty);
+      controller.dispose();
+    },
+  );
+  test(
+    'backend revalidation removes access when merchant role is revoked',
+    () async {
+      final identity = _StaticIdentity({'merchant'});
+      final controller = BusinessController(
+        repository: repository,
+        identity: identity,
+      );
+      await controller.signIn();
+      expect(controller.data.orders, isNotEmpty);
+      identity.roles = {'customer'};
+      expect(await controller.revalidateBusinessAccess(force: true), isFalse);
+      expect(controller.session, SessionStatus.denied);
+      expect(controller.data.orders, isEmpty);
+      controller.dispose();
+    },
+  );
   test('scan contexts reject wrong types and repeated codes', () async {
     await c.enterDemo();
     expect(c.scan(order: false, code: 'order-1'), startsWith('Invalid'));
@@ -179,6 +223,22 @@ void main() {
   test('live and non-development configurations fail closed', () {
     expect(const BusinessConfig().problem, isNull);
     expect(const BusinessConfig(useMocks: false).problem, isNotNull);
+    expect(
+      const BusinessConfig(
+        useMocks: false,
+        oidcIssuer: 'https://identity.example.test/realms/faji',
+        apiBaseUrl: 'https://api.example.test',
+      ).problem,
+      isNull,
+    );
+    expect(
+      const BusinessConfig(
+        useMocks: false,
+        oidcIssuer: 'http://identity.example.test/realms/faji',
+        apiBaseUrl: 'https://api.example.test',
+      ).problem,
+      isNotNull,
+    );
     expect(const BusinessConfig(environment: 'production').problem, isNotNull);
   });
   test('sign-in failure leaves session signed out', () async {
@@ -188,7 +248,7 @@ void main() {
     );
     await controller.enterDemo();
     expect(controller.session, SessionStatus.signedOut);
-    expect(controller.error, contains('failed'));
+    expect(controller.error, contains('could not be completed'));
     expect(controller.signingIn, isFalse);
     controller.dispose();
   });
@@ -200,24 +260,117 @@ void main() {
     );
     final pending = controller.enterDemo();
     await controller.logout();
-    identity.pending.complete();
+    identity.pending.complete(
+      const BusinessIdentity(
+        subject: 'demo-subject',
+        roles: {'merchant'},
+        businessMemberships: {'demo-lagos'},
+      ),
+    );
     await pending;
     expect(controller.session, SessionStatus.signedOut);
+    controller.dispose();
+  });
+  test('late access revalidation cannot reopen a logged-out session', () async {
+    final identity = _DelayedValidationIdentity();
+    final controller = BusinessController(
+      repository: repository,
+      identity: identity,
+    );
+    await controller.signIn();
+    final pending = controller.revalidateBusinessAccess(force: true);
+    await controller.logout();
+    identity.validation.complete(
+      const BusinessIdentity(
+        subject: 'test-subject',
+        roles: {'merchant'},
+        businessMemberships: {'test-business'},
+      ),
+    );
+    expect(await pending, isFalse);
+    expect(controller.session, SessionStatus.signedOut);
+    expect(controller.account, isNull);
     controller.dispose();
   });
 }
 
 class _FailingIdentity implements IdentityService {
   @override
-  Future<void> signIn() async => throw const DemoFailure();
+  Future<BusinessIdentity?> restoreSession() async => null;
+
+  @override
+  Future<BusinessIdentity?> validateSession() async => null;
+
+  @override
+  Future<BusinessIdentity> signIn() async => throw const DemoFailure();
   @override
   Future<void> signOut() async {}
 }
 
 class _DelayedIdentity implements IdentityService {
-  final pending = Completer<void>();
+  final pending = Completer<BusinessIdentity>();
+
   @override
-  Future<void> signIn() => pending.future;
+  Future<BusinessIdentity?> restoreSession() async => null;
+
+  @override
+  Future<BusinessIdentity?> validateSession() async => null;
+
+  @override
+  Future<BusinessIdentity> signIn() => pending.future;
+  @override
+  Future<void> signOut() async {}
+}
+
+class _DelayedValidationIdentity implements IdentityService {
+  final validation = Completer<BusinessIdentity?>();
+  static const _identity = BusinessIdentity(
+    subject: 'test-subject',
+    roles: {'merchant'},
+    businessMemberships: {'test-business'},
+  );
+
+  @override
+  Future<BusinessIdentity?> restoreSession() async => null;
+
+  @override
+  Future<BusinessIdentity?> validateSession() => validation.future;
+
+  @override
+  Future<BusinessIdentity> signIn() async => _identity;
+
+  @override
+  Future<void> signOut() async {}
+}
+
+class _StaticIdentity implements IdentityService {
+  _StaticIdentity(
+    this.roles, {
+    Set<String> businessMemberships = const {'test-business'},
+  }) : businessMemberships = roles.contains('merchant')
+           ? businessMemberships
+           : const {};
+
+  Set<String> roles;
+  final Set<String> businessMemberships;
+
+  @override
+  Future<BusinessIdentity?> restoreSession() async => null;
+
+  @override
+  Future<BusinessIdentity?> validateSession() async => BusinessIdentity(
+    subject: 'test-subject',
+    roles: roles,
+    businessMemberships: businessMemberships,
+  );
+
+  @override
+  Future<BusinessIdentity> signIn() async => BusinessIdentity(
+    subject: 'test-subject',
+    roles: roles,
+    businessMemberships: businessMemberships,
+  );
+
   @override
   Future<void> signOut() async {}
 }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/business_controller.dart';
 import '../core/models.dart';
+import '../core/services.dart';
 import '../shared/business_ui.dart';
 import 'dashboard.dart';
 
@@ -41,7 +42,7 @@ class WelcomePage extends StatelessWidget {
                   width: double.infinity,
                   child: FilledButton(
                     onPressed: () => context.go('/login'),
-                    child: const Text('Open Business demo'),
+                    child: const Text('Continue to Faji Business'),
                   ),
                 ),
                 if (onExit != null)
@@ -51,7 +52,7 @@ class WelcomePage extends StatelessWidget {
                   ),
                 const SizedBox(height: 14),
                 const Text(
-                  'Milestone 1 · Synthetic data only',
+                  'Secure identity sign-in · sample business workflows',
                   style: TextStyle(color: muted, fontSize: 12),
                 ),
               ],
@@ -68,60 +69,140 @@ class LoginPage extends StatelessWidget {
   final BusinessController controller;
   final VoidCallback? onExit;
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(
-      child: PageBody(
-        title: 'Welcome to Faji Business',
-        subtitle: 'Merchant workspace',
-        children: [
-          const Panel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.storefront_outlined, color: brand, size: 40),
-                SizedBox(height: 18),
-                Text(
-                  'Your business, in one place',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  'Explore a sample merchant session. Secure Keycloak sign-in will be connected in Milestone 2.',
-                  style: TextStyle(color: muted),
-                ),
-              ],
+  Widget build(BuildContext context) {
+    final demoMode = controller.identity is MockIdentityService;
+    return Scaffold(
+      body: SafeArea(
+        child: PageBody(
+          title: 'Welcome to Faji Business',
+          subtitle: 'Merchant workspace',
+          children: [
+            Panel(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.storefront_outlined, color: brand, size: 40),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'Your business, in one place',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    demoMode
+                        ? 'Explore sample business workflows. No live merchant data or account access is used.'
+                        : 'Sign in or create a Faji identity with Keycloak. Only backend-confirmed merchant accounts can continue.',
+                    style: const TextStyle(color: muted),
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (controller.error != null)
-            Text(controller.error!, style: const TextStyle(color: amber)),
-          FilledButton(
-            key: const ValueKey('enter-demo'),
-            onPressed: controller.signingIn ? null : controller.enterDemo,
-            child: Text(
-              controller.signingIn
-                  ? 'Opening demo…'
-                  : 'Enter demo merchant session',
-            ),
-          ),
-          OutlinedButton(
-            onPressed: controller.signingIn
-                ? null
-                : () => controller.enterDemo(merchant: false),
-            child: const Text('Test role without merchant access'),
-          ),
-          TextButton(
-            onPressed: () => context.go('/onboarding'),
-            child: const Text('Back to introduction'),
-          ),
-          if (onExit != null)
+            if (controller.error != null)
+              Text(controller.error!, style: const TextStyle(color: amber)),
+            if (demoMode) ...[
+              FilledButton(
+                key: const ValueKey('enter-demo'),
+                onPressed: controller.signingIn ? null : controller.enterDemo,
+                child: Text(
+                  controller.signingIn
+                      ? 'Opening sample…'
+                      : 'Enter sample merchant session',
+                ),
+              ),
+              OutlinedButton(
+                onPressed: controller.signingIn
+                    ? null
+                    : () => controller.enterDemo(merchant: false),
+                child: const Text('Test account without merchant access'),
+              ),
+            ] else ...[
+              FilledButton(
+                onPressed: controller.signingIn ? null : controller.signIn,
+                child: Text(
+                  controller.signingIn ? 'Connecting…' : 'Sign In with Faji',
+                ),
+              ),
+              OutlinedButton(
+                onPressed: controller.signingIn
+                    ? null
+                    : () => context.go('/register'),
+                child: const Text('Register Your Business'),
+              ),
+              TextButton(
+                onPressed: controller.signingIn ? null : controller.signIn,
+                child: const Text('Forgot password? Continue to Keycloak'),
+              ),
+            ],
             TextButton(
-              onPressed: onExit,
-              child: const Text('Back to role selection'),
+              onPressed: () => context.go('/onboarding'),
+              child: const Text('Back to introduction'),
             ),
-        ],
+            if (onExit != null)
+              TextButton(
+                onPressed: onExit,
+                child: const Text('Back to role selection'),
+              ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
+}
+
+class IdentityHandoffPage extends StatelessWidget {
+  const IdentityHandoffPage({
+    super.key,
+    required this.controller,
+    this.onExit,
+  });
+
+  final BusinessController controller;
+  final VoidCallback? onExit;
+
+  @override
+  Widget build(BuildContext context) {
+    final demoMode = controller.identity is MockIdentityService;
+    return Scaffold(
+      body: SafeArea(
+        child: PageBody(
+          title: 'Register Your Business',
+          subtitle: 'Create or reuse a Faji identity',
+          children: [
+            const Panel(
+              child: Text(
+                'Continue to Keycloak to create or sign in to a Faji identity. '
+                'Identity registration does not register, approve, or grant access '
+                'to a business. Merchant onboarding and approval are handled separately.',
+              ),
+            ),
+            if (demoMode)
+              const Text(
+                'Identity registration is unavailable in sample mode. Use a configured Keycloak build.',
+                style: TextStyle(color: muted),
+              )
+            else
+              FilledButton(
+                onPressed: controller.signingIn ? null : controller.signIn,
+                child: Text(
+                  controller.signingIn
+                      ? 'Connecting…'
+                      : 'Continue to secure identity',
+                ),
+              ),
+            TextButton(
+              onPressed: () => context.go('/login'),
+              child: const Text('Back to Sign In'),
+            ),
+            if (onExit != null)
+              TextButton(
+                onPressed: onExit,
+                child: const Text('Back to role selection'),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class BusinessSetupPage extends StatefulWidget {

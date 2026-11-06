@@ -1,3 +1,4 @@
+import {test} from 'node:test';
 import 'reflect-metadata';
 import assert from 'node:assert/strict';
 import {Pool} from 'pg';
@@ -50,4 +51,4 @@ async function main(){
   console.log('PASS: M3 capacity contention, cancellation release, retry idempotency, unpublished-item blocking');
  }finally{await pool.end();}
 }
-main().catch(e=>{console.error('FAIL: M3 database acceptance:',e instanceof Error?e.message:'unknown');process.exitCode=1;});
+test('M3 real PostgreSQL capacity contention and order scope',main);
