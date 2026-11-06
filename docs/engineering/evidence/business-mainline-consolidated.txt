@@ -1,0 +1,101 @@
+Business integration with Developer 2 accepted mainline baseline
+Date: 23 October 2026
+Mainline baseline: 2533b29fbfeef35bf9b290d81e0c18b30e6dee40
+Main-app test conflict resolved by retaining the new integrated-flow tests.
+
+b51e09e9f790386c2bc7ca4853471bb912ea5d77
+Resolving dependencies...
+Downloading packages...
+  flutter_lints 5.0.0 (6.0.0 available)
+  go_router 14.8.1 (18.1.1 available)
+  lints 5.1.1 (6.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+Got dependencies!
+5 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Formatted 17 files (0 changed) in 0.10 seconds.
+Analyzing business_mobile...
+No issues found! (ran in 5.3s)
+00:00 +0: loading /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart
+00:00 +0: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: populated merchant fixtures and summaries agree
+00:00 +1: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: orders advance through the local lifecycle and stop at completed
+00:00 +2: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: write failure does not change fixtures and can be retried
+00:00 +3: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: duplicate mutation is rejected while first is pending
+00:00 +4: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: menu edits preserve count and local additions increase it
+00:00 +5: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: service count changes from actual states and reset restores it
+00:00 +6: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: empty and error reads recover to populated fixtures
+00:00 +7: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: merchant contexts keep local changes separate
+00:00 +8: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: logout clears demo data and prevents an in-flight mutation resurfacing
+00:00 +9: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: wrong role cannot load or mutate merchant data
+00:00 +10: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: scan contexts reject wrong types and repeated codes
+00:00 +11: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: editing an existing menu item preserves list order
+00:00 +12: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: empty scenario can create its first item without hidden fixtures
+00:00 +13: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: price parsing uses exact minor units and rejects invalid inputs
+00:00 +14: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: saved navigation only allows local merchant destinations
+00:00 +15: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: live and non-development configurations fail closed
+00:00 +16: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: sign-in failure leaves session signed out
+00:00 +17: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/controller_test.dart: late sign-in completion cannot reopen a logged-out session
+00:00 +18: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/embedded_test.dart: embedded detail Back navigates within Business before exiting
+00:01 +19: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/embedded_test.dart: embedded detail Back navigates within Business before exiting
+00:01 +20: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/embedded_test.dart: embedded detail Back navigates within Business before exiting
+00:01 +21: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: five tabs navigate to separate menu and services screens
+00:01 +22: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: five tabs navigate to separate menu and services screens
+00:02 +23: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: calendar selection and month navigation update the view
+00:03 +24: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: order action updates card and completed filter
+00:03 +25: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: menu form validates and saves a local item
+00:03 +26: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: service confirmation can cancel or update derived active count
+00:03 +27: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: loading and error states do not expose stale page data
+00:04 +28: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: invalid detail routes are useful and recoverable
+00:04 +29: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: unsupported configuration does not open demo session
+00:04 +30: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: broken menu image uses a bundled-free category placeholder
+00:04 +31: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: compact layout supports enlarged system text
+00:04 +32: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: service bottom actions remain reachable and logout clears merchant UI
+00:05 +33: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: scan page displays contextual sample verification results
+00:05 +34: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: main pages fit viewport width 375.0
+00:05 +35: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: main pages fit viewport width 768.0
+00:06 +36: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: main pages fit viewport width 1024.0
+00:06 +37: /workspace/scratch/a8e81b4cd92b/Fajify/apps/business_mobile/test/navigation_test.dart: main pages fit viewport width 1440.0
+00:06 +38: All tests passed!
+Resolving dependencies...
+Downloading packages...
+  _flutterfire_internals 1.3.77 (1.3.79 available)
+  cloud_firestore 6.10.0 (7.1.0 available)
+  cloud_firestore_platform_interface 8.0.7 (8.1.0 available)
+  cloud_firestore_web 5.7.3 (5.8.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  firebase_auth 6.7.0 (7.0.1 available)
+  firebase_auth_platform_interface 9.1.0 (9.1.2 available)
+  firebase_auth_web 6.3.0 (6.3.2 available)
+  firebase_core 4.15.0 (5.1.0 available)
+  firebase_core_web 3.12.0 (4.1.0 available)
+  go_router 14.8.1 (18.1.1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  shared_preferences 2.5.5 (2.5.6 available)
+  shared_preferences_android 2.4.28 (2.5.3 available)
+  shared_preferences_foundation 2.5.7 (2.6.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.3 available)
+  vm_service 15.3.0 (15.4.0 available)
+  web 1.1.1 (1.1.2 available)
+Got dependencies!
+20 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Formatted 3 files (0 changed) in 0.01 seconds.
+Analyzing customer_mobile...
+No issues found! (ran in 2.5s)
+00:00 +0: loading /workspace/scratch/a8e81b4cd92b/Fajify/apps/customer_mobile/test/widget_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: Business entry opens embedded login and returns to role selection
+00:01 +1: merchant tabs, customer switch and fresh re-entry share one app
+00:02 +2: Android Back leaves merchant login and keeps role selection
+00:02 +3: (tearDownAll)
+00:02 +3: All tests passed!
+PASS: all requested Business/main-app checks completed.
+Android build requested: false; device test requested: no
+Unrequested physical-device checks remain unverified.
+
+PR diff whitespace against main: passed after trimming inherited guide whitespace.
+Shell syntax: passed. Existing backend and other customer source hashes preserved.
+Android/physical-device flags were NOT requested or run in this environment.

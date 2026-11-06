@@ -1,0 +1,73 @@
+Developer 3A M1 — exact-commit verification
+Date: 23 October 2026
+Source commit: 768a17f1997c69a4c8b566f2b4304acfb973b848
+Clean worktree verified before and after the run.
+Command: bash tooling/verify-d3a-m1.sh
+
+768a17f1997c69a4c8b566f2b4304acfb973b848
+PASS: required repository workspaces are present. This is NOT an app build or acceptance test.
+Flutter 3.47.7 • channel stable • https://github.com/flutter/flutter.git
+Framework • revision abaf9c5237 (2 weeks ago) • 2026-10-08 09:51:21 -0700
+Engine • hash d8a2d6c768c334d53e16277f837970ffa1e2de81 (revision deb287481e) (15 days ago) • 2026-10-07 17:09:12.000Z
+Tools • Dart 3.13.5 • DevTools 2.60.0
+Resolving dependencies...
+Downloading packages...
+  flutter_lints 5.0.0 (6.0.0 available)
+  go_router 14.8.1 (18.1.1 available)
+  lints 5.1.1 (6.1.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.15 available)
+Got dependencies!
+5 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Formatted 17 files (0 changed) in 0.12 seconds.
+Analyzing business_mobile...
+No issues found! (ran in 1.0s)
+00:00 +0: loading /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart
+00:00 +0: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: populated merchant fixtures and summaries agree
+00:00 +1: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: orders advance through the local lifecycle and stop at completed
+00:00 +2: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: write failure does not change fixtures and can be retried
+00:00 +3: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: duplicate mutation is rejected while first is pending
+00:00 +4: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: menu edits preserve count and local additions increase it
+00:00 +5: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: service count changes from actual states and reset restores it
+00:00 +6: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: empty and error reads recover to populated fixtures
+00:00 +7: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: merchant contexts keep local changes separate
+00:00 +8: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: logout clears demo data and prevents an in-flight mutation resurfacing
+00:00 +9: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: wrong role cannot load or mutate merchant data
+00:00 +10: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: scan contexts reject wrong types and repeated codes
+00:00 +11: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: editing an existing menu item preserves list order
+00:00 +12: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: empty scenario can create its first item without hidden fixtures
+00:00 +13: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: price parsing uses exact minor units and rejects invalid inputs
+00:00 +14: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: saved navigation only allows local merchant destinations
+00:00 +15: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: live and non-development configurations fail closed
+00:00 +16: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: sign-in failure leaves session signed out
+00:00 +17: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/controller_test.dart: late sign-in completion cannot reopen a logged-out session
+00:00 +18: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: protected deep link restores after explicit demo login
+00:01 +19: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: wrong role is denied and can return to login
+00:01 +20: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: five tabs navigate to separate menu and services screens
+00:02 +21: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: calendar selection and month navigation update the view
+00:02 +22: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: order action updates card and completed filter
+00:02 +23: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: menu form validates and saves a local item
+00:03 +24: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: service confirmation can cancel or update derived active count
+00:03 +25: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: loading and error states do not expose stale page data
+00:03 +26: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: invalid detail routes are useful and recoverable
+00:04 +27: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: unsupported configuration does not open demo session
+00:04 +28: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: broken menu image uses a bundled-free category placeholder
+00:04 +29: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: compact layout supports enlarged system text
+00:04 +30: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: service bottom actions remain reachable and logout clears merchant UI
+00:04 +31: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: scan page displays contextual sample verification results
+00:05 +32: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: main pages fit viewport width 375.0
+00:05 +33: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: main pages fit viewport width 768.0
+00:05 +34: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: main pages fit viewport width 1024.0
+00:06 +35: /workspace/scratch/31c7bb5f2455/Fajify/apps/business_mobile/test/navigation_test.dart: main pages fit viewport width 1440.0
+00:06 +36: All tests passed!
+Compiling lib/main.dart for the Web...
+Wasm dry run succeeded. Consider building and testing your application with the `--wasm` flag. See docs for more info: https://docs.flutter.dev/platform-integration/web/wasm
+Use --no-wasm-dry-run to disable these warnings.
+Expected to find fonts for (MaterialIcons, packages/cupertino_icons/CupertinoIcons), but found (MaterialIcons). This usually means you are referring to font families in an IconData class but not including them in the assets section of your pubspec.yaml, are missing the package that would include them, or are missing "uses-material-design: true".
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 11156 bytes (99.3% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Compiling lib/main.dart for the Web...                             28.7s
+✓ Built build/web
+PASS: all requested Developer 3A M1 checks completed.
+Android requested: false; iOS requested: false; device smoke requested: no
+Platform/device gates not requested here remain unverified.

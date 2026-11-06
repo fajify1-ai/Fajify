@@ -11,11 +11,13 @@ import {PrivilegedGuard} from './privileged.guard';
 import {AdminRateGuard} from './admin-rate.guard';
 import {AdminAccessController} from './admin-access.controller';
 import {OnboardingController} from './onboarding.controller';
+import {BusinessApprovalController} from './business-approval.controller';
+import {BusinessApprovalService} from './business-approval.service';
 const disabledVerifier:IdentityVerifier={async verifyAccessToken(){throw new UnauthorizedException('Identity provider unavailable');}};
-@Module({controllers:[SessionController,AdminAccessController,OnboardingController],providers:[{provide:IDENTITY_VERIFIER,useFactory:():IdentityVerifier=>{
+@Module({controllers:[SessionController,AdminAccessController,OnboardingController,BusinessApprovalController],providers:[{provide:IDENTITY_VERIFIER,useFactory:():IdentityVerifier=>{
  const issuer=process.env.KEYCLOAK_ISSUER;
  const audience=process.env.KEYCLOAK_AUDIENCE;
  return issuer&&audience?new KeycloakAccessTokenVerifier(issuer,audience):disabledVerifier;
-}},IdentityGuard,RolesGuard,AccessService,AccountGuard,ResourceGuard,PrivilegedGuard,AdminRateGuard],
+}},IdentityGuard,RolesGuard,AccessService,BusinessApprovalService,AccountGuard,ResourceGuard,PrivilegedGuard,AdminRateGuard],
  exports:[IDENTITY_VERIFIER,IdentityGuard,RolesGuard,AccessService,AccountGuard,ResourceGuard,PrivilegedGuard,AdminRateGuard]})
 export class IdentityModule {}

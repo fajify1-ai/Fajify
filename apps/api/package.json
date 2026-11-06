@@ -8,9 +8,15 @@
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --max-warnings=0",
-    "test": "node --import tsx --test test/*.test.ts",
+    "test": "node scripts/run-unit-tests.mjs",
     "contracts": "node --import tsx scripts/export-openapi.ts",
-    "test:database": "node --import tsx --test test/*.database.test.ts"
+    "test:database": "node --import tsx --test test/*.database.test.ts",
+    "test:m5:database": "node --import tsx --test --test-concurrency=1 test/m5-payment-acceptance.ts test/m5-lifecycle-acceptance.ts",
+    "worker:finance": "node dist/payments/m5-worker.js",
+    "worker:rides": "node dist/rides/ride-expiry.worker.js",
+    "test:m7:database": "node --import tsx --test --test-concurrency=1 test/m7-ride-dispatch-acceptance.ts",
+    "typecheck:m7": "tsc --noEmit -p tsconfig.m7-tests.json",
+    "worker:monitor": "node dist/admin/m8-monitor.js --once"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
@@ -22,7 +28,7 @@
     "class-validator": "^0.14.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "zod": "^3.25.0",
+    "zod": "4.6.6",
     "pg": "^8.13.0"
   },
   "devDependencies": {

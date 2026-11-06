@@ -5,8 +5,12 @@ import {Pool} from 'pg';
 import {randomUUID,generateKeyPairSync,createPublicKey,sign} from 'node:crypto';
 import {KeycloakAccessTokenVerifier} from '../src/auth/keycloak.verifier';
 import {AccessService} from '../src/auth/access.service';
+import {BusinessApprovalService} from '../src/auth/business-approval.service';
 import {Test} from '@nestjs/testing';
 import {VersioningType} from '@nestjs/common';
+import {Reflector} from '@nestjs/core';
+import {ResourceGuard} from '../src/auth/resource.guard';
+import {BusinessApprovalController} from '../src/auth/business-approval.controller';
 import request from 'supertest';
 import {SessionController} from '../src/auth/session.controller';
 import {IdentityGuard} from '../src/auth/identity.guard';
@@ -18,7 +22,7 @@ const migrationUrl=process.env.FAJI_DATABASE_URL;
 const enabled=Boolean(url&&migrationUrl&&process.env.FAJI_DISPOSABLE_DATABASE);
 const runtime=enabled?new Pool({connectionString:url,max:2}):undefined;
 const admin=enabled?new Pool({connectionString:migrationUrl,max:2}):undefined;
-const subject='m2_'+randomUUID(),actor='admin_'+randomUUID(),resource=randomUUID(),liveSubject='m2_'+randomUUID(),signedSubject='m2_'+randomUUID();
+const subject='m2_'+randomUUID(),actor='admin_'+randomUUID(),liveSubject='m2_'+randomUUID(),signedSubject='m2_'+randomUUID();
 before(async()=>{
  if(!enabled||!admin||!runtime)throw Error('M2 database integration requires explicitly disposable migration/runtime URLs');
  const {assertDisposable}=await import('../../../packages/database/scripts/disposable-target');
@@ -29,6 +33,7 @@ after(async()=>{
  if(admin){
   await admin.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[subject,actor,liveSubject,signedSubject]]);
   await admin.query('DELETE FROM resource_memberships WHERE identity_subject=$1',[subject]);
+  await admin.query('DELETE FROM business_onboarding WHERE applicant_subject=$1',[subject]);
   await admin.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[subject,liveSubject,signedSubject]]);
   await admin.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[subject,liveSubject]]);
  }
@@ -37,9 +42,14 @@ after(async()=>{
 test('unapproved identity denied then privileges remain scoped to verified resource',async()=>{
  const access=new AccessService(runtime!);
  await access.provisionSubject(subject);
+ const business=new BusinessApprovalService(runtime!);
+ const registration=await business.apply(subject,'Fajify Scoped Fixture');
+ const resource=registration.id;
  assert.equal((await access.state(subject)).suspended,true);
  await assert.rejects(runtime!.query('CREATE TABLE m2_privilege_escape(id integer)'),{code:'42501'});
  await assert.rejects(runtime!.query('UPDATE _faji_migrations SET checksum=$1',['tamper']),{code:'42501'});
+ await assert.rejects(access.setMembership(actor,subject,'business',resource,'manager',true),/approved/);
+ await business.review(actor,resource,'approved');
  await access.setMembership(actor,subject,'business',resource,'manager',true);
  assert.equal(await access.member(subject,'business',resource,['manager']),false,'pending account cannot use membership');
  await access.setSuspended(actor,subject,false);
@@ -146,4 +156,123 @@ test('real RSA signature verifier and PostgreSQL reject the same bearer across s
   await access.setSuspended(actor,signedSubject,false);
   assert.equal((await get()).status,403,'previously valid signed bearer must stay invalid');
  }finally{await app.close();}
+});
+
+test('revoked signed session stays denied across independent service instances',async()=>{
+ const subjectId='m2_'+randomUUID(),sessionId=randomUUID();
+ const first=new AccessService(runtime!);
+ const second=new AccessService(runtime!);
+ await first.provisionSubject(subjectId);
+ await first.setSuspended(actor,subjectId,false);
+ assert.equal(await second.sessionRevoked(subjectId,sessionId),false);
+ await first.revokeSession(subjectId,sessionId);
+ assert.equal(await second.sessionRevoked(subjectId,sessionId),true);
+ assert.equal(await second.sessionRevoked(subjectId,randomUUID()),false);
+ await admin!.query('DELETE FROM revoked_identity_sessions WHERE identity_subject=$1',[subjectId]);
+ await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=$1',[subjectId]);
+ await admin!.query('DELETE FROM account_access WHERE identity_subject=$1',[subjectId]);
+ await admin!.query('DELETE FROM user_profiles WHERE identity_subject=$1',[subjectId]);
+});
+
+test('privileged request budget is enforced across concurrent service instances',async()=>{
+ const quotaActor='m2_rate_'+randomUUID();
+ const a=new AccessService(runtime!);
+ const b=new AccessService(runtime!);
+ try{
+  const results=await Promise.all(Array.from({length:30},(_,i)=>
+   (i%2===0?a:b).allowPrivilegedRequest(quotaActor)));
+  assert.equal(results.filter(Boolean).length,20,'shared PostgreSQL advisory lock must bound accepted requests');
+  assert.equal(results.filter(value=>!value).length,10);
+  const count=await admin!.query<{total:string}>(
+   "SELECT COUNT(*)::text AS total FROM identity_security_events WHERE actor_subject=$1 AND event_type='admin_request'",[quotaActor]);
+  assert.equal(Number(count.rows[0]?.total),20,'exactly 20 accepted requests audited');
+ }finally{
+  await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=$1',[quotaActor]);
+ }
+});
+
+test('business application stays pending, approval creates only its own scoped ownership',async()=>{
+ const applicant='m2_business_'+randomUUID(),second='m2_business_'+randomUUID();
+ const access=new AccessService(runtime!),business=new BusinessApprovalService(runtime!);
+ await access.provisionSubject(applicant);
+ await access.provisionSubject(second);
+ await access.setSuspended(actor,applicant,false);
+ await access.setSuspended(actor,second,false);
+ const first=await business.apply(applicant,'Fajify Synthetic Vendor');
+ const other=await business.apply(second,'Fajify Separate Vendor');
+ try{
+  assert.equal(first.status,'pending');
+  assert.equal(await business.approvedMember(applicant,first.id,['owner']),false);
+  assert.equal(await business.approvedMember(second,first.id,['owner']),false);
+  await business.review(actor,first.id,'approved');
+  assert.equal(await business.approvedMember(applicant,first.id,['owner']),true);
+  assert.equal(await business.approvedMember(applicant,other.id,['owner']),false);
+  assert.equal(await business.approvedMember(second,first.id,['owner']),false);
+  await assert.rejects(business.review(actor,first.id,'approved'),{status:409});
+  await business.review(actor,other.id,'rejected');
+  assert.equal(await business.approvedMember(second,other.id,['owner']),false);
+  await access.setSuspended(actor,applicant,true);
+  assert.equal(await business.approvedMember(applicant,first.id,['owner']),false);
+  const events=await admin!.query<{event_type:string}>(
+   "SELECT event_type FROM identity_security_events WHERE actor_subject=$1 AND event_type LIKE 'business_%'",[actor]);
+  assert.ok(events.rows.some(x=>x.event_type==='business_approved'));
+  assert.ok(events.rows.some(x=>x.event_type==='business_rejected'));
+ }finally{
+  await admin!.query('DELETE FROM resource_memberships WHERE resource_id=ANY($1::uuid[])',[[first.id,other.id]]);
+  await admin!.query('DELETE FROM business_onboarding WHERE id=ANY($1::uuid[])',[[first.id,other.id]]);
+  await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[applicant,second]]);
+  await admin!.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
+  await admin!.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
+ }
+});
+
+test('actual Business workspace HTTP route rejects pending, rejected, foreign and suspended identities',async()=>{
+ const access=new AccessService(runtime!),business=new BusinessApprovalService(runtime!);
+ const first='m2_workspace_'+randomUUID(),foreign='m2_workspace_'+randomUUID();
+ await access.provisionSubject(first);await access.provisionSubject(foreign);
+ await access.setSuspended(actor,first,false);await access.setSuspended(actor,foreign,false);
+ const pending=await business.apply(first,'Pending Workspace');
+ const approved=await business.apply(first,'Approved Workspace');
+ const rejected=await business.apply(first,'Rejected Workspace');
+ const foreignWorkspace=await business.apply(foreign,'Foreign Workspace');
+ await business.review(actor,approved.id,'approved');
+ await business.review(actor,rejected.id,'rejected');
+ await business.review(actor,foreignWorkspace.id,'approved');
+ let active=first;
+ const verifier:IdentityVerifier={verifyAccessToken:async()=>({
+  subject:active,issuer:'https://issuer.example/realms/faji',audience:['faji-api'],
+  issuedAt:Math.floor(Date.now()/1000)+1,expiresAt:Math.floor(Date.now()/1000)+300,
+  roles:['customer'],sessionId:'workspace-session'
+ })};
+ const module=await Test.createTestingModule({controllers:[BusinessApprovalController],providers:[
+  Reflector,IdentityGuard,AccountGuard,
+  {provide:ResourceGuard,useFactory:()=>new ResourceGuard(new Reflector(),access)},
+  {provide:IDENTITY_VERIFIER,useValue:verifier},
+  {provide:AccessService,useValue:access},
+  {provide:BusinessApprovalService,useValue:business}
+ ]}).compile();
+ const app=module.createNestApplication();
+ app.setGlobalPrefix('api');app.enableVersioning({type:VersioningType.URI,defaultVersion:'1'});
+ await app.init();
+ try{
+  const get=(id:string)=>request(app.getHttpServer()).get('/api/v1/business/onboarding/'+id+'/workspace')
+   .set('Authorization','Bearer signed.workspace.token');
+  assert.equal((await get(pending.id)).status,403,'pending application cannot access workspace');
+  assert.equal((await get(rejected.id)).status,403,'rejected application cannot access workspace');
+  assert.equal((await get(approved.id)).status,200,'approved owner accesses own workspace');
+  assert.equal((await get(foreignWorkspace.id)).status,403,'owner cannot access foreign workspace');
+  active=foreign;
+  assert.equal((await get(approved.id)).status,403,'other owner cannot cross tenant boundary');
+  active=first;
+  assert.equal((await get('not-a-uuid')).status,400,'active account receives malformed business ID validation');
+  await access.setSuspended(actor,first,true);
+  assert.equal((await get(approved.id)).status,403,'suspension denies workspace');
+ }finally{
+  await app.close();
+  await admin!.query('DELETE FROM resource_memberships WHERE resource_id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
+  await admin!.query('DELETE FROM business_onboarding WHERE id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
+  await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[first,foreign]]);
+  await admin!.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[first,foreign]]);
+  await admin!.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[first,foreign]]);
+ }
 });

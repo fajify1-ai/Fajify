@@ -1,6 +1,6 @@
 # Phase 1 — Milestone 2: Engineering and consolidated acceptance
 
-**Branch:** `feat/m2-d1-keycloak-auth-authorization`  
+**Branch:** `feat/m2-d1-keycloak-auth-authorization`
 **Status (2026-10-26):** automated backend and disposable live Keycloak acceptance passed in separate executions. Final consolidated exact-commit run and additional release/security acceptance remain pending.
 
 ## Scope implemented

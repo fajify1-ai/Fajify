@@ -49,3 +49,9 @@ test('issuer permits isolated loopback Keycloak acceptance and rejects remote pl
  assert.doesNotThrow(()=>new KeycloakAccessTokenVerifier('http://127.0.0.1:18080/realms/faji',audience,load));
  assert.throws(()=>new KeycloakAccessTokenVerifier('http://remote.example.test/realms/faji',audience,load),/Invalid Keycloak issuer/);
 });
+
+test('signed Keycloak sid is preserved only when well formed',async()=>{
+ const v=verifier();
+ assert.equal((await v.verifyAccessToken(token({sid:'test-session-123'}))).sessionId,'test-session-123');
+ assert.equal((await v.verifyAccessToken(token({sid:123}))).sessionId,undefined);
+});

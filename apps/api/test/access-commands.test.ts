@@ -39,7 +39,8 @@ test('self administrative action is rejected before querying',async()=>{
 test('membership modification produces auditable transaction',async()=>{
  const f=fixture();await f.service.setMembership('admin','user','business','ae5d7bce-c422-4eae-bf45-e68e46c06c11','manager',true);
  assert.equal(f.queries.at(-1)?.text,'COMMIT');
- assert.equal(f.queries[2].args[1],'membership_enabled');
+ assert.equal(f.queries[3].args[1],'membership_enabled');
+ assert.match(f.queries[1].text,/status='approved'/);
 });
 
 test('repeat enrollment is idempotent and does not emit duplicate provisioning audit',async()=>{

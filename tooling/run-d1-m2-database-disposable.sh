@@ -2,7 +2,7 @@
 # Creates a private loopback PostgreSQL 16/PostGIS test cluster; never touches existing clusters.
 set -Eeuo pipefail
 cd "$(dirname "$0")/.."
-[[ "$(git branch --show-current)" == "feat/m2-d1-keycloak-auth-authorization" ]] || { echo 'BLOCKED: wrong branch' >&2; exit 2; }
+[[ "$(git branch --show-current)" == "feat/m2-p1-session-security-hardening" ]] || { echo 'BLOCKED: wrong branch' >&2; exit 2; }
 for c in node corepack; do command -v "$c" >/dev/null || { echo "Missing $c" >&2; exit 2; }; done
 pg_bin="${FAJI_PG_BIN:-/usr/lib/postgresql/16/bin}"
 "$pg_bin/postgres" --version | grep -q ' 16\.' || { echo 'PostgreSQL 16 required' >&2; exit 2; }
@@ -50,7 +50,7 @@ corepack pnpm --filter @faji/api lint
 corepack pnpm --filter @faji/api build
 corepack pnpm --filter @faji/database migrate
 PGDATABASE="$FAJI_DISPOSABLE_DATABASE" "$pg_bin/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
-GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events TO m2_runtime;
+GRANT SELECT,INSERT,UPDATE,DELETE ON user_profiles,account_access,resource_memberships,identity_security_events,revoked_identity_sessions,business_onboarding TO m2_runtime;
 SQL
 # The API test glob includes authorization.database.test.ts; run only after migration and runtime grants.
 corepack pnpm --filter @faji/api test
