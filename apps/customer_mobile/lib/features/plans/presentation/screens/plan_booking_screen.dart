@@ -11,9 +11,9 @@ class PlanBookingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       appBar: AppBar(
-        backgroundColor: FajiColors.backgroundDark,
+        backgroundColor: FajiColors.background,
         title: const Text('Book Your Plan'),
       ),
       body: Center(
@@ -23,7 +23,7 @@ class PlanBookingScreen extends StatelessWidget {
             'Booking coming next\n\n${plan.title}\n${plan.businessName}',
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white,
+              color: FajiColors.textPrimary,
               fontSize: 22,
               fontWeight: FontWeight.w700,
             ),

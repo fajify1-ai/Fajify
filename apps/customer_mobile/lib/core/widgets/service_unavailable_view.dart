@@ -11,7 +11,7 @@ class ServiceUnavailableView extends StatelessWidget {
     padding: const EdgeInsets.all(24),
     child: Text(
       ServiceUnavailable(feature).message,
-      style: const TextStyle(color: FajiColors.textSecondaryDark),
+      style: const TextStyle(color: FajiColors.textSecondary),
     ),
   );
 }

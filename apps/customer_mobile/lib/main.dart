@@ -104,7 +104,8 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
       title: 'Faji',
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
-      theme: FajiTheme.dark,
+      theme: FajiTheme.light,
+      themeMode: ThemeMode.light,
       home: SplashScreen(
         onFinish: () => navigatorKey.currentState?.pushReplacementNamed(
           _auth.canAccessCustomer

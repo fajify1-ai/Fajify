@@ -7,15 +7,15 @@ class AuthDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Row(
     children: [
-      Expanded(child: Divider(color: FajiColors.borderDark)),
+      Expanded(child: Divider(color: FajiColors.border)),
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Text(
           'or',
-          style: TextStyle(color: FajiColors.textSecondaryDark, fontSize: 14),
+          style: TextStyle(color: FajiColors.textSecondary, fontSize: 14),
         ),
       ),
-      Expanded(child: Divider(color: FajiColors.borderDark)),
+      Expanded(child: Divider(color: FajiColors.border)),
     ],
   );
 }

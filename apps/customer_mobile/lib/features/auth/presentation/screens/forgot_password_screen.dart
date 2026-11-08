@@ -49,7 +49,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: FajiColors.backgroundDark,
+    backgroundColor: FajiColors.background,
     appBar: AppBar(backgroundColor: Colors.transparent),
     body: Center(
       child: SingleChildScrollView(
@@ -74,7 +74,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               AuthScope.of(context).usesBrowserAuthentication
                   ? 'Choose Forgot password on the secure sign-in page. Your account provider handles verification and your new password.'
                   : 'Account recovery is awaiting the shared identity integration.',
-              style: const TextStyle(color: FajiColors.textSecondaryDark),
+              style: const TextStyle(color: FajiColors.textSecondary),
             ),
             const SizedBox(height: 28),
             if (!AuthScope.of(context).usesBrowserAuthentication)

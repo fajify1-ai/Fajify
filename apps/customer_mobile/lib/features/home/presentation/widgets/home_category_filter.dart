@@ -38,7 +38,7 @@ class HomeCategoryFilter extends StatelessWidget {
           final category = homeCategories[index];
           final selected = category == selectedCategory;
           return Material(
-            color: selected ? FajiColors.primary : FajiColors.surfaceDark,
+            color: selected ? FajiColors.primary : FajiColors.surface,
             borderRadius: BorderRadius.circular(24),
             child: InkWell(
               onTap: () {
@@ -53,17 +53,13 @@ class HomeCategoryFilter extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: selected
-                        ? FajiColors.primary
-                        : FajiColors.borderDark,
+                    color: selected ? FajiColors.primary : FajiColors.border,
                   ),
                 ),
                 child: Text(
                   category,
                   style: TextStyle(
-                    color: selected
-                        ? Colors.white
-                        : FajiColors.textSecondaryDark,
+                    color: selected ? Colors.white : FajiColors.textSecondary,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),

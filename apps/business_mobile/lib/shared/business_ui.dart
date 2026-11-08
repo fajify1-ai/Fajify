@@ -5,9 +5,9 @@ import '../core/models.dart';
 
 // Business-local adapter until D2 publishes reviewed shared widget exports.
 const brand = Color(0xFFFA3F38);
-const canvas = Color(0xFF0D0D0D);
-const surface = Color(0xFF1C1C1C);
-const muted = Color(0xFFB5B5BE);
+const canvas = Color(0xFFFAFAFA);
+const surface = Color(0xFFFFFFFF);
+const muted = Color(0xFF76767D);
 const good = Color(0xFF5CD58C);
 const amber = Color(0xFFFFBE4D);
 
@@ -16,15 +16,15 @@ ThemeData businessTheme({String? fontPackage}) => ThemeData(
   fontFamily: fontPackage == null ? 'Roboto' : 'packages/$fontPackage/Roboto',
   progressIndicatorTheme: const ProgressIndicatorThemeData(
     color: brand,
-    linearTrackColor: Color(0xFF303030),
+    linearTrackColor: Color(0xFFE8E8EA),
   ),
-  brightness: Brightness.dark,
+  brightness: Brightness.light,
   scaffoldBackgroundColor: canvas,
-  colorScheme: const ColorScheme.dark(
+  colorScheme: const ColorScheme.light(
     primary: brand,
     surface: surface,
     onPrimary: Colors.white,
-    onSurface: Colors.white,
+    onSurface: Color(0xFF202020),
     secondary: good,
   ),
   textTheme: const TextTheme(
@@ -48,12 +48,12 @@ ThemeData businessTheme({String? fontPackage}) => ThemeData(
   outlinedButtonTheme: OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
       minimumSize: const Size(48, 48),
-      foregroundColor: Colors.white,
-      side: const BorderSide(color: Color(0xFF424242)),
+      foregroundColor: const Color(0xFF202020),
+      side: const BorderSide(color: Color(0xFFE0E0E0)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
   ),
-  dividerTheme: const DividerThemeData(color: Color(0xFF303030), thickness: 1),
+  dividerTheme: const DividerThemeData(color: Color(0xFFE8E8EA), thickness: 1),
   navigationRailTheme: NavigationRailThemeData(
     backgroundColor: surface,
     indicatorColor: brand.withValues(alpha: .12),
@@ -65,10 +65,10 @@ ThemeData businessTheme({String? fontPackage}) => ThemeData(
     style: ButtonStyle(
       backgroundColor: WidgetStateProperty.resolveWith(
         (states) => states.contains(WidgetState.selected)
-            ? const Color(0xFF303030)
+            ? const Color(0xFFE8E8EA)
             : surface,
       ),
-      foregroundColor: const WidgetStatePropertyAll(Colors.white),
+      foregroundColor: const WidgetStatePropertyAll(Color(0xFF202020)),
     ),
   ),
   navigationBarTheme: NavigationBarThemeData(
@@ -101,7 +101,7 @@ class Panel extends StatelessWidget {
     clipBehavior: Clip.antiAlias,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
-      side: BorderSide(color: borderColor ?? const Color(0xFF292929)),
+      side: BorderSide(color: borderColor ?? const Color(0xFFE8E8EA)),
     ),
     child: Padding(padding: padding, child: child),
   );

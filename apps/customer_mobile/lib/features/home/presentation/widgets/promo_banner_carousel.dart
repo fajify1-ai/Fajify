@@ -45,7 +45,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
       const SnackBar(
         content: Text('This promotion will be available soon.'),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: FajiColors.surfaceDark,
+        backgroundColor: FajiColors.surface,
       ),
     );
   }
@@ -128,10 +128,10 @@ class _PromoSlide extends StatelessWidget {
           promo.imagePath,
           fit: BoxFit.cover,
           errorBuilder: (_, _, _) => Container(
-            color: FajiColors.borderDark,
+            color: FajiColors.border,
             child: const Icon(
               Icons.image_not_supported_outlined,
-              color: FajiColors.textSecondaryDark,
+              color: FajiColors.textSecondary,
               size: 32,
             ),
           ),

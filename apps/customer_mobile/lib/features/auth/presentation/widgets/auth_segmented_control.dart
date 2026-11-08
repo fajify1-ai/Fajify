@@ -14,10 +14,10 @@ class AuthSegmentedControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 56,
-      padding: const EdgeInsets.all(5),
+      height: 44,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFF292929),
+        color: const Color(0xFFF4F4F4),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Stack(
@@ -33,7 +33,7 @@ class AuthSegmentedControl extends StatelessWidget {
               heightFactor: 1,
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1B1B1B),
+                  color: const Color(0xFFFFFFFF),
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -86,11 +86,9 @@ class _Tab extends StatelessWidget {
           child: AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 220),
             style: TextStyle(
-              color: selected
-                  ? FajiColors.primary
-                  : FajiColors.textSecondaryDark,
+              color: selected ? FajiColors.primary : FajiColors.textSecondary,
               fontWeight: FontWeight.w600,
-              fontSize: 16,
+              fontSize: 13,
             ),
             child: Text(label),
           ),

@@ -304,12 +304,14 @@ class _AuthSheet extends StatelessWidget {
     final height = MediaQuery.sizeOf(context).height;
     // Keep the sheet fixed across both tabs. Register content scrolls inside
     // the available area instead of resizing the anchored sheet.
-    final panelHeight = register ? height * .79 : height * .60;
+    final panelHeight = register
+        ? height * .79
+        : (height * .57).clamp(540.0, height * .9);
     return Container(
       height: panelHeight,
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: FajiColors.surfaceDark,
+        color: FajiColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: SafeArea(
@@ -318,15 +320,15 @@ class _AuthSheet extends StatelessWidget {
           children: [
             const SizedBox(height: 14),
             Container(
-              width: 48,
-              height: 5,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
-                color: FajiColors.borderDark,
+                color: FajiColors.border,
                 borderRadius: BorderRadius.circular(5),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(30, 18, 30, 0),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -338,8 +340,8 @@ class _AuthSheet extends StatelessWidget {
                           'FAJI ACCOUNT',
                           style: TextStyle(
                             color: FajiColors.primary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
                             letterSpacing: .3,
                           ),
                         ),
@@ -347,26 +349,26 @@ class _AuthSheet extends StatelessWidget {
                         Text(
                           register ? 'Create your account' : 'Welcome back',
                           style: const TextStyle(
-                            color: FajiColors.textPrimaryDark,
-                            fontSize: 27,
-                            fontWeight: FontWeight.w700,
+                            color: FajiColors.textPrimary,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
                     ),
                   ),
                   Material(
-                    color: const Color(0xFF292929),
+                    color: const Color(0xFFF4F4F4),
                     shape: const CircleBorder(),
                     child: InkWell(
                       onTap: onClose,
                       customBorder: const CircleBorder(),
                       child: const SizedBox(
-                        width: 42,
-                        height: 42,
+                        width: 32,
+                        height: 32,
                         child: Icon(
                           Icons.close,
-                          color: FajiColors.textSecondaryDark,
+                          color: FajiColors.textSecondary,
                           size: 19,
                         ),
                       ),
@@ -380,7 +382,7 @@ class _AuthSheet extends StatelessWidget {
                 behavior: ScrollConfiguration.of(context)
                     .copyWith(scrollbars: false, overscroll: false),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(30, 18, 30, 28),
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
                   child: Column(
                     children: [
                       AuthSegmentedControl(
@@ -518,7 +520,7 @@ class _SignInFields extends StatelessWidget {
                   showPassword
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
-                  color: FajiColors.textSecondaryDark,
+                  color: FajiColors.textSecondary,
                 ),
               ),
               validator: AuthInput.signInPassword,
@@ -539,9 +541,9 @@ class _SignInFields extends StatelessWidget {
               onTap: onSubmit,
               busy: signingIn,
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 16),
             const AuthDivider(),
-            const SizedBox(height: 22),
+            const SizedBox(height: 16),
             GoogleAuthButton(onTap: onGoogle),
           ],
         );
@@ -716,7 +718,7 @@ class _RegisterFields extends StatelessWidget {
                   showPassword
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
-                  color: FajiColors.textSecondaryDark,
+                  color: FajiColors.textSecondary,
                 ),
               ),
               validator: passwordValidator,
@@ -734,7 +736,7 @@ class _RegisterFields extends StatelessWidget {
                   showConfirm
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
-                  color: FajiColors.textSecondaryDark,
+                  color: FajiColors.textSecondary,
                 ),
               ),
               validator: (v) {
@@ -750,7 +752,7 @@ class _RegisterFields extends StatelessWidget {
                   value: terms,
                   onChanged: onTermsChanged,
                   activeColor: FajiColors.primary,
-                  side: const BorderSide(color: FajiColors.borderDark),
+                  side: const BorderSide(color: FajiColors.border),
                 ),
                 Expanded(
                   child: Wrap(
@@ -758,7 +760,7 @@ class _RegisterFields extends StatelessWidget {
                       const Text(
                         "I agree to Faji's ",
                         style: TextStyle(
-                          color: FajiColors.textSecondaryDark,
+                          color: FajiColors.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -777,7 +779,7 @@ class _RegisterFields extends StatelessWidget {
                       const Text(
                         ' and ',
                         style: TextStyle(
-                          color: FajiColors.textSecondaryDark,
+                          color: FajiColors.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -804,9 +806,9 @@ class _RegisterFields extends StatelessWidget {
               onTap: onCreate,
               busy: registering,
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 16),
             const AuthDivider(),
-            const SizedBox(height: 22),
+            const SizedBox(height: 16),
             GoogleAuthButton(onTap: onGoogle),
           ],
         );
@@ -819,9 +821,9 @@ class _RegisterFields extends StatelessWidget {
       lastDate: now,
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.dark(
+          colorScheme: const ColorScheme.light(
             primary: FajiColors.primary,
-            surface: FajiColors.surfaceDark,
+            surface: FajiColors.surface,
           ),
         ),
         child: child!,
@@ -843,9 +845,9 @@ class _Label extends StatelessWidget {
     child: Text(
       text,
       style: const TextStyle(
-        color: FajiColors.textSecondaryDark,
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
+        color: FajiColors.textSecondary,
+        fontSize: 11,
+        fontWeight: FontWeight.w400,
         letterSpacing: .2,
       ),
     ),

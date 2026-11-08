@@ -31,7 +31,7 @@ class WhatsOnSection extends StatelessWidget {
             const Text(
               "What's On 🔥",
               style: TextStyle(
-                color: Colors.white,
+                color: FajiColors.textPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
               ),

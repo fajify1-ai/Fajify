@@ -27,7 +27,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: FajiColors.backgroundDark,
+    backgroundColor: FajiColors.background,
     body: _withNavigation(
       SafeArea(
         child: FutureBuilder<void>(
@@ -88,7 +88,7 @@ class _WishlistContent extends StatelessWidget {
         const Text(
           'My Wishlist',
           style: TextStyle(
-            color: Colors.white,
+            color: FajiColors.textPrimary,
             fontSize: 25,
             fontWeight: FontWeight.w500,
           ),
@@ -96,10 +96,7 @@ class _WishlistContent extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           '$count saved ${count == 1 ? 'place' : 'places'}',
-          style: const TextStyle(
-            color: FajiColors.textSecondaryDark,
-            fontSize: 14,
-          ),
+          style: const TextStyle(color: FajiColors.textSecondary, fontSize: 14),
         ),
         const SizedBox(height: 20),
         if (loading)
@@ -141,7 +138,7 @@ class _WishlistError extends StatelessWidget {
             message,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: FajiColors.textSecondaryDark,
+              color: FajiColors.textSecondary,
               fontSize: 15,
             ),
           ),
@@ -185,7 +182,7 @@ class _WishlistEmptyState extends StatelessWidget {
         const Text(
           'Nothing saved yet',
           style: TextStyle(
-            color: Colors.white,
+            color: FajiColors.textPrimary,
             fontSize: 21,
             fontWeight: FontWeight.w500,
           ),
@@ -195,7 +192,7 @@ class _WishlistEmptyState extends StatelessWidget {
           'Tap the heart on any venue or\nevent to save it here.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: FajiColors.textSecondaryDark,
+            color: FajiColors.textSecondary,
             fontSize: 15,
             height: 1.45,
           ),
@@ -231,9 +228,9 @@ class _WishlistCard extends StatelessWidget {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: FajiColors.surfaceDark,
+        color: FajiColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: FajiColors.borderDark),
+        border: Border.all(color: FajiColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,7 +313,7 @@ class _WishlistCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: FajiColors.textPrimary,
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
                         ),
@@ -339,7 +336,7 @@ class _WishlistCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: FajiColors.textSecondaryDark,
+                    color: FajiColors.textSecondary,
                     fontSize: 13,
                   ),
                 ),
@@ -387,10 +384,10 @@ class _WishlistImageFallback extends StatelessWidget {
   const _WishlistImageFallback();
   @override
   Widget build(BuildContext context) => const ColoredBox(
-    color: FajiColors.borderDark,
+    color: FajiColors.border,
     child: Icon(
       Icons.image_not_supported_outlined,
-      color: FajiColors.textSecondaryDark,
+      color: FajiColors.textSecondary,
     ),
   );
 }
@@ -460,7 +457,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       body: _withNavigation(_content(context), context, HomeNavItem.bookings),
     );
   }
@@ -480,7 +477,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     return SafeArea(
       child: RefreshIndicator(
         color: FajiColors.primary,
-        backgroundColor: FajiColors.surfaceDark,
+        backgroundColor: FajiColors.surface,
         onRefresh: _loadBookings,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 150),
@@ -488,7 +485,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
             const Text(
               'My Tickets',
               style: TextStyle(
-                color: Colors.white,
+                color: FajiColors.textPrimary,
                 fontSize: 24,
                 fontWeight: FontWeight.w500,
               ),
@@ -568,7 +565,7 @@ class _TicketTabs extends StatelessWidget {
                   bottom: BorderSide(
                     color: index == selected
                         ? FajiColors.primary
-                        : FajiColors.borderDark,
+                        : FajiColors.border,
                     width: index == selected ? 2 : 1,
                   ),
                 ),
@@ -579,7 +576,7 @@ class _TicketTabs extends StatelessWidget {
                 style: TextStyle(
                   color: index == selected
                       ? FajiColors.primary
-                      : FajiColors.textSecondaryDark,
+                      : FajiColors.textSecondary,
                   fontSize: 12,
                   fontWeight: index == selected
                       ? FontWeight.w600
@@ -607,15 +604,15 @@ class _EmptyBookings extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.fromLTRB(22, 54, 22, 54),
     decoration: BoxDecoration(
-      color: FajiColors.surfaceDark,
+      color: FajiColors.surface,
       borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: FajiColors.borderDark),
+      border: Border.all(color: FajiColors.border),
     ),
     child: Column(
       children: [
         const Icon(
           Icons.confirmation_number_outlined,
-          color: FajiColors.textSecondaryDark,
+          color: FajiColors.textSecondary,
           size: 44,
         ),
         const SizedBox(height: 16),
@@ -623,7 +620,7 @@ class _EmptyBookings extends StatelessWidget {
           title,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Colors.white,
+            color: FajiColors.textPrimary,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -632,10 +629,7 @@ class _EmptyBookings extends StatelessWidget {
         Text(
           message,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: FajiColors.textSecondaryDark,
-            fontSize: 13,
-          ),
+          style: const TextStyle(color: FajiColors.textSecondary, fontSize: 13),
         ),
         if (onExplore != null) ...[
           const SizedBox(height: 20),
@@ -693,9 +687,9 @@ class _TicketCard extends StatelessWidget {
       height: 124,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: FajiColors.surfaceDark,
+        color: FajiColors.surface,
         borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: FajiColors.borderDark),
+        border: Border.all(color: FajiColors.border),
       ),
       child: Row(
         children: [
@@ -707,13 +701,13 @@ class _TicketCard extends StatelessWidget {
                     image,
                     fit: BoxFit.cover,
                     errorBuilder: (_, _, _) =>
-                        const ColoredBox(color: FajiColors.borderDark),
+                        const ColoredBox(color: FajiColors.border),
                   )
                 : Image.asset(
                     image,
                     fit: BoxFit.cover,
                     errorBuilder: (_, _, _) =>
-                        const ColoredBox(color: FajiColors.borderDark),
+                        const ColoredBox(color: FajiColors.border),
                   ),
           ),
           Expanded(
@@ -730,7 +724,7 @@ class _TicketCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: FajiColors.textPrimary,
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                           ),
@@ -746,7 +740,7 @@ class _TicketCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: FajiColors.textSecondaryDark,
+                      color: FajiColors.textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -755,7 +749,7 @@ class _TicketCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: FajiColors.textSecondaryDark,
+                      color: FajiColors.textSecondary,
                       fontSize: 11,
                     ),
                   ),
@@ -781,15 +775,15 @@ class _TicketCard extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: isCancelled
-                                ? FajiColors.borderDark
-                                : FajiColors.decorativeDarkRed,
+                                ? FajiColors.border
+                                : FajiColors.decorativeRed,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
                             'View Ticket →',
                             style: TextStyle(
                               color: isCancelled
-                                  ? FajiColors.textSecondaryDark
+                                  ? FajiColors.textSecondary
                                   : FajiColors.primary,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -817,7 +811,7 @@ class _StatusPill extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
     decoration: BoxDecoration(
-      color: cancelled ? FajiColors.decorativeDarkRed : const Color(0xFF082D18),
+      color: cancelled ? FajiColors.decorativeRed : const Color(0xFFE9F8EF),
       borderRadius: BorderRadius.circular(12),
     ),
     child: Text(
@@ -837,8 +831,8 @@ class _HelpCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
     decoration: BoxDecoration(
-      color: FajiColors.decorativeDarkRed,
-      border: Border.all(color: const Color(0xFF57201F)),
+      color: FajiColors.decorativeRed,
+      border: Border.all(color: const Color(0xFFFFD3D1)),
       borderRadius: BorderRadius.circular(16),
     ),
     child: Row(
@@ -846,7 +840,7 @@ class _HelpCard extends StatelessWidget {
         const Expanded(
           child: Text(
             'Need help with a ticket or order?',
-            style: TextStyle(color: FajiColors.textSecondaryDark, fontSize: 12),
+            style: TextStyle(color: FajiColors.textSecondary, fontSize: 12),
           ),
         ),
         TextButton(
@@ -896,11 +890,8 @@ class _TemporaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: FajiColors.backgroundDark,
-    appBar: AppBar(
-      backgroundColor: FajiColors.backgroundDark,
-      title: Text(title),
-    ),
+    backgroundColor: FajiColors.background,
+    appBar: AppBar(backgroundColor: FajiColors.background, title: Text(title)),
     body: currentItem == null
         ? _temporaryBody
         : _withNavigation(_temporaryBody, context, currentItem!),
@@ -910,7 +901,7 @@ class _TemporaryScreen extends StatelessWidget {
     child: Text(
       '$title coming soon',
       style: const TextStyle(
-        color: Colors.white,
+        color: FajiColors.textPrimary,
         fontSize: 22,
         fontWeight: FontWeight.w700,
       ),

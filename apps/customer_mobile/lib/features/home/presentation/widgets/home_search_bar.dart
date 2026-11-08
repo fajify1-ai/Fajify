@@ -24,25 +24,28 @@ class HomeSearchBar extends StatelessWidget {
           child: Container(
             height: 52,
             decoration: BoxDecoration(
-              color: FajiColors.surfaceDark,
+              color: FajiColors.surface,
               borderRadius: BorderRadius.circular(26),
             ),
             child: TextField(
               controller: controller,
               onChanged: onChanged,
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+              style: const TextStyle(
+                color: FajiColors.textPrimary,
+                fontSize: 16,
+              ),
               cursorColor: FajiColors.primary,
               textInputAction: TextInputAction.search,
               decoration: const InputDecoration(
                 hintText: 'Search restaurants, venues, events...',
                 hintStyle: TextStyle(
-                  color: FajiColors.textSecondaryDark,
+                  color: FajiColors.textSecondary,
                   fontSize: 14,
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
                   size: 24,
-                  color: FajiColors.textSecondaryDark,
+                  color: FajiColors.textSecondary,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.only(top: 14, right: 16),
@@ -55,7 +58,7 @@ class HomeSearchBar extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             Material(
-              color: FajiColors.surfaceDark,
+              color: FajiColors.surface,
               shape: const CircleBorder(),
               child: InkWell(
                 onTap: onFilter,
@@ -66,7 +69,7 @@ class HomeSearchBar extends StatelessWidget {
                   child: Icon(
                     Icons.tune_rounded,
                     size: 24,
-                    color: FajiColors.textPrimaryDark,
+                    color: FajiColors.textPrimary,
                   ),
                 ),
               ),

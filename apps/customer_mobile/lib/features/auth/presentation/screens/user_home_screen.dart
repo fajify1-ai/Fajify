@@ -156,7 +156,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: FajiColors.surfaceDark,
+      backgroundColor: FajiColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
@@ -179,7 +179,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         final results = _results;
         final wishlist = WishlistRepository.instance;
         return Scaffold(
-          backgroundColor: FajiColors.backgroundDark,
+          backgroundColor: FajiColors.background,
           body: Stack(
             children: [
               SafeArea(
@@ -187,7 +187,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
-                      color: FajiColors.backgroundDark,
+                      color: FajiColors.background,
                       padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,7 +333,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: FajiColors.surfaceDark,
+        backgroundColor: FajiColors.surface,
       ),
     );
   }
@@ -361,7 +361,7 @@ class _EmptySearchState extends StatelessWidget {
           const Icon(
             Icons.search_off_rounded,
             size: 42,
-            color: FajiColors.textSecondaryDark,
+            color: FajiColors.textSecondary,
           ),
           const SizedBox(height: 12),
           Text(
@@ -372,7 +372,7 @@ class _EmptySearchState extends StatelessWidget {
                 : 'No places found for “${query.trim()}”',
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white,
+              color: FajiColors.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),

@@ -118,7 +118,7 @@ class _BookingReservationScreenState extends State<BookingReservationScreen> {
   Widget build(BuildContext context) {
     final price = _price;
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       body: Stack(
         children: [
           SafeArea(
@@ -132,7 +132,7 @@ class _BookingReservationScreenState extends State<BookingReservationScreen> {
                     const Text(
                       'Book your Reservation',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: FajiColors.textPrimary,
                         fontSize: 20,
                         fontWeight: FontWeight.w500,
                       ),
@@ -190,8 +190,8 @@ class _BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: FajiColors.surfaceDark,
-    shape: const CircleBorder(side: BorderSide(color: FajiColors.borderDark)),
+    color: FajiColors.surface,
+    shape: const CircleBorder(side: BorderSide(color: FajiColors.border)),
     child: InkWell(
       onTap: onTap,
       customBorder: const CircleBorder(),
@@ -200,7 +200,7 @@ class _BackButton extends StatelessWidget {
         height: 48,
         child: Icon(
           Icons.arrow_back_ios_new_rounded,
-          color: Colors.white,
+          color: FajiColors.textPrimary,
           size: 20,
         ),
       ),
@@ -238,7 +238,7 @@ class _PlanHero extends StatelessWidget {
             child: Text(
               plan.title,
               style: const TextStyle(
-                color: Colors.white,
+                color: FajiColors.textPrimary,
                 fontSize: 19,
                 fontWeight: FontWeight.w500,
               ),
@@ -257,10 +257,7 @@ class _PlanHero extends StatelessWidget {
       const SizedBox(height: 5),
       Text(
         '⌖ ${plan.location}, Lagos',
-        style: const TextStyle(
-          color: FajiColors.textSecondaryDark,
-          fontSize: 13,
-        ),
+        style: const TextStyle(color: FajiColors.textSecondary, fontSize: 13),
       ),
     ],
   );
@@ -268,7 +265,7 @@ class _PlanHero extends StatelessWidget {
   Widget _asset() => Image.asset(
     plan.imageAsset,
     fit: BoxFit.cover,
-    errorBuilder: (_, _, _) => Container(color: FajiColors.borderDark),
+    errorBuilder: (_, _, _) => Container(color: FajiColors.border),
   );
 }
 
@@ -302,13 +299,13 @@ class _FeatureTile extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.black,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: FajiColors.borderDark),
+      border: Border.all(color: FajiColors.border),
     ),
     child: Center(
       child: Text(
         feature,
         textAlign: TextAlign.center,
-        style: const TextStyle(color: Colors.white, fontSize: 12),
+        style: const TextStyle(color: FajiColors.textPrimary, fontSize: 12),
       ),
     ),
   );
@@ -362,7 +359,10 @@ class _BookingDetailsCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Text(
                 '$guestCount',
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: const TextStyle(
+                  color: FajiColors.textPrimary,
+                  fontSize: 16,
+                ),
               ),
             ),
             _CircleAction(icon: Icons.add, onTap: onIncrease),
@@ -392,13 +392,13 @@ class _Detail extends StatelessWidget {
     children: [
       Text(
         label,
-        style: const TextStyle(
-          color: FajiColors.textSecondaryDark,
-          fontSize: 12,
-        ),
+        style: const TextStyle(color: FajiColors.textSecondary, fontSize: 12),
       ),
       const SizedBox(height: 6),
-      Text(value, style: const TextStyle(color: Colors.white, fontSize: 14)),
+      Text(
+        value,
+        style: const TextStyle(color: FajiColors.textPrimary, fontSize: 14),
+      ),
     ],
   );
 }
@@ -409,7 +409,7 @@ class _CircleAction extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Material(
-    color: const Color(0xff202020),
+    color: const Color(0xffFFFFFF),
     shape: const CircleBorder(side: BorderSide(color: FajiColors.primary)),
     child: InkWell(
       onTap: onTap,
@@ -434,7 +434,7 @@ class _PriceBreakdown extends StatelessWidget {
         _PriceRow(label: 'Plan / package', value: price?.planTotal ?? 0),
         _PriceRow(label: 'Ride add-on', value: price?.ridePrice ?? 0),
         _PriceRow(label: 'Service fee', value: price?.serviceFee ?? 0),
-        const Divider(color: FajiColors.borderDark),
+        const Divider(color: FajiColors.border),
         _PriceRow(label: 'Total', value: price?.total ?? 0, strong: true),
       ],
     ),
@@ -458,7 +458,7 @@ class _PriceRow extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: strong ? Colors.white : FajiColors.textSecondaryDark,
+            color: strong ? FajiColors.textPrimary : FajiColors.textSecondary,
             fontSize: 13,
             fontWeight: strong ? FontWeight.w700 : FontWeight.w400,
           ),
@@ -467,7 +467,7 @@ class _PriceRow extends StatelessWidget {
         Text(
           '₦${value.toString()}',
           style: TextStyle(
-            color: strong ? FajiColors.primary : Colors.white,
+            color: strong ? FajiColors.primary : FajiColors.textPrimary,
             fontSize: 14,
             fontWeight: strong ? FontWeight.w800 : FontWeight.w500,
           ),
@@ -485,7 +485,7 @@ class _RideAddon extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: FajiColors.surfaceDark,
+      color: FajiColors.surface,
       borderRadius: BorderRadius.circular(18),
     ),
     child: Column(
@@ -494,7 +494,7 @@ class _RideAddon extends StatelessWidget {
         const Text(
           'ADD-ON',
           style: TextStyle(
-            color: FajiColors.textSecondaryDark,
+            color: FajiColors.textSecondary,
             fontSize: 12,
             letterSpacing: 1,
           ),
@@ -503,7 +503,7 @@ class _RideAddon extends StatelessWidget {
         const Text(
           'Need a ride to the venue?',
           style: TextStyle(
-            color: Colors.white,
+            color: FajiColors.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -511,7 +511,7 @@ class _RideAddon extends StatelessWidget {
         const SizedBox(height: 4),
         const Text(
           'Book your transport now — from ₦6,500 round trip',
-          style: TextStyle(color: FajiColors.textSecondaryDark, fontSize: 12),
+          style: TextStyle(color: FajiColors.textSecondary, fontSize: 12),
         ),
         const SizedBox(height: 14),
         Row(
@@ -548,10 +548,10 @@ class _RideButton extends StatelessWidget {
     child: OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        foregroundColor: selected ? Colors.white : FajiColors.textSecondaryDark,
+        foregroundColor: selected ? Colors.white : FajiColors.textSecondary,
         backgroundColor: selected ? FajiColors.primary : Colors.transparent,
         side: BorderSide(
-          color: selected ? FajiColors.primary : FajiColors.borderDark,
+          color: selected ? FajiColors.primary : FajiColors.border,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       ),
@@ -622,7 +622,7 @@ class _PaymentRow extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Material(
-    color: selected ? const Color(0xff292020) : Colors.transparent,
+    color: selected ? const Color(0xFFFFECEB) : Colors.transparent,
     borderRadius: BorderRadius.circular(14),
     child: InkWell(
       onTap: onTap,
@@ -632,16 +632,14 @@ class _PaymentRow extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? FajiColors.primary : FajiColors.borderDark,
+            color: selected ? FajiColors.primary : FajiColors.border,
           ),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: selected
-                  ? FajiColors.primary
-                  : FajiColors.textSecondaryDark,
+              color: selected ? FajiColors.primary : FajiColors.textSecondary,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -651,7 +649,7 @@ class _PaymentRow extends StatelessWidget {
                   Text(
                     label,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: FajiColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -660,7 +658,7 @@ class _PaymentRow extends StatelessWidget {
                   Text(
                     detail,
                     style: const TextStyle(
-                      color: FajiColors.textSecondaryDark,
+                      color: FajiColors.textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -688,9 +686,9 @@ class _SectionCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
     decoration: BoxDecoration(
-      color: FajiColors.surfaceDark,
+      color: FajiColors.surface,
       borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: FajiColors.borderDark),
+      border: Border.all(color: FajiColors.border),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -698,7 +696,7 @@ class _SectionCard extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            color: Colors.white,
+            color: FajiColors.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -724,7 +722,7 @@ class _BottomBookBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-    color: const Color(0xff202020),
+    color: const Color(0xffFFFFFF),
     child: Column(
       children: [
         if (!enabled)
@@ -732,10 +730,7 @@ class _BottomBookBar extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 8),
             child: Text(
               'Select a payment method above to continue',
-              style: TextStyle(
-                color: FajiColors.textSecondaryDark,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: FajiColors.textSecondary, fontSize: 12),
             ),
           ),
         SizedBox(
@@ -745,8 +740,8 @@ class _BottomBookBar extends StatelessWidget {
             onPressed: enabled ? onTap : null,
             style: FilledButton.styleFrom(
               backgroundColor: FajiColors.primary,
-              disabledBackgroundColor: const Color(0xff2b2b2b),
-              disabledForegroundColor: FajiColors.textSecondaryDark,
+              disabledBackgroundColor: const Color(0xffF4F4F4),
+              disabledForegroundColor: FajiColors.textSecondary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),

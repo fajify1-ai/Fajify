@@ -76,7 +76,7 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
         decoration: const BoxDecoration(
-          color: FajiColors.surfaceDark,
+          color: FajiColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -86,7 +86,7 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
               width: 30,
               height: 4,
               decoration: BoxDecoration(
-                color: FajiColors.borderDark,
+                color: FajiColors.border,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -97,14 +97,14 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
                   child: Text(
                     'Pick a Time',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: FajiColors.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
                 Material(
-                  color: const Color(0xff101010),
+                  color: const Color(0xffFFFFFF),
                   shape: const CircleBorder(),
                   child: InkWell(
                     onTap: () => Navigator.of(context).pop(),
@@ -114,7 +114,7 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
                       height: 36,
                       child: Icon(
                         Icons.close,
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         size: 18,
                       ),
                     ),
@@ -135,7 +135,7 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
                   child: Text(
                     '‹  $date',
                     style: const TextStyle(
-                      color: FajiColors.textSecondaryDark,
+                      color: FajiColors.textSecondary,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -172,7 +172,7 @@ class _BookingTimeSheetState extends State<BookingTimeSheet> {
               child: Text(
                 'Choose a time of day',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: FajiColors.textPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -238,7 +238,7 @@ class _TimeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? const Color(0xff2d0d0e) : const Color(0xff101010),
+      color: selected ? const Color(0xff2d0d0e) : const Color(0xffFFFFFF),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: enabled ? onTap : null,
@@ -249,7 +249,7 @@ class _TimeOption extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: selected ? FajiColors.primary : const Color(0xff303030),
+              color: selected ? FajiColors.primary : const Color(0xffF4F4F4),
               width: selected ? 1.4 : 1,
             ),
           ),
@@ -260,8 +260,8 @@ class _TimeOption extends StatelessWidget {
                 color: enabled
                     ? selected
                           ? FajiColors.primary
-                          : FajiColors.textSecondaryDark
-                    : const Color(0xff414141),
+                          : FajiColors.textSecondary
+                    : const Color(0xffF4F4F4),
                 size: 22,
               ),
               const SizedBox(width: 10),
@@ -269,7 +269,9 @@ class _TimeOption extends StatelessWidget {
                 child: Text(
                   period.label,
                   style: TextStyle(
-                    color: enabled ? Colors.white : const Color(0xff555555),
+                    color: enabled
+                        ? FajiColors.textPrimary
+                        : const Color(0xffF4F4F4),
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -279,8 +281,8 @@ class _TimeOption extends StatelessWidget {
                 period.range,
                 style: TextStyle(
                   color: enabled
-                      ? FajiColors.textSecondaryDark
-                      : const Color(0xff454545),
+                      ? FajiColors.textSecondary
+                      : const Color(0xffF4F4F4),
                   fontSize: 12,
                 ),
               ),

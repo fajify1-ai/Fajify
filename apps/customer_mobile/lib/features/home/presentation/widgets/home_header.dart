@@ -64,7 +64,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 21,
                         fontWeight: FontWeight.w700,
                       ),
@@ -89,7 +89,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                         'Loading profile…',
                         key: ValueKey('loading'),
                         style: TextStyle(
-                          color: FajiColors.textSecondaryDark,
+                          color: FajiColors.textSecondary,
                           fontSize: 15,
                         ),
                       )
@@ -116,7 +116,7 @@ class _HomeHeaderState extends State<HomeHeader> {
               const SnackBar(
                 content: Text('Notifications will be available here.'),
                 behavior: SnackBarBehavior.floating,
-                backgroundColor: FajiColors.surfaceDark,
+                backgroundColor: FajiColors.surface,
               ),
             );
           },
@@ -146,7 +146,7 @@ class _ProfileAvatar extends StatelessWidget {
 
     return CircleAvatar(
       radius: 28,
-      backgroundColor: FajiColors.surfaceDark,
+      backgroundColor: FajiColors.surface,
       child: ClipOval(
         child: Image.network(
           url,
@@ -175,11 +175,11 @@ class _InitialsAvatar extends StatelessWidget {
         : parts.take(2).map((part) => part[0]).join().toUpperCase();
     return CircleAvatar(
       radius: 28,
-      backgroundColor: FajiColors.surfaceDark,
+      backgroundColor: FajiColors.surface,
       child: Text(
         initials,
         style: const TextStyle(
-          color: FajiColors.textPrimaryDark,
+          color: FajiColors.textPrimary,
           fontSize: 17,
           fontWeight: FontWeight.w800,
         ),
@@ -196,7 +196,7 @@ class _NotificationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: FajiColors.surfaceDark,
+      color: FajiColors.surface,
       shape: const CircleBorder(),
       child: InkWell(
         onTap: onTap,
@@ -209,7 +209,7 @@ class _NotificationButton extends StatelessWidget {
             children: [
               const Icon(
                 Icons.notifications_none_rounded,
-                color: FajiColors.textPrimaryDark,
+                color: FajiColors.textPrimary,
                 size: 27,
               ),
               Positioned(

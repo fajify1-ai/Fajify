@@ -81,7 +81,7 @@ class _BookingDateSheetState extends State<BookingDateSheet> {
       child: Container(
         padding: const EdgeInsets.fromLTRB(22, 10, 22, 18),
         decoration: const BoxDecoration(
-          color: FajiColors.surfaceDark,
+          color: FajiColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -91,7 +91,7 @@ class _BookingDateSheetState extends State<BookingDateSheet> {
               width: 30,
               height: 4,
               decoration: BoxDecoration(
-                color: FajiColors.borderDark,
+                color: FajiColors.border,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -102,7 +102,7 @@ class _BookingDateSheetState extends State<BookingDateSheet> {
                   child: Text(
                     'Pick a Date',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: FajiColors.textPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -127,7 +127,7 @@ class _BookingDateSheetState extends State<BookingDateSheet> {
                     child: Text(
                       _monthLabel(_displayedMonth),
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: FajiColors.textPrimary,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -149,7 +149,7 @@ class _BookingDateSheetState extends State<BookingDateSheet> {
                         child: Text(
                           day,
                           style: const TextStyle(
-                            color: FajiColors.textSecondaryDark,
+                            color: FajiColors.textSecondary,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                           ),
@@ -258,8 +258,8 @@ class _CalendarGrid extends StatelessWidget {
                       color: selected
                           ? Colors.white
                           : available
-                          ? FajiColors.textPrimaryDark
-                          : const Color(0xff414141),
+                          ? FajiColors.textPrimary
+                          : const Color(0xffF4F4F4),
                       fontSize: 13,
                       fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
                     ),
@@ -287,7 +287,7 @@ class _SheetIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: const Color(0xff101010),
+    color: const Color(0xffFFFFFF),
     shape: const CircleBorder(),
     child: InkWell(
       onTap: enabled ? onTap : null,
@@ -298,9 +298,7 @@ class _SheetIconButton extends StatelessWidget {
         child: Icon(
           icon,
           size: 18,
-          color: enabled
-              ? FajiColors.textPrimaryDark
-              : FajiColors.textSecondaryDark,
+          color: enabled ? FajiColors.textPrimary : FajiColors.textSecondary,
         ),
       ),
     ),
