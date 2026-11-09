@@ -1,3 +1,5 @@
+import '../domain/auth_session.dart';
+
 /// Build-time public settings only. No client secret belongs in a native app.
 class NativeOidcSettings {
   NativeOidcSettings({
@@ -38,18 +40,42 @@ class NativeOidcSettings {
   final Uri logoutRedirectUri;
   final List<String> scopes;
 
-  /// Missing, disabled or invalid settings never activate live authentication.
+  /// Nullable inspection helper. Application composition uses the strict parser
+  /// so a rejected build configuration is never silently replaced by a stub.
   static NativeOidcSettings? fromValues(Map<String, String> values) {
-    if (values['FAJI_CUSTOMER_NATIVE_AUTH_ENABLED'] != 'true') return null;
     try {
-      String requiredValue(String name) {
-        final value = values[name];
-        if (value == null || value.isEmpty || value != value.trim()) {
-          throw const FormatException();
-        }
-        return value;
-      }
+      return requireValues(values);
+    } on AuthFailure {
+      return null;
+    }
+  }
 
+  static NativeOidcSettings requireValues(Map<String, String> values) {
+    const enabled = 'FAJI_CUSTOMER_NATIVE_AUTH_ENABLED';
+    if (values[enabled] != 'true') {
+      throw const AuthFailure(
+        AuthErrorCode.providerUnavailable,
+        'Native sign-in is disabled or missing configuration. Rebuild with --dart-define-from-file=oidc-config.local.json and FAJI_CUSTOMER_NATIVE_AUTH_ENABLED=true.',
+      );
+    }
+    String requiredValue(String name) {
+      final value = values[name];
+      if (value == null || value.isEmpty) {
+        throw AuthFailure(
+          AuthErrorCode.providerUnavailable,
+          'Native sign-in configuration is missing $name. Rebuild with --dart-define-from-file=oidc-config.local.json.',
+        );
+      }
+      if (value != value.trim()) {
+        throw AuthFailure(
+          AuthErrorCode.providerUnavailable,
+          'Native sign-in configuration contains surrounding whitespace in $name.',
+        );
+      }
+      return value;
+    }
+
+    try {
       return NativeOidcSettings(
         issuer: Uri.parse(requiredValue('FAJI_CUSTOMER_OIDC_ISSUER')),
         apiOrigin: Uri.parse(requiredValue('FAJI_CUSTOMER_API_ORIGIN')),
@@ -63,12 +89,20 @@ class NativeOidcSettings {
         scopes: requiredValue('FAJI_CUSTOMER_OIDC_SCOPES')
             .split(RegExp(r'\s+')),
       );
-    } catch (_) {
-      return null;
+    } on AuthFailure {
+      rethrow;
+    } on FormatException {
+      throw const AuthFailure(
+        AuthErrorCode.providerUnavailable,
+        'Native sign-in configuration is invalid. Check HTTPS issuer, API origin, mobile client, callback and openid/email scopes.',
+      );
     }
   }
 
-  static NativeOidcSettings? fromEnvironment() => fromValues(const {
+  static NativeOidcSettings fromEnvironment() =>
+      requireValues(environmentValues);
+
+  static const environmentValues = {
     'FAJI_CUSTOMER_NATIVE_AUTH_ENABLED': String.fromEnvironment(
       'FAJI_CUSTOMER_NATIVE_AUTH_ENABLED',
     ),
@@ -90,7 +124,7 @@ class NativeOidcSettings {
     'FAJI_CUSTOMER_OIDC_SCOPES': String.fromEnvironment(
       'FAJI_CUSTOMER_OIDC_SCOPES',
     ),
-  });
+  };
 
   /// Binds persisted credentials to every configured identity/API boundary.
   List<Object> get binding => [

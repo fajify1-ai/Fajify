@@ -53,32 +53,32 @@ class FajiAuthTextField extends StatelessWidget {
     validator: validator,
     onChanged: onChanged,
     style: TextStyle(
-      color: FajiColors.textPrimaryDark,
-      fontSize: recoveryAppearance ? null : 16,
+      color: FajiColors.textPrimary,
+      fontSize: recoveryAppearance ? null : 14,
     ),
     decoration: InputDecoration(
       hintText: hint,
       prefixText: prefixText,
       prefixStyle: const TextStyle(
-        color: FajiColors.textSecondaryDark,
+        color: FajiColors.textSecondary,
         fontSize: 16,
       ),
       suffixIcon: suffixIcon,
-      hintStyle: const TextStyle(color: FajiColors.textSecondaryDark),
+      hintStyle: const TextStyle(color: FajiColors.textSecondary),
       filled: true,
-      fillColor: const Color(0xFF252525),
+      fillColor: const Color(0xFFF4F4F4),
       contentPadding: recoveryAppearance
           ? null
-          : const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
+          : const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
+        borderSide: const BorderSide(color: FajiColors.border),
       ),
       enabledBorder: recoveryAppearance
           ? null
           : OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
+              borderSide: const BorderSide(color: FajiColors.border),
             ),
       focusedBorder: recoveryAppearance
           ? null

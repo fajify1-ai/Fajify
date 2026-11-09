@@ -89,7 +89,7 @@ class _PlanResultsScreenState extends State<PlanResultsScreen> {
     return AnimatedBuilder(
       animation: WishlistRepository.instance,
       builder: (context, _) => Scaffold(
-        backgroundColor: FajiColors.backgroundDark,
+        backgroundColor: FajiColors.background,
         body: Stack(
           children: [
             SafeArea(
@@ -187,7 +187,7 @@ class _ResultsContent extends StatelessWidget {
           padding: EdgeInsets.zero,
           icon: const Icon(
             Icons.chevron_left,
-            color: FajiColors.textSecondaryDark,
+            color: FajiColors.textSecondary,
             size: 30,
           ),
         ),
@@ -195,7 +195,7 @@ class _ResultsContent extends StatelessWidget {
         const Text(
           '🎉 We found some plans\nfor you!',
           style: TextStyle(
-            color: Colors.white,
+            color: FajiColors.textPrimary,
             fontSize: 22,
             height: 1.1,
             fontWeight: FontWeight.w600,
@@ -204,7 +204,7 @@ class _ResultsContent extends StatelessWidget {
         const SizedBox(height: 8),
         const Text(
           'Based on what you picked, here are your best matches.',
-          style: TextStyle(color: FajiColors.textSecondaryDark, fontSize: 13),
+          style: TextStyle(color: FajiColors.textSecondary, fontSize: 13),
         ),
         const SizedBox(height: 13),
         _PreferenceChips(state: state),
@@ -242,7 +242,7 @@ class _ResultsContent extends StatelessWidget {
         if (result.moreOptions.isNotEmpty)
           _ResultSection(
             title: 'MORE OPTIONS',
-            color: FajiColors.textSecondaryDark,
+            color: FajiColors.textSecondary,
             plans: result.moreOptions,
             badge: 'More',
             onSaved: onSaved,
@@ -299,7 +299,7 @@ class _PreferenceChip extends StatelessWidget {
     child: Text(
       label,
       style: const TextStyle(
-        color: Colors.white,
+        color: FajiColors.textPrimary,
         fontSize: 11,
         fontWeight: FontWeight.w600,
       ),
@@ -376,7 +376,7 @@ class _EmptyResults extends StatelessWidget {
           const Text(
             "We couldn't find an exact match.",
             style: TextStyle(
-              color: Colors.white,
+              color: FajiColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),

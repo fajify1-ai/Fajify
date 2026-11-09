@@ -123,7 +123,7 @@ class _PlanForMeStepOneScreenState extends State<PlanForMeStepOneScreen> {
     final selectedPlanType = _flowState.planType;
 
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -140,7 +140,7 @@ class _PlanForMeStepOneScreenState extends State<PlanForMeStepOneScreen> {
                         const Text(
                           'Step 1 of 6',
                           style: TextStyle(
-                            color: FajiColors.textSecondaryDark,
+                            color: FajiColors.textSecondary,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -153,7 +153,7 @@ class _PlanForMeStepOneScreenState extends State<PlanForMeStepOneScreen> {
                     const Text(
                       'What are you\nplanning?',
                       style: TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 30,
                         height: 1.12,
                         fontWeight: FontWeight.w600,
@@ -163,7 +163,7 @@ class _PlanForMeStepOneScreenState extends State<PlanForMeStepOneScreen> {
                     const Text(
                       'Pick what feels right.',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
@@ -196,7 +196,7 @@ class _PlanForMeStepOneScreenState extends State<PlanForMeStepOneScreen> {
             Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
               decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xff202020))),
+                border: Border(top: BorderSide(color: Color(0xffFFFFFF))),
               ),
               child: SizedBox(
                 width: double.infinity,
@@ -233,8 +233,8 @@ class _BackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: FajiColors.surfaceDark,
-      shape: const CircleBorder(side: BorderSide(color: FajiColors.borderDark)),
+      color: FajiColors.surface,
+      shape: const CircleBorder(side: BorderSide(color: FajiColors.border)),
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
@@ -243,7 +243,7 @@ class _BackButton extends StatelessWidget {
           height: 48,
           child: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: FajiColors.textSecondaryDark,
+            color: FajiColors.textSecondary,
             size: 21,
           ),
         ),
@@ -269,7 +269,7 @@ class _ProgressIndicator extends StatelessWidget {
             decoration: BoxDecoration(
               color: index < completedSteps
                   ? FajiColors.primary
-                  : FajiColors.borderDark,
+                  : FajiColors.border,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -293,7 +293,7 @@ class _PlanTypeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? const Color(0xff292020) : FajiColors.surfaceDark,
+      color: selected ? const Color(0xFFFFECEB) : FajiColors.surface,
       borderRadius: BorderRadius.circular(17),
       child: InkWell(
         onTap: onTap,
@@ -302,7 +302,7 @@ class _PlanTypeCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(17),
             border: Border.all(
-              color: selected ? FajiColors.primary : FajiColors.borderDark,
+              color: selected ? FajiColors.primary : FajiColors.border,
               width: selected ? 1.5 : 1,
             ),
           ),
@@ -318,7 +318,7 @@ class _PlanTypeCard extends StatelessWidget {
                       type.label,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
@@ -407,7 +407,7 @@ class _PlanForMeStepTwoScreenState
     final displayValue = _selectedRange?.label ?? '$_exactPeopleCount';
 
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -424,7 +424,7 @@ class _PlanForMeStepTwoScreenState
                         const Text(
                           'Step 2 of 6',
                           style: TextStyle(
-                            color: FajiColors.textSecondaryDark,
+                            color: FajiColors.textSecondary,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -437,7 +437,7 @@ class _PlanForMeStepTwoScreenState
                     const Text(
                       'How many people\nare coming?',
                       style: TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 30,
                         height: 1.12,
                         fontWeight: FontWeight.w600,
@@ -447,7 +447,7 @@ class _PlanForMeStepTwoScreenState
                     const Text(
                       'No typing needed.',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
@@ -465,7 +465,7 @@ class _PlanForMeStepTwoScreenState
                     const Text(
                       'OR PICK A RANGE',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 14,
                         letterSpacing: 1.1,
                         fontWeight: FontWeight.w500,
@@ -492,7 +492,7 @@ class _PlanForMeStepTwoScreenState
             Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
               decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xff202020))),
+                border: Border(top: BorderSide(color: Color(0xffFFFFFF))),
               ),
               child: Column(
                 children: [
@@ -522,7 +522,7 @@ class _PlanForMeStepTwoScreenState
                     child: const Text(
                       '← Go back',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
@@ -594,7 +594,7 @@ class _PeopleCounterPanel extends StatelessWidget {
                 const Text(
                   'people',
                   style: TextStyle(
-                    color: FajiColors.textSecondaryDark,
+                    color: FajiColors.textSecondary,
                     fontSize: 14,
                   ),
                 ),
@@ -633,7 +633,7 @@ class _CounterButton extends StatelessWidget {
           child: Icon(
             icon,
             size: 29,
-            color: onTap == null ? FajiColors.textSecondaryDark : Colors.white,
+            color: onTap == null ? FajiColors.textSecondary : Colors.white,
           ),
         ),
       ),
@@ -655,7 +655,7 @@ class _PeopleRangeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? FajiColors.primary : FajiColors.backgroundDark,
+      color: selected ? FajiColors.primary : FajiColors.background,
       borderRadius: BorderRadius.circular(24),
       child: InkWell(
         onTap: onTap,
@@ -667,13 +667,13 @@ class _PeopleRangeChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: selected ? FajiColors.primary : FajiColors.borderDark,
+              color: selected ? FajiColors.primary : FajiColors.border,
             ),
           ),
           child: Text(
             range.label,
             style: TextStyle(
-              color: selected ? Colors.white : FajiColors.textPrimaryDark,
+              color: selected ? Colors.white : FajiColors.textPrimary,
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),
@@ -725,7 +725,7 @@ class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
     final customLocation = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: FajiColors.surfaceDark,
+      backgroundColor: FajiColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
@@ -743,7 +743,7 @@ class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
             const Text(
               'Choose another location',
               style: TextStyle(
-                color: FajiColors.textPrimaryDark,
+                color: FajiColors.textPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
               ),
@@ -760,18 +760,18 @@ class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
                 }
               },
               style: const TextStyle(
-                color: FajiColors.textPrimaryDark,
+                color: FajiColors.textPrimary,
                 fontSize: 17,
               ),
               decoration: InputDecoration(
                 hintText: 'Search location...',
-                hintStyle: const TextStyle(color: FajiColors.textSecondaryDark),
+                hintStyle: const TextStyle(color: FajiColors.textSecondary),
                 prefixIcon: const Icon(
                   Icons.search_rounded,
-                  color: FajiColors.textSecondaryDark,
+                  color: FajiColors.textSecondary,
                 ),
                 filled: true,
-                fillColor: FajiColors.backgroundDark,
+                fillColor: FajiColors.background,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide.none,
@@ -830,7 +830,7 @@ class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -847,7 +847,7 @@ class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
                         const Text(
                           'Step 3 of 6',
                           style: TextStyle(
-                            color: FajiColors.textSecondaryDark,
+                            color: FajiColors.textSecondary,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -860,7 +860,7 @@ class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
                     const Text(
                       'Where do you\nwant to go?',
                       style: TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 30,
                         height: 1.12,
                         fontWeight: FontWeight.w600,
@@ -870,7 +870,7 @@ class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
                     const Text(
                       'Choose a place that works for you.',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
@@ -906,7 +906,7 @@ class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
             Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
               decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xff202020))),
+                border: Border(top: BorderSide(color: Color(0xffFFFFFF))),
               ),
               child: Column(
                 children: [
@@ -938,7 +938,7 @@ class _PlanForMeStepThreeScreenState extends State<PlanForMeStepThreeScreen> {
                     child: const Text(
                       '← Go back',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
@@ -970,7 +970,7 @@ class _LocationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? const Color(0xff292020) : FajiColors.surfaceDark,
+      color: selected ? const Color(0xff292020) : FajiColors.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -981,7 +981,7 @@ class _LocationCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? FajiColors.primary : FajiColors.borderDark,
+              color: selected ? FajiColors.primary : FajiColors.border,
               width: selected ? 1.5 : 1,
             ),
           ),
@@ -990,16 +990,14 @@ class _LocationCard extends StatelessWidget {
               Icon(
                 icon,
                 size: 22,
-                color: selected
-                    ? FajiColors.primary
-                    : FajiColors.textSecondaryDark,
+                color: selected ? FajiColors.primary : FajiColors.textSecondary,
               ),
               const SizedBox(width: 13),
               Expanded(
                 child: Text(
                   label,
                   style: const TextStyle(
-                    color: FajiColors.textPrimaryDark,
+                    color: FajiColors.textPrimary,
                     fontSize: 17,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1061,7 +1059,7 @@ class _PlanForMeStepFourScreenState extends State<PlanForMeStepFourScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -1078,7 +1076,7 @@ class _PlanForMeStepFourScreenState extends State<PlanForMeStepFourScreen> {
                         const Text(
                           'Step 4 of 6',
                           style: TextStyle(
-                            color: FajiColors.textSecondaryDark,
+                            color: FajiColors.textSecondary,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1091,7 +1089,7 @@ class _PlanForMeStepFourScreenState extends State<PlanForMeStepFourScreen> {
                     const Text(
                       'What feels\ncomfortable?',
                       style: TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 30,
                         height: 1.12,
                         fontWeight: FontWeight.w600,
@@ -1101,7 +1099,7 @@ class _PlanForMeStepFourScreenState extends State<PlanForMeStepFourScreen> {
                     const Text(
                       "We'll find options around your range.",
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1121,7 +1119,7 @@ class _PlanForMeStepFourScreenState extends State<PlanForMeStepFourScreen> {
                       child: Text(
                         'Your budget is a preference, not a hard limit.',
                         style: TextStyle(
-                          color: FajiColors.textSecondaryDark,
+                          color: FajiColors.textSecondary,
                           fontSize: 13,
                         ),
                       ),
@@ -1133,7 +1131,7 @@ class _PlanForMeStepFourScreenState extends State<PlanForMeStepFourScreen> {
             Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
               decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xff202020))),
+                border: Border(top: BorderSide(color: Color(0xffFFFFFF))),
               ),
               child: Column(
                 children: [
@@ -1165,7 +1163,7 @@ class _PlanForMeStepFourScreenState extends State<PlanForMeStepFourScreen> {
                     child: const Text(
                       '← Go back',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1195,7 +1193,7 @@ class _BudgetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? const Color(0xff292020) : FajiColors.surfaceDark,
+      color: selected ? const Color(0xff292020) : FajiColors.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -1206,7 +1204,7 @@ class _BudgetCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? FajiColors.primary : FajiColors.borderDark,
+              color: selected ? FajiColors.primary : FajiColors.border,
               width: selected ? 1.5 : 1,
             ),
           ),
@@ -1220,7 +1218,7 @@ class _BudgetCard extends StatelessWidget {
                     Text(
                       budget.label,
                       style: const TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1229,7 +1227,7 @@ class _BudgetCard extends StatelessWidget {
                     Text(
                       budget.description,
                       style: const TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 14,
                       ),
                     ),
@@ -1303,12 +1301,12 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
           : now,
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.dark(
+          colorScheme: const ColorScheme.light(
             primary: FajiColors.primary,
-            surface: FajiColors.surfaceDark,
+            surface: FajiColors.surface,
           ),
           dialogTheme: const DialogThemeData(
-            backgroundColor: FajiColors.surfaceDark,
+            backgroundColor: FajiColors.surface,
           ),
         ),
         child: child!,
@@ -1355,7 +1353,7 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
     final dateSelected = _selectedDate != null;
 
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -1372,7 +1370,7 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
                         const Text(
                           'Step 5 of 6',
                           style: TextStyle(
-                            color: FajiColors.textSecondaryDark,
+                            color: FajiColors.textSecondary,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1385,7 +1383,7 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
                     const Text(
                       'When are\nyou going?',
                       style: TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 30,
                         height: 1.12,
                         fontWeight: FontWeight.w600,
@@ -1395,7 +1393,7 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
                     const Text(
                       'Pick a date and time.',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1458,7 +1456,7 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
             Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
               decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xff202020))),
+                border: Border(top: BorderSide(color: Color(0xffFFFFFF))),
               ),
               child: Column(
                 children: [
@@ -1492,7 +1490,7 @@ class _PlanForMeStepFiveScreenState extends State<PlanForMeStepFiveScreen> {
                     child: const Text(
                       '← Go back',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1517,7 +1515,7 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) => Text(
     label,
     style: const TextStyle(
-      color: FajiColors.textSecondaryDark,
+      color: FajiColors.textSecondary,
       fontSize: 14,
       letterSpacing: 1.1,
       fontWeight: FontWeight.w500,
@@ -1539,7 +1537,7 @@ class _DateOptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? FajiColors.primary : FajiColors.surfaceDark,
+      color: selected ? FajiColors.primary : FajiColors.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -1549,7 +1547,7 @@ class _DateOptionCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? FajiColors.primary : FajiColors.borderDark,
+              color: selected ? FajiColors.primary : FajiColors.border,
               width: selected ? 1.5 : 1,
             ),
           ),
@@ -1557,7 +1555,7 @@ class _DateOptionCard extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: selected ? Colors.white : FajiColors.textPrimaryDark,
+              color: selected ? Colors.white : FajiColors.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -1579,9 +1577,9 @@ class _TimeSelector extends StatelessWidget {
     return Container(
       height: 54,
       decoration: BoxDecoration(
-        color: FajiColors.surfaceDark,
+        color: FajiColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: FajiColors.borderDark),
+        border: Border.all(color: FajiColors.border),
       ),
       clipBehavior: Clip.antiAlias,
       child: Row(
@@ -1598,15 +1596,13 @@ class _TimeSelector extends StatelessWidget {
                     border: Border(
                       right: time == PlanTimeOfDay.night
                           ? BorderSide.none
-                          : const BorderSide(color: FajiColors.borderDark),
+                          : const BorderSide(color: FajiColors.border),
                     ),
                   ),
                   child: Text(
                     time.label,
                     style: TextStyle(
-                      color: selected
-                          ? Colors.white
-                          : FajiColors.textPrimaryDark,
+                      color: selected ? Colors.white : FajiColors.textPrimary,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1707,7 +1703,7 @@ class _PlanForMeStepSixScreenState extends State<PlanForMeStepSixScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -1724,7 +1720,7 @@ class _PlanForMeStepSixScreenState extends State<PlanForMeStepSixScreen> {
                         const Text(
                           'Step 6 of 6',
                           style: TextStyle(
-                            color: FajiColors.textSecondaryDark,
+                            color: FajiColors.textSecondary,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -1737,7 +1733,7 @@ class _PlanForMeStepSixScreenState extends State<PlanForMeStepSixScreen> {
                     const Text(
                       "What's the vibe?",
                       style: TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 30,
                         height: 1.12,
                         fontWeight: FontWeight.w600,
@@ -1747,7 +1743,7 @@ class _PlanForMeStepSixScreenState extends State<PlanForMeStepSixScreen> {
                     const Text(
                       "Pick what you're feeling. Choose as many as you like.",
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1780,7 +1776,7 @@ class _PlanForMeStepSixScreenState extends State<PlanForMeStepSixScreen> {
             Container(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
               decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xff202020))),
+                border: Border(top: BorderSide(color: Color(0xffFFFFFF))),
               ),
               child: Column(
                 children: [
@@ -1812,7 +1808,7 @@ class _PlanForMeStepSixScreenState extends State<PlanForMeStepSixScreen> {
                     child: const Text(
                       '← Go back',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1845,10 +1841,10 @@ class _VibeCard extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOut,
       decoration: BoxDecoration(
-        color: selected ? const Color(0xff292020) : FajiColors.surfaceDark,
+        color: selected ? const Color(0xff292020) : FajiColors.surface,
         borderRadius: BorderRadius.circular(17),
         border: Border.all(
-          color: selected ? FajiColors.primary : FajiColors.borderDark,
+          color: selected ? FajiColors.primary : FajiColors.border,
           width: selected ? 1.5 : 1,
         ),
       ),
@@ -1869,7 +1865,7 @@ class _VibeCard extends StatelessWidget {
                     Text(
                       vibe.label,
                       style: const TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1908,9 +1904,9 @@ class _LegacyPlanResultsScreen extends StatelessWidget {
         flowState.peopleRange?.label ??
         '${flowState.exactPeopleCount ?? 6} people';
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       appBar: AppBar(
-        backgroundColor: FajiColors.backgroundDark,
+        backgroundColor: FajiColors.background,
         title: const Text('Your Faji Plans'),
       ),
       body: Center(
@@ -1927,7 +1923,7 @@ class _LegacyPlanResultsScreen extends StatelessWidget {
             'Vibes: $vibes',
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Colors.white,
+              color: FajiColors.textPrimary,
               fontSize: 18,
               height: 1.45,
               fontWeight: FontWeight.w600,

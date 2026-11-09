@@ -60,10 +60,10 @@ class _WhatsOnCardState extends State<WhatsOnCard>
               widget.item.image,
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => Container(
-                color: FajiColors.borderDark,
+                color: FajiColors.border,
                 child: const Icon(
                   Icons.image_not_supported_outlined,
-                  color: FajiColors.textSecondaryDark,
+                  color: FajiColors.textSecondary,
                 ),
               ),
             ),

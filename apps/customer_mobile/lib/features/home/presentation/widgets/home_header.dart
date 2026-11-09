@@ -1,4 +1,5 @@
 import '../../data/repositories/customer_profile_repository.dart';
+import '../../../auth/presentation/auth_scope.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,11 +7,8 @@ import 'package:flutter/services.dart';
 import '../../../../core/theme/faji_colors.dart';
 
 class HomeHeader extends StatefulWidget {
-  const HomeHeader({
-    super.key,
-    this.repository = const UnavailableCustomerProfileRepository(),
-  });
-  final CustomerProfileRepository repository;
+  const HomeHeader({super.key, this.repository});
+  final CustomerProfileRepository? repository;
 
   @override
   State<HomeHeader> createState() => _HomeHeaderState();
@@ -22,20 +20,67 @@ class _HomeHeaderState extends State<HomeHeader> {
   String? _photoUrl;
   bool _loading = true;
 
+  Object? _session;
+  bool _allowed = false;
+  bool _initialized = false;
+  int _request = 0;
+
   @override
-  void initState() {
-    super.initState();
-    _loadHeader();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolveProfile();
   }
 
-  Future<void> _loadHeader() async {
+  @override
+  void didUpdateWidget(HomeHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.repository != widget.repository) {
+      _initialized = false;
+      _resolveProfile();
+    }
+  }
+
+  void _resolveProfile() {
+    final injected = widget.repository;
+    if (injected != null) {
+      if (!_initialized) {
+        _initialized = true;
+        _loadHeader(injected);
+      }
+      return;
+    }
+    final auth = context
+        .dependOnInheritedWidgetOfExactType<AuthScope>()
+        ?.notifier;
+    if (auth == null) {
+      if (!_initialized) {
+        _initialized = true;
+        _loadHeader(const UnavailableCustomerProfileRepository());
+      }
+      return;
+    }
+    final session = auth.state.session;
+    final allowed = auth.canAccessCustomer;
+    if (!_initialized || !identical(session, _session) || allowed != _allowed) {
+      _initialized = true;
+      _session = session;
+      _allowed = allowed;
+      _loadHeader(AuthenticatedCustomerProfileRepository(auth));
+    }
+  }
+
+  Future<void> _loadHeader(CustomerProfileRepository repository) async {
+    final request = ++_request;
+    _name = 'Loading profile…';
+    _photoUrl = null;
+    _loading = true;
     CustomerProfile? profile;
     try {
-      profile = await widget.repository.loadCurrentProfile();
+      profile = await repository.loadCurrentProfile();
     } catch (_) {
-      // Preserve the header with an explicit unavailable state.
+      // A real network/profile error can fail independently of sign-in.
     }
-    if (!mounted) return;
+    if (!mounted || request != _request) return;
     setState(() {
       _greeting = _greetingForTime(DateTime.now());
       _name = profile?.fullName ?? 'Profile unavailable';
@@ -64,7 +109,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 21,
                         fontWeight: FontWeight.w700,
                       ),
@@ -89,7 +134,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                         'Loading profile…',
                         key: ValueKey('loading'),
                         style: TextStyle(
-                          color: FajiColors.textSecondaryDark,
+                          color: FajiColors.textSecondary,
                           fontSize: 15,
                         ),
                       )
@@ -99,7 +144,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Color(0xffc3c3c8),
+                          color: FajiColors.textSecondary,
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -116,7 +161,7 @@ class _HomeHeaderState extends State<HomeHeader> {
               const SnackBar(
                 content: Text('Notifications will be available here.'),
                 behavior: SnackBarBehavior.floating,
-                backgroundColor: FajiColors.surfaceDark,
+                backgroundColor: FajiColors.surface,
               ),
             );
           },
@@ -146,7 +191,7 @@ class _ProfileAvatar extends StatelessWidget {
 
     return CircleAvatar(
       radius: 28,
-      backgroundColor: FajiColors.surfaceDark,
+      backgroundColor: FajiColors.surface,
       child: ClipOval(
         child: Image.network(
           url,
@@ -169,17 +214,21 @@ class _InitialsAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parts = name.trim().split(RegExp(r'\s+'));
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
     final initials = parts.isEmpty
         ? 'F'
         : parts.take(2).map((part) => part[0]).join().toUpperCase();
     return CircleAvatar(
       radius: 28,
-      backgroundColor: FajiColors.surfaceDark,
+      backgroundColor: FajiColors.surface,
       child: Text(
         initials,
         style: const TextStyle(
-          color: FajiColors.textPrimaryDark,
+          color: FajiColors.textPrimary,
           fontSize: 17,
           fontWeight: FontWeight.w800,
         ),
@@ -196,7 +245,7 @@ class _NotificationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: FajiColors.surfaceDark,
+      color: FajiColors.surface,
       shape: const CircleBorder(),
       child: InkWell(
         onTap: onTap,
@@ -209,7 +258,7 @@ class _NotificationButton extends StatelessWidget {
             children: [
               const Icon(
                 Icons.notifications_none_rounded,
-                color: FajiColors.textPrimaryDark,
+                color: FajiColors.textPrimary,
                 size: 27,
               ),
               Positioned(

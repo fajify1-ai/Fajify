@@ -11,9 +11,9 @@ class BookingReviewPlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       appBar: AppBar(
-        backgroundColor: FajiColors.backgroundDark,
+        backgroundColor: FajiColors.background,
         title: const Text('Choose a time'),
       ),
       body: Center(
@@ -21,7 +21,7 @@ class BookingReviewPlaceholderScreen extends StatelessWidget {
           'Review Booking\n\n${draft.plan.title}\n${draft.bookingTimePeriod?.label}',
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Colors.white,
+            color: FajiColors.textPrimary,
             fontSize: 22,
             fontWeight: FontWeight.w700,
           ),

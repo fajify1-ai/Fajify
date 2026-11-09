@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'core/theme/faji_theme.dart';
+import 'features/legal/presentation/legal_document_screen.dart';
+import 'features/legal/presentation/legal_routes.dart';
 import 'features/auth/application/auth_controller.dart';
 import 'features/auth/data/customer_auth_composition.dart';
 import 'features/auth/domain/auth_session.dart';
@@ -23,6 +25,8 @@ class FajiRoutes {
   static const userHome = '/user-home';
   static const businessLogin = '/business-login';
   static const rideLogin = '/ride-login';
+  static const termsOfService = LegalRoutes.terms;
+  static const privacyPolicy = LegalRoutes.privacy;
 }
 
 Future<void> main() async {
@@ -104,7 +108,8 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
       title: 'Faji',
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
-      theme: FajiTheme.dark,
+      theme: FajiTheme.light,
+      themeMode: ThemeMode.light,
       home: SplashScreen(
         onFinish: () => navigatorKey.currentState?.pushReplacementNamed(
           _auth.canAccessCustomer
@@ -113,6 +118,8 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
         ),
       ),
       routes: {
+        FajiRoutes.termsOfService: (_) => const TermsOfServiceScreen(),
+        FajiRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
         FajiRoutes.roleSelection: (_) => const RoleSelectionScreen(),
         FajiRoutes.businessLogin: (_) => const BusinessLoginScreen(),
         FajiRoutes.rideLogin: (_) => const RideLoginScreen(),

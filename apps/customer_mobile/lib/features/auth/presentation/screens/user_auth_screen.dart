@@ -10,13 +10,13 @@ import '../../domain/auth_input.dart';
 import '../widgets/auth_error_message.dart';
 import '../widgets/auth_form_layout.dart';
 import '../auth_scope.dart';
-import '../customer_auth_navigation.dart';
 import '../widgets/auth_status_view.dart';
 import '../widgets/auth_divider.dart';
 import '../widgets/auth_primary_button.dart';
 import '../widgets/auth_segmented_control.dart';
 import '../widgets/faji_auth_text_field.dart';
 import '../widgets/google_auth_button.dart';
+import '../widgets/registration_legal_acknowledgement.dart';
 
 class UserAuthScreen extends StatefulWidget {
   const UserAuthScreen({super.key});
@@ -88,53 +88,29 @@ class _UserAuthScreenState extends State<UserAuthScreen>
   }
 
   Future<void> _signIn() async {
-    final browserAuth = AuthScope.of(context);
-    if (browserAuth.usesBrowserAuthentication) {
-      if (signingIn) return;
-      setState(() => signingIn = true);
-      await browserAuth.authorize();
-      if (!mounted) return;
-      setState(() => signingIn = false);
-      if (browserAuth.canAccessCustomer) {
-        continueToCustomerHome(context, browserAuth);
-      }
-      return;
-    }
     if (signingIn || !(_signInForm.currentState?.validate() ?? false)) return;
-    final email = AuthInput.normalizeEmail(_email.text);
+    final email = _email.text.trim();
     final auth = AuthScope.of(context);
     setState(() => signingIn = true);
     await auth.signIn(email, _signPassword.text);
     if (!mounted) return;
+    _signPassword.clear();
     setState(() => signingIn = false);
     if (auth.canAccessCustomer) {
-      _signPassword.clear();
       Navigator.of(context)
           .pushNamedAndRemoveUntil(FajiRoutes.userHome, (route) => false);
-    } else {
-      _message(
-        auth.state.failure?.message ??
-            'Your account is not ready for customer access.',
-      );
     }
+    // AuthStatusView keeps denied, pending, and failed attempts visible inline.
   }
 
   Future<void> _registerAccount() async {
-    final browserAuth = AuthScope.of(context);
-    if (browserAuth.usesBrowserAuthentication) {
-      if (registering) return;
-      setState(() => registering = true);
-      await browserAuth.beginRegistration();
-      if (!mounted) return;
-      setState(() => registering = false);
-      continueToCustomerHome(context, browserAuth);
-      return;
-    }
     if (registering || !(_registerForm.currentState?.validate() ?? false)) {
       return;
     }
     if (!terms) {
-      _message('Please accept the Terms of Service and Privacy Policy.');
+      _message(
+        'Please accept the Terms of Service and acknowledge the Privacy Policy.',
+      );
       return;
     }
     final auth = AuthScope.of(context);
@@ -148,9 +124,12 @@ class _UserAuthScreenState extends State<UserAuthScreen>
         phone: _phone.text,
         dateOfBirth: _dob.text,
         homeAddress: _address.text,
+        termsAccepted: terms,
       ),
     );
     if (!mounted) return;
+    _regPassword.clear();
+    _confirmPassword.clear();
     setState(() => registering = false);
     if (auth.canAccessCustomer) {
       _regPassword.clear();
@@ -304,12 +283,14 @@ class _AuthSheet extends StatelessWidget {
     final height = MediaQuery.sizeOf(context).height;
     // Keep the sheet fixed across both tabs. Register content scrolls inside
     // the available area instead of resizing the anchored sheet.
-    final panelHeight = register ? height * .79 : height * .60;
+    final panelHeight = register
+        ? height * .92
+        : (height * .57).clamp(540.0, height * .9);
     return Container(
       height: panelHeight,
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: FajiColors.surfaceDark,
+        color: FajiColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: SafeArea(
@@ -318,15 +299,15 @@ class _AuthSheet extends StatelessWidget {
           children: [
             const SizedBox(height: 14),
             Container(
-              width: 48,
-              height: 5,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
-                color: FajiColors.borderDark,
+                color: FajiColors.border,
                 borderRadius: BorderRadius.circular(5),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(30, 18, 30, 0),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -338,8 +319,8 @@ class _AuthSheet extends StatelessWidget {
                           'FAJI ACCOUNT',
                           style: TextStyle(
                             color: FajiColors.primary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
                             letterSpacing: .3,
                           ),
                         ),
@@ -347,26 +328,26 @@ class _AuthSheet extends StatelessWidget {
                         Text(
                           register ? 'Create your account' : 'Welcome back',
                           style: const TextStyle(
-                            color: FajiColors.textPrimaryDark,
-                            fontSize: 27,
-                            fontWeight: FontWeight.w700,
+                            color: FajiColors.textPrimary,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
                     ),
                   ),
                   Material(
-                    color: const Color(0xFF292929),
+                    color: const Color(0xFFF4F4F4),
                     shape: const CircleBorder(),
                     child: InkWell(
                       onTap: onClose,
                       customBorder: const CircleBorder(),
                       child: const SizedBox(
-                        width: 42,
-                        height: 42,
+                        width: 32,
+                        height: 32,
                         child: Icon(
                           Icons.close,
-                          color: FajiColors.textSecondaryDark,
+                          color: FajiColors.textSecondary,
                           size: 19,
                         ),
                       ),
@@ -375,19 +356,21 @@ class _AuthSheet extends StatelessWidget {
                 ],
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              child: AuthSegmentedControl(
+                registerSelected: register,
+                onChanged: onTabChanged,
+              ),
+            ),
             Expanded(
               child: ScrollConfiguration(
                 behavior: ScrollConfiguration.of(context)
                     .copyWith(scrollbars: false, overscroll: false),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(30, 18, 30, 28),
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
                   child: Column(
                     children: [
-                      AuthSegmentedControl(
-                        registerSelected: register,
-                        onChanged: onTabChanged,
-                      ),
-                      const SizedBox(height: 16),
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 260),
                         transitionBuilder: (child, animation) => FadeTransition(
@@ -471,80 +454,61 @@ class _SignInFields extends StatelessWidget {
   final bool showPassword, signingIn;
   final VoidCallback onPasswordToggle, onForgot, onSubmit, onGoogle;
   @override
-  Widget build(BuildContext context) =>
-      AuthScope.of(context).usesBrowserAuthentication
-      ? AuthFormLayout(
-          formKey: form,
-          children: [
-            AuthStatusView(
-              state: AuthScope.of(context).state,
-              onVerifyEmail: AuthScope.of(context).supportsBrowserJourneys
-                  ? () => verifyEmailAndContinue(context, AuthScope.of(context))
-                  : null,
-            ),
-            AuthPrimaryButton(
-              label: 'Sign In',
-              onTap: onSubmit,
-              busy: signingIn || AuthScope.of(context).isBusy,
-            ),
-            TextButton(
-              onPressed: onForgot,
-              child: const Text('Forgot password?'),
-            ),
-          ],
-        )
-      : AuthFormLayout(
-          formKey: form,
-          children: [
-            _Label('EMAIL OR USERNAME'),
-            FajiAuthTextField(
-              controller: email,
-              hint: 'Enter your email or username',
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              validator: AuthInput.email,
-            ),
-            const SizedBox(height: 18),
-            _Label('PASSWORD'),
-            FajiAuthTextField(
-              controller: password,
-              hint: 'Your password',
-              obscureText: !showPassword,
-              keyboardType: TextInputType.visiblePassword,
-              textInputAction: TextInputAction.done,
-              suffixIcon: IconButton(
-                onPressed: onPasswordToggle,
-                icon: Icon(
-                  showPassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  color: FajiColors.textSecondaryDark,
-                ),
-              ),
-              validator: AuthInput.signInPassword,
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: onForgot,
-                child: const Text(
-                  'Forgot password?',
-                  style: TextStyle(color: FajiColors.primary, fontSize: 15),
-                ),
-              ),
-            ),
-            const SizedBox(height: 2),
-            AuthPrimaryButton(
-              label: 'Sign In',
-              onTap: onSubmit,
-              busy: signingIn,
-            ),
-            const SizedBox(height: 25),
-            const AuthDivider(),
-            const SizedBox(height: 22),
-            GoogleAuthButton(onTap: onGoogle),
-          ],
-        );
+  Widget build(BuildContext context) => AuthFormLayout(
+    formKey: form,
+    children: [
+      AuthStatusView(
+        state: AuthScope.of(context).state,
+        authenticatingMessage: signingIn ? 'Signing you in...' : null,
+      ),
+      _Label('EMAIL OR USERNAME'),
+      FajiAuthTextField(
+        controller: email,
+        hint: 'Enter your email or username',
+        keyboardType: TextInputType.emailAddress,
+        textInputAction: TextInputAction.next,
+        validator: (value) =>
+            AuthInput.requiredValue(value, 'Email or username'),
+        autofillHints: const [AutofillHints.username],
+      ),
+      const SizedBox(height: 18),
+      _Label('PASSWORD'),
+      FajiAuthTextField(
+        controller: password,
+        hint: 'Your password',
+        obscureText: !showPassword,
+        keyboardType: TextInputType.visiblePassword,
+        textInputAction: TextInputAction.done,
+        suffixIcon: IconButton(
+          onPressed: onPasswordToggle,
+          icon: Icon(
+            showPassword
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            color: FajiColors.textSecondary,
+          ),
+        ),
+        validator: AuthInput.signInPassword,
+        autofillHints: const [AutofillHints.password],
+      ),
+      Align(
+        alignment: Alignment.centerRight,
+        child: TextButton(
+          onPressed: onForgot,
+          child: const Text(
+            'Forgot password?',
+            style: TextStyle(color: FajiColors.primary, fontSize: 15),
+          ),
+        ),
+      ),
+      const SizedBox(height: 2),
+      AuthPrimaryButton(label: 'Sign In', onTap: onSubmit, busy: signingIn),
+      const SizedBox(height: 16),
+      const AuthDivider(),
+      const SizedBox(height: 16),
+      GoogleAuthButton(onTap: onGoogle),
+    ],
+  );
 }
 
 class _RegisterFields extends StatelessWidget {
@@ -622,194 +586,115 @@ class _RegisterFields extends StatelessWidget {
     ),
   );
   @override
-  Widget build(BuildContext context) =>
-      AuthScope.of(context).usesBrowserAuthentication
-      ? AuthFormLayout(
-          formKey: form,
-          children: [
-            AuthStatusView(
-              state: AuthScope.of(context).state,
-              onVerifyEmail: AuthScope.of(context).supportsBrowserJourneys
-                  ? () => verifyEmailAndContinue(context, AuthScope.of(context))
-                  : null,
-            ),
-            AuthPrimaryButton(
-              label: 'Create Account',
-              onTap: onCreate,
-              busy: registering || AuthScope.of(context).isBusy,
-            ),
-          ],
-        )
-      : AuthFormLayout(
-          formKey: form,
-          children: [
-            field(
-              'FULL NAME',
-              name,
-              'e.g. Adaeze Okonkwo',
-              type: TextInputType.name,
-              action: TextInputAction.next,
-              validator: (v) => requiredValidator(v, 'Full name'),
-            ),
-            field(
-              'USERNAME',
-              username,
-              'yourhandle',
-              type: TextInputType.text,
-              action: TextInputAction.next,
-              validator: (v) {
-                final e = requiredValidator(v, 'Username');
-                if (e != null) return e;
-                return v!.contains(' ')
-                    ? 'Username cannot contain spaces'
-                    : null;
-              },
-              prefix: '@ ',
-            ),
-            field(
-              'EMAIL ADDRESS',
-              email,
-              'you@email.com',
-              type: TextInputType.emailAddress,
-              action: TextInputAction.next,
-              validator: emailValidator,
-            ),
-            field(
-              'PHONE NUMBER',
-              phone,
-              '0801 234 5678',
-              type: TextInputType.phone,
-              action: TextInputAction.next,
-              validator: (v) => requiredValidator(v, 'Phone'),
-              prefix: '+234  ',
-            ),
-            field(
-              'DATE OF BIRTH',
-              dob,
-              'mm/dd/yyyy',
-              readOnly: true,
-              onTap: () => _pickDate(context),
-              suffix: IconButton(
-                onPressed: () => _pickDate(context),
-                icon: const Icon(Icons.calendar_today_outlined, size: 19),
-              ),
-              validator: (v) => requiredValidator(v, 'Date of birth'),
-            ),
-            field(
-              'HOME ADDRESS',
-              address,
-              'Street, City, State',
-              type: TextInputType.streetAddress,
-              action: TextInputAction.next,
-              validator: (v) => requiredValidator(v, 'Address'),
-            ),
-            field(
-              'PASSWORD',
-              password,
-              'Min. 8 characters',
-              type: TextInputType.visiblePassword,
-              action: TextInputAction.next,
-              obscureText: !showPassword,
-              suffix: IconButton(
-                onPressed: onPasswordToggle,
-                icon: Icon(
-                  showPassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  color: FajiColors.textSecondaryDark,
-                ),
-              ),
-              validator: passwordValidator,
-            ),
-            field(
-              'CONFIRM PASSWORD',
-              confirm,
-              'Re-enter password',
-              type: TextInputType.visiblePassword,
-              action: TextInputAction.done,
-              obscureText: !showConfirm,
-              suffix: IconButton(
-                onPressed: onConfirmToggle,
-                icon: Icon(
-                  showConfirm
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  color: FajiColors.textSecondaryDark,
-                ),
-              ),
-              validator: (v) {
-                final e = passwordValidator(v);
-                return e ??
-                    (v != password.text ? 'Passwords do not match' : null);
-              },
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Checkbox(
-                  value: terms,
-                  onChanged: onTermsChanged,
-                  activeColor: FajiColors.primary,
-                  side: const BorderSide(color: FajiColors.borderDark),
-                ),
-                Expanded(
-                  child: Wrap(
-                    children: [
-                      const Text(
-                        "I agree to Faji's ",
-                        style: TextStyle(
-                          color: FajiColors.textSecondaryDark,
-                          fontSize: 12,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => onMessage(
-                          'Terms of Service will be connected later.',
-                        ),
-                        child: const Text(
-                          'Terms of Service',
-                          style: TextStyle(
-                            color: FajiColors.primary,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      const Text(
-                        ' and ',
-                        style: TextStyle(
-                          color: FajiColors.textSecondaryDark,
-                          fontSize: 12,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => onMessage(
-                          'Privacy Policy will be connected later.',
-                        ),
-                        child: const Text(
-                          'Privacy Policy',
-                          style: TextStyle(
-                            color: FajiColors.primary,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            AuthPrimaryButton(
-              label: 'Create Account',
-              onTap: onCreate,
-              busy: registering,
-            ),
-            const SizedBox(height: 25),
-            const AuthDivider(),
-            const SizedBox(height: 22),
-            GoogleAuthButton(onTap: onGoogle),
-          ],
-        );
+  Widget build(BuildContext context) => AuthFormLayout(
+    formKey: form,
+    children: [
+      field(
+        'FULL NAME',
+        name,
+        'e.g. Adaeze Okonkwo',
+        type: TextInputType.name,
+        action: TextInputAction.next,
+        validator: (v) => requiredValidator(v, 'Full name'),
+      ),
+      field(
+        'USERNAME',
+        username,
+        'yourhandle',
+        type: TextInputType.text,
+        action: TextInputAction.next,
+        validator: (v) {
+          final e = requiredValidator(v, 'Username');
+          if (e != null) return e;
+          return v!.contains(' ') ? 'Username cannot contain spaces' : null;
+        },
+        prefix: '@ ',
+      ),
+      field(
+        'EMAIL ADDRESS',
+        email,
+        'you@email.com',
+        type: TextInputType.emailAddress,
+        action: TextInputAction.next,
+        validator: emailValidator,
+      ),
+      field(
+        'PHONE NUMBER',
+        phone,
+        '0801 234 5678',
+        type: TextInputType.phone,
+        action: TextInputAction.next,
+        validator: (v) => requiredValidator(v, 'Phone'),
+        prefix: '+234  ',
+      ),
+      field(
+        'DATE OF BIRTH',
+        dob,
+        'mm/dd/yyyy',
+        readOnly: true,
+        onTap: () => _pickDate(context),
+        suffix: IconButton(
+          onPressed: () => _pickDate(context),
+          icon: const Icon(Icons.calendar_today_outlined, size: 19),
+        ),
+        validator: (v) => requiredValidator(v, 'Date of birth'),
+      ),
+      field(
+        'HOME ADDRESS',
+        address,
+        'Street, City, State',
+        type: TextInputType.streetAddress,
+        action: TextInputAction.next,
+        validator: (v) => requiredValidator(v, 'Address'),
+      ),
+      field(
+        'PASSWORD',
+        password,
+        'Min. 8 characters',
+        type: TextInputType.visiblePassword,
+        action: TextInputAction.next,
+        obscureText: !showPassword,
+        suffix: IconButton(
+          onPressed: onPasswordToggle,
+          icon: Icon(
+            showPassword
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            color: FajiColors.textSecondary,
+          ),
+        ),
+        validator: passwordValidator,
+      ),
+      field(
+        'CONFIRM PASSWORD',
+        confirm,
+        'Re-enter password',
+        type: TextInputType.visiblePassword,
+        action: TextInputAction.done,
+        obscureText: !showConfirm,
+        suffix: IconButton(
+          onPressed: onConfirmToggle,
+          icon: Icon(
+            showConfirm
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+            color: FajiColors.textSecondary,
+          ),
+        ),
+        validator: (v) {
+          final e = passwordValidator(v);
+          return e ?? (v != password.text ? 'Passwords do not match' : null);
+        },
+      ),
+      RegistrationLegalAcknowledgement(value: terms, onChanged: onTermsChanged),
+      const SizedBox(height: 12),
+      AuthPrimaryButton(
+        label: 'Create Account',
+        onTap: onCreate,
+        busy: registering,
+      ),
+    ],
+  );
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
     final date = await showDatePicker(
@@ -819,9 +704,9 @@ class _RegisterFields extends StatelessWidget {
       lastDate: now,
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.dark(
+          colorScheme: const ColorScheme.light(
             primary: FajiColors.primary,
-            surface: FajiColors.surfaceDark,
+            surface: FajiColors.surface,
           ),
         ),
         child: child!,
@@ -843,9 +728,9 @@ class _Label extends StatelessWidget {
     child: Text(
       text,
       style: const TextStyle(
-        color: FajiColors.textSecondaryDark,
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
+        color: FajiColors.textSecondary,
+        fontSize: 11,
+        fontWeight: FontWeight.w400,
         letterSpacing: .2,
       ),
     ),

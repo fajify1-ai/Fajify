@@ -21,7 +21,7 @@ Future<Uint8List> capture(WidgetTester tester, Widget child) async {
   final key = GlobalKey();
   await tester.pumpWidget(
     MaterialApp(
-      theme: FajiTheme.dark,
+      theme: FajiTheme.light,
       home: Scaffold(
         body: Center(
           child: RepaintBoundary(
@@ -93,7 +93,7 @@ void main() {
   });
 
   testWidgets(
-    'browser sign-in and registration reuse controls without collecting passwords',
+    'sign-in fields stay visible with the production browser-capable repository',
     (tester) async {
       await tester.pumpWidget(const FajiApp());
       await tester.pumpAndSettle();
@@ -101,12 +101,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(AuthFormLayout), findsOneWidget);
       expect(find.byType(AuthPrimaryButton), findsOneWidget);
-      expect(find.byType(FajiAuthTextField), findsNothing);
+      expect(find.byType(FajiAuthTextField), findsNWidgets(2));
       await tester.tap(find.text('Register'));
       await tester.pumpAndSettle();
       expect(find.byType(AuthFormLayout), findsOneWidget);
       expect(find.byType(AuthPrimaryButton), findsOneWidget);
-      expect(find.byType(FajiAuthTextField), findsNothing);
+      expect(find.byType(FajiAuthTextField), findsNWidgets(8));
     },
   );
 
@@ -150,7 +150,7 @@ void main() {
     late BuildContext context;
     await tester.pumpWidget(
       MaterialApp(
-        theme: FajiTheme.dark,
+        theme: FajiTheme.light,
         home: Builder(
           builder: (value) {
             context = value;
@@ -175,33 +175,31 @@ void main() {
         bar.backgroundColor,
         presentation == AuthMessagePresentation.sheet
             ? FajiColors.primary
-            : FajiColors.surfaceDark,
+            : FajiColors.surface,
       );
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       await tester.pumpAndSettle();
     }
   });
 
-  testWidgets('recovery field pixels match the pre-refactor appearance', (
-    tester,
-  ) async {
+  testWidgets('recovery field uses the light appearance', (tester) async {
     final controller = TextEditingController();
     addTearDown(controller.dispose);
-    // Reference is the recovery field before component reuse; test-only fixture.
+    // Reference for the shared light recovery field.
     final original = await capture(
       tester,
       TextField(
         controller: controller,
         keyboardType: TextInputType.emailAddress,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: FajiColors.textPrimary),
         decoration: InputDecoration(
           hintText: 'you@email.com',
-          hintStyle: const TextStyle(color: FajiColors.textSecondaryDark),
+          hintStyle: const TextStyle(color: FajiColors.textSecondary),
           filled: true,
-          fillColor: const Color(0xFF252525),
+          fillColor: const Color(0xFFF4F4F4),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
+            borderSide: const BorderSide(color: FajiColors.border),
           ),
         ),
       ),
@@ -240,7 +238,7 @@ void main() {
     expect(reused, orderedEquals(original));
   });
 
-  testWidgets('sheet button preserves its established paint and dimensions', (
+  testWidgets('sheet button matches the light sign-in reference', (
     tester,
   ) async {
     final original = await capture(
@@ -250,18 +248,22 @@ void main() {
         duration: const Duration(milliseconds: 120),
         child: Material(
           color: FajiColors.primary,
-          borderRadius: BorderRadius.circular(20),
-          elevation: 12,
+          borderRadius: BorderRadius.circular(16),
+          elevation: 5,
           shadowColor: FajiColors.primary.withValues(alpha: .35),
           child: InkWell(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             onTap: () {},
             child: const SizedBox(
-              height: 68,
+              height: 56,
               child: Center(
                 child: Text(
                   'Sign In',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),

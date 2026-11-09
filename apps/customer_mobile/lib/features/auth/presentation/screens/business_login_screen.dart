@@ -27,7 +27,7 @@ class _BusinessLoginScreenState extends State<BusinessLoginScreen> {
       );
     }
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       body: Stack(
         children: [
           Positioned.fill(
@@ -65,7 +65,7 @@ class _BusinessLoginScreenState extends State<BusinessLoginScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 580),
               child: Material(
-                color: FajiColors.surfaceDark,
+                color: FajiColors.surface,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(28),
                 ),
@@ -83,7 +83,7 @@ class _BusinessLoginScreenState extends State<BusinessLoginScreen> {
                             width: 38,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: FajiColors.borderDark,
+                              color: FajiColors.border,
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -120,7 +120,7 @@ class _BusinessLoginScreenState extends State<BusinessLoginScreen> {
                               onPressed: () => Navigator.of(context).pop(),
                               icon: const Icon(Icons.close, size: 20),
                               style: IconButton.styleFrom(
-                                backgroundColor: FajiColors.borderDark,
+                                backgroundColor: FajiColors.border,
                               ),
                             ),
                           ],
@@ -138,19 +138,19 @@ class _BusinessLoginScreenState extends State<BusinessLoginScreen> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: Divider(color: FajiColors.borderDark),
+                                child: Divider(color: FajiColors.border),
                               ),
                               Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 16),
                                 child: Text(
                                   'or',
                                   style: TextStyle(
-                                    color: FajiColors.textSecondaryDark,
+                                    color: FajiColors.textSecondary,
                                   ),
                                 ),
                               ),
                               Expanded(
-                                child: Divider(color: FajiColors.borderDark),
+                                child: Divider(color: FajiColors.border),
                               ),
                             ],
                           ),
@@ -205,9 +205,7 @@ class _ChoiceButton extends StatelessWidget {
       foregroundColor: Colors.white,
       minimumSize: const Size.fromHeight(56),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-      side: BorderSide(
-        color: primary ? FajiColors.primary : FajiColors.borderDark,
-      ),
+      side: BorderSide(color: primary ? FajiColors.primary : FajiColors.border),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
     ),
     child: Row(

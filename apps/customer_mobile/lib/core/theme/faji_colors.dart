@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 abstract final class FajiColors {
-  static const backgroundDark = Color(0xFF0D0D0D);
-  static const surfaceDark = Color(0xFF1C1C1C);
-  static const primary = Color(0xFFFA3F38);
-  static const textPrimaryDark = Color(0xFFFFFFFF);
-  static const textSecondaryDark = Color(0xFF7F7F87);
-  static const borderDark = Color(0xFF303030);
-  static const decorativeDarkRed = Color(0xFF201110);
+  static const background = Color(0xFFFAFAFA);
+  static const surface = Color(0xFFFFFFFF);
+  static const primary = Color(0xFFFF3D38);
+  static const textPrimary = Color(0xFF202020);
+  static const textSecondary = Color(0xFF76767D);
+  static const border = Color(0xFFE8E8EA);
+  static const decorativeRed = Color(0xFFFFECEB);
 }

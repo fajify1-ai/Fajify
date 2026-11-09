@@ -49,7 +49,7 @@ class _VenueCardState extends State<VenueCard>
     final business = widget.business;
     return Container(
       decoration: BoxDecoration(
-        color: FajiColors.surfaceDark,
+        color: FajiColors.surface,
         borderRadius: BorderRadius.circular(20),
       ),
       clipBehavior: Clip.antiAlias,
@@ -115,7 +115,7 @@ class _VenueCardState extends State<VenueCard>
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: FajiColors.textPrimary,
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
@@ -138,13 +138,13 @@ class _VenueCardState extends State<VenueCard>
                     const Icon(
                       Icons.location_on_outlined,
                       size: 16,
-                      color: FajiColors.textSecondaryDark,
+                      color: FajiColors.textSecondary,
                     ),
                     const SizedBox(width: 3),
                     Text(
                       business.location,
                       style: const TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -233,10 +233,10 @@ class _ImageFallback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    color: FajiColors.borderDark,
+    color: FajiColors.border,
     child: const Icon(
       Icons.image_not_supported_outlined,
-      color: FajiColors.textSecondaryDark,
+      color: FajiColors.textSecondary,
     ),
   );
 }
@@ -318,10 +318,7 @@ class _Metric extends StatelessWidget {
         const SizedBox(width: 3),
         Text(
           label,
-          style: const TextStyle(
-            color: FajiColors.textSecondaryDark,
-            fontSize: 10,
-          ),
+          style: const TextStyle(color: FajiColors.textSecondary, fontSize: 10),
         ),
       ],
     ),

@@ -12,12 +12,21 @@ typedef OidcJsonRequest = Future<IdentityResponse> Function(
   String? token,
 );
 
+class NativeAccountIdentity {
+  const NativeAccountIdentity({
+    required this.subject,
+    required this.emailVerified,
+  });
+  final String subject;
+  final bool emailVerified;
+}
+
 abstract interface class NativeAccountVerifier {
-  Future<String> verify(String accessToken);
+  Future<NativeAccountIdentity> verify(String accessToken);
 }
 
 /// Do not decode an ID token and call its claims verified. AppAuth performs
-/// protocol checks; UserInfo proves email/subject using the access token, and
+/// protocol checks; UserInfo supplies the subject and email-verification metadata using the access token, and
 /// NestJS /me independently enforces signed-token and active-account policy.
 class OidcAccountVerifier implements NativeAccountVerifier {
   OidcAccountVerifier(
@@ -45,7 +54,7 @@ class OidcAccountVerifier implements NativeAccountVerifier {
   }
 
   @override
-  Future<String> verify(String accessToken) async {
+  Future<NativeAccountIdentity> verify(String accessToken) async {
     try {
       final discovery = await _get(
         Uri.parse('${settings.issuer}/.well-known/openid-configuration'),
@@ -68,14 +77,11 @@ class OidcAccountVerifier implements NativeAccountVerifier {
       if (subject is! String || subject.trim().isEmpty) {
         throw const FormatException();
       }
-      if (user['email_verified'] != true) {
-        throw const AuthFailure(
-          AuthErrorCode.verificationRequired,
-          'Please verify your email before signing in.',
-        );
-      }
       await _identity.load(accessToken: accessToken, expectedSubject: subject);
-      return subject;
+      return NativeAccountIdentity(
+        subject: subject,
+        emailVerified: user['email_verified'] == true,
+      );
     } on AuthFailure {
       rethrow;
     } catch (_) {

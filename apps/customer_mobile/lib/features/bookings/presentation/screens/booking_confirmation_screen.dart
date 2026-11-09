@@ -33,7 +33,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: FajiColors.background,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -51,7 +51,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
             const Text(
               'Booking Confirmed!',
               style: TextStyle(
-                color: Colors.white,
+                color: FajiColors.textPrimary,
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
               ),
@@ -61,7 +61,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
               'Your ${widget.booking.plan.title} is booked',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: FajiColors.textSecondaryDark,
+                color: FajiColors.textSecondary,
                 fontSize: 13,
               ),
             ),

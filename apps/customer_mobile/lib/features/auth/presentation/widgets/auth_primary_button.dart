@@ -42,7 +42,11 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton> {
           widget.label,
           style: widget._recovery
               ? null
-              : const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              : const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
         );
 
   @override
@@ -66,14 +70,14 @@ class _AuthPrimaryButtonState extends State<AuthPrimaryButton> {
         duration: const Duration(milliseconds: 120),
         child: Material(
           color: FajiColors.primary,
-          borderRadius: BorderRadius.circular(20),
-          elevation: 12,
+          borderRadius: BorderRadius.circular(16),
+          elevation: 5,
           shadowColor: FajiColors.primary.withValues(alpha: .35),
           child: InkWell(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             onTap: widget.busy ? null : widget.onTap,
             onHighlightChanged: (value) => setState(() => pressed = value),
-            child: SizedBox(height: 68, child: Center(child: _content)),
+            child: SizedBox(height: 56, child: Center(child: _content)),
           ),
         ),
       ),

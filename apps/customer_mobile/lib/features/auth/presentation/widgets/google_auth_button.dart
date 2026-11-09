@@ -9,13 +9,13 @@ class GoogleAuthButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF252525),
+      color: const Color(0xFFF4F4F4),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: SizedBox(
-          height: 62,
+          height: 52,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -31,9 +31,9 @@ class GoogleAuthButton extends StatelessWidget {
               Text(
                 'Continue with Google',
                 style: TextStyle(
-                  color: FajiColors.textPrimaryDark.withValues(alpha: .9),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  color: FajiColors.textPrimary.withValues(alpha: .9),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],

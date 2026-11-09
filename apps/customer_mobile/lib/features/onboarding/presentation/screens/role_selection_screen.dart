@@ -53,7 +53,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
           return Stack(
             fit: StackFit.expand,
             children: [
-              const ColoredBox(color: FajiColors.backgroundDark),
+              const ColoredBox(color: FajiColors.background),
               _TopDecoration(animation: _fade(0, .3)),
               SafeArea(
                 child: Stack(
@@ -116,7 +116,7 @@ class _TopDecoration extends StatelessWidget {
         opacity: animation,
         child: Container(
           decoration: const BoxDecoration(
-            color: FajiColors.decorativeDarkRed,
+            color: FajiColors.decorativeRed,
             borderRadius: BorderRadius.only(bottomLeft: Radius.circular(150)),
           ),
         ),
@@ -175,7 +175,7 @@ class _IntroContent extends StatelessWidget {
                       'Plan. Book. Enjoy.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: FajiColors.textPrimaryDark,
+                        color: FajiColors.textPrimary,
                         fontSize: 28,
                         height: 1.1,
                         fontWeight: FontWeight.w700,
@@ -187,7 +187,7 @@ class _IntroContent extends StatelessWidget {
                       'Everything you need to make every\nmoment unforgettable.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 16,
                         height: 1.35,
                         fontWeight: FontWeight.w400,
@@ -267,7 +267,7 @@ class _BottomSheet extends StatelessWidget {
           height: height,
           padding: const EdgeInsets.fromLTRB(24, 30, 24, 14),
           decoration: const BoxDecoration(
-            color: FajiColors.surfaceDark,
+            color: FajiColors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
           ),
           child: Column(
@@ -278,18 +278,18 @@ class _BottomSheet extends StatelessWidget {
               const SizedBox(height: 20),
               const Row(
                 children: [
-                  Expanded(child: Divider(color: FajiColors.borderDark)),
+                  Expanded(child: Divider(color: FajiColors.border)),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 18),
                     child: Text(
                       'or',
                       style: TextStyle(
-                        color: FajiColors.textSecondaryDark,
+                        color: FajiColors.textSecondary,
                         fontSize: 14,
                       ),
                     ),
                   ),
-                  Expanded(child: Divider(color: FajiColors.borderDark)),
+                  Expanded(child: Divider(color: FajiColors.border)),
                 ],
               ),
               const SizedBox(height: 17),

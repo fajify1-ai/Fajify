@@ -12,7 +12,7 @@ import 'package:faji_app/features/auth/presentation/widgets/auth_primary_button.
 import 'package:faji_app/features/auth/presentation/widgets/faji_auth_text_field.dart';
 
 class JourneyRepository extends UnavailableAuthRepository
-    implements CustomerBrowserJourneys {
+    implements CustomerBrowserJourneys, CustomerPasswordSignIn {
   final journeys = <CustomerAuthJourney>[];
   Object? error;
   Completer<AuthSession>? pending;
@@ -29,6 +29,10 @@ class JourneyRepository extends UnavailableAuthRepository
     if (error != null) throw error!;
     return pending?.future ?? session;
   }
+
+  @override
+  Future<AuthSession> signIn(String identifier, String password) =>
+      perform(CustomerAuthJourney.signIn);
 
   @override
   Future<AuthSession> authorize() => perform(CustomerAuthJourney.signIn);
@@ -116,7 +120,7 @@ void main() {
     expect(controller.canAccessCustomer, isTrue);
   });
 
-  test('registration and recovery cannot turn unverified or expired callbacks into access', () async {
+  test('customer registration accepts unverified email but expired callbacks remain denied', () async {
     repo.session = AuthSession(
       subject: 'fixture-subject',
       provider: IdentityProvider.keycloak,
@@ -125,8 +129,9 @@ void main() {
       customerAccess: true,
     );
     await controller.beginRegistration();
-    expect(controller.state.status, AuthStatus.verificationRequired);
-    expect(controller.canAccessCustomer, isFalse);
+    expect(controller.state.status, AuthStatus.authenticated);
+    expect(controller.state.session!.emailVerified, isFalse);
+    expect(controller.canAccessCustomer, isTrue);
     repo.session = AuthSession(
       subject: 'fixture-subject',
       provider: IdentityProvider.keycloak,
@@ -168,7 +173,7 @@ void main() {
   });
 
   testWidgets(
-    'verification feedback reuses shared view and guards customer navigation',
+    'native sign-in never offers email verification for a legacy profile failure',
     (tester) async {
       repo.error = const AuthFailure(
         AuthErrorCode.verificationRequired,
@@ -178,20 +183,57 @@ void main() {
       await tester.pumpAndSettle();
       navigatorKey.currentState!.pushNamed(FajiRoutes.userLogin);
       await tester.pumpAndSettle();
+      await tester.enterText(find.byType(FajiAuthTextField).first, 'test-user');
+      await tester.enterText(
+        find.byType(FajiAuthTextField).last,
+        'test-only-password',
+      );
       await tester.tap(find.widgetWithText(AuthPrimaryButton, 'Sign In'));
       await tester.pumpAndSettle();
-      expect(find.byType(AuthStatusView), findsOneWidget);
-      expect(find.text('Verify your email.'), findsOneWidget);
-      expect(find.byType(FajiAuthTextField), findsNothing);
-      expect(controller.canAccessCustomer, isFalse);
-      repo.error = null;
-      await tester.tap(find.text('Verify email in browser'));
-      await tester.pumpAndSettle();
-      expect(controller.canAccessCustomer, isTrue);
-      expect(repo.journeys.last, CustomerAuthJourney.verifyEmail);
       expect(find.text('Verify email in browser'), findsNothing);
-      await controller.signOut();
+      expect(find.text('Verify your email.'), findsNothing);
+      expect(
+        find.text(
+          'Your account profile needs attention. Please contact support.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(FajiAuthTextField), findsNWidgets(2));
+      expect(repo.journeys, [CustomerAuthJourney.signIn]);
+    },
+  );
+
+  testWidgets(
+    'native sign-in progress and incomplete-profile errors stay visible without browser action',
+    (tester) async {
+      repo.pending = Completer<AuthSession>();
+      await tester.pumpWidget(FajiApp(authController: controller));
       await tester.pumpAndSettle();
+      navigatorKey.currentState!.pushNamed(FajiRoutes.userLogin);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(FajiAuthTextField).first, 'test-user');
+      await tester.enterText(
+        find.byType(FajiAuthTextField).last,
+        'test-only-password',
+      );
+      await tester.tap(find.widgetWithText(AuthPrimaryButton, 'Sign In'));
+      await tester.pump();
+      expect(find.text('Signing you in...'), findsOneWidget);
+      repo.pending!.completeError(
+        const AuthFailure(
+          AuthErrorCode.providerUnavailable,
+          'Your account profile is incomplete. Please contact support.',
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'Your account profile is incomplete. Please contact support.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Verify email in browser'), findsNothing);
+      expect(repo.journeys, [CustomerAuthJourney.signIn]);
       expect(controller.canAccessCustomer, isFalse);
     },
   );

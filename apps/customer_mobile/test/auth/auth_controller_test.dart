@@ -97,21 +97,13 @@ void main() {
     expect(controller.canAccessCustomer, isFalse);
   });
 
-  test(
-    'verification policy is explicit and denies unverified accounts',
-    () async {
-      final verifiedOnly = AuthController(
-        repository,
-        clock: () => now,
-        requireVerifiedEmail: true,
-      );
-      addTearDown(verifiedOnly.dispose);
-      repository.session = session(verified: false);
-      await verifiedOnly.restore();
-      expect(verifiedOnly.state.status, AuthStatus.verificationRequired);
-      expect(verifiedOnly.canAccessCustomer, isFalse);
-    },
-  );
+  test('customer access never requires email verification', () async {
+    repository.session = session(verified: false);
+    await controller.restore();
+    expect(controller.state.status, AuthStatus.authenticated);
+    expect(controller.state.session!.emailVerified, isFalse);
+    expect(controller.canAccessCustomer, isTrue);
+  });
 
   test('logout invalidates a restoration which completes late', () async {
     repository.pendingRestore = Completer<AuthSession?>();
@@ -211,7 +203,7 @@ void main() {
   );
 
   test(
-    'Keycloak verification is required even with legacy compatibility enabled',
+    'customer sign-in accepts unverified email without inventing verification',
     () async {
       repository.session = AuthSession(
         subject: 'fixture-keycloak-subject',
@@ -221,8 +213,9 @@ void main() {
         customerAccess: true,
       );
       await controller.restore();
-      expect(controller.state.status, AuthStatus.verificationRequired);
-      expect(controller.canAccessCustomer, isFalse);
+      expect(controller.state.status, AuthStatus.authenticated);
+      expect(controller.state.session!.emailVerified, isFalse);
+      expect(controller.canAccessCustomer, isTrue);
     },
   );
 

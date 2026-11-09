@@ -39,7 +39,7 @@ class _FajiRoleCardState extends State<FajiRoleCard> {
               border: Border.all(
                 color: _pressed
                     ? FajiColors.primary.withValues(alpha: .7)
-                    : FajiColors.borderDark,
+                    : FajiColors.border,
               ),
               borderRadius: BorderRadius.circular(18),
             ),

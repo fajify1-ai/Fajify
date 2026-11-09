@@ -44,7 +44,7 @@ class PlaceholderLoginScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               subtitle,
-              style: const TextStyle(color: FajiColors.textSecondaryDark),
+              style: const TextStyle(color: FajiColors.textSecondary),
             ),
           ],
         ),

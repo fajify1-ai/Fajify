@@ -17,7 +17,7 @@ const expected=new Set(['faji-customer-mobile','faji-business-mobile','faji-ride
 for(const c of r.clients){
  assert.equal(ids.has(c.clientId),false,'duplicate client');
  ids.add(c.clientId);
- assert.equal(c.directAccessGrantsEnabled,false);
+ assert.equal(c.directAccessGrantsEnabled,c.clientId==='faji-customer-mobile');
  assert.notEqual(c.implicitFlowEnabled,true);
  if(expected.has(c.clientId)){
   assert.ok(c.defaultClientScopes?.includes('basic'),c.clientId+' requires Keycloak subject mapper via default basic scope');

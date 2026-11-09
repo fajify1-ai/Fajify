@@ -68,7 +68,7 @@ class _HomeFilterSheetState extends State<HomeFilterSheet> {
                   const Text(
                     'Filter',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: FajiColors.textPrimary,
                       fontSize: 21,
                       fontWeight: FontWeight.w800,
                     ),
@@ -157,7 +157,7 @@ class _HomeFilterSheetState extends State<HomeFilterSheet> {
     child: Text(
       text,
       style: const TextStyle(
-        color: FajiColors.textSecondaryDark,
+        color: FajiColors.textSecondary,
         fontSize: 12,
         fontWeight: FontWeight.w800,
         letterSpacing: .7,
@@ -200,7 +200,7 @@ class _ChoicePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? FajiColors.primary : FajiColors.surfaceDark,
+      color: selected ? FajiColors.primary : FajiColors.surface,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
@@ -210,13 +210,13 @@ class _ChoicePill extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? FajiColors.primary : FajiColors.borderDark,
+              color: selected ? FajiColors.primary : FajiColors.border,
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? Colors.white : FajiColors.textSecondaryDark,
+              color: selected ? Colors.white : FajiColors.textSecondary,
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),

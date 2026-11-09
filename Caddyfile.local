@@ -1,0 +1,8 @@
+{
+    admin off
+}
+
+https://localhost:3443 {
+    tls infrastructure/certs/localhost.pem infrastructure/certs/localhost-key.pem
+    reverse_proxy 127.0.0.1:3001
+}

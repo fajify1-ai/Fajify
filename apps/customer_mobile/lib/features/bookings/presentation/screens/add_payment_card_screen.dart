@@ -8,9 +8,9 @@ class AddPaymentCardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: FajiColors.backgroundDark,
+      backgroundColor: FajiColors.background,
       appBar: AppBar(
-        backgroundColor: FajiColors.backgroundDark,
+        backgroundColor: FajiColors.background,
         title: const Text('Add a new card'),
       ),
       body: Padding(
@@ -21,7 +21,7 @@ class AddPaymentCardScreen extends StatelessWidget {
             const Text(
               'Secure card setup',
               style: TextStyle(
-                color: Colors.white,
+                color: FajiColors.textPrimary,
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
               ),
@@ -30,7 +30,7 @@ class AddPaymentCardScreen extends StatelessWidget {
             const Text(
               'Card details will be collected by a PCI-compliant payment provider. Faji does not store raw card numbers, CVV, or PIN.',
               style: TextStyle(
-                color: FajiColors.textSecondaryDark,
+                color: FajiColors.textSecondary,
                 fontSize: 15,
                 height: 1.4,
               ),

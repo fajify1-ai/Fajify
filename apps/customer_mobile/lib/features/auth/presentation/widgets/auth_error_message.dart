@@ -37,7 +37,7 @@ void showAuthMessage(
             : null,
       ),
       behavior: SnackBarBehavior.floating,
-      backgroundColor: sheet ? FajiColors.primary : FajiColors.surfaceDark,
+      backgroundColor: sheet ? FajiColors.primary : FajiColors.surface,
       margin: sheet ? const EdgeInsets.fromLTRB(20, 0, 20, 24) : null,
       shape: sheet
           ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))

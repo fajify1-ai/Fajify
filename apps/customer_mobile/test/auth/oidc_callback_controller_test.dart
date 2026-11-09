@@ -63,12 +63,16 @@ void main() {
       expect(controller.canAccessCustomer, isTrue);
     },
   );
-  test('unverified email remains denied after callback', () async {
-    repository.verifiedSession = verified(email: false);
-    await controller.completeAuthorization(callback);
-    expect(controller.state.status, AuthStatus.verificationRequired);
-    expect(controller.canAccessCustomer, isFalse);
-  });
+  test(
+    'unverified email metadata does not block the customer session',
+    () async {
+      repository.verifiedSession = verified(email: false);
+      await controller.completeAuthorization(callback);
+      expect(controller.state.status, AuthStatus.authenticated);
+      expect(controller.state.session!.emailVerified, isFalse);
+      expect(controller.canAccessCustomer, isTrue);
+    },
+  );
   test(
     'missing customer authorization remains denied after callback',
     () async {

@@ -103,7 +103,7 @@ class _FloatingHomeNavState extends State<FloatingHomeNav>
               right: 26,
               bottom: 90,
               child: Material(
-                color: const Color(0xff202020),
+                color: const Color(0xffFFFFFF),
                 elevation: 8,
                 shadowColor: Colors.black87,
                 shape: const CircleBorder(),
@@ -122,7 +122,7 @@ class _FloatingHomeNavState extends State<FloatingHomeNav>
                       child: DecoratedBox(
                         decoration: const ShapeDecoration(
                           shape: CircleBorder(
-                            side: BorderSide(color: Color(0xff363636)),
+                            side: BorderSide(color: Color(0xffF4F4F4)),
                           ),
                         ),
                         child: Icon(
@@ -172,7 +172,7 @@ class _QuickAction extends StatelessWidget {
             opacity: visible ? 1 : 0,
             duration: const Duration(milliseconds: 220),
             child: Material(
-              color: primary ? FajiColors.primary : FajiColors.surfaceDark,
+              color: primary ? FajiColors.primary : FajiColors.surface,
               borderRadius: BorderRadius.circular(31),
               elevation: 8,
               child: InkWell(
@@ -186,12 +186,12 @@ class _QuickAction extends StatelessWidget {
                     borderRadius: BorderRadius.circular(31),
                     border: primary
                         ? null
-                        : Border.all(color: FajiColors.borderDark, width: 2),
+                        : Border.all(color: FajiColors.border, width: 2),
                   ),
                   child: Text(
                     label,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: primary ? Colors.white : FajiColors.textPrimary,
                       fontSize: 16,
                       fontWeight: primary ? FontWeight.w800 : FontWeight.w700,
                     ),
@@ -226,12 +226,12 @@ class _NavigationBar extends StatelessWidget {
       height: 74,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: const Color(0xff202020),
+        color: const Color(0xffFFFFFF),
         borderRadius: BorderRadius.circular(37),
-        border: Border.all(color: const Color(0xff363636)),
+        border: Border.all(color: const Color(0xffF4F4F4)),
         boxShadow: const [
           BoxShadow(
-            color: Colors.black87,
+            color: Colors.black12,
             blurRadius: 22,
             offset: Offset(0, 10),
           ),
@@ -255,7 +255,7 @@ class _NavigationBar extends StatelessWidget {
                       size: 26,
                       color: active
                           ? FajiColors.primary
-                          : FajiColors.textSecondaryDark,
+                          : FajiColors.textSecondary,
                     ),
                     const SizedBox(height: 3),
                     Text(
@@ -263,7 +263,7 @@ class _NavigationBar extends StatelessWidget {
                       style: TextStyle(
                         color: active
                             ? FajiColors.primary
-                            : FajiColors.textSecondaryDark,
+                            : FajiColors.textSecondary,
                         fontSize: 12,
                         fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                       ),

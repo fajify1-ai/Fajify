@@ -29,7 +29,7 @@ class RecommendationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: FajiColors.surfaceDark,
+        color: FajiColors.surface,
         borderRadius: BorderRadius.circular(18),
       ),
       clipBehavior: Clip.antiAlias,
@@ -69,7 +69,7 @@ class RecommendationCard extends StatelessWidget {
                   right: 10,
                   top: 10,
                   child: Material(
-                    color: const Color(0xdd171717),
+                    color: const Color(0xddFFFFFF),
                     shape: const CircleBorder(),
                     child: InkWell(
                       onTap: () {
@@ -104,7 +104,7 @@ class RecommendationCard extends StatelessWidget {
                       child: Text(
                         plan.title,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: FajiColors.textPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),
@@ -125,7 +125,7 @@ class RecommendationCard extends StatelessWidget {
                 Text(
                   '⌖ ${plan.location}',
                   style: const TextStyle(
-                    color: FajiColors.textSecondaryDark,
+                    color: FajiColors.textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -135,7 +135,7 @@ class RecommendationCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: FajiColors.textSecondaryDark,
+                    color: FajiColors.textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -143,7 +143,7 @@ class RecommendationCard extends StatelessWidget {
                 Text(
                   '♧ Up to ${plan.maximumGuests}',
                   style: const TextStyle(
-                    color: FajiColors.textSecondaryDark,
+                    color: FajiColors.textSecondary,
                     fontSize: 12,
                   ),
                 ),
@@ -198,10 +198,10 @@ class _PlanImage extends StatelessWidget {
     plan.imageAsset,
     fit: BoxFit.cover,
     errorBuilder: (_, _, _) => Container(
-      color: FajiColors.borderDark,
+      color: FajiColors.border,
       child: const Icon(
         Icons.image_not_supported_outlined,
-        color: FajiColors.textSecondaryDark,
+        color: FajiColors.textSecondary,
         size: 32,
       ),
     ),
