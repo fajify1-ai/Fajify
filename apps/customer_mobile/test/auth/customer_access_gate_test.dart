@@ -19,8 +19,8 @@ void main() {
       await tester.tap(find.text('Continue in browser'));
       await tester.pumpAndSettle();
       expect(
-        find.text(
-          'Keycloak sign-in is awaiting approved integration configuration.',
+        find.textContaining(
+          'Native sign-in is disabled or missing configuration.',
         ),
         findsOneWidget,
       );

@@ -83,13 +83,17 @@ class Gateway implements NativeOidcGateway {
 
 class Accounts implements NativeAccountVerifier {
   String subject = 'subject';
+  bool emailVerified = true;
   Object? error;
   int checks = 0;
   @override
-  Future<String> verify(String accessToken) async {
+  Future<NativeAccountIdentity> verify(String accessToken) async {
     checks++;
     if (error != null) throw error!;
-    return subject;
+    return NativeAccountIdentity(
+      subject: subject,
+      emailVerified: emailVerified,
+    );
   }
 }
 
@@ -444,15 +448,60 @@ void main() {
         );
       },
     );
-    expect(await verifier.verify('access-fixture'), 'subject');
+    expect((await verifier.verify('access-fixture')).subject, 'subject');
     expect(calls.last, '/api/v1/auth/me');
     expect(calls, hasLength(3));
   });
 
+  test('unverified customer email stays false while API account authorization remains required', () async {
+    for (final status in [200, 403]) {
+      var accountChecks = 0;
+      final verifier = OidcAccountVerifier(
+        settings(),
+        identity: CustomerIdentityClient(
+          apiOrigin: settings().apiOrigin,
+          request: (_, _) async {
+            accountChecks++;
+            return (
+              statusCode: status,
+              body: '{"subject":"subject","roles":["customer"]}',
+            );
+          },
+        ),
+        request: (_, token) async => (
+          statusCode: 200,
+          body: token == null
+              ? jsonEncode({
+                  'issuer': settings().issuer.toString(),
+                  'userinfo_endpoint': '${settings().issuer}/userinfo-fixture',
+                })
+              : '{"sub":"subject","email_verified":false}',
+        ),
+      );
+      if (status == 200) {
+        final account = await verifier.verify('access-fixture');
+        expect(account.subject, 'subject');
+        expect(account.emailVerified, isFalse);
+      } else {
+        await expectLater(
+          verifier.verify('access-fixture'),
+          throwsA(
+            isA<AuthFailure>().having(
+              (e) => e.code,
+              'code',
+              AuthErrorCode.disabled,
+            ),
+          ),
+        );
+      }
+      expect(accountChecks, 1);
+    }
+  });
+
   test(
-    'UserInfo refuses substituted discovery, cross-origin and unverified email',
+    'UserInfo refuses substituted discovery, cross-origin and malformed data',
     () async {
-      for (final mode in ['issuer', 'endpoint', 'email', 'malformed']) {
+      for (final mode in ['issuer', 'endpoint', 'malformed']) {
         final verifier = OidcAccountVerifier(
           settings(),
           request: (uri, token) async {

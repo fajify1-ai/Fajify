@@ -4,7 +4,10 @@ import 'dart:convert';
 import '../domain/auth_repository.dart';
 import '../domain/auth_session.dart';
 import 'native_account_verifier.dart';
+import 'customer_profile_client.dart';
 import 'native_oidc_gateway.dart';
+import 'native_password_sign_in.dart';
+import 'native_customer_registration.dart';
 import 'native_oidc_settings.dart';
 import 'oidc_auth_boundary.dart';
 
@@ -12,16 +15,31 @@ import 'oidc_auth_boundary.dart';
 /// source of presentation state. Serialized work plus a logout generation
 /// prevents late login/refresh writes from resurrecting cleared credentials.
 class NativeKeycloakRepository
-    implements CustomerAuthRepository, CustomerBrowserJourneys {
+    implements
+        CustomerAuthRepository,
+        CustomerBrowserJourneys,
+        CustomerPasswordSignIn,
+        CustomerPasswordRegistration,
+        CustomerProfileAccess {
   NativeKeycloakRepository({
     required this.settings,
     required this.gateway,
     required this.store,
     required this.accounts,
+    NativePasswordSignIn? passwordSignIn,
+    NativeCustomerRegistration? registration,
+    CustomerProfileClient? profile,
     DateTime Function()? clock,
-  }) : _clock = clock ?? DateTime.now;
+  }) : profile =
+           profile ?? CustomerProfileClient(apiOrigin: settings.apiOrigin),
+       registration = registration ?? NativeCustomerRegistration(settings),
+       passwordSignIn = passwordSignIn ?? NativePasswordSignIn(settings),
+       _clock = clock ?? DateTime.now;
 
   final NativeOidcSettings settings;
+  final NativePasswordSignIn passwordSignIn;
+  final NativeCustomerRegistration registration;
+  final CustomerProfileClient profile;
   final NativeOidcGateway gateway;
   final SecureSessionStore store;
   final NativeAccountVerifier accounts;
@@ -35,6 +53,30 @@ class NativeKeycloakRepository
 
   @override
   Stream<AuthSession?> get sessionChanges => const Stream.empty();
+
+  @override
+  Future<String> loadCustomerDisplayName() async {
+    final tokens = _tokens;
+    final subject = _subject;
+    final generation = _generation;
+    if (tokens == null ||
+        subject == null ||
+        !tokens.expiresAt.isAfter(_clock())) {
+      throw const AuthFailure(
+        AuthErrorCode.invalidCredentials,
+        'Please sign in to load your profile.',
+      );
+    }
+    final name = await profile.loadDisplayName(tokens.accessToken);
+    _current(generation);
+    if (!identical(tokens, _tokens) || subject != _subject) {
+      throw const AuthFailure(
+        AuthErrorCode.operationFailed,
+        'The signed-in account changed.',
+      );
+    }
+    return name;
+  }
 
   Future<T> _ordered<T>(Future<T> Function() operation) {
     final result = _tail.then((_) => operation());
@@ -78,7 +120,8 @@ class NativeKeycloakRepository
         tokens.idToken.isEmpty) {
       throw const FormatException();
     }
-    final subject = await accounts.verify(tokens.accessToken);
+    final account = await accounts.verify(tokens.accessToken);
+    final subject = account.subject;
     _current(generation);
     if (expectedSubject != null && subject != expectedSubject) {
       throw const FormatException();
@@ -100,7 +143,7 @@ class NativeKeycloakRepository
       subject: subject,
       provider: IdentityProvider.keycloak,
       expiresAt: tokens.expiresAt,
-      emailVerified: true,
+      emailVerified: account.emailVerified,
       customerAccess: true,
     );
   }
@@ -122,6 +165,38 @@ class NativeKeycloakRepository
         'We could not complete authentication. Please sign in again.',
       );
     }
+  }
+
+  @override
+  Future<AuthSession> register(LegacyRegistration input) {
+    final generation = _generation;
+    return _ordered(
+      () async => (await _guard(() async {
+        _current(generation);
+        await _forget();
+        await registration.create(input);
+        _current(generation);
+        return _accept(
+          await passwordSignIn.signIn(input.username.trim(), input.password),
+          generation,
+        );
+      }))!,
+    );
+  }
+
+  @override
+  Future<AuthSession> signIn(String identifier, String password) {
+    final generation = _generation;
+    return _ordered(
+      () async => (await _guard(() async {
+        _current(generation);
+        await _forget();
+        return _accept(
+          await passwordSignIn.signIn(identifier, password),
+          generation,
+        );
+      }))!,
+    );
   }
 
   @override

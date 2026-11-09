@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/faji_colors.dart';
+import '../../../legal/presentation/legal_links_card.dart';
 import '../../../auth/presentation/screens/user_home_screen.dart';
 import '../../../bookings/data/repositories/booking_repository.dart';
 import '../../../bookings/data/models/confirmed_booking.dart';
@@ -863,9 +864,40 @@ class _HelpCard extends StatelessWidget {
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
   @override
-  Widget build(BuildContext context) => const _TemporaryScreen(
-    title: 'Profile',
-    currentItem: HomeNavItem.profile,
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: FajiColors.background,
+    appBar: AppBar(title: const Text('Profile')),
+    body: _withNavigation(
+      ListView(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 140),
+        children: [
+          Semantics(
+            header: true,
+            child: const Text(
+              'Legal & privacy',
+              style: TextStyle(
+                color: FajiColors.textPrimary,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Read the documents and information about your privacy.',
+            style: TextStyle(
+              color: FajiColors.textSecondary,
+              fontSize: 15,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const LegalLinksCard(),
+        ],
+      ),
+      context,
+      HomeNavItem.profile,
+    ),
   );
 }
 
@@ -884,17 +916,14 @@ class BrowsePlansScreen extends StatelessWidget {
 }
 
 class _TemporaryScreen extends StatelessWidget {
-  const _TemporaryScreen({required this.title, this.currentItem});
+  const _TemporaryScreen({required this.title});
   final String title;
-  final HomeNavItem? currentItem;
 
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: FajiColors.background,
     appBar: AppBar(backgroundColor: FajiColors.background, title: Text(title)),
-    body: currentItem == null
-        ? _temporaryBody
-        : _withNavigation(_temporaryBody, context, currentItem!),
+    body: _temporaryBody,
   );
 
   Widget get _temporaryBody => Center(

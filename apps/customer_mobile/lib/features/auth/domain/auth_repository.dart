@@ -7,9 +7,22 @@ abstract interface class CustomerAuthRepository {
   Future<void> signOut();
 }
 
-/// Temporary legacy boundary. Browser OIDC providers do not implement this API.
-abstract interface class LegacyPasswordAuth {
-  Future<AuthSession> signIn(String email, String password);
+/// In-app credential sign-in, independent of browser account journeys.
+abstract interface class CustomerPasswordSignIn {
+  Future<AuthSession> signIn(String identifier, String password);
+}
+
+abstract interface class CustomerProfileAccess {
+  Future<String> loadCustomerDisplayName();
+}
+
+abstract interface class CustomerPasswordRegistration {
+  Future<AuthSession> register(LegacyRegistration registration);
+}
+
+abstract interface class LegacyPasswordAuth
+    implements CustomerPasswordSignIn, CustomerPasswordRegistration {
+  @override
   Future<AuthSession> register(LegacyRegistration registration);
 }
 
@@ -23,6 +36,7 @@ class LegacyRegistration {
     required this.phone,
     required this.dateOfBirth,
     required this.homeAddress,
+    this.termsAccepted = false,
   });
 
   final String email;
@@ -32,6 +46,7 @@ class LegacyRegistration {
   final String phone;
   final String dateOfBirth;
   final String homeAddress;
+  final bool termsAccepted;
 
   @override
   String toString() => 'LegacyRegistration(redacted)';

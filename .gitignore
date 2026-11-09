@@ -10,3 +10,9 @@
 *.log
 
 **/*.tsbuildinfo
+
+# Local HTTPS development certificates
+infrastructure/certs/
+
+# Device-local debug CA (public certificate only, never a private key)
+apps/customer_mobile/android/app/src/debug/res/raw/fajify_root_ca.crt

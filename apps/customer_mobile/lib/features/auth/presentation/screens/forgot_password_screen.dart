@@ -88,12 +88,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 validator: AuthInput.email,
               ),
             const SizedBox(height: 20),
-            AuthStatusView(
-              state: AuthScope.of(context).state,
-              onVerifyEmail: AuthScope.of(context).supportsBrowserJourneys
-                  ? () => verifyEmailAndContinue(context, AuthScope.of(context))
-                  : null,
-            ),
+            AuthStatusView(state: AuthScope.of(context).state),
             AuthPrimaryButton.recovery(
               label: AuthScope.of(context).usesBrowserAuthentication
                   ? 'Continue in browser'

@@ -8,11 +8,8 @@ import '../domain/auth_session.dart';
 
 /// Owns client session state; providers own credential/token verification.
 class AuthController extends ChangeNotifier {
-  AuthController(
-    this._repository, {
-    DateTime Function()? clock,
-    this.requireVerifiedEmail = false,
-  }) : _clock = clock ?? DateTime.now {
+  AuthController(this._repository, {DateTime Function()? clock})
+    : _clock = clock ?? DateTime.now {
     _subscription = _repository.sessionChanges.listen(
       (session) {
         if (_listenEnabled && !_busy && !_disposed) _accept(session);
@@ -26,8 +23,6 @@ class AuthController extends ChangeNotifier {
   final CustomerAuthRepository _repository;
   final DateTime Function() _clock;
 
-  /// Email verification policy is enforced for Keycloak. Enable only with an agreed policy.
-  final bool requireVerifiedEmail;
   late final StreamSubscription<AuthSession?> _subscription;
   Timer? _expiry;
   Timer? _refreshTimer;
@@ -48,6 +43,26 @@ class AuthController extends ChangeNotifier {
   bool get usesBrowserAuthentication => _repository is BrowserOidcAuthorization;
   bool get supportsBrowserJourneys => _repository is CustomerBrowserJourneys;
   bool get isBusy => _busy;
+
+  Future<String> loadCustomerDisplayName() async {
+    final provider = _repository;
+    final session = _state.session;
+    if (!canAccessCustomer || provider is! CustomerProfileAccess) {
+      throw const AuthFailure(
+        AuthErrorCode.providerUnavailable,
+        'Please sign in to load your profile.',
+      );
+    }
+    final name = await (provider as CustomerProfileAccess)
+        .loadCustomerDisplayName();
+    if (!canAccessCustomer || !identical(session, _state.session)) {
+      throw const AuthFailure(
+        AuthErrorCode.operationFailed,
+        'The signed-in account changed.',
+      );
+    }
+    return name;
+  }
 
   Future<void> authorize() async {
     final provider = _repository;
@@ -110,7 +125,7 @@ class AuthController extends ChangeNotifier {
 
   Future<void> signIn(String email, String password) async {
     final provider = _repository;
-    if (provider is! LegacyPasswordAuth) {
+    if (provider is! CustomerPasswordSignIn) {
       _fail(
         const AuthFailure(
           AuthErrorCode.providerUnavailable,
@@ -121,8 +136,10 @@ class AuthController extends ChangeNotifier {
     }
     await _run(
       AuthStatus.authenticating,
-      () => (provider as LegacyPasswordAuth).signIn(
-        AuthInput.normalizeEmail(email),
+      () => (provider as CustomerPasswordSignIn).signIn(
+        provider is LegacyPasswordAuth
+            ? AuthInput.normalizeEmail(email)
+            : email.trim(),
         password,
       ),
     );
@@ -130,7 +147,7 @@ class AuthController extends ChangeNotifier {
 
   Future<void> register(LegacyRegistration registration) async {
     final provider = _repository;
-    if (provider is! LegacyPasswordAuth) {
+    if (provider is! CustomerPasswordRegistration) {
       _fail(
         const AuthFailure(
           AuthErrorCode.providerUnavailable,
@@ -141,7 +158,7 @@ class AuthController extends ChangeNotifier {
     }
     await _run(
       AuthStatus.authenticating,
-      () => (provider as LegacyPasswordAuth).register(registration),
+      () => (provider as CustomerPasswordRegistration).register(registration),
     );
   }
 
@@ -228,20 +245,11 @@ class AuthController extends ChangeNotifier {
     } else if (session.subject.isEmpty || session.isExpired(_clock())) {
       _set(const AuthState(AuthStatus.expired));
     } else {
-      final needsVerification =
-          requireVerifiedEmail || session.provider == IdentityProvider.keycloak;
-      final verified = !needsVerification || session.emailVerified;
-      _set(
-        AuthState(
-          verified ? AuthStatus.authenticated : AuthStatus.verificationRequired,
-          session: session,
-        ),
-      );
+      _set(AuthState(AuthStatus.authenticated, session: session));
       _expiry = Timer(session.expiresAt.difference(_clock()), checkExpiry);
       final untilRefresh =
           session.expiresAt.difference(_clock()) - const Duration(seconds: 30);
-      if (verified &&
-          session.customerAccess &&
+      if (session.customerAccess &&
           session.provider == IdentityProvider.keycloak &&
           untilRefresh > Duration.zero) {
         _refreshTimer = Timer(untilRefresh, () => unawaited(refresh()));

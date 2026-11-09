@@ -93,7 +93,7 @@ void main() {
   });
 
   testWidgets(
-    'browser sign-in and registration reuse controls without collecting passwords',
+    'sign-in fields stay visible with the production browser-capable repository',
     (tester) async {
       await tester.pumpWidget(const FajiApp());
       await tester.pumpAndSettle();
@@ -101,12 +101,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(AuthFormLayout), findsOneWidget);
       expect(find.byType(AuthPrimaryButton), findsOneWidget);
-      expect(find.byType(FajiAuthTextField), findsNothing);
+      expect(find.byType(FajiAuthTextField), findsNWidgets(2));
       await tester.tap(find.text('Register'));
       await tester.pumpAndSettle();
       expect(find.byType(AuthFormLayout), findsOneWidget);
       expect(find.byType(AuthPrimaryButton), findsOneWidget);
-      expect(find.byType(FajiAuthTextField), findsNothing);
+      expect(find.byType(FajiAuthTextField), findsNWidgets(8));
     },
   );
 

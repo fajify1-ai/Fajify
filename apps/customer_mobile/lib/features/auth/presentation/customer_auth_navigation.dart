@@ -10,11 +10,3 @@ bool continueToCustomerHome(BuildContext context, AuthController controller) {
       .pushNamedAndRemoveUntil(FajiRoutes.userHome, (_) => false);
   return true;
 }
-
-Future<void> verifyEmailAndContinue(
-  BuildContext context,
-  AuthController controller,
-) async {
-  await controller.verifyEmail();
-  if (context.mounted) continueToCustomerHome(context, controller);
-}

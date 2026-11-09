@@ -9,3 +9,13 @@ Future<({int statusCode, String body})> requestOidcJson(
   Uri endpoint,
   String? accessToken,
 ) async => throw UnsupportedError('Native identity transport required');
+
+Future<({int statusCode, String body})> postOidcForm(
+  Uri endpoint,
+  Map<String, String> fields,
+) async => throw UnsupportedError('Native identity transport required');
+
+Future<({int statusCode, String body})> postIdentityJson(
+  Uri endpoint,
+  Map<String, dynamic> fields,
+) async => throw UnsupportedError('Native identity transport required');
