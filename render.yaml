@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: fajify-dev-db-bootstrap
+    runtime: node
+    plan: free
+    region: frankfurt
+    autoDeployTrigger: off
+    buildCommand: corepack pnpm install --frozen-lockfile --filter @faji/database...
+    startCommand: >-
+      corepack pnpm --filter @faji/database migrate &&
+      node -e 'require("node:http").createServer((req,res) => {res.writeHead(204); res.end()}).listen(Number(process.env.PORT), "0.0.0.0")'
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: FAJI_DATABASE_URL
+        fromDatabase:
+          name: fajify-dev-postgres
+          property: connectionString
+databases:
+  - name: fajify-dev-postgres
+    plan: free
+    region: frankfurt
+    postgresMajorVersion: "16"
+    databaseName: fajify_dev_postgres
+    user: fajify_dev_postgres_user
+    ipAllowList: []
