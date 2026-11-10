@@ -40,6 +40,37 @@ services:
       - key: KC_BOOTSTRAP_ADMIN_PASSWORD
         generateValue: true
       - fromGroup: fajify-dev-keycloak-database
+  - type: web
+    name: fajify-dev-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    autoDeployTrigger: off
+    healthCheckPath: /api/v1/health/ready
+    buildCommand: corepack pnpm install --frozen-lockfile --filter @faji/api... && corepack pnpm --filter @faji/api build
+    startCommand: corepack pnpm --filter @faji/api start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: staging
+      - key: FAJI_DATABASE_URL
+        fromDatabase:
+          name: fajify-dev-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: fajify-dev-redis
+          property: connectionString
+      - key: KEYCLOAK_ISSUER
+        value: https://fajify-dev-keycloak.onrender.com/realms/faji
+      - key: KEYCLOAK_AUDIENCE
+        value: faji-api
+      - key: S3_ENDPOINT
+        value: https://storage-disabled.invalid
+      - key: S3_BUCKET
+        value: fajify-dev-disabled
 envVarGroups:
   - name: fajify-dev-keycloak-database
     envVars:
