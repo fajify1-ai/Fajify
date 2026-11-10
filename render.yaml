@@ -8,6 +8,7 @@ services:
     buildCommand: corepack pnpm install --frozen-lockfile --filter @faji/database...
     startCommand: >-
       corepack pnpm --filter @faji/database migrate &&
+      NODE_PATH=./packages/database/node_modules node tooling/render-dev-keycloak-db.cjs &&
       node -e 'require("node:http").createServer((req,res) => {res.writeHead(204); res.end()}).listen(Number(process.env.PORT), "0.0.0.0")'
     envVars:
       - key: NODE_VERSION
@@ -16,6 +17,34 @@ services:
         fromDatabase:
           name: fajify-dev-postgres
           property: connectionString
+      - fromGroup: fajify-dev-keycloak-database
+  - type: web
+    name: fajify-dev-keycloak
+    runtime: docker
+    plan: free
+    region: frankfurt
+    autoDeployTrigger: off
+    dockerfilePath: ./infrastructure/keycloak/Dockerfile.render
+    healthCheckPath: /realms/faji/.well-known/openid-configuration
+    envVars:
+      - key: KC_DB_URL_HOST
+        fromDatabase:
+          name: fajify-dev-postgres
+          property: host
+      - key: KC_DB_URL_DATABASE
+        value: fajify_dev_keycloak
+      - key: KC_DB_USERNAME
+        value: fajify_dev_keycloak
+      - key: KC_BOOTSTRAP_ADMIN_USERNAME
+        value: fajify-dev-admin
+      - key: KC_BOOTSTRAP_ADMIN_PASSWORD
+        generateValue: true
+      - fromGroup: fajify-dev-keycloak-database
+envVarGroups:
+  - name: fajify-dev-keycloak-database
+    envVars:
+      - key: KC_DB_PASSWORD
+        generateValue: true
 databases:
   - name: fajify-dev-postgres
     plan: free
