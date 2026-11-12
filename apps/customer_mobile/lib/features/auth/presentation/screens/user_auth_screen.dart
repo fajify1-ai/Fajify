@@ -595,7 +595,13 @@ class _RegisterFields extends StatelessWidget {
         'e.g. Adaeze Okonkwo',
         type: TextInputType.name,
         action: TextInputAction.next,
-        validator: (v) => requiredValidator(v, 'Full name'),
+        validator: (value) {
+          final name = (value ?? '').trim();
+          if (name.split(RegExp(r'\s+')).length < 2) {
+            return 'Enter your first and last name.';
+          }
+          return null;
+        },
       ),
       field(
         'USERNAME',
