@@ -39,6 +39,8 @@ export class CustomerRegistrationService {
   const origin=new URL(issuer);
   const match=origin.pathname.match(/^(.*)\/realms\/([^/]+)$/);
   if(origin.protocol!=='https:'||origin.username||origin.password||origin.search||origin.hash||!match)throw new ServiceUnavailableException('Registration is not configured.');
+  if(input.fullName.trim().split(/\s+/).length<2)
+   throw new BadRequestException('Enter your first and last name.');
   const birthday=new Date(input.dateOfBirth);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(input.dateOfBirth)||!Number.isFinite(birthday.getTime())||birthday>new Date()||birthday.getUTCFullYear()<1900)throw new BadRequestException('Enter a valid date of birth.');
   const bucket=createHash('sha256').update(remoteAddress||'unknown').digest('hex');
