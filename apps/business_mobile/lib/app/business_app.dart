@@ -122,7 +122,7 @@ GoRouter businessRouter(
       page('/login', (_) => LoginPage(controller: controller, onExit: onExit)),
       page(
         '/register',
-        (_) => IdentityHandoffPage(
+        (_) => BusinessRegistrationPage(
           controller: controller,
           onExit: onExit,
         ),
