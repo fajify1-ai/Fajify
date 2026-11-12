@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/business_controller.dart';
 import '../core/models.dart';
+import '../core/keycloak_identity_service.dart';
 import '../core/services.dart';
 import '../shared/business_ui.dart';
 import 'dashboard.dart';
@@ -149,8 +150,8 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-class IdentityHandoffPage extends StatelessWidget {
-  const IdentityHandoffPage({
+class BusinessRegistrationPage extends StatefulWidget {
+  const BusinessRegistrationPage({
     super.key,
     required this.controller,
     this.onExit,
@@ -160,42 +161,89 @@ class IdentityHandoffPage extends StatelessWidget {
   final VoidCallback? onExit;
 
   @override
+  State<BusinessRegistrationPage> createState() => _BusinessRegistrationPageState();
+}
+
+class _BusinessRegistrationPageState extends State<BusinessRegistrationPage> {
+  final _form = GlobalKey<FormState>();
+  final _name = TextEditingController();
+  bool _submitting = false;
+  bool _submitted = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit(KeycloakIdentityService identity) async {
+    if (_submitting || !(_form.currentState?.validate() ?? false)) return;
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+    try {
+      await identity.submitBusinessApplication(_name.text.trim());
+      if (mounted) setState(() => _submitted = true);
+    } on IdentityCancelled {
+      // Keep the application form available after sign-in cancellation.
+    } on IdentityFailure catch (error) {
+      if (mounted) setState(() => _error = error.message);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final demoMode = controller.identity is MockIdentityService;
+    final identity = widget.controller.identity;
     return Scaffold(
       body: SafeArea(
         child: PageBody(
           title: 'Register Your Business',
-          subtitle: 'Create or reuse a Faji identity',
+          subtitle: _submitted ? 'Pending approval' : 'Apply for a merchant workspace',
           children: [
-            const Panel(
-              child: Text(
-                'Continue to Keycloak to create or sign in to a Faji identity. '
-                'Identity registration does not register, approve, or grant access '
-                'to a business. Merchant onboarding and approval are handled separately.',
-              ),
-            ),
-            if (demoMode)
-              const Text(
-                'Identity registration is unavailable in sample mode. Use a configured Keycloak build.',
-                style: TextStyle(color: muted),
+            if (_submitted)
+              const Panel(child: Text('Your business application was submitted for review.'))
+            else if (identity is KeycloakIdentityService)
+              Form(
+                key: _form,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
+                      controller: _name,
+                      enabled: !_submitting,
+                      decoration: const InputDecoration(labelText: 'Business name'),
+                      textCapitalization: TextCapitalization.words,
+                      maxLength: 120,
+                      validator: (value) => (value?.trim().length ?? 0) < 2
+                          ? 'Enter your business name.'
+                          : null,
+                    ),
+                    if (_error != null) Text(_error!),
+                    const Text('Sign in with Faji to submit your application for review.'),
+                    FilledButton(
+                      onPressed: _submitting ? null : () => _submit(identity),
+                      child: Text(_submitting ? 'Submitting…' : 'Sign in and submit'),
+                    ),
+                  ],
+                ),
               )
             else
-              FilledButton(
-                onPressed: controller.signingIn ? null : controller.signIn,
+              const Panel(
                 child: Text(
-                  controller.signingIn
-                      ? 'Connecting…'
-                      : 'Continue to secure identity',
+                  'Sample mode does not register, approve, or grant access to a business.',
                 ),
               ),
             TextButton(
               onPressed: () => context.go('/login'),
               child: const Text('Back to Sign In'),
             ),
-            if (onExit != null)
+            if (widget.onExit != null)
               TextButton(
-                onPressed: onExit,
+                onPressed: widget.onExit,
                 child: const Text('Back to role selection'),
               ),
           ],
