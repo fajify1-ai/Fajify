@@ -82,17 +82,7 @@ class KeycloakIdentityService implements IdentityService {
       );
     }
     try {
-      final response = await _appAuth.authorizeAndExchangeCode(
-        AuthorizationTokenRequest(
-          config.oidcClientId,
-          config.oidcRedirectUri,
-          issuer: _issuer,
-          discoveryUrl: _discoveryUrl,
-          scopes: _scopes,
-          promptValues: const ['login'],
-          allowInsecureConnections: _allowsLocalHttp,
-        ),
-      );
+      final response = await _authorize();
       await _saveTokens(response, preserveRefreshToken: false);
       final accessToken = response.accessToken;
       if (accessToken == null || accessToken.isEmpty) {
@@ -114,6 +104,52 @@ class KeycloakIdentityService implements IdentityService {
       throw const IdentityFailure(
         'Keycloak sign-in failed. Check your connection and try again.',
       );
+    }
+  }
+
+  Future<AuthorizationTokenResponse> _authorize() async {
+    return _appAuth.authorizeAndExchangeCode(
+        AuthorizationTokenRequest(
+          config.oidcClientId,
+          config.oidcRedirectUri,
+          issuer: _issuer,
+          discoveryUrl: _discoveryUrl,
+          scopes: _scopes,
+          promptValues: const ['login'],
+          allowInsecureConnections: _allowsLocalHttp,
+        ),
+      );
+  }
+
+  Future<void> submitBusinessApplication(String displayName) async {
+    try {
+      final authorization = await _authorize();
+      final token = authorization.accessToken;
+      if (token == null || token.isEmpty) {
+        throw const IdentityFailure('Your sign-in could not be verified.');
+      }
+      final response = await _send(
+        _client.post(
+          _api('business/onboarding'),
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({'displayName': displayName}),
+        ),
+      );
+      if (response.statusCode == 403) {
+        throw const IdentityFailure(
+          'An active Faji account is required to submit your application.',
+        );
+      }
+      if (response.statusCode != 201) {
+        throw const IdentityFailure('Could not submit your business application.');
+      }
+    } on FlutterAppAuthUserCancelledException {
+      throw const IdentityCancelled();
+    } on FlutterAppAuthPlatformException {
+      throw const IdentityFailure('Faji sign-in failed. Please try again.');
     }
   }
 
