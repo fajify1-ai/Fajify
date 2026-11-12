@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/business_controller.dart';
+import '../core/business_api.dart';
 import '../core/config.dart';
 import '../core/keycloak_identity_service.dart';
 import '../core/models.dart';
@@ -12,8 +13,10 @@ import '../features/account.dart';
 import '../features/dashboard.dart';
 import '../features/menu.dart';
 import '../features/orders.dart';
+import '../features/operations.dart';
 import '../features/reservations.dart';
 import '../features/services_page.dart';
+import '../features/staff.dart';
 import '../shared/business_ui.dart';
 
 const destinations = [
@@ -45,7 +48,7 @@ String safeDestination(String? candidate) {
     return '/dashboard';
   }
   final valid = RegExp(
-    r'^/(dashboard|reservations(?:/[a-zA-Z0-9-]+)?|orders(?:/[a-zA-Z0-9-]+)?|menu(?:/[a-zA-Z0-9-]+)?|services|earnings|profile|scan|notifications|business-setup)$',
+    r'^/(dashboard|reservations(?:/[a-zA-Z0-9-]+)?|orders(?:/[a-zA-Z0-9-]+)?|menu(?:/[a-zA-Z0-9-]+)?|services|operations|staff|earnings|profile|scan|notifications|business-setup)$',
   ).hasMatch(uri.path);
   return valid ? uri.toString() : '/dashboard';
 }
@@ -153,6 +156,8 @@ GoRouter businessRouter(
         ),
         routes: [
           page('/dashboard', (_) => DashboardPage(controller: controller)),
+          page('/operations', (_) => OperationsPage(controller: controller)),
+          page('/staff', (_) => StaffPage(controller: controller)),
           page(
             '/reservations',
             (state) => ReservationsPage(
@@ -199,10 +204,23 @@ GoRouter businessRouter(
           ),
           page(
             '/earnings',
-            (state) => EarningsPage(
-              controller: controller,
-              withdraw: state.uri.queryParameters['withdraw'] == 'true',
-            ),
+            (state) => controller.isSample
+                ? EarningsPage(
+                    controller: controller,
+                    withdraw: state.uri.queryParameters['withdraw'] == 'true',
+                  )
+                : const PageBody(
+                    title: 'Earnings unavailable',
+                    subtitle: 'No live payout or settlement API is connected.',
+                    children: [
+                      Panel(
+                        child: Text(
+                          'The Business overview reports fulfilled order value only. '
+                          'It is not a payable balance or settlement amount.',
+                        ),
+                      ),
+                    ],
+                  ),
           ),
           page(
             '/profile',
@@ -211,8 +229,26 @@ GoRouter businessRouter(
               controller: controller,
             ),
           ),
-          page('/business-setup', (_) => const BusinessSetupPage()),
-          page('/notifications', (_) => const NotificationsPage()),
+          page(
+            '/business-setup',
+            (_) => controller.isSample
+                ? const BusinessSetupPage()
+                : const PageBody(
+                    title: 'Business onboarding unavailable',
+                    subtitle: 'This route is a local sample preview.',
+                    children: [
+                      Panel(
+                        child: Text(
+                          'No business onboarding or approval request was submitted.',
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+          page(
+            '/notifications',
+            (_) => NotificationsPage(controller: controller),
+          ),
           page(
             '/scan',
             (state) => ScanPage(
@@ -250,13 +286,7 @@ class BusinessApp extends StatefulWidget {
 }
 
 class _BusinessAppState extends State<BusinessApp> with WidgetsBindingObserver {
-  late final controller =
-      widget.controller ??
-      BusinessController(
-        identity: widget.config.useMocks
-            ? MockIdentityService()
-            : KeycloakIdentityService(widget.config),
-      );
+  late final controller = widget.controller ?? _createController();
   late final router = businessRouter(
     controller,
     initialLocation: widget.initialLocation,
@@ -265,6 +295,24 @@ class _BusinessAppState extends State<BusinessApp> with WidgetsBindingObserver {
   );
   final _heroes = MaterialApp.createMaterialHeroController();
   bool _leaving = false;
+
+  BusinessController _createController() {
+    if (widget.config.useMocks) {
+      return BusinessController(
+        repository: MockBusinessRepository(),
+        identity: MockIdentityService(),
+      );
+    }
+    final identity = KeycloakIdentityService(widget.config);
+    final api = BusinessApiClient(
+      widget.config,
+      accessToken: identity.accessTokenForApi,
+    );
+    return BusinessController(
+      identity: identity,
+      repository: BusinessApiRepository(api),
+    );
+  }
 
   @override
   void initState() {
@@ -420,19 +468,48 @@ class BusinessShell extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: PopupMenuButton<String>(
-                      tooltip: 'Switch sample data',
+                      tooltip: controller.isSample
+                          ? 'Switch sample data'
+                          : 'Select business or branch',
                       enabled: !controller.busy,
-                      onSelected: controller.selectBusiness,
-                      itemBuilder: (_) => const [
-                        PopupMenuItem(
-                          value: 'demo-lagos',
-                          child: Text('Sample · Lagos'),
-                        ),
-                        PopupMenuItem(
-                          value: 'demo-island',
-                          child: Text('Sample · Island'),
-                        ),
-                      ],
+                      onSelected: (value) {
+                        if (controller.isSample) {
+                          controller.selectBusiness(value);
+                        } else if (value.startsWith('business:')) {
+                          controller.selectBusiness(value.substring(9));
+                        } else {
+                          controller.selectBranch(value);
+                        }
+                      },
+                      itemBuilder: (_) => controller.isSample
+                          ? const [
+                              PopupMenuItem(
+                                value: 'demo-lagos',
+                                child: Text('Sample · Lagos'),
+                              ),
+                              PopupMenuItem(
+                                value: 'demo-island',
+                                child: Text('Sample · Island'),
+                              ),
+                            ]
+                          : [
+                              for (final business
+                                  in (controller.account?.businessMemberships ??
+                                          {})
+                                      .toList()
+                                    ..sort())
+                                PopupMenuItem(
+                                  value: 'business:$business',
+                                  child: Text(
+                                    'Business · ${business.substring(0, business.length < 8 ? business.length : 8)}',
+                                  ),
+                                ),
+                              for (final branch in controller.branches)
+                                PopupMenuItem(
+                                  value: branch.id,
+                                  child: Text('Branch · ${branch.name}'),
+                                ),
+                            ],
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -448,13 +525,22 @@ class BusinessShell extends StatelessWidget {
                               const Icon(Icons.expand_more, size: 16),
                             ],
                           ),
-                          const Row(
+                          Row(
                             children: [
-                              Icon(Icons.circle, size: 6, color: good),
-                              SizedBox(width: 4),
+                              Icon(
+                                Icons.circle,
+                                size: 6,
+                                color: controller.isSample ? good : brand,
+                              ),
+                              const SizedBox(width: 4),
                               Text(
-                                'Sample data',
-                                style: TextStyle(color: good, fontSize: 11),
+                                controller.isSample
+                                    ? 'Sample data'
+                                    : 'Live business API',
+                                style: TextStyle(
+                                  color: controller.isSample ? good : brand,
+                                  fontSize: 11,
+                                ),
                               ),
                             ],
                           ),
@@ -505,20 +591,26 @@ class BusinessShell extends StatelessWidget {
                           ),
                           child: Row(
                             children: [
-                              const Expanded(
+                              Expanded(
                                 child: Text(
-                                  'DEMO · Sample data',
-                                  style: TextStyle(color: muted, fontSize: 11),
+                                  controller.isSample
+                                      ? 'DEMO · Sample data'
+                                      : 'LIVE · Server-authoritative business data',
+                                  style: const TextStyle(
+                                    color: muted,
+                                    fontSize: 11,
+                                  ),
                                 ),
                               ),
-                              TextButton(
-                                onPressed: () =>
-                                    demoControls(context, controller),
-                                child: const Text(
-                                  'Demo controls',
-                                  style: TextStyle(fontSize: 11),
+                              if (controller.isSample)
+                                TextButton(
+                                  onPressed: () =>
+                                      demoControls(context, controller),
+                                  child: const Text(
+                                    'Demo controls',
+                                    style: TextStyle(fontSize: 11),
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),

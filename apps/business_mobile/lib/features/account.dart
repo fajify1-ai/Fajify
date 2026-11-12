@@ -307,7 +307,19 @@ class EarningsPage extends StatelessWidget {
   final BusinessController controller;
   final bool withdraw;
   @override
-  Widget build(BuildContext context) => controller.state == LoadState.empty
+  Widget build(BuildContext context) => !controller.isSample
+      ? const PageBody(
+          title: 'Earnings unavailable',
+          subtitle: 'No live payout or settlement API is connected.',
+          children: [
+            Panel(
+              child: Text(
+                'The fulfilled-order total is not settlement or withdrawable revenue.',
+              ),
+            ),
+          ],
+        )
+      : controller.state == LoadState.empty
       ? PageBody(
           title: 'Earnings',
           subtitle: 'Sample financial overview',
@@ -392,10 +404,39 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   @override
-  Widget build(BuildContext context) => PageBody(
-    title: 'Profile & settings',
-    subtitle: widget.controller.businessName,
-    children: [
+  Widget build(BuildContext context) {
+    final controller = widget.controller;
+    if (!controller.isSample) {
+      return PageBody(
+        title: 'Profile & settings',
+        subtitle: 'Authenticated business workspace',
+        children: [
+          Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(controller.businessName),
+                const SizedBox(height: 8),
+                Text('Membership role: ${controller.membershipRole ?? 'unavailable'}'),
+                const SizedBox(height: 8),
+                const Text(
+                  'Profile editing is not part of the Business API contract.',
+                  style: TextStyle(color: muted),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: controller.logout,
+            child: const Text('Log Out'),
+          ),
+        ],
+      );
+    }
+    return PageBody(
+      title: 'Profile & settings',
+      subtitle: controller.businessName,
+      children: [
       Panel(
         child: Form(
           key: form,
@@ -425,7 +466,7 @@ class _ProfilePageState extends State<ProfilePage> {
               FilledButton(
                 onPressed: () {
                   if (form.currentState!.validate()) {
-                    widget.controller.profileContact = contact.text.trim();
+                    controller.profileContact = contact.text.trim();
                     feedback(context, true);
                   }
                 },
@@ -440,11 +481,12 @@ class _ProfilePageState extends State<ProfilePage> {
         child: const Text('Business setup preview'),
       ),
       TextButton(
-        onPressed: widget.controller.logout,
+        onPressed: controller.logout,
         child: const Text('Log Out'),
       ),
     ],
-  );
+    );
+  }
 }
 
 class ScanPage extends StatefulWidget {
@@ -471,10 +513,29 @@ class _ScanPageState extends State<ScanPage> {
     ),
   );
   @override
-  Widget build(BuildContext context) => PageBody(
-    title: widget.order ? 'Verify order recipient' : 'Guest check-in',
-    subtitle: 'Mock scan preview · no camera access required',
-    children: [
+  Widget build(BuildContext context) {
+    if (!widget.controller.isSample) {
+      return PageBody(
+        title: 'QR verification unavailable',
+        subtitle: 'This Business API does not expose a QR verification contract.',
+        children: [
+          const Panel(
+            child: Text(
+              'No live reservation or order was changed. Use the server-backed '
+              'reservation and order status actions instead.',
+            ),
+          ),
+          TextButton(
+            onPressed: () => context.go(widget.order ? '/orders' : '/reservations'),
+            child: const Text('Back'),
+          ),
+        ],
+      );
+    }
+    return PageBody(
+      title: widget.order ? 'Verify order recipient' : 'Guest check-in',
+      subtitle: 'Mock scan preview · no camera access required',
+      children: [
       const Panel(
         child: Column(
           children: [
@@ -522,17 +583,28 @@ class _ScanPageState extends State<ScanPage> {
         onPressed: () => context.go(widget.order ? '/orders' : '/reservations'),
         child: const Text('Back'),
       ),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 class NotificationsPage extends StatelessWidget {
-  const NotificationsPage({super.key});
+  const NotificationsPage({super.key, required this.controller});
+  final BusinessController controller;
   @override
   Widget build(BuildContext context) => PageBody(
     title: 'Notifications',
-    subtitle: 'Synthetic messages',
-    children: const [
+    subtitle: controller.isSample
+        ? 'Synthetic messages'
+        : 'No live notification API is connected.',
+    children: [
+      if (!controller.isSample)
+        const Panel(
+          child: Text(
+            'No live notifications are available in this milestone.',
+          ),
+        )
+      else
       Panel(
         child: ListTile(
           contentPadding: EdgeInsets.zero,

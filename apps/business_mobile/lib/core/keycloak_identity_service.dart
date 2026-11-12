@@ -42,6 +42,7 @@ class KeycloakIdentityService implements IdentityService {
   final FlutterAppAuth _appAuth;
   final FlutterSecureStorage _storage;
   final http.Client _client;
+  Future<String?>? _refreshInProgress;
 
   String get _issuer => config.oidcIssuer.replaceFirst(RegExp(r'/+$'), '');
 
@@ -170,6 +171,19 @@ class KeycloakIdentityService implements IdentityService {
     if (failure != null) throw failure;
   }
 
+  Future<String> accessTokenForApi() async {
+    if (kIsWeb) {
+      throw const IdentityFailure(
+        'Keycloak sign-in is currently supported on Android and iOS only.',
+      );
+    }
+    final token = await _accessToken();
+    if (token == null) {
+      throw const IdentityFailure('Sign in to continue.');
+    }
+    return token;
+  }
+
   bool get _allowsLocalHttp =>
       Uri.parse(config.oidcIssuer).scheme == 'http' ||
       Uri.parse(config.apiBaseUrl).scheme == 'http';
@@ -209,19 +223,13 @@ class KeycloakIdentityService implements IdentityService {
         'The identity service returned an invalid response.',
       );
     }
-    if (payload is! Map<String, dynamic> ||
-        payload['subject'] is! String ||
-        (payload['subject'] as String).isEmpty ||
-        payload['roles'] is! List ||
-        (payload['roles'] as List).any((role) => role is! String)) {
+    try {
+      return BusinessIdentity.fromAuthResponse(payload);
+    } on FormatException {
       throw const IdentityFailure(
         'The identity service returned an invalid response.',
       );
     }
-    return BusinessIdentity(
-      subject: payload['subject'] as String,
-      roles: (payload['roles'] as List).cast<String>().toSet(),
-    );
   }
 
   Future<String?> _accessToken() async {
@@ -237,6 +245,20 @@ class KeycloakIdentityService implements IdentityService {
       return accessToken;
     }
 
+    final existingRefresh = _refreshInProgress;
+    if (existingRefresh != null) return existingRefresh;
+    final refresh = _refreshAccessToken();
+    _refreshInProgress = refresh;
+    try {
+      return await refresh;
+    } finally {
+      if (identical(_refreshInProgress, refresh)) {
+        _refreshInProgress = null;
+      }
+    }
+  }
+
+  Future<String?> _refreshAccessToken() async {
     final refreshToken = await _storage.read(key: _refreshTokenKey);
     if (refreshToken == null || refreshToken.isEmpty) {
       await _clearTokens();

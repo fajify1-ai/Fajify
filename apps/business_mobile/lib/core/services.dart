@@ -21,14 +21,57 @@ class BusinessIdentity {
     required this.subject,
     required this.roles,
     this.businessMemberships = const {},
+    this.membershipRoles = const {},
   });
 
   final String subject;
   final Set<String> roles;
   final Set<String> businessMemberships;
+  final Map<String, String> membershipRoles;
 
-  bool get canAccessBusiness =>
-      roles.contains('merchant') && businessMemberships.isNotEmpty;
+  bool get canAccessBusiness => businessMemberships.isNotEmpty;
+
+  factory BusinessIdentity.fromAuthResponse(Object? payload) {
+    if (payload is! Map<String, dynamic> ||
+        payload['subject'] is! String ||
+        (payload['subject'] as String).isEmpty ||
+        payload['roles'] is! List ||
+        (payload['roles'] as List).any((role) => role is! String)) {
+      throw const FormatException('Invalid identity response.');
+    }
+
+    final rawMemberships = payload['memberships'];
+    if (rawMemberships != null &&
+        (rawMemberships is! List ||
+            rawMemberships.any((membership) {
+              if (membership is! Map<String, dynamic>) return true;
+              return membership['resourceType'] is! String ||
+                  membership['resourceId'] is! String ||
+                  (membership['resourceId'] as String).isEmpty ||
+                  membership['role'] is! String ||
+                  membership['status'] is! String;
+            }))) {
+      throw const FormatException('Invalid membership response.');
+    }
+
+    final membershipRoles = <String, String>{};
+    for (final membership
+        in (rawMemberships as List? ?? const []).cast<Map<String, dynamic>>()) {
+      final resourceId = membership['resourceId'] as String;
+      final role = membership['role'] as String;
+      if (membership['resourceType'] == 'business' &&
+          membership['status'] == 'approved' &&
+          const {'owner', 'manager', 'staff'}.contains(role)) {
+        membershipRoles[resourceId] = role;
+      }
+    }
+    return BusinessIdentity(
+      subject: payload['subject'] as String,
+      roles: (payload['roles'] as List).cast<String>().toSet(),
+      businessMemberships: membershipRoles.keys.toSet(),
+      membershipRoles: membershipRoles,
+    );
+  }
 }
 
 class MockIdentityService implements IdentityService {
@@ -46,6 +89,7 @@ class MockIdentityService implements IdentityService {
       subject: 'demo-subject',
       roles: {'merchant'},
       businessMemberships: {'demo-lagos'},
+      membershipRoles: {'demo-lagos': 'owner'},
     );
     return _identity!;
   }
@@ -62,6 +106,10 @@ class DemoFailure implements Exception {
   String toString() => 'The sample request failed. Please try again.';
 }
 
+class DemoSessionReset implements Exception {
+  const DemoSessionReset();
+}
+
 class MockBusinessRepository implements BusinessRepository {
   MockBusinessRepository({this.delay = const Duration(milliseconds: 250)});
   final Duration delay;
@@ -76,7 +124,7 @@ class MockBusinessRepository implements BusinessRepository {
   Future<void> _wait({bool write = false}) async {
     final epoch = _epoch;
     await Future<void>.delayed(delay);
-    if (epoch != _epoch) throw StateError('Demo session was reset.');
+    if (epoch != _epoch) throw const DemoSessionReset();
     if (scenario == DemoScenario.error || (write && failNextWrite)) {
       failNextWrite = false;
       throw const DemoFailure();
@@ -108,12 +156,16 @@ class MockBusinessRepository implements BusinessRepository {
     await _wait(write: true);
     final data = _get(businessId);
     final current = data.orders.firstWhere((o) => o.id == orderId);
-    if (current.stage == OrderStage.completed) {
-      throw StateError('This demo order is already complete.');
+    final nextStage = switch (current.stage) {
+      OrderStage.fresh || OrderStage.accepted => OrderStage.preparing,
+      OrderStage.preparing => OrderStage.ready,
+      OrderStage.ready => OrderStage.completed,
+      OrderStage.completed || OrderStage.cancelled => null,
+    };
+    if (nextStage == null) {
+      throw const DemoFailure();
     }
-    final updated = current.withStage(
-      OrderStage.values[current.stage.index + 1],
-    );
+    final updated = current.withStage(nextStage);
     _store[businessId] = BusinessSnapshot(
       reservations: data.reservations,
       orders: List.unmodifiable(

@@ -1,4 +1,4 @@
-enum OrderStage { fresh, preparing, ready, completed }
+enum OrderStage { fresh, accepted, preparing, ready, completed, cancelled }
 
 enum LoadState { loading, data, empty, error }
 
@@ -12,6 +12,7 @@ class Reservation {
     this.time,
     this.party, {
     this.confirmed = true,
+    this.status = 'confirmed',
   });
   final String id;
   final String guest;
@@ -19,6 +20,7 @@ class Reservation {
   final String time;
   final int party;
   final bool confirmed;
+  final String status;
 }
 
 class MerchantOrder {
@@ -29,15 +31,36 @@ class MerchantOrder {
     this.amount,
     this.stage,
     this.minutesAgo,
-  );
+  {
+    this.currency = 'NGN',
+    this.status = 'placed',
+  });
   final String id;
   final String title;
   final String guest;
   final int amount;
   final OrderStage stage;
   final int minutesAgo;
+  final String currency;
+  final String status;
   MerchantOrder withStage(OrderStage value) =>
-      MerchantOrder(id, title, guest, amount, value, minutesAgo);
+      MerchantOrder(
+        id,
+        title,
+        guest,
+        amount,
+        value,
+        minutesAgo,
+        currency: currency,
+        status: switch (value) {
+          OrderStage.fresh => 'placed',
+          OrderStage.accepted => 'accepted',
+          OrderStage.preparing => 'preparing',
+          OrderStage.ready => 'ready',
+          OrderStage.completed => 'fulfilled',
+          OrderStage.cancelled => 'cancelled',
+        },
+      );
 }
 
 class MenuItem {
@@ -48,6 +71,10 @@ class MenuItem {
     this.amount, {
     this.available = true,
     this.imageAsset,
+    this.kind = 'product',
+    this.description,
+    this.currency = 'NGN',
+    this.active = true,
   });
   final String id;
   final String name;
@@ -55,6 +82,10 @@ class MenuItem {
   final int amount;
   final bool available;
   final String? imageAsset;
+  final String kind;
+  final String? description;
+  final String currency;
+  final bool active;
   MenuItem withAvailability(bool value) => MenuItem(
     id,
     name,
@@ -62,6 +93,10 @@ class MenuItem {
     amount,
     available: value,
     imageAsset: imageAsset,
+    kind: kind,
+    description: description,
+    currency: currency,
+    active: value || active,
   );
 }
 
@@ -115,14 +150,15 @@ class BusinessSnapshot {
   );
 }
 
-String money(int minorUnits) {
+String money(int minorUnits, {String currency = 'NGN'}) {
   final digits = (minorUnits.abs() ~/ 100).toString();
   final whole = digits.replaceAllMapped(
     RegExp(r'\B(?=(\d{3})+(?!\d))'),
     (_) => ',',
   );
   final cents = minorUnits.abs() % 100;
-  return '${minorUnits < 0 ? '-' : ''}₦$whole${cents == 0 ? '' : '.${cents.toString().padLeft(2, '0')}'}';
+  final symbol = currency == 'NGN' ? '₦' : '$currency ';
+  return '${minorUnits < 0 ? '-' : ''}$symbol$whole${cents == 0 ? '' : '.${cents.toString().padLeft(2, '0')}'}';
 }
 
 int? parsePrice(String value) {
@@ -137,9 +173,11 @@ int? parsePrice(String value) {
 
 String stageLabel(OrderStage stage) => switch (stage) {
   OrderStage.fresh => 'New',
+  OrderStage.accepted => 'Accepted',
   OrderStage.preparing => 'Preparing',
   OrderStage.ready => 'Ready',
   OrderStage.completed => 'Completed',
+  OrderStage.cancelled => 'Cancelled',
 };
 
 bool sameDay(DateTime a, DateTime b) =>

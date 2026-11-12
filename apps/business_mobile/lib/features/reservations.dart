@@ -46,19 +46,26 @@ class _ReservationsPageState extends State<ReservationsPage> {
         .toList();
     final guests = selected.fold(0, (sum, r) => sum + r.party);
     final filtered = c.data.reservations
-        .where((r) => !widget.pendingOnly || !r.confirmed)
+        .where(
+          (r) =>
+              !widget.pendingOnly ||
+              (c.isSample ? !r.confirmed : r.status == 'confirmed'),
+        )
         .toList();
     final offset = DateTime(month.year, month.month).weekday % 7;
     final days = DateTime(month.year, month.month + 1, 0).day;
     return PageBody(
       title: 'Reservations',
-      subtitle: 'Review and manage guest bookings',
+      subtitle: c.isSample
+          ? 'Review sample guest bookings'
+          : 'Branch reservations · server-confirmed status',
       children: [
-        OutlinedButton.icon(
-          onPressed: () => context.go('/scan?type=reservation'),
-          icon: const Icon(Icons.qr_code_scanner, color: brand),
-          label: const Text('Scan Guest QR — Check-in'),
-        ),
+        if (c.isSample)
+          OutlinedButton.icon(
+            onPressed: () => context.go('/scan?type=reservation'),
+            icon: const Icon(Icons.qr_code_scanner, color: brand),
+            label: const Text('Preview guest QR check-in'),
+          ),
         SegmentedButton<bool>(
           segments: const [
             ButtonSegment(value: true, label: Text('Calendar')),
@@ -250,8 +257,10 @@ class _ReservationsPageState extends State<ReservationsPage> {
         ] else ...[
           Text(
             widget.pendingOnly
-                ? 'Pending reservations'
-                : 'All sample reservations',
+                ? (c.isSample
+                      ? 'Pending sample reservations'
+                      : 'Confirmed reservations')
+                : (c.isSample ? 'All sample reservations' : 'All reservations'),
           ),
           if (filtered.isEmpty) emptyState('No reservations match this view.'),
           ...filtered.map((r) => ReservationTile(reservation: r)),
@@ -275,7 +284,9 @@ class ReservationDetailPage extends StatelessWidget {
     if (matches.isEmpty) {
       return PageBody(
         title: 'Reservation not found',
-        subtitle: 'This sample booking is unavailable.',
+        subtitle: controller.isSample
+            ? 'This sample booking is unavailable.'
+            : 'This reservation is no longer available.',
         children: [
           TextButton(
             onPressed: () => context.go('/reservations'),
@@ -302,21 +313,65 @@ class ReservationDetailPage extends StatelessWidget {
               Text('${r.party} guests'),
               const SizedBox(height: 12),
               StatusPill(
-                checked
+                controller.isSample && checked
                     ? 'Demo checked in'
-                    : r.confirmed
-                    ? 'Confirmed'
-                    : 'Pending',
-                color: checked || r.confirmed ? good : amber,
+                    : _reservationStatus(r.status),
+                color: r.status == 'cancelled'
+                    ? amber
+                    : r.status == 'completed'
+                    ? muted
+                    : good,
               ),
             ],
           ),
         ),
-        FilledButton.icon(
-          onPressed: () => context.go('/scan?type=reservation'),
-          icon: const Icon(Icons.qr_code_scanner),
-          label: const Text('Preview guest check-in'),
-        ),
+        if (controller.isSample)
+          FilledButton.icon(
+            onPressed: () => context.go('/scan?type=reservation'),
+            icon: const Icon(Icons.qr_code_scanner),
+            label: const Text('Preview guest check-in'),
+          )
+        else ...[
+          if (r.status == 'confirmed')
+            FilledButton(
+              onPressed: controller.busy
+                  ? null
+                  : () async {
+                      final ok = await controller.setReservationStatus(
+                        id,
+                        'checked_in',
+                      );
+                      if (context.mounted) feedback(context, ok);
+                    },
+              child: const Text('Check in guest'),
+            ),
+          if (r.status == 'checked_in')
+            FilledButton(
+              onPressed: controller.busy
+                  ? null
+                  : () async {
+                      final ok = await controller.setReservationStatus(
+                        id,
+                        'completed',
+                      );
+                      if (context.mounted) feedback(context, ok);
+                    },
+              child: const Text('Complete reservation'),
+            ),
+          if (r.status == 'confirmed')
+            OutlinedButton(
+              onPressed: controller.busy
+                  ? null
+                  : () async {
+                      final ok = await controller.setReservationStatus(
+                        id,
+                        'cancelled',
+                      );
+                      if (context.mounted) feedback(context, ok);
+                    },
+              child: const Text('Cancel reservation'),
+            ),
+        ],
         OutlinedButton(
           onPressed: () => context.go('/reservations'),
           child: const Text('Back to reservations'),
@@ -325,3 +380,11 @@ class ReservationDetailPage extends StatelessWidget {
     );
   }
 }
+
+String _reservationStatus(String status) => switch (status) {
+  'confirmed' => 'Confirmed',
+  'checked_in' => 'Checked in',
+  'completed' => 'Completed',
+  'cancelled' => 'Cancelled',
+  _ => 'Unknown',
+};

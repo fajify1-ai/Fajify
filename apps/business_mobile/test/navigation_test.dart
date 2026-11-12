@@ -38,6 +38,22 @@ Future<BusinessController> merchant(
 }
 
 void main() {
+  testWidgets('mock configuration starts an offline sample session', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const BusinessApp(
+        initialLocation: '/login',
+        config: BusinessConfig(useMocks: true),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('enter-demo')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('enter-demo')));
+    await tester.pumpAndSettle();
+    expect(find.text('Dashboard'), findsOneWidget);
+  });
+
   testWidgets('protected deep link restores after explicit demo login', (
     tester,
   ) async {

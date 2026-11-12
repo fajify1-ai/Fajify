@@ -7,14 +7,16 @@ import '../shared/business_ui.dart';
 
 Color orderColor(OrderStage s) => s == OrderStage.fresh
     ? brand
-    : s == OrderStage.preparing
+    : s == OrderStage.preparing || s == OrderStage.accepted
     ? amber
     : good;
 String nextAction(OrderStage s) => switch (s) {
   OrderStage.fresh => 'Accept',
+  OrderStage.accepted => 'Start preparation',
   OrderStage.preparing => 'Mark Ready',
-  OrderStage.ready => 'Complete',
+  OrderStage.ready => 'Fulfill',
   OrderStage.completed => 'Completed',
+  OrderStage.cancelled => 'Cancelled',
 };
 
 class OrdersPage extends StatefulWidget {
@@ -29,40 +31,55 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget build(BuildContext context) {
     final c = widget.controller;
     bool matches(MerchantOrder o, String filter) => filter == 'Active'
-        ? o.stage != OrderStage.completed
+        ? o.stage != OrderStage.completed && o.stage != OrderStage.cancelled
         : stageLabel(o.stage) == filter;
     final orders = c.data.orders.where((o) => matches(o, c.orderFilter));
     return PageBody(
       title: 'Orders',
       subtitle: 'Track every order from new to completed',
       children: [
-        OutlinedButton.icon(
-          onPressed: () => context.go('/scan?type=order'),
-          icon: const Icon(Icons.qr_code_scanner, color: amber),
-          label: const Text('Scan QR to Verify Order Recipient'),
-        ),
+        if (c.isSample)
+          OutlinedButton.icon(
+            onPressed: () => context.go('/scan?type=order'),
+            icon: const Icon(Icons.qr_code_scanner, color: amber),
+            label: const Text('Preview sample QR verification'),
+          ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: ['Active', 'New', 'Preparing', 'Ready', 'Completed']
-                .map(
-                  (filter) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(
-                        '$filter ${c.data.orders.where((o) => matches(o, filter)).length}',
+            children:
+                [
+                      'Active',
+                      'New',
+                      'Accepted',
+                      'Preparing',
+                      'Ready',
+                      'Completed',
+                      'Cancelled',
+                    ]
+                    .map(
+                      (filter) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(
+                            '$filter ${c.data.orders.where((o) => matches(o, filter)).length}',
+                          ),
+                          selected: c.orderFilter == filter,
+                          selectedColor: brand,
+                          onSelected: (_) =>
+                              setState(() => c.orderFilter = filter),
+                        ),
                       ),
-                      selected: c.orderFilter == filter,
-                      selectedColor: brand,
-                      onSelected: (_) => setState(() => c.orderFilter = filter),
-                    ),
-                  ),
-                )
-                .toList(),
+                    )
+                    .toList(),
           ),
         ),
         if (orders.isEmpty)
-          emptyState('No ${c.orderFilter.toLowerCase()} sample orders.'),
+          emptyState(
+            c.isSample
+                ? 'No ${c.orderFilter.toLowerCase()} sample orders.'
+                : 'No ${c.orderFilter.toLowerCase()} orders for this branch.',
+          ),
         ...orders.map((o) => OrderCard(controller: c, order: o)),
       ],
     );
@@ -114,7 +131,7 @@ class OrderCard extends StatelessWidget {
           runSpacing: 8,
           children: [
             Text(
-              money(order.amount),
+              money(order.amount, currency: order.currency),
               style: const TextStyle(
                 color: brand,
                 fontSize: 18,
@@ -126,7 +143,8 @@ class OrderCard extends StatelessWidget {
                 onPressed: () => context.go('/orders/${order.id}'),
                 child: const Text('View details'),
               ),
-            if (order.stage != OrderStage.completed)
+            if (order.stage != OrderStage.completed &&
+                order.stage != OrderStage.cancelled)
               FilledButton(
                 key: ValueKey('advance-${order.id}'),
                 style: FilledButton.styleFrom(
@@ -145,16 +163,56 @@ class OrderCard extends StatelessWidget {
               ),
           ],
         ),
-        if (detail) ...[
+        if (detail && controller.isSample) ...[
           const SizedBox(height: 12),
           const Text(
             'Local demo transition only. Live fulfilment and recipient verification arrive with backend integration.',
             style: TextStyle(color: muted),
           ),
         ],
+        if (!controller.isSample &&
+            order.stage != OrderStage.completed &&
+            order.stage != OrderStage.cancelled) ...[
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: controller.busy
+                ? null
+                : () => _confirmCancel(context, controller, order),
+            child: const Text('Cancel order'),
+          ),
+        ],
       ],
     ),
   );
+
+  Future<void> _confirmCancel(
+    BuildContext context,
+    BusinessController controller,
+    MerchantOrder order,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel this order?'),
+        content: const Text(
+          'The Business API will validate whether the current order status can be cancelled.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Keep order'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Cancel order'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    final saved = await controller.cancelOrder(order.id);
+    if (context.mounted) feedback(context, saved);
+  }
 }
 
 class OrderDetailPage extends StatelessWidget {

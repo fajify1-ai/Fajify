@@ -37,30 +37,35 @@ class ServicesPage extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Preview your business capabilities. All switches affect this demo session only.',
-              style: TextStyle(color: muted),
+            Text(
+              controller.isSample
+                  ? 'Preview your business capabilities. Changes are local to this sample session.'
+                  : 'Business services from this branch catalogue. Publication is confirmed by the server.',
+              style: const TextStyle(color: muted),
             ),
           ],
         ),
       ),
       if (controller.data.services.isEmpty)
         emptyState(
-          'No sample services. Restore populated data from Demo controls.',
+          controller.isSample
+              ? 'No sample services. Restore populated data from Demo controls.'
+              : 'No service catalogue items are available for this branch.',
         ),
       ...controller.data.services.indexed.map((entry) {
         final service = entry.$2;
         final color = serviceColors[entry.$1 % serviceColors.length];
         Future<void> change(bool enabled) async {
           final id = controller.businessId;
-          final confirmed = await confirmDemo(
-            context,
-            '${enabled ? 'Enable' : 'Disable'} ${service.name}?',
-            'This changes a local preview only. It does not publish a service or activate an integration.',
-          );
-          if (!confirmed || id != controller.businessId || !context.mounted) {
-            return;
+          if (controller.isSample) {
+            final confirmed = await confirmDemo(
+              context,
+              '${enabled ? 'Enable' : 'Disable'} ${service.name}?',
+              'This changes a local preview only. It does not publish a service or activate an integration.',
+            );
+            if (!confirmed) return;
           }
+          if (id != controller.businessId || !context.mounted) return;
           final ok = await controller.setService(service.id, enabled);
           if (context.mounted) feedback(context, ok);
         }
@@ -92,7 +97,9 @@ class ServicesPage extends StatelessWidget {
                     ),
                   ),
                   Semantics(
-                    label: '${service.name} demo activation',
+                    label: controller.isSample
+                        ? '${service.name} demo activation'
+                        : '${service.name} publication',
                     child: Switch(
                       value: service.enabled,
                       activeThumbColor: Colors.white,

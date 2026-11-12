@@ -15,18 +15,19 @@ and macOS/Xcode for iOS. Use a device/emulator or Chrome for the interactive dem
 cd apps/business_mobile
 flutter pub get
 flutter devices
-flutter run -d <device-id> --dart-define-from-file=config/development.example.json
+flutter run -d <device-id> --dart-define-from-file=config/development.json
 ```
 
 For Chrome use `-d chrome`. The Flutter browser build uses hash routes, for example
 `/#/reservations`. Direct protected links return to login first and restore a
-validated local destination after explicit sample login. The example
-configuration explicitly enables sample mode. A browser refresh starts a fresh
-signed-out session; sample state is intentionally in memory. No PostgreSQL,
-Redis, Keycloak or Docker service is needed for sample mode.
+validated local destination after explicit sample login. The development
+configuration enables `MockBusinessRepository` and `MockIdentityService` for
+offline sample mode. A browser refresh starts a fresh signed-out session;
+sample state is intentionally in memory. No PostgreSQL, Redis, Keycloak or
+Docker service is needed for sample mode.
 
 For Android/iOS identity integration, create an ignored
-`config/development.local.json` from the example and set `USE_MOCK_SERVICES` to
+`config/development.local.json` and set `USE_MOCK_SERVICES` to
 `false`, `OIDC_ISSUER` to the realm issuer (for example
 `https://identity.example.test/realms/faji`) and `API_BASE_URL` to the API origin.
 The public client ID defaults to `faji-business-mobile`; the redirect defaults
@@ -80,15 +81,15 @@ handoff. See [main-app integration](../../docs/engineering/BUSINESS_MAIN_APP_INT
 
 ## Configuration
 
-The committed `config/development.example.json` contains public sample settings.
-An unconfigured live build fails closed. An optional
+`config/development.json` enables the offline sample services. An unconfigured
+live build fails closed. An optional
 `config/development.local.json` is ignored. Build definitions are visible in the
 compiled app and must never contain credentials.
 
 | Define | Setting |
 | --- | --- |
 | `APP_ENV` | `development` |
-| `USE_MOCK_SERVICES` | `true` in the sample configuration; `false` for Keycloak |
+| `USE_MOCK_SERVICES` | `true` for offline sample mode; `false` for Keycloak |
 | `OIDC_ISSUER` | Keycloak realm issuer; required when mocks are disabled |
 | `OIDC_CLIENT_ID` | Public Keycloak client; defaults to `faji-business-mobile` |
 | `OIDC_REDIRECT_URI` | Registered callback; defaults to `com.faji.business:/oauth/callback` |
@@ -97,17 +98,39 @@ compiled app and must never contain credentials.
 Live configuration requires HTTPS endpoints (HTTP is allowed only for localhost)
 and fails closed when required identity settings are absent. Access, refresh and
 ID tokens use platform secure storage. New and restored sessions are validated
-through `/api/v1/auth/me`; accounts without the `merchant` role are denied.
-Server authorization remains authoritative for business resources.
+through `/api/v1/auth/me`. The response must include an approved business
+membership with an `owner`, `manager` or `staff` role; a realm-level `merchant`
+role alone does not grant workspace access. Access is revalidated by the API,
+and an API `401` clears the local session.
 
-The M2 API currently returns identity roles from `/auth/me` but does not return
-business membership/resource IDs. The app cannot discover or validate an
-approved merchant workspace membership from this contract yet. Existing
-Business screens remain local sample workflows, not merchant records; the
-Phase 1 membership-discovery contract and live business API integration are
-required before those screens can be presented as real merchant data. Android
-physical-device and iOS Keycloak acceptance also require a configured realm,
-API and device environment.
+## Live Business operations (M3-P3)
+
+With live configuration, the app uses the authenticated Business API for
+branches and branch selection, the catalogue (products, services, packages and
+events), availability slots, reservations and their permitted status changes,
+orders and their server-validated lifecycle, branch hours, event configuration,
+package components, owner-managed staff grants, and operational overview
+counts. The live dashboard's fulfilled-order total is explicitly not payment
+settlement or withdrawable revenue. Customer identities are not displayed in
+the list UI.
+
+Branch operations are available from the dashboard. Business owners can
+configure staff grants from branch operations; identities must already exist,
+and the server verifies scope and role on every call. Managers can manage
+branches and operational configuration but cannot grant staff access. Staff
+actions remain restricted to server-authorized branch scopes. Branch hours use
+the server contract's weekday numbering (Sunday `0` through Saturday `6`) and
+minutes from midnight in the branch timezone.
+
+Sample mode remains deterministic and local. Earnings, profile/setup previews,
+QR scan previews and synthetic metrics are not live financial, identity,
+admission or fulfillment operations; QR routes explain that live verification
+is not available instead of simulating success. The client never connects
+directly to PostgreSQL and does not replace server-side authorization or
+business validation. Event/package writes and live authentication require a
+configured API and identity provider. Physical Android acceptance still
+requires the configured realm, API and a device; this README does not claim
+that live-device acceptance has run.
 
 ## Code boundaries
 
@@ -115,7 +138,8 @@ API and device environment.
 - `lib/app/`: router, embedded host mode, guarded merchant shell and responsive navigation.
 - `lib/core/`: configuration, UI models, session/data controller, repository and
   identity interfaces, deterministic mocks.
-- `lib/features/`: dashboard, reservations, orders, menu, service and account UI.
+- `lib/features/`: dashboard, reservations, orders, catalogue, branch operations,
+  staff management and account UI.
 - `lib/shared/business_ui.dart`: Business-local component adapter pending D2's
   reviewed shared Flutter exports. The main customer app now consumes the public Business entry point under the
   product-owner-approved integration; Business does not import customer internals.
@@ -127,11 +151,11 @@ API and device environment.
 - `scripts/render_review_test.dart`: opt-in labelled visual review renders.
 
 `KeycloakIdentityService` implements Authorization Code + PKCE using the system
-browser, secure token storage, token refresh, `/api/v1/auth/me` validation,
-current-session revocation and Keycloak logout. Business workflow data still
-uses `MockBusinessRepository`; its UI models are fixtures, not published backend
-contracts. Resource membership and future business operations must be validated
-by Phase 1 server contracts; the client never connects directly to PostgreSQL.
+browser, secure token storage, token refresh, `/api/v1/auth/me` membership
+validation, current-session revocation and Keycloak logout. `BusinessApiClient`
+adds the current bearer token to each versioned API request and parses server
+responses into UI models. `MockBusinessRepository` remains the explicit sample
+mode adapter; live screens use the Business API repository.
 
 ## Verification
 

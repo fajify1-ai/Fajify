@@ -74,7 +74,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionIdentity"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2659,6 +2666,66 @@
       }
     },
     "schemas": {
+      "BusinessMembership": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "type": "string",
+            "enum": [
+              "business"
+            ]
+          },
+          "resourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "manager",
+              "staff"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "approved"
+            ]
+          }
+        },
+        "required": [
+          "resourceType",
+          "resourceId",
+          "role",
+          "status"
+        ]
+      },
+      "SessionIdentity": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "memberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BusinessMembership"
+            }
+          }
+        },
+        "required": [
+          "subject",
+          "roles",
+          "memberships"
+        ]
+      },
       "LiveStatus": {
         "type": "object",
         "properties": {}

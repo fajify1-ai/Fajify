@@ -11,25 +11,60 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = controller.data;
+    final live = !controller.isSample;
     if (controller.state == LoadState.empty) {
       return PageBody(
         title: 'Dashboard',
-        subtitle: 'Your business at a glance',
-        children: [
-          emptyState(
-            'No sample activity. Use Demo controls to restore the populated scenario.',
-          ),
-        ],
+        subtitle: live
+            ? 'Server-confirmed business overview'
+            : 'Your business at a glance',
+        children: live
+            ? [
+                Panel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${controller.overview?.branches ?? 0} active branches',
+                      ),
+                      Text(
+                        '${controller.overview?.catalogueItems ?? 0} active catalogue items',
+                      ),
+                      Text('${controller.overview?.orders ?? 0} orders'),
+                      Text(
+                        '${controller.overview?.reservations ?? 0} reservations',
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton(
+                        onPressed: () => context.go('/operations'),
+                        child: const Text('Manage branch operations'),
+                      ),
+                    ],
+                  ),
+                ),
+                emptyState(
+                  'No activity has been returned for this branch yet.',
+                ),
+              ]
+            : [
+                emptyState(
+                  'No sample activity. Use Demo controls to restore the populated scenario.',
+                ),
+              ],
       );
     }
     final active = data.orders
         .where((o) => o.stage != OrderStage.completed)
         .length;
-    final completed = data.orders.length - active;
+    final completed = data.orders
+        .where((order) => order.stage == OrderStage.completed)
+        .length;
     final pending = data.reservations.where((r) => !r.confirmed).length;
     return PageBody(
       title: 'Dashboard',
-      subtitle: 'Sunday, 30 August 2026 · Sample data',
+      subtitle: live
+          ? 'Branch operations · ${controller.businessName}'
+          : 'Sunday, 30 August 2026 · Sample data',
       children: [
         Panel(
           child: Column(
@@ -37,75 +72,101 @@ class DashboardPage extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      "TODAY’S REVENUE",
-                      style: TextStyle(color: muted, fontSize: 12),
+                      live
+                          ? 'FULFILLED ORDER VALUE · NOT SETTLEMENT'
+                          : 'TODAY’S SAMPLE REVENUE',
+                      style: const TextStyle(color: muted, fontSize: 12),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => context.go('/earnings'),
-                    child: const Text('View balance'),
-                  ),
+                  if (!live)
+                    TextButton(
+                      onPressed: () => context.go('/earnings'),
+                      child: const Text('View balance'),
+                    ),
                 ],
               ),
               Text(
-                money(14000000),
+                live
+                    ? money(controller.overview?.fulfilledOrderTotalMinor ?? 0)
+                    : money(14000000),
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
-                '+18.4% from last week',
-                style: TextStyle(color: good, fontSize: 12),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Divider(),
-              ),
-              const Row(
-                children: [
-                  Expanded(child: _Metric('Available balance', '₦320,000')),
-                  Expanded(child: _Metric('Customer rating', '4.8 / 5')),
-                ],
-              ),
+              if (!live) ...[
+                const SizedBox(height: 8),
+                const Text(
+                  '+18.4% from last week',
+                  style: TextStyle(color: good, fontSize: 12),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(),
+                ),
+                const Row(
+                  children: [
+                    Expanded(child: _Metric('Available balance', '₦320,000')),
+                    Expanded(child: _Metric('Customer rating', '4.8 / 5')),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
-        const Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(child: Text("Today’s capacity")),
-                  Text('8 / 12 tables', style: TextStyle(color: brand)),
-                ],
-              ),
-              SizedBox(height: 6),
-              Text(
-                'Table capacity',
-                style: TextStyle(color: muted, fontSize: 12),
-              ),
-              SizedBox(height: 14),
-              LinearProgressIndicator(
-                value: 8 / 12,
-                minHeight: 7,
-                semanticsLabel: 'Eight of twelve tables booked',
-              ),
-              SizedBox(height: 10),
-              Wrap(
-                spacing: 24,
-                children: [
-                  Text('67% booked', style: TextStyle(color: muted)),
-                  Text('4 tables available'),
-                ],
-              ),
-            ],
+        if (live)
+          Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Business operations'),
+                const SizedBox(height: 10),
+                Text('${controller.overview?.branches ?? 0} active branches'),
+                Text(
+                  '${controller.overview?.catalogueItems ?? 0} active catalogue items',
+                ),
+                OutlinedButton(
+                  onPressed: () => context.go('/operations'),
+                  child: const Text('Manage branch operations'),
+                ),
+              ],
+            ),
+          )
+        else
+          const Panel(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: Text("Today’s capacity")),
+                    Text('8 / 12 tables', style: TextStyle(color: brand)),
+                  ],
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Table capacity',
+                  style: TextStyle(color: muted, fontSize: 12),
+                ),
+                SizedBox(height: 14),
+                LinearProgressIndicator(
+                  value: 8 / 12,
+                  minHeight: 7,
+                  semanticsLabel: 'Eight of twelve tables booked',
+                ),
+                SizedBox(height: 10),
+                Wrap(
+                  spacing: 24,
+                  children: [
+                    Text('67% booked', style: TextStyle(color: muted)),
+                    Text('4 tables available'),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
         LayoutBuilder(
           builder: (context, constraints) => Wrap(
             spacing: 12,
@@ -165,20 +226,22 @@ class DashboardPage extends StatelessWidget {
           spacing: 10,
           runSpacing: 10,
           children: [
-            _QuickAction(
-              Icons.qr_code_scanner,
-              'Scan QR',
-              () => context.go('/scan?type=reservation'),
-            ),
+            if (!live)
+              _QuickAction(
+                Icons.qr_code_scanner,
+                'Scan QR',
+                () => context.go('/scan?type=reservation'),
+              ),
             _QuickAction(Icons.add, 'Add item', () => context.go('/menu/new')),
-            _QuickAction(
-              Icons.account_balance_wallet_outlined,
-              'Withdraw',
-              () => context.go('/earnings?withdraw=true'),
-            ),
+            if (!live)
+              _QuickAction(
+                Icons.account_balance_wallet_outlined,
+                'Withdraw',
+                () => context.go('/earnings?withdraw=true'),
+              ),
           ],
         ),
-        const RevenueChart(),
+        if (!live) const RevenueChart(),
         SectionHeading(
           'Upcoming',
           action: TextButton(
