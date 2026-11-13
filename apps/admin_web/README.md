@@ -20,3 +20,21 @@ corepack pnpm --filter @faji/admin-web typecheck
 corepack pnpm --filter @faji/admin-web build
 corepack pnpm --filter @faji/admin-web test
 ```
+
+## Operations console
+
+The operator lands on Operations overview after sign-in. Navigation connects the following views. The API checks each grant independently.
+
+| View | Reads | Commands |
+| --- | --- | --- |
+| Operations overview | `operations.read` | |
+| Merchant applications | `governance.read` | Existing privileged review guard |
+| Support | `support.read` | `support.write` for assignment, reply, close and reopen |
+| Finance | `finance.read` | |
+| Reports | `reports.read` and `finance.read` | |
+| Monitoring | `monitoring.read` | `incidents.write` for manual checks, acknowledgements and incident management |
+| Audit log | `audit.read` | |
+
+Finance displays captures, refunds, settlements and reconciled ride payouts as separate measures. Reports use the server's rolling date windows and can retrieve a merchant report by its UUID. Monitoring shows external provider health as unverified until the backend has provider evidence. Navigation is visible to signed-in operators and restricted reads and commands return access-denied states.
+
+Before production rollout, verify the Azure dev MFA and physical Business APK acceptance above. Also exercise every console route with least-privilege read-only and write-enabled operators, including denial, expired MFA, concurrent decisions and replay. For multi-instance deployment, replace the process-local session and OIDC transaction stores with shared server-side storage.

@@ -1,12 +1,8 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { sessionCookie, sessions } from '../../lib/session';
+import { requireOperator } from '../../lib/operations';
 import { MerchantQueue } from './queue';
 
 export default async function MerchantApplications() {
-  const id = (await cookies()).get(sessionCookie)?.value;
-  const session = sessions.get(id);
-  if (!session) redirect(id ? '/?auth=expired' : '/');
+  const session = await requireOperator();
 
   return (
     <main className="workspace" id="main">
