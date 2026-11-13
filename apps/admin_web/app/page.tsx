@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { config, queuePath } from '../lib/config';
+import { config, operatorHome } from '../lib/config';
 import { sessionCookie, sessions } from '../lib/session';
 
 const messages: Record<string, string> = {
@@ -13,7 +13,7 @@ const messages: Record<string, string> = {
 export default async function Page({ searchParams }: { searchParams: Promise<{ auth?: string }> }) {
   const auth = (await searchParams).auth;
   const store = await cookies();
-  if (!auth && sessions.get(store.get(sessionCookie)?.value)) redirect(queuePath);
+  if (!auth && sessions.get(store.get(sessionCookie)?.value)) redirect(operatorHome);
   let available = true;
   try {
     config();
@@ -22,10 +22,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ a
   }
 
   return (
-    <main className="signin">
+    <main className="signin" id="main">
       <div className="signin-panel">
         <h1>Sign in to Faji Admin</h1>
-        <p>Use your operator account and complete multi-factor authentication to review merchant applications.</p>
+        <p>Use your operator account and complete multi-factor authentication to access the operations console.</p>
         {!available ? (
           <p role="alert">Admin sign-in is unavailable. Contact your deployment operator.</p>
         ) : (

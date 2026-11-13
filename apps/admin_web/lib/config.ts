@@ -2,7 +2,7 @@ import 'server-only';
 
 export const clientId = 'faji-admin-web';
 export const callbackPath = '/auth/callback';
-export const queuePath = '/merchant-applications';
+export const operatorHome = '/operations';
 export const elevationSeconds = 300;
 
 function httpsUrl(value: string | undefined) {
