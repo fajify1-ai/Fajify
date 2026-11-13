@@ -6,8 +6,8 @@ import { cookieOptions, transactionCookie, transactions, transactionSeconds } fr
 export async function POST(request: NextRequest) {
   if (!sameOrigin(request)) return new Response('Sign-in unavailable', { status: 403 });
 
-  transactions.remove(request.cookies.get(transactionCookie)?.value);
   try {
+    await transactions.remove(request.cookies.get(transactionCookie)?.value);
     const { url, transactionId } = await beginLogin();
     const response = NextResponse.redirect(url, 303);
     response.cookies.set(transactionCookie, transactionId, { ...cookieOptions, maxAge: transactionSeconds });

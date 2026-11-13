@@ -30,7 +30,7 @@ test('command route denies other origins and absent sessions and preserves upstr
   process.env.FAJI_ADMIN_WEB_ORIGIN = origin;
   process.env.FAJI_ADMIN_API_ORIGIN = 'https://api.example';
   process.env.FAJI_ADMIN_OIDC_ISSUER = 'https://identity.example/realms/faji';
-  const session = sessions.create({ accessToken: 'synthetic', expires: Date.now() + 30_000 });
+  const session = await sessions.create({ accessToken: 'synthetic', expires: Date.now() + 30_000 });
   t.after(() => sessions.remove(session));
   const params = { params: Promise.resolve({ command: 'support-reply' }) };
   const send = (browserOrigin: string, cookie: string) => POST(new NextRequest(origin + '/api/operations/support-reply', {

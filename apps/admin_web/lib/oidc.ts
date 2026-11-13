@@ -47,7 +47,7 @@ export async function beginLogin() {
   });
   return {
     url,
-    transactionId: transactions.create({ state, nonce, verifier, expires: Date.now() + transactionSeconds * 1000 }),
+    transactionId: await transactions.create({ state, nonce, verifier, expires: Date.now() + transactionSeconds * 1000 }),
   };
 }
 
@@ -68,7 +68,7 @@ export function elevationExpiry(payload: JWTPayload, subject: string, acr: strin
 }
 
 export async function finishLogin(request: Request, transactionId: string | undefined) {
-  const transaction = transactions.take(transactionId);
+  const transaction = await transactions.take(transactionId);
   if (!transaction) throw new Error('Expired login transaction');
   const { issuer, origin, audience, acr } = config();
   const callback = new URL(origin + callbackPath);

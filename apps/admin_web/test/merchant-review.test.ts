@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server';
 import { GET, POST } from '../app/api/merchant-applications/route';
 import { parseQueue } from '../lib/merchant-contract';
 import { elevationExpiry } from '../lib/oidc';
-import { sessionCookie, sessions, transactions } from '../lib/session';
+import { redisStore, sessionCookie, sessions, transactions } from '../lib/session';
 
 const origin = 'https://admin.example';
 const api = 'https://api.example';
@@ -32,20 +32,20 @@ test('elevation uses the shorter of access token and recent MFA lifetimes', () =
   assert.equal(expiry({ ...claims, realm_access: { roles: ['customer'] } }), null);
 });
 
-test('OIDC transactions can be consumed once and expired sessions are denied', () => {
+test('OIDC transactions can be consumed once and expired sessions are denied', async () => {
   const transaction = { state: 'state', nonce: 'nonce', verifier: 'verifier', expires: Date.now() + 1000 };
-  const id = transactions.create(transaction);
-  assert.deepEqual(transactions.take(id), transaction);
-  assert.equal(transactions.take(id), undefined);
-  const expired = sessions.create({ accessToken: 'synthetic', expires: Date.now() - 1 });
-  assert.equal(sessions.get(expired), undefined);
+  const id = await transactions.create(transaction);
+  assert.deepEqual(await transactions.take(id), transaction);
+  assert.equal(await transactions.take(id), undefined);
+  const expired = await sessions.create({ accessToken: 'synthetic', expires: Date.now() - 1 });
+  assert.equal(await sessions.get(expired), undefined);
 });
 
 test('web routes require an operator session and forward only the authoritative commands', async (t) => {
   process.env.FAJI_ADMIN_WEB_ORIGIN = origin;
   process.env.FAJI_ADMIN_API_ORIGIN = api;
   process.env.FAJI_ADMIN_OIDC_ISSUER = 'https://identity.example/realms/faji';
-  const session = sessions.create({ accessToken: 'synthetic', expires: Date.now() + 10_000 });
+  const session = await sessions.create({ accessToken: 'synthetic', expires: Date.now() + 10_000 });
   t.after(() => sessions.remove(session));
 
   let upstream: Response;
@@ -80,4 +80,32 @@ test('web routes require an operator session and forward only the authoritative 
   assert.equal((await POST(request('POST'))).status, 401);
   upstream = Response.json({ error: { message: 'Business application already reviewed' } }, { status: 409 });
   assert.equal((await POST(request('POST'))).status, 409);
+});
+
+test('shared sessions use TTL and consume login transactions atomically across store instances', async t => {
+  const records = new Map<string, string>();
+  const commands: string[][] = [];
+  t.mock.method(globalThis, 'fetch', async (_url: unknown, init?: RequestInit) => {
+    const args = JSON.parse(String(init?.body));
+    commands.push(args);
+    const [op, key, value] = args;
+    if (op === 'SET') {
+      records.set(key, value);
+      return Response.json({ result: 'OK' });
+    }
+    const found = records.get(key) ?? null;
+    if (op === 'GETDEL' || op === 'DEL') records.delete(key);
+    return Response.json({ result: found });
+  });
+  const endpoint = new URL('https://redis.example/');
+  const first = redisStore('https://admin.example', 'transaction', endpoint, 'synthetic');
+  const second = redisStore('https://admin.example', 'transaction', endpoint, 'synthetic');
+  const value = { expires: Date.now() + 5000 };
+  const id = await first.create(value);
+  assert.deepEqual(await second.get(id), value);
+  const results = await Promise.all([first.take(id), second.take(id)]);
+  assert.equal(results.filter(Boolean).length, 1);
+  assert.equal(commands[0][3], 'PX');
+  assert.equal(commands[0][5], 'NX');
+  assert.deepEqual(commands.slice(1).map(parts => parts[0]), ['GET', 'GETDEL', 'GETDEL']);
 });
