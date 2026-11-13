@@ -39,6 +39,14 @@ class BusinessController extends ChangeNotifier {
   bool calendarView = true;
   String orderFilter = 'Active';
 
+  void _selectApprovedBusiness(BusinessIdentity? identity) {
+    final memberships = identity?.businessMemberships;
+    if (memberships != null && memberships.isNotEmpty &&
+        !memberships.contains(businessId)) {
+      businessId = memberships.first;
+    }
+  }
+
   void _emit() {
     if (!_disposed) notifyListeners();
   }
@@ -50,6 +58,7 @@ class BusinessController extends ChangeNotifier {
       final restored = await identity.restoreSession();
       if (_disposed || generation != _generation || restored == null) return;
       account = restored;
+      _selectApprovedBusiness(restored);
       session = restored.canAccessBusiness
           ? SessionStatus.merchant
           : SessionStatus.denied;
@@ -67,9 +76,15 @@ class BusinessController extends ChangeNotifier {
     }
   }
 
-  Future<void> signIn() => _authenticate();
+  Future<void> signIn() => _authenticate(identity.signIn);
 
-  Future<void> _authenticate() async {
+  Future<void> signInWithPassword(String identifier, String password) {
+    final service = identity;
+    if (service is! KeycloakIdentityService) return Future<void>.value();
+    return _authenticate(() => service.signInWithPassword(identifier, password));
+  }
+
+  Future<void> _authenticate(Future<BusinessIdentity> Function() signIn) async {
     if (signingIn) return;
     signingIn = true;
     error = null;
@@ -77,9 +92,10 @@ class BusinessController extends ChangeNotifier {
     _authGeneration++;
     _emit();
     try {
-      final authenticated = await identity.signIn();
+      final authenticated = await signIn();
       if (_disposed || generation != _generation) return;
       account = authenticated;
+      _selectApprovedBusiness(authenticated);
       session = authenticated.canAccessBusiness
           ? SessionStatus.merchant
           : SessionStatus.denied;
@@ -115,6 +131,7 @@ class BusinessController extends ChangeNotifier {
       final authenticated = await identity.signIn();
       if (_disposed || generation != _generation) return;
       account = authenticated;
+      _selectApprovedBusiness(authenticated);
       session = merchant ? SessionStatus.merchant : SessionStatus.denied;
     } on Exception catch (exception) {
       error = _identityError(exception);
@@ -200,6 +217,7 @@ class BusinessController extends ChangeNotifier {
         return false;
       }
       account = validated;
+      _selectApprovedBusiness(validated);
       if (validated == null || !validated.canAccessBusiness) {
         session = SessionStatus.denied;
         error = 'Your account no longer has an approved business membership.';
@@ -244,7 +262,7 @@ class BusinessController extends ChangeNotifier {
   }
 
   Future<void> reload() async {
-    if (session != SessionStatus.merchant) return;
+    if (session != SessionStatus.merchant || identity is KeycloakIdentityService) return;
     final generation = ++_generation;
     final id = businessId;
     state = LoadState.loading;

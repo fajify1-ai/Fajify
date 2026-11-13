@@ -57,6 +57,12 @@ export class AccessService {
   return result.rowCount===1;
  }
  /** Trusted identity event handler. Default is suspended until an authorized onboarding decision. */
+ async latestBusinessApplicationStatus(subject:string):Promise<string|null>{
+  const result=await this.pool.query<{status:string}>(
+   'SELECT status FROM business_onboarding WHERE applicant_subject=$1 ORDER BY created_at DESC,id DESC LIMIT 1',
+   [subject]);
+  return result.rows[0]?.status??null;
+ }
  async provisionSubject(subject:string):Promise<void>{
   if(!subject||subject.length>255)throw Error('Invalid identity subject');
   const client=await this.pool.connect();

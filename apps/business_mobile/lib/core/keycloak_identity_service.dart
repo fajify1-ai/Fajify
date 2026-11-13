@@ -74,6 +74,89 @@ class KeycloakIdentityService implements IdentityService {
     return _loadIdentity(accessToken, restored: true);
   }
 
+  Future<Object?> merchantRequest(String method, String path, [Map<String, Object>? body]) async {
+    final token = await _accessToken();
+    if (token == null) throw const IdentityFailure('Sign in again to continue.');
+    final request = http.Request(method, _api(path))
+      ..followRedirects = false
+      ..headers['authorization'] = 'Bearer $token';
+    if (body != null) {
+      request.headers['content-type'] = 'application/json';
+      request.body = jsonEncode(body);
+    }
+    final response = await _send(_client.send(request).then(http.Response.fromStream));
+    if (response.statusCode == 403) {
+      throw const IdentityFailure('Your account cannot perform this operation.');
+    }
+    if (response.statusCode == 409) {
+      throw const IdentityFailure('This record changed. Refresh before trying again.');
+    }
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw const IdentityFailure('The request could not be completed.');
+    }
+    return jsonDecode(response.body);
+  }
+
+  Future<BusinessIdentity> signInWithPassword(String identifier, String password) async {
+    final request = http.Request(
+      'POST',
+      Uri.parse('$_issuer/protocol/openid-connect/token'),
+    )..followRedirects = false;
+    request.bodyFields = {
+      'grant_type': 'password',
+      'client_id': config.oidcClientId,
+      'username': identifier,
+      'password': password,
+      'scope': _scopes.join(' '),
+    };
+    final response = await _send(
+      _client.send(request).then(http.Response.fromStream),
+    );
+    if (response.statusCode != 200) {
+      throw const IdentityFailure('Sign-in failed. Check your details and try again.');
+    }
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final accessToken = data['access_token'];
+    final expiresIn = data['expires_in'];
+    if (accessToken is! String || accessToken.isEmpty ||
+        expiresIn is! int || expiresIn <= 0) {
+      throw const IdentityFailure('Faji returned an invalid sign-in response.');
+    }
+    final identity = await _loadIdentity(accessToken);
+    if (identity == null) {
+      throw const IdentityFailure('Your sign-in could not be verified.');
+    }
+    await _saveTokens(
+      TokenResponse(
+        accessToken,
+        data['refresh_token'] as String?,
+        DateTime.now().add(Duration(seconds: expiresIn)),
+        data['id_token'] as String?,
+        'Bearer',
+        _scopes,
+        null,
+      ),
+      preserveRefreshToken: false,
+    );
+    return identity;
+  }
+
+  Future<void> registerBusiness(Map<String, Object> fields) async {
+    final request = http.Request('POST', _api('auth/register-business'))
+      ..followRedirects = false
+      ..headers['content-type'] = 'application/json'
+      ..body = jsonEncode(fields);
+    final response = await _send(
+      _client.send(request).then(http.Response.fromStream),
+    );
+    if (response.statusCode == 409) {
+      throw const IdentityFailure('That email or username already exists. Sign in to continue.');
+    }
+    if (response.statusCode != 201) {
+      throw const IdentityFailure('Registration could not be completed. Check your details and try again.');
+    }
+  }
+
   @override
   Future<BusinessIdentity> signIn() async {
     if (kIsWeb) {
@@ -218,7 +301,32 @@ class KeycloakIdentityService implements IdentityService {
         'The identity service returned an invalid response.',
       );
     }
+    final memberships = payload['memberships'];
+    final status = payload['businessApplicationStatus'];
+    final membershipRoles = <String, Set<String>>{};
+    if (memberships is List) {
+      for (final row in memberships) {
+        if (row is Map && row['resourceType'] == 'business' &&
+            row['status'] == 'approved' && row['resourceId'] is String &&
+            row['role'] is String) {
+          membershipRoles.putIfAbsent(row['resourceId'] as String, () => {})
+              .add(row['role'] as String);
+        }
+      }
+    }
     return BusinessIdentity(
+      membershipRoles: membershipRoles,
+      applicationStatus: status is String ? status : null,
+      businessMemberships: {
+        if (memberships is List)
+          for (final membership in memberships)
+            if (membership is Map &&
+                membership['resourceType'] == 'business' &&
+                membership['status'] == 'approved' &&
+                const {'owner', 'manager', 'staff'}.contains(membership['role']) &&
+                membership['resourceId'] is String)
+              membership['resourceId'] as String,
+      },
       subject: payload['subject'] as String,
       roles: (payload['roles'] as List).cast<String>().toSet(),
     );

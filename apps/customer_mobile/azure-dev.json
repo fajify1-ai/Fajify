@@ -1,0 +1,15 @@
+{
+  "FAJI_CUSTOMER_NATIVE_AUTH_ENABLED": "true",
+  "FAJI_CUSTOMER_OIDC_ISSUER": "https://fajify-dev.eastus.cloudapp.azure.com/realms/faji",
+  "FAJI_CUSTOMER_API_ORIGIN": "https://fajify-dev.eastus.cloudapp.azure.com",
+  "FAJI_CUSTOMER_OIDC_CLIENT_ID": "faji-customer-mobile",
+  "FAJI_CUSTOMER_OIDC_REDIRECT_URI": "com.faji.customer:/oauth/callback",
+  "FAJI_CUSTOMER_OIDC_POST_LOGOUT_REDIRECT_URI": "com.faji.customer:/oauth/callback",
+  "FAJI_CUSTOMER_OIDC_SCOPES": "openid email profile",
+  "APP_ENV": "development",
+  "USE_MOCK_SERVICES": "false",
+  "OIDC_ISSUER": "https://fajify-dev.eastus.cloudapp.azure.com/realms/faji",
+  "API_BASE_URL": "https://fajify-dev.eastus.cloudapp.azure.com",
+  "OIDC_CLIENT_ID": "faji-business-mobile",
+  "OIDC_REDIRECT_URI": "com.faji.business:/oauth/callback"
+}

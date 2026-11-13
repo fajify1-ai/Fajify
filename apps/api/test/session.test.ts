@@ -16,7 +16,7 @@ const run=async(state:{suspended:boolean;revokedAfter:Date|null},tokenValid=true
  const verifier:IdentityVerifier={verifyAccessToken:async()=>{verificationCalls++;if(!tokenValid)throw Error('bad signature');return verified;}};
  const module=await Test.createTestingModule({controllers:[SessionController],providers:[
   IdentityGuard,AccountGuard,{provide:IDENTITY_VERIFIER,useValue:verifier},
-  {provide:AccessService,useValue:{state:async(subject:string)=>{stateCalls++;assert.equal(subject,verified.subject);return state;},approvedBusinessMemberships:async()=>[]}}
+  {provide:AccessService,useValue:{state:async(subject:string)=>{stateCalls++;assert.equal(subject,verified.subject);return state;},approvedBusinessMemberships:async()=>[],latestBusinessApplicationStatus:async()=>null}}
  ]}).compile();
  const app=module.createNestApplication();
  app.setGlobalPrefix('api');app.enableVersioning({type:VersioningType.URI,defaultVersion:'1'});await app.init();
@@ -49,7 +49,7 @@ test('revoking current signed Keycloak session blocks reuse of the bearer',async
  const identity={...verified,sessionId:'signed-sid-1'};
  let revoked=false;
  const access={state:async()=>({suspended:false,revokedAfter:null}),sessionRevoked:async()=>revoked,
-  approvedBusinessMemberships:async()=>[],revokeSession:async(subject:string,sid:string)=>{assert.equal(subject,verified.subject);assert.equal(sid,identity.sessionId);revoked=true;}};
+  approvedBusinessMemberships:async()=>[],latestBusinessApplicationStatus:async()=>null,revokeSession:async(subject:string,sid:string)=>{assert.equal(subject,verified.subject);assert.equal(sid,identity.sessionId);revoked=true;}};
  const verifier:IdentityVerifier={verifyAccessToken:async()=>identity};
  const module=await Test.createTestingModule({controllers:[SessionController],providers:[
   IdentityGuard,AccountGuard,{provide:IDENTITY_VERIFIER,useValue:verifier},{provide:AccessService,useValue:access}

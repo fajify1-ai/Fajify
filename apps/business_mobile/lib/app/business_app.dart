@@ -11,6 +11,7 @@ import '../core/services.dart';
 import '../features/account.dart';
 import '../features/dashboard.dart';
 import '../features/menu.dart';
+import '../features/live_workspace.dart';
 import '../features/orders.dart';
 import '../features/reservations.dart';
 import '../features/services_page.dart';
@@ -84,6 +85,9 @@ GoRouter businessRouter(
         return path == '/access-denied' ? null : '/access-denied';
       }
       if (controller.session == SessionStatus.merchant) {
+        if (controller.identity is KeycloakIdentityService) {
+          return path == '/live-workspace' ? null : '/live-workspace';
+        }
         if (path == '/access-denied') {
           return safeDestination(state.uri.queryParameters['from']);
         }
@@ -132,9 +136,17 @@ GoRouter businessRouter(
         (_) => Scaffold(
           body: SafeArea(
             child: PageBody(
-              title: 'Merchant access required',
-              subtitle: controller.error ??
-                  'Your Faji identity is valid, but no merchant access was confirmed.',
+              title: switch (controller.account?.applicationStatus) {
+                'pending' => 'Application under review',
+                'rejected' => 'Application declined',
+                _ => 'Merchant access required',
+              },
+              subtitle: switch (controller.account?.applicationStatus) {
+                'pending' => 'Sign in again later to check the review outcome.',
+                'rejected' => 'Contact Faji support for help with your application.',
+                _ => controller.error ??
+                    'Your Faji identity is valid, but no merchant access was confirmed.',
+              },
               children: [
                 FilledButton(
                   onPressed: controller.logout,
@@ -144,6 +156,10 @@ GoRouter businessRouter(
             ),
           ),
         ),
+      ),
+      page(
+        '/live-workspace',
+        (_) => LiveWorkspace(controller: controller),
       ),
       ShellRoute(
         builder: (context, state, child) => BusinessShell(

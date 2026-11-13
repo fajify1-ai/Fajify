@@ -24,6 +24,7 @@ export class SessionController {
  @ApiOperation({summary:'Get validated identity and active-account status'})
  async me(@Req() req:{identity:VerifiedIdentity}){
   const memberships=await this.access.approvedBusinessMemberships(req.identity.subject);
-  return {subject:req.identity.subject,roles:req.identity.roles,memberships};
+  const businessApplicationStatus=await this.access.latestBusinessApplicationStatus(req.identity.subject);
+  return {subject:req.identity.subject,roles:req.identity.roles,memberships,businessApplicationStatus};
  }
 }

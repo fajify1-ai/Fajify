@@ -21,14 +21,18 @@ class BusinessIdentity {
     required this.subject,
     required this.roles,
     this.businessMemberships = const {},
+    this.applicationStatus,
+    this.membershipRoles = const {},
   });
 
   final String subject;
   final Set<String> roles;
   final Set<String> businessMemberships;
 
-  bool get canAccessBusiness =>
-      roles.contains('merchant') && businessMemberships.isNotEmpty;
+  final String? applicationStatus;
+  final Map<String, Set<String>> membershipRoles;
+
+  bool get canAccessBusiness => businessMemberships.isNotEmpty;
 }
 
 class MockIdentityService implements IdentityService {

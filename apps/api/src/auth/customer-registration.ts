@@ -19,6 +19,10 @@ export class CustomerRegistrationInput {
  @Equals(true,{message:'Accept the Terms of Service and Privacy Policy.'}) termsAccepted!:boolean;
 }
 
+export class BusinessRegistrationInput extends CustomerRegistrationInput {
+ @IsString() @Length(2,120) businessName!:string;
+}
+
 /** Public customer creation. The client cannot choose roles, identity subject,
  * account state, or verified-email claims. All passwords stay out of PostgreSQL.
  */
@@ -33,7 +37,7 @@ export class CustomerRegistrationService {
   catch{throw new ServiceUnavailableException('Registration is temporarily unavailable.');}
  }
 
- async register(input:CustomerRegistrationInput,remoteAddress:string){
+ async register(input:CustomerRegistrationInput,remoteAddress:string,businessName?:string){
   const {issuer,clientId,clientSecret}=this.config;
   if(!this.config.enabled||!issuer||!clientId||!clientSecret)throw new ServiceUnavailableException('Registration is not configured.');
   const origin=new URL(issuer);
@@ -41,6 +45,8 @@ export class CustomerRegistrationService {
   if(origin.protocol!=='https:'||origin.username||origin.password||origin.search||origin.hash||!match)throw new ServiceUnavailableException('Registration is not configured.');
   if(input.fullName.trim().split(/\s+/).length<2)
    throw new BadRequestException('Enter your first and last name.');
+  if(businessName!==undefined&&businessName.trim().length<2)
+   throw new BadRequestException('Enter your business name.');
   const birthday=new Date(input.dateOfBirth);
   if(!/^\d{4}-\d{2}-\d{2}$/.test(input.dateOfBirth)||!Number.isFinite(birthday.getTime())||birthday>new Date()||birthday.getUTCFullYear()<1900)throw new BadRequestException('Enter a valid date of birth.');
   const bucket=createHash('sha256').update(remoteAddress||'unknown').digest('hex');
@@ -72,22 +78,41 @@ export class CustomerRegistrationService {
   if(!subject||!/^[a-zA-Z0-9-]{1,255}$/.test(subject))throw new ServiceUnavailableException();
   let connection:PoolClient|undefined;
   try{
-   const roleResponse=await this.send(`${adminRoot}/roles/customer`,{headers});
-   if(!roleResponse.ok)throw new ServiceUnavailableException();
-   const role=await roleResponse.json() as {id?:string;name?:string};
-   if(!role.id||role.name!=='customer')throw new ServiceUnavailableException();
-   const mapped=await this.send(`${adminRoot}/users/${subject}/role-mappings/realm`,{method:'POST',headers,body:JSON.stringify([{id:role.id,name:'customer'}])});
-   if(!mapped.ok)throw new ServiceUnavailableException();
+   if(businessName===undefined){
+    const roleResponse=await this.send(`${adminRoot}/roles/customer`,{headers});
+    if(!roleResponse.ok)throw new ServiceUnavailableException();
+    const role=await roleResponse.json() as {id?:string;name?:string};
+    if(!role.id||role.name!=='customer')throw new ServiceUnavailableException();
+    const mapped=await this.send(`${adminRoot}/users/${subject}/role-mappings/realm`,{method:'POST',headers,body:JSON.stringify([{id:role.id,name:'customer'}])});
+    if(!mapped.ok)throw new ServiceUnavailableException();
+   }else{
+    const mappingsUrl=`${adminRoot}/users/${subject}/role-mappings/realm`;
+    const direct=await this.send(mappingsUrl,{headers});
+    if(!direct.ok)throw new ServiceUnavailableException();
+    const roles=await direct.json() as {id:string;name:string}[];
+    const inherited=roles.filter(role=>role.name==='default-roles-faji'||role.name==='customer');
+    if(inherited.length){
+     const removed=await this.send(mappingsUrl,{method:'DELETE',headers,body:JSON.stringify(inherited)});
+     if(!removed.ok)throw new ServiceUnavailableException();
+    }
+    const effective=await this.send(`${mappingsUrl}/composite`,{headers});
+    if(!effective.ok)throw new ServiceUnavailableException();
+    const effectiveRoles=await effective.json() as {name:string}[];
+    if(effectiveRoles.some(role=>role.name==='customer'))throw new ServiceUnavailableException();
+   }
    connection=await this.pool.connect();
    await connection.query('BEGIN');
    await connection.query(`INSERT INTO user_profiles(identity_subject,display_name,phone_number,date_of_birth,home_address,terms_accepted_at,suspended)
     VALUES($1,$2,$3,$4::date,$5,now(),false)`,[subject,input.fullName.trim(),input.phone,input.dateOfBirth,input.homeAddress.trim()]);
    await connection.query('INSERT INTO account_access(identity_subject,suspended) VALUES($1,false)',[subject]);
-   await connection.query('INSERT INTO identity_security_events(actor_subject,event_type) VALUES($1,$2)',[subject,'customer_self_registered']);
+   const application=businessName===undefined?undefined:await connection.query<{id:string;status:string}>(
+    'INSERT INTO business_onboarding(applicant_subject,display_name) VALUES($1,$2) RETURNING id,status',
+    [subject,businessName.trim()]);
+   await connection.query('INSERT INTO identity_security_events(actor_subject,event_type) VALUES($1,$2)',[subject,businessName===undefined?'customer_self_registered':'business_self_registered']);
    const enabled=await this.send(`${adminRoot}/users/${subject}`,{method:'PUT',headers,body:'{"enabled":true}'});
    if(!enabled.ok)throw new ServiceUnavailableException();
    await connection.query('COMMIT');
-   return {created:true};
+   return application?{created:true,application:application.rows[0]}:{created:true};
   }catch{
    if(connection)await connection.query('ROLLBACK').catch(()=>{});
    // Compensate only the identity created by this request; never edit an
@@ -104,5 +129,9 @@ export class CustomerRegistrationController {
  @Post('register')
  register(@Body(new ValidationPipe({expectedType:CustomerRegistrationInput,transform:true,whitelist:true,forbidNonWhitelisted:true})) input:CustomerRegistrationInput,@Req() req:{socket:{remoteAddress?:string}}){
   return this.registration.register(input,req.socket.remoteAddress??'unknown');
+ }
+ @Post('register-business')
+ registerBusiness(@Body(new ValidationPipe({expectedType:BusinessRegistrationInput,transform:true,whitelist:true,forbidNonWhitelisted:true})) input:BusinessRegistrationInput,@Req() req:{socket:{remoteAddress?:string}}){
+  return this.registration.register(input,req.socket.remoteAddress??'unknown',input.businessName);
  }
 }

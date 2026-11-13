@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/business_controller.dart';
 import '../core/models.dart';
+import '../core/keycloak_identity_service.dart';
 import '../core/services.dart';
 import '../shared/business_ui.dart';
 import 'dashboard.dart';
@@ -91,7 +92,7 @@ class LoginPage extends StatelessWidget {
                   Text(
                     demoMode
                         ? 'Explore sample business workflows. No live merchant data or account access is used.'
-                        : 'Sign in or create a Faji identity with Keycloak. Only backend-confirmed merchant accounts can continue.',
+                        : 'Sign in to your Faji account or apply for a business workspace.',
                     style: const TextStyle(color: muted),
                   ),
                 ],
@@ -116,21 +117,12 @@ class LoginPage extends StatelessWidget {
                 child: const Text('Test account without merchant access'),
               ),
             ] else ...[
-              FilledButton(
-                onPressed: controller.signingIn ? null : controller.signIn,
-                child: Text(
-                  controller.signingIn ? 'Connecting…' : 'Sign In with Faji',
-                ),
-              ),
+              _BusinessCredentials(controller: controller),
               OutlinedButton(
                 onPressed: controller.signingIn
                     ? null
                     : () => context.go('/register'),
                 child: const Text('Register Your Business'),
-              ),
-              TextButton(
-                onPressed: controller.signingIn ? null : controller.signIn,
-                child: const Text('Forgot password? Continue to Keycloak'),
               ),
             ],
             TextButton(
@@ -168,27 +160,10 @@ class IdentityHandoffPage extends StatelessWidget {
           title: 'Register Your Business',
           subtitle: 'Create or reuse a Faji identity',
           children: [
-            const Panel(
-              child: Text(
-                'Continue to Keycloak to create or sign in to a Faji identity. '
-                'Identity registration does not register, approve, or grant access '
-                'to a business. Merchant onboarding and approval are handled separately.',
-              ),
-            ),
             if (demoMode)
-              const Text(
-                'Identity registration is unavailable in sample mode. Use a configured Keycloak build.',
-                style: TextStyle(color: muted),
-              )
+              const Text('Registration is unavailable in sample mode.')
             else
-              FilledButton(
-                onPressed: controller.signingIn ? null : controller.signIn,
-                child: Text(
-                  controller.signingIn
-                      ? 'Connecting…'
-                      : 'Continue to secure identity',
-                ),
-              ),
+              _BusinessCredentials(controller: controller, register: true),
             TextButton(
               onPressed: () => context.go('/login'),
               child: const Text('Back to Sign In'),
@@ -545,4 +520,105 @@ class NotificationsPage extends StatelessWidget {
       ),
     ],
   );
+}
+
+class _BusinessCredentials extends StatefulWidget {
+  const _BusinessCredentials({required this.controller, this.register = false});
+  final BusinessController controller;
+  final bool register;
+
+  @override
+  State<_BusinessCredentials> createState() => _BusinessCredentialsState();
+}
+
+class _BusinessCredentialsState extends State<_BusinessCredentials> {
+  final _form = GlobalKey<FormState>();
+  final _values = <String, String>{};
+  bool _accepted = false;
+  bool _busy = false;
+  String? _message;
+
+  Widget _field(String key, String label, {bool secret = false}) {
+    return TextFormField(
+      decoration: InputDecoration(labelText: label),
+      obscureText: secret,
+      validator: (value) {
+        final input = value?.trim() ?? '';
+        if (input.isEmpty) return 'Enter $label';
+        if (key == 'fullName' && input.split(RegExp(r'\s+')).length < 2) {
+          return 'Enter your first and last name.';
+        }
+        return null;
+      },
+      onSaved: (value) => _values[key] = secret ? value! : value!.trim(),
+    );
+  }
+
+  Future<void> _submit() async {
+    if (!_form.currentState!.validate()) return;
+    _form.currentState!.save();
+    setState(() {
+      _busy = true;
+      _message = null;
+    });
+    try {
+      if (widget.register) {
+        final service = widget.controller.identity;
+        if (service is! KeycloakIdentityService) return;
+        await service.registerBusiness({..._values, 'termsAccepted': _accepted});
+        if (!mounted) return;
+        _form.currentState?.reset();
+        setState(() {
+          _accepted = false;
+          _message = 'Application submitted for review. Sign in to check access.';
+        });
+      } else {
+        await widget.controller.signInWithPassword(
+          _values['username']!,
+          _values['password']!,
+        );
+        if (mounted) _form.currentState?.reset();
+      }
+    } on IdentityFailure catch (error) {
+      if (mounted) setState(() => _message = error.message);
+    } finally {
+      _values.clear();
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _form,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.register) ...[
+            _field('businessName', 'Business name'),
+            _field('fullName', 'Full name'),
+            _field('email', 'Email'),
+            _field('phone', 'Phone with country code'),
+            _field('dateOfBirth', 'Date of birth (YYYY-MM-DD)'),
+            _field('homeAddress', 'Home address'),
+          ],
+          _field('username', widget.register ? 'Username' : 'Email or username'),
+          _field('password', 'Password', secret: true),
+          if (widget.register)
+            CheckboxListTile(
+              title: const Text('I accept the Terms of Service and Privacy Policy'),
+              value: _accepted,
+              onChanged: _busy ? null : (value) {
+                setState(() => _accepted = value ?? false);
+              },
+            ),
+          if (_message != null) Text(_message!),
+          FilledButton(
+            onPressed: _busy || (widget.register && !_accepted) ? null : _submit,
+            child: Text(_busy ? 'Please wait…' : widget.register ? 'Submit application' : 'Sign in'),
+          ),
+        ],
+      ),
+    );
+  }
 }
