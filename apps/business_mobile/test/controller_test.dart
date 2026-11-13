@@ -151,7 +151,7 @@ void main() {
     },
   );
   test(
-    'backend revalidation removes access when merchant role is revoked',
+    'backend revalidation removes access when approved membership is revoked',
     () async {
       final identity = _StaticIdentity({'merchant'});
       final controller = BusinessController(
@@ -160,7 +160,7 @@ void main() {
       );
       await controller.signIn();
       expect(controller.data.orders, isNotEmpty);
-      identity.roles = {'customer'};
+      identity.businessMemberships = {};
       expect(await controller.revalidateBusinessAccess(force: true), isFalse);
       expect(controller.session, SessionStatus.denied);
       expect(controller.data.orders, isEmpty);
@@ -352,7 +352,7 @@ class _StaticIdentity implements IdentityService {
            : const {};
 
   Set<String> roles;
-  final Set<String> businessMemberships;
+  Set<String> businessMemberships;
 
   @override
   Future<BusinessIdentity?> restoreSession() async => null;

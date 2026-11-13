@@ -209,10 +209,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Register Your Business'), findsOneWidget);
     expect(
-      find.textContaining('does not register, approve, or grant access'),
+      find.text('Registration is unavailable in sample mode.'),
       findsOneWidget,
     );
-    expect(find.text('Continue to secure identity'), findsNothing);
+    expect(find.text('Submit application'), findsNothing);
     expect(controller.session, SessionStatus.signedOut);
     await tester.pumpWidget(const SizedBox());
     controller.dispose();
