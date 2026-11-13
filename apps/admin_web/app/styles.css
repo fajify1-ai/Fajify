@@ -1,0 +1,83 @@
+:root {
+  color-scheme: light;
+  --ink: #1c1c1c;
+  --muted: #5d5b61;
+  --brand: #fa3f38;
+  --action: #ad241f;
+  --line: #dedcdf;
+  font-family: system-ui, sans-serif;
+  color: var(--ink);
+  background: #f7f6f6;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+h1, h2, h3, p { margin: 0; }
+p { color: var(--muted); line-height: 1.55; }
+button {
+  min-height: 44px;
+  padding: .55rem .85rem;
+  border: 1px solid #aaa6aa;
+  border-radius: .4rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  background: white;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: #f0eded; }
+button:disabled { opacity: .55; cursor: default; }
+button.primary { color: white; border-color: var(--action); background: var(--action); }
+button.primary:hover:not(:disabled) { background: #8c1c18; }
+:focus-visible { outline: 3px solid #225bc2; outline-offset: 3px; }
+.topbar { border-top: 4px solid var(--brand); border-bottom: 1px solid var(--line); background: white; }
+.topbar-inner {
+  min-height: 4.25rem;
+  width: min(100% - 2rem, 68rem);
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.brand { font-size: 1.18rem; font-weight: 600; color: var(--ink); text-decoration: none; }
+.brand strong { color: var(--action); }
+.workspace { width: min(100% - 2rem, 68rem); margin: clamp(2rem, 6vw, 4.5rem) auto; }
+.page-heading { margin-bottom: 1.7rem; }
+h1 { font-size: clamp(1.85rem, 4vw, 2.6rem); letter-spacing: -.035em; line-height: 1.12; }
+.page-heading p, .signin p, .access-state p { margin-top: .65rem; }
+.queue-panel, .signin-panel {
+  border: 1px solid var(--line);
+  border-radius: .65rem;
+  background: white;
+}
+.queue-toolbar, .application, .pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem clamp(.9rem, 3vw, 1.45rem);
+}
+.queue-toolbar { border-bottom: 1px solid var(--line); }
+h2 { font-size: 1.15rem; }
+h3 { font-size: 1rem; overflow-wrap: anywhere; margin-bottom: .3rem; }
+.applications { list-style: none; margin: 0; padding: 0; }
+.application + .application, .pagination { border-top: 1px solid var(--line); }
+.application p, .pagination span { font-size: .875rem; }
+.identifier { margin-top: .2rem; overflow-wrap: anywhere; }
+.actions { display: flex; gap: .55rem; flex-wrap: wrap; }
+.application .actions { flex-shrink: 0; }
+.queue-state, .notice, .access-state { padding: 1rem 1.45rem; }
+.queue-state button, .access-state form { margin-top: .7rem; }
+.notice { background: #faf3f2; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.signin { width: min(100% - 2rem, 32rem); margin: clamp(2rem, 10vw, 8rem) auto; }
+.signin-panel { padding: clamp(1.25rem, 5vw, 2.5rem); }
+.signin form { margin-top: 1.25rem; }
+.signin [role="alert"] { color: var(--action); }
+dialog { width: min(100% - 2rem, 27rem); border: 1px solid var(--line); border-radius: .65rem; padding: 1.35rem; color: var(--ink); }
+dialog::backdrop { background: #16111399; }
+dialog p { margin: .65rem 0 1.2rem; overflow-wrap: anywhere; }
+dialog .actions { justify-content: flex-end; }
+@media (max-width: 37rem) {
+  .application, .pagination { align-items: flex-start; flex-direction: column; }
+  .queue-toolbar { flex-wrap: wrap; }
+}

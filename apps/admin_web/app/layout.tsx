@@ -1,5 +1,23 @@
 import type { ReactNode } from 'react';
-export const metadata = { title: 'Faji Administration' };
-export default function Layout({children}:{children:ReactNode}) {
-  return <html lang="en"><body style={{fontFamily:'system-ui, sans-serif',margin:0}}>{children}</body></html>;
+import { cookies } from 'next/headers';
+import { sessionCookie, sessions } from '../lib/session';
+import './styles.css';
+
+export const metadata = { title: 'Faji Admin' };
+
+export default async function Layout({ children }: { children: ReactNode }) {
+  const signedIn = Boolean(sessions.get((await cookies()).get(sessionCookie)?.value));
+  return (
+    <html lang="en">
+      <body>
+        <header className="topbar">
+          <div className="topbar-inner">
+            <a href="/" className="brand"><strong>Faji</strong> Admin</a>
+            {signedIn && <form action="/auth/logout" method="post"><button>Sign out</button></form>}
+          </div>
+        </header>
+        {children}
+      </body>
+    </html>
+  );
 }
