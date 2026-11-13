@@ -5,7 +5,7 @@
 	<key>CFBundleURLTypes</key>
 	<array><dict>
 		<key>CFBundleURLSchemes</key>
-		<array><string>com.faji.customer</string></array>
+		<array><string>com.faji.customer</string><string>com.faji.business</string></array>
 	</dict></array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
