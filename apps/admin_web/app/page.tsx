@@ -13,7 +13,7 @@ const messages: Record<string, string> = {
 export default async function Page({ searchParams }: { searchParams: Promise<{ auth?: string }> }) {
   const auth = (await searchParams).auth;
   const store = await cookies();
-  if (!auth && await sessions.get(store.get(sessionCookie)?.value)) redirect(operatorHome);
+  if (!auth && sessions.get(store.get(sessionCookie)?.value)) redirect(operatorHome);
   let available = true;
   try {
     config();

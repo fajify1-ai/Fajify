@@ -8,7 +8,7 @@ import './styles.css';
 export const metadata = { title: { default: 'Fajify Admin', template: '%s · Fajify Admin' } };
 
 export default async function Layout({ children }: { children: ReactNode }) {
-  const signedIn = Boolean(await sessions.get((await cookies()).get(sessionCookie)?.value));
+  const signedIn = Boolean(sessions.get((await cookies()).get(sessionCookie)?.value));
   return (
     <html lang="en">
       <body>

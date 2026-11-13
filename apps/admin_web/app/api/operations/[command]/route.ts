@@ -7,7 +7,7 @@ import { sessionCookie, sessions } from '../../../../lib/session';
 export async function POST(request: NextRequest, context: { params: Promise<{ command: string }> }) {
   const result = (status: number) => NextResponse.json({ ok: status === 200 }, { status });
   if (!sameOrigin(request)) return result(403);
-  const session = await sessions.get(request.cookies.get(sessionCookie)?.value);
+  const session = sessions.get(request.cookies.get(sessionCookie)?.value);
   if (!session) return result(401);
   if (request.headers.get('content-type')?.split(';')[0] !== 'application/json') return result(400);
   const { command } = await context.params;

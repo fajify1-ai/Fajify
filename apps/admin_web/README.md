@@ -38,12 +38,3 @@ The operator lands on Operations overview after sign-in. Navigation connects the
 Finance displays captures, refunds, settlements and reconciled ride payouts as separate measures. Reports use the server's rolling date windows and can retrieve a merchant report by its UUID. Monitoring shows external provider health as unverified until the backend has provider evidence. Navigation is visible to signed-in operators and restricted reads and commands return access-denied states.
 
 Before production rollout, verify the Azure dev MFA and physical Business APK acceptance above. Also exercise every console route with least-privilege read-only and write-enabled operators, including denial, expired MFA, concurrent decisions and replay. For multi-instance deployment, replace the process-local session and OIDC transaction stores with shared server-side storage.
-
-## Vercel dev preview
-
-Use a separate Vercel project with root directory `apps/admin_web`, the Next.js preset, and Node 22.x. Include workspace files outside the root so Vercel can use the root pnpm lockfile. Deploy the admin branch as a preview.
-
-- Set `FAJI_ADMIN_WEB_ORIGIN` to the exact HTTPS preview origin you will open in the browser. Use a stable preview alias and set it before the acceptance build.
-- Set `FAJI_ADMIN_API_ORIGIN=https://fajify-dev.eastus.cloudapp.azure.com` and `FAJI_ADMIN_OIDC_ISSUER=https://fajify-dev.eastus.cloudapp.azure.com/realms/faji`.
-- Provision a dedicated dev Upstash Redis database and set `UPSTASH_REDIS_REST_URL` and the read/write `UPSTASH_REDIS_REST_TOKEN` as server-only Preview variables. Redis stores short-lived sessions and consumes each login transaction atomically. Vercel requires this shared storage. Single-process Azure deployments can continue using memory.
-- In Azure dev Keycloak, append the preview origin plus `/auth/callback` to the `faji-admin-web` redirect URIs and the preview origin plus `/` to its post-logout redirect URIs. Keep existing entries and MFA. Open the preview in Android Chrome and complete sign-in before testing merchant approval.

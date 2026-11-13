@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
   try {
     const session = await finishLogin(request, transactionId);
     if (session) {
-      const sessionId = await sessions.create(session);
-      await sessions.remove(request.cookies.get(sessionCookie)?.value);
+      const sessionId = sessions.create(session);
+      sessions.remove(request.cookies.get(sessionCookie)?.value);
       response = NextResponse.redirect(origin + operatorHome, 303);
       response.cookies.set(sessionCookie, sessionId, { ...cookieOptions, expires: new Date(session.expires) });
     } else {

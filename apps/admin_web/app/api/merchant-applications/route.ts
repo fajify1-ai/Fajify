@@ -8,7 +8,7 @@ function result(value: object, status = 200) {
 }
 
 async function forward(request: NextRequest, path: string, body?: object) {
-  const session = await sessions.get(request.cookies.get(sessionCookie)?.value);
+  const session = sessions.get(request.cookies.get(sessionCookie)?.value);
   if (!session) return new Response(null, { status: 401 });
 
   return fetch(config().api + path, {

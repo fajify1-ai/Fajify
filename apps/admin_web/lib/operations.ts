@@ -6,7 +6,7 @@ import { sessionCookie, sessions } from './session';
 
 export async function requireOperator() {
   const id = (await cookies()).get(sessionCookie)?.value;
-  const session = await sessions.get(id);
+  const session = sessions.get(id);
   if (!session) redirect(id ? '/?auth=expired' : '/');
   return session;
 }
