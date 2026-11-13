@@ -79,9 +79,11 @@ class _LiveWorkspaceState extends State<LiveWorkspace> {
       );
       if (mounted) _refresh();
     } on Exception catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error is IdentityFailure ? error.message : 'The update failed.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error is IdentityFailure ? error.message : 'The update failed.')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -160,9 +162,11 @@ class _LiveWorkspaceState extends State<LiveWorkspace> {
       await _api.merchantRequest(method, path, payload);
       if (mounted) _refresh();
     } on Exception catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error is IdentityFailure ? error.message : 'The update failed.')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error is IdentityFailure ? error.message : 'The update failed.')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
