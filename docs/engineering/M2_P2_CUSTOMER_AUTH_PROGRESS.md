@@ -1,3 +1,5 @@
+> **Historical implementation reference — superseded for future work (2026-11-16).** The approved architecture uses application-hosted Better Auth with Faji PostgreSQL and fully in-app authentication (no Keycloak, hosted login or browser-based OIDC redirects). All web applications use Next.js/React/TypeScript; Flutter is native Android/iOS only. Preserve historical evidence below, but follow [the current architecture decision](../architecture/AUTH_AND_WEB_MIGRATION_DECISION.md) for new work.
+
 > Historical implementation record. For the restored preferred working directory, current Firebase-free behavior and combined verification, see [current reconciliation report](M2_P2_RECONCILIATION.md). No GitHub push is authorized.
 
 > Historical evidence below is superseded for current development by [M2-P2 Firebase removal](M2_P2_FIREBASE_REMOVAL.md). The product owner's 2026-10-26 instruction authorizes removal before customer APIs exist, using typed unavailable boundaries.
