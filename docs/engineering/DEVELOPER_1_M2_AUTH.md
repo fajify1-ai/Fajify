@@ -1,3 +1,5 @@
+> **Historical implementation reference — superseded for future work (2026-11-16).** The approved architecture uses application-hosted Better Auth with Faji PostgreSQL and fully in-app authentication (no Keycloak, hosted login or browser-based OIDC redirects). All web applications use Next.js/React/TypeScript; Flutter is native Android/iOS only. Preserve historical evidence below, but follow [the current architecture decision](../architecture/AUTH_AND_WEB_MIGRATION_DECISION.md) for new work.
+
 # Phase 1 — Milestone 2 identity and authorization (engineering ownership: Developer 1)
 
 **Status: implementation in progress, not accepted.** Branch: `feat/m2-d1-keycloak-auth-authorization`.
