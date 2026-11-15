@@ -6,8 +6,8 @@
 | --- | --- | --- |
 | **Phase 1 — Backend & Platform** | API, data, identity, integrations, infrastructure, security | `apps/api/`, `apps/worker/`, `packages/database/`, `packages/api_contracts/`, `infrastructure/` |
 | **Phase 2 — Customer & Frontend** | Customer Flutter/web, customer journeys, UI, tests | `apps/customer_mobile/`, `apps/customer_web/`, shared Flutter/web UI |
-| **Phase 3 — Faji Business** | Business Flutter, merchant operations, merchant finance UI | `apps/business_mobile/` |
-| **Phase 4 — Ride, Dispatch & Operations** | Driver/dispatcher Flutter and operational administration UX | `apps/ride_dispatch/`, `apps/admin_web/` with Phase 1 on admin contracts |
+| **Phase 3 — Faji Business** | Business Flutter mobile and Next.js web, merchant operations, merchant finance UI | `apps/business_mobile/`, `apps/business_web/` |
+| **Phase 4 — Ride, Dispatch & Operations** | Driver/dispatcher Flutter and operational administration UX | `apps/ride_dispatch/`, `apps/ride_dispatch_web/`, `apps/admin_web/` with Phase 1 on admin contracts |
 
 Owners are people or teams assigned to a **phase**; the label is not an employee identifier. `Phase 3` and `Phase 4` replace the formerly subdivided Business/Mobility allocation for planning, not the domain architecture. Administration UI belongs to Phase 4; privileged APIs and authorization belong to Phase 1.
 
@@ -16,7 +16,7 @@ Owners are people or teams assigned to a **phase**; the label is not an employee
 | Milestone | Phase 1 — Backend & Platform | Phase 2 — Customer & Frontend | Phase 3 — Business | Phase 4 — Ride, Dispatch & Operations |
 | --- | --- | --- | --- | --- |
 | **M1 — Foundation** | NestJS API, Postgres/PostGIS, workspace/infrastructure | Flutter customer migration, shared UI, customer web shell | Business scaffold and navigation | Combined Ride/Dispatch scaffold, admin web shell |
-| **M2 — Identity & Security** | Keycloak, auth contracts, roles/memberships, server authorization | Customer mobile/web OIDC, registration, sessions | Business OIDC, merchant scopes, access gating | Driver/dispatcher OIDC, role separation, admin authentication |
+| **M2 — Identity & Security** | Better Auth in NestJS/Faji PostgreSQL, auth contracts, roles/memberships, server authorization | Customer mobile/web embedded authentication, registration, sessions | Business mobile/web embedded authentication, merchant scopes, access gating | Driver/dispatcher mobile/web embedded authentication, role separation, admin authentication |
 | **M3 — Business** | Merchant schema/APIs and transactional rules | Customer-facing venue widgets and contract integration | Merchant onboarding, catalogue, reservations, orders, reporting | Admin approval and merchant-governance UI under Phase 1 contracts |
 | **M4 — Customer** | Discovery, booking and ordering APIs | Customer Flutter/web discovery, plans, reservations, ordering | Merchant/customer booking & order status integration | Operational handling/escalation UI and cross-domain readiness |
 | **M5 — Payments** | Gateway, verified webhooks, ledger, payout/refund rules | Checkout, paid booking and ticket UX | Merchant earnings, settlements, payout views | Admin finance/dispute operations; Ride earnings integration fixtures |
@@ -30,8 +30,8 @@ These allocations are **delivery responsibilities**, not proof of completion. Sc
 ## Naming and contributions
 
 - Milestone/phase identity: `M1-P1`, `M1-P2`, `M1-P3`, `M1-P4`; `M2-P1` … `M9-P4`.
-- Branches: `feat/m2-p1-keycloak-auth`, `feat/m2-p2-customer-auth`, `feat/m2-p3-business-auth`, `feat/m2-p4-ride-dispatch-auth`; equivalent `fix/`, `docs/`, `test/` prefixes as appropriate.
-- Pull request titles: `M2 · Phase 1 · Keycloak identity and authorization`.
+- Branches: `feat/m2-p1-better-auth`, `feat/m2-p2-customer-auth`, `feat/m2-p3-business-auth`, `feat/m2-p4-ride-dispatch-auth`; equivalent `fix/`, `docs/`, `test/` prefixes as appropriate.
+- Pull request titles: `M2 · Phase 1 · Better Auth identity and authorization`.
 - PR bodies and acceptance reports must state milestone/phase ID, affected modules, dependent contracts, tests and device evidence, security/rollback concerns, review/approval and outstanding blockers.
 - **Do not rename or rewrite historical commits, authors, existing branches, merged PRs, evidence logs, or dated acceptance records.** Historical identifiers such as `d1`, `Developer 3A`, and `DEVELOPER_1_M1_ACCEPTANCE.md` remain valid evidence references. New documentation uses phase labels and links back to historical evidence as needed.
 - Never replace the original contributor attribution with a phase label; Git author and review history remain attributable to individuals.
@@ -53,3 +53,5 @@ Merged and unmerged M1 PR titles #1–#6 have been updated to phase terminology,
 ## Delivery gate
 
 Each phase requires implemented code, reproducible checks, negative/security cases where relevant, contract compatibility, and a reviewed PR. A milestone is accepted only after its four phase deliveries and shared integration acceptance have cleared; a dependency can be recorded as blocked without incorrectly marking a milestone done.
+
+> Architecture decision: all web surfaces use Next.js/React/TypeScript; Flutter is native mobile only. All authentication is in-app via application-hosted Better Auth and Faji PostgreSQL. Historical branch names and evidence remain unchanged, but are superseded as implementation guidance.
