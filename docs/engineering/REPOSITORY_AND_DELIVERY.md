@@ -10,6 +10,8 @@ Fajify/
 │   ├── ride_dispatch/         # One Flutter app: driver + dispatcher
 │   ├── customer_web/          # Next.js customer website
 │   ├── admin_web/             # Next.js admin website
+│   ├── business_web/          # Next.js merchant operations
+│   ├── ride_dispatch_web/     # Next.js dispatcher/ride operations
 │   ├── api/                   # NestJS modular monolith
 │   └── worker/                # Background processing
 ├── packages/
@@ -24,7 +26,7 @@ Fajify/
 ├── infrastructure/
 │   ├── docker/
 │   ├── terraform/
-│   ├── keycloak/
+│   ├── auth/                  # Better Auth configuration notes (target)
 │   ├── database/
 │   └── deployment/
 ├── tests/
@@ -42,6 +44,8 @@ Fajify/
 │   └── roadmap/
 └── tooling/
 ```
+Flutter is restricted to native Android/iOS; no Flutter Web deployment is part of the target architecture. Authentication UI and lifecycle remain inside the apps, without external browser or hosted identity redirects. The NestJS backend validates sessions/tokens and enforces memberships, approvals, suspensions and resource scopes. One identity can hold multiple roles.
+
 This is the **target layout**, not an assertion that all directories or applications have already been implemented. The current repository may begin with documentation and incrementally create workspaces during M1.
 
 ## 2. Workspaces and boundaries
@@ -54,7 +58,7 @@ This is the **target layout**, not an assertion that all directories or applicat
 
 ## 3. Environment configuration
 **Development:** local or disposable databases, fake providers and synthetic test data; reproducible Docker configuration where required.
-**Staging:** separate identity and application DBs, production-like network/roles/providers using safe test credentials and no uncontrolled production data.
+**Staging:** isolated Faji PostgreSQL with Better Auth and application schemas, production-like network/roles/providers using safe test credentials and no uncontrolled production data.
 **Production:** independently deployed services, restricted networking, managed secrets, TLS, backups, audit and alerts.
 Record template variable names and validation. Do not copy production secrets into Git history or staging.
 
@@ -64,9 +68,9 @@ Record template variable names and validation. Do not copy production secrets in
 3. Start NestJS API with health, OpenAPI and standard validation/error/logging.
 4. Import customer Flutter code with source attribution and reproducible build evidence.
 5. Scaffold Faji Business and Ride & Dispatch Flutter clients in parallel.
-6. Scaffold Next.js customer/admin websites and shared UI packages.
+6. Scaffold Next.js customer, admin, business and ride/dispatch websites and shared UI packages.
 7. Establish mock API fixtures from documented contracts for independent developer progress.
-8. Prepare Keycloak and integrate server-enforced authorization in M2.
+8. Integrate application-hosted Better Auth with NestJS and Faji PostgreSQL, and enforce server-side authorization in M2.
 9. Expand merchant, customer, finance, ride and admin modules according to milestone acceptance gates.
 10. Verify exact commit/release in isolated staging before any controlled production release.
 
