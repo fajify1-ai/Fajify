@@ -3,23 +3,23 @@
 The former 63 numbered roadmap items are **technical work packages**, not additional delivery phases. Section identifiers such as 2.1–2.6 remain as traceable scope references. Each milestone runs Phase 1 (Backend & Platform), Phase 2 (Customer & Frontend), Phase 3 (Faji Business) and Phase 4 (Ride, Dispatch & Operations). See [four-phase allocation](../roadmap/FOUR_PHASE_MODEL.md). Phase workstreams may overlap once dependencies are satisfied. Every acceptance statement is a **required verification gate**, not a claim of completion.
 
 ## M1 — Engineering Foundation & Infrastructure
-**Objective:** reproducible workspaces, backend/database foundation, applications and engineering automation.
+**Objective:** reproducible workspaces, backend/database foundation, applications and engineering automation. Web uses Next.js/React/TypeScript for all four domains; Flutter/Dart is native Android/iOS only.
 - **1.1 Repository/workspace:** GitHub monorepo; Flutter, Next.js, NestJS workspace and package boundaries; formatting and static analysis.
 - **1.2 Environments:** local PostgreSQL/Redis, Docker, environment variable conventions, secure secrets and disposable test resources.
 - **1.3 Database:** Postgres/PostGIS, roles, migrations, initial schema conventions, backup/restore strategy.
 - **1.4 APIs:** NestJS module layout, /api/v1 versioning, OpenAPI, validation, errors, logging and trace IDs.
 - **1.5 Design system:** Faji tokens, Flutter widgets, Next.js components, responsiveness, accessibility and brand consistency.
 - **1.6 Automation:** build/unit checks, dependency and secret scanning, branch protection, release workflow foundations.
-**Acceptance:** all app shells build; migrations work (rollback where supported); local/staging reproducible; OpenAPI generates; automated checks pass. Phase-level steps: [workstreams](DEVELOPER_WORKSTREAMS.md).
+**Acceptance:** all four Next.js web app shells (customer, admin, business, ride/dispatch) and native Flutter app shells build; migrations work (rollback where supported); local/staging reproducible; OpenAPI generates; automated checks pass. Phase-level steps: [workstreams](DEVELOPER_WORKSTREAMS.md).
 
 ## M2 — Identity, Access & Platform Security
-- **2.1 Keycloak:** isolate identity PostgreSQL; realms, clients, TLS, backup, monitoring.
+- **2.1 Better Auth:** integrate application-hosted authentication with NestJS and Faji PostgreSQL; secure configuration, migrations, backup and monitoring.
 - **2.2 Authentication:** registration, verification, login, recovery, supported social login, logout.
-- **2.3 Flutter OIDC:** Android/iOS Authorization Code + PKCE, secure storage, sessions, expiry/refresh.
-- **2.4 Next.js OIDC:** customer/admin login, HttpOnly cookies, server sessions, route protection.
+- **2.3 Native Flutter authentication:** embedded Android/iOS registration, login, recovery, phone OTP and session lifecycle with secure local handling; no external browser redirects.
+- **2.4 Next.js authentication:** customer, admin, business and ride/dispatch web apps use embedded Better Auth flows, secure HttpOnly session cookies where applicable, server validation and route protection.
 - **2.5 Authorization:** unified subject ID, profiles, merchant/driver/dispatcher/admin roles; resource-scoped access.
-- **2.6 Security:** MFA, revocation, suspension, rate limits, audit logs, recovery testing.
-**Acceptance:** unified identity across clients; multi-role support; unauthorized access denied; expired/revoked sessions rejected; privileged access hardened.
+- **2.6 Security:** optional MFA enrollment, privileged step-up where warranted, revocation, suspension, rate limits, audit logs, recovery testing.
+**Acceptance:** one PostgreSQL-backed Better Auth identity across all clients and roles; registration, login, password recovery, phone OTP, logout and session lifecycle verified entirely in-app without external browser or hosted login; expired/revoked sessions rejected by NestJS; membership, approval, suspension and tenant isolation enforced server-side; privileged access hardened and audited.
 
 ## M3 — Faji Business Platform
 - **3.1 Merchant registration:** business identity, branch/contact, documents and approvals.
@@ -60,7 +60,7 @@ The former 63 numbered roadmap items are **technical work packages**, not additi
 **Acceptance:** recommendations obey availability and constraints; pricing logic is coherent; choices explainable; recommended items can lead to valid booking. First implementation uses structured matching/rules, not mandatory generative AI.
 
 ## M7 — Faji Ride & Dispatch
-- **7.1 One Ride & Dispatch app:** role-aware driver/dispatcher routes and OIDC.
+- **7.1 One Ride & Dispatch app:** role-aware driver/dispatcher routes and embedded Better Auth sessions.
 - **7.2 Driver onboarding:** identification, licence, vehicle, banking and review.
 - **7.3 Driver administration:** approvals, suspension, eligibility, document expiry.
 - **7.4 Location:** permissions, background GPS, proximity, stale handling.
@@ -73,7 +73,7 @@ The former 63 numbered roadmap items are **technical work packages**, not additi
 **Acceptance:** only eligible drivers assigned; no double assignment; consistent trip state; background location verified within iOS/Android platform limitations; payouts reconcile; safety flows work.
 
 ## M8 — Platform Administration, Integration & Operations
-- **8.1 Admin foundation:** admin dashboard, scopes, MFA, auditing.
+- **8.1 Admin foundation:** admin dashboard, scopes, optional MFA with risk-based privileged step-up, auditing.
 - **8.2 Marketplace governance:** approvals, moderation and restrictions.
 - **8.3 Financial administration:** payment/refund/settlement/dispute controls.
 - **8.4 Support:** tickets, complaints, booking/order/ride incidents.
