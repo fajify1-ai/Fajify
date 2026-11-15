@@ -13,10 +13,13 @@ This repository follows the established Faji System Architecture & Engineering D
 
 ## Confirmed core stack
 - **Mobile:** Flutter / Dart (customer, business, combined ride/dispatch)
-- **Web:** Next.js / React / TypeScript (customer and admin); Flutter Web (business/dispatch operations)
+- **Web:** Next.js / React / TypeScript (customer, admin, business, ride & dispatch)
 - **Backend:** NestJS / Node.js / TypeScript, modular monolith, REST/OpenAPI and WebSockets
 - **Database:** PostgreSQL / PostGIS; Drizzle ORM and SQL
-- **Identity:** Keycloak / OIDC / OAuth 2.0
+- **Identity:** Better Auth embedded in Faji applications, backed by Faji PostgreSQL
 - **Queues/cache:** Redis / BullMQ
 - **Services:** S3-compatible storage, Google Maps, Paystack or Flutterwave, transactional email, FCM/APNs push
 - **Delivery:** GitHub, pnpm, Turborepo, Melos, Docker, managed hosting
+
+## Authentication and authorization decision
+All registration, sign-in, password recovery, phone OTP, sign-out and session handling occur within Faji web/mobile applications using application-hosted Better Auth. No external browser or hosted login redirect is permitted. NestJS validates authenticated sessions/tokens and enforces server-side roles, memberships, approvals, suspensions and resource scope. One identity can hold multiple roles. This is the target architecture; legacy implementation and test artifacts are not evidence that migration has occurred.
