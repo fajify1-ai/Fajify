@@ -1,3 +1,4 @@
+import {WebCompletionModule} from './web-completion/module';
 import {Module} from '@nestjs/common';
 import {ConfigModule} from '@nestjs/config';
 import {HealthController} from './health.controller';
@@ -10,5 +11,5 @@ import {PlanningModule} from './planning/planning.module';
 import {RideModule} from './rides/ride.module';
 import {AdminOperationsModule} from './admin/admin.module';
 import {validateEnvironment} from './config';
-@Module({imports:[ConfigModule.forRoot({isGlobal:true,validate:validateEnvironment}),DatabaseModule,IdentityModule,BusinessModule,CustomerModule,PaymentsModule,PlanningModule,RideModule,AdminOperationsModule],controllers:[HealthController]})
+@Module({imports:[ConfigModule.forRoot({isGlobal:true,validate:validateEnvironment}),DatabaseModule,IdentityModule,BusinessModule,CustomerModule,WebCompletionModule,PaymentsModule,PlanningModule,RideModule,AdminOperationsModule],controllers:[HealthController]})
 export class AppModule {}

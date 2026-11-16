@@ -235,6 +235,11 @@
     "audience": "business"
   },
   {
+    "path": "businesses/{businessId}/branches/{branchId}/public-profile",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
     "path": "businesses/{businessId}/branches/{branchId}/public-media",
     "method": "PUT",
     "audience": "business"
@@ -242,6 +247,11 @@
   {
     "path": "businesses/{businessId}/branches/{branchId}/packages/{id}/public-options",
     "method": "PUT",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/packages/{id}/public-options",
+    "method": "GET",
     "audience": "business"
   },
   {
@@ -333,6 +343,136 @@
     "path": "customer/support/{id}/closure",
     "method": "PUT",
     "audience": "customer"
+  },
+  {
+    "path": "customer/cart",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/cart",
+    "method": "PUT",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/events",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/events",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/events/{id}/invitations",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/invitations/preview",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/invitations/acceptance",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/promotions",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/payments/{id}/receipt",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/catalogue/{id}/media",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/reports",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/health",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/notifications",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/notifications/{id}/read",
+    "method": "PUT",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/support",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/support",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/support/{id}/messages",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/support/{id}/messages",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/promotions",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/promotions",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/draft/current",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/draft/current",
+    "method": "PUT",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/applications/mine",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/{id}/verification-documents",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/{id}/verification-documents",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/{id}/verification-documents/{documentId}",
+    "method": "GET",
+    "audience": "business"
   },
   {
     "path": "customer/payments/{id}",

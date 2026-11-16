@@ -1845,6 +1845,38 @@
         "tags": [
           "merchant-public-content"
         ]
+      },
+      "get": {
+        "operationId": "WebMerchantController_publicProfile_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebPublicProfile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
       }
     },
     "/api/v1/businesses/{businessId}/branches/{branchId}/public-media": {
@@ -1963,6 +1995,38 @@
         ],
         "tags": [
           "merchant-public-content"
+        ]
+      },
+      "get": {
+        "operationId": "WebMerchantController_options_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebPackageOptions"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
         ]
       }
     },
@@ -2687,6 +2751,1104 @@
         ],
         "tags": [
           "customer-account"
+        ]
+      }
+    },
+    "/api/v1/customer/cart": {
+      "get": {
+        "operationId": "WebCustomerController_cart_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebCart"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      },
+      "put": {
+        "operationId": "WebCustomerController_setCart_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebCart"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      }
+    },
+    "/api/v1/customer/events": {
+      "get": {
+        "operationId": "WebCustomerController_events_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebHostedEvents"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      },
+      "post": {
+        "operationId": "WebCustomerController_event_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HostedEventInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebHostedEvent"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      }
+    },
+    "/api/v1/customer/events/{id}/invitations": {
+      "post": {
+        "operationId": "WebCustomerController_invite_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebInvitation"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      }
+    },
+    "/api/v1/customer/invitations/preview": {
+      "post": {
+        "operationId": "WebCustomerController_preview_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationAcceptance"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebHostedEvent"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      }
+    },
+    "/api/v1/customer/invitations/acceptance": {
+      "post": {
+        "operationId": "WebCustomerController_accept_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationAcceptance"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebInvitationAccepted"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      }
+    },
+    "/api/v1/customer/promotions": {
+      "get": {
+        "operationId": "WebCustomerController_promotions_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebPromotions"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      }
+    },
+    "/api/v1/customer/payments/{id}/receipt": {
+      "get": {
+        "operationId": "WebCustomerController_receipt_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebReceipt"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/branches/{branchId}/catalogue/{id}/media": {
+      "get": {
+        "operationId": "WebMerchantController_media_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebMedia"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/reports": {
+      "get": {
+        "operationId": "WebMerchantController_report_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebReport"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/health": {
+      "get": {
+        "operationId": "WebMerchantController_health_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebReport"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/notifications": {
+      "get": {
+        "operationId": "WebMerchantController_notifications_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebMerchantNotifications"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/notifications/{id}/read": {
+      "put": {
+        "operationId": "WebMerchantController_read_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebNotificationRead"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/support": {
+      "get": {
+        "operationId": "WebMerchantController_support_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebSupportCases"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      },
+      "post": {
+        "operationId": "WebMerchantController_createSupport_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantSupportInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebSupportCase"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/support/{id}/messages": {
+      "get": {
+        "operationId": "WebMerchantController_thread_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebSupportMessages"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      },
+      "post": {
+        "operationId": "WebMerchantController_reply_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantMessageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebSupportMessages"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      }
+    },
+    "/api/v1/businesses/{businessId}/promotions": {
+      "get": {
+        "operationId": "WebMerchantController_promotions_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebPromotions"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      },
+      "post": {
+        "operationId": "WebMerchantController_promotion_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromotionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebPromotion"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-merchant-journeys"
+        ]
+      }
+    },
+    "/api/v1/business/onboarding/draft/current": {
+      "get": {
+        "operationId": "WebOnboardingController_draft_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebDraftView"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-onboarding"
+        ]
+      },
+      "put": {
+        "operationId": "WebOnboardingController_save_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebDraftView"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-onboarding"
+        ]
+      }
+    },
+    "/api/v1/business/onboarding/applications/mine": {
+      "get": {
+        "operationId": "WebOnboardingController_applications_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebApplications"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-onboarding"
+        ]
+      }
+    },
+    "/api/v1/business/onboarding/{id}/verification-documents": {
+      "get": {
+        "operationId": "WebOnboardingController_documents_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebDocuments"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-onboarding"
+        ]
+      },
+      "post": {
+        "operationId": "WebOnboardingController_upload_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebUploadResult"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-onboarding"
+        ]
+      }
+    },
+    "/api/v1/business/onboarding/{id}/verification-documents/{documentId}": {
+      "get": {
+        "operationId": "WebOnboardingController_document_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebDocumentFile"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-onboarding"
         ]
       }
     },
@@ -10577,6 +11739,947 @@
         "required": [
           "requestKey",
           "message"
+        ]
+      },
+      "WebCartLine": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity"
+        ]
+      },
+      "WebCartQuote": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "branch_id": {
+            "type": "string"
+          },
+          "price_minor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "branch_id",
+          "price_minor",
+          "currency"
+        ]
+      },
+      "WebCart": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebCartLine"
+            }
+          },
+          "quotes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebCartQuote"
+            }
+          },
+          "checkoutEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "revision",
+          "items",
+          "quotes",
+          "checkoutEnabled"
+        ]
+      },
+      "CartLine": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "catalogueId",
+          "quantity"
+        ]
+      },
+      "CartInput": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartLine"
+            }
+          }
+        },
+        "required": [
+          "revision",
+          "items"
+        ]
+      },
+      "WebHostedEvent": {
+        "type": "object",
+        "properties": {
+          "is_owner": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "starts_at": {
+            "type": "string"
+          },
+          "ends_at": {
+            "type": "string"
+          },
+          "capacity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "location",
+          "starts_at",
+          "ends_at",
+          "capacity"
+        ]
+      },
+      "WebHostedEvents": {
+        "type": "object",
+        "properties": {
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebHostedEvent"
+            }
+          }
+        },
+        "required": [
+          "nextOffset",
+          "items"
+        ]
+      },
+      "HostedEventInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "capacity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "location",
+          "startsAt",
+          "endsAt",
+          "capacity"
+        ]
+      },
+      "WebInvitation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "delivery": {
+            "type": "string"
+          },
+          "grants": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "expires_at",
+          "token",
+          "delivery",
+          "grants"
+        ]
+      },
+      "InvitationAcceptance": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "WebInvitationAccepted": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "bookingCreated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "eventId",
+          "status",
+          "bookingCreated"
+        ]
+      },
+      "WebPromotion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "business_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "business_id",
+          "title",
+          "description",
+          "expires_at"
+        ]
+      },
+      "WebPromotions": {
+        "type": "object",
+        "properties": {
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebPromotion"
+            }
+          }
+        },
+        "required": [
+          "nextOffset",
+          "items"
+        ]
+      },
+      "WebReceipt": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "amount_minor": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "verified_at": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "amount_minor",
+          "currency",
+          "verified_at",
+          "filename",
+          "contentType",
+          "content"
+        ]
+      },
+      "WebPackageAddon": {
+        "type": "object",
+        "properties": {
+          "catalogueId": {
+            "type": "string"
+          },
+          "maxQuantity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "catalogueId",
+          "maxQuantity"
+        ]
+      },
+      "WebPackageOptions": {
+        "type": "object",
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "pricingModel": {
+            "type": "string"
+          },
+          "minGuests": {
+            "type": "number"
+          },
+          "maxGuests": {
+            "type": "number"
+          },
+          "addOns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebPackageAddon"
+            }
+          }
+        },
+        "required": [
+          "configured",
+          "pricingModel",
+          "minGuests",
+          "maxGuests",
+          "addOns"
+        ]
+      },
+      "WebPublicProfile": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "public_phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "summary",
+          "city",
+          "public_phone",
+          "latitude",
+          "longitude"
+        ]
+      },
+      "WebMediaItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "position": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "alt",
+          "position"
+        ]
+      },
+      "WebMedia": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebMediaItem"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "WebOrderMetric": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string"
+          },
+          "orders": {
+            "type": "number"
+          },
+          "cancelled": {
+            "type": "number"
+          },
+          "fulfilled_minor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "currency",
+          "orders",
+          "cancelled",
+          "fulfilled_minor"
+        ]
+      },
+      "WebReservationMetric": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "status",
+          "count"
+        ]
+      },
+      "WebDailyMetric": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "orders": {
+            "type": "number"
+          },
+          "fulfilled_minor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "day",
+          "currency",
+          "orders",
+          "fulfilled_minor"
+        ]
+      },
+      "WebReport": {
+        "type": "object",
+        "properties": {
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebOrderMetric"
+            }
+          },
+          "reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebReservationMetric"
+            }
+          },
+          "daily": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebDailyMetric"
+            }
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "periodDays": {
+            "type": "number"
+          },
+          "metric": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orders",
+          "reservations",
+          "daily",
+          "timezone",
+          "periodDays",
+          "metric"
+        ]
+      },
+      "WebMerchantNotification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "read": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "created_at",
+          "read"
+        ]
+      },
+      "WebMerchantNotifications": {
+        "type": "object",
+        "properties": {
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebMerchantNotification"
+            }
+          }
+        },
+        "required": [
+          "nextOffset",
+          "items"
+        ]
+      },
+      "WebNotificationRead": {
+        "type": "object",
+        "properties": {
+          "read": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "read"
+        ]
+      },
+      "WebSupportCase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status",
+          "created_at"
+        ]
+      },
+      "WebSupportCases": {
+        "type": "object",
+        "properties": {
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebSupportCase"
+            }
+          }
+        },
+        "required": [
+          "nextOffset",
+          "items"
+        ]
+      },
+      "MerchantSupportInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "message"
+        ]
+      },
+      "WebSupportMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "body",
+          "created_at"
+        ]
+      },
+      "WebSupportMessages": {
+        "type": "object",
+        "properties": {
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebSupportMessage"
+            }
+          }
+        },
+        "required": [
+          "nextOffset",
+          "items"
+        ]
+      },
+      "MerchantMessageInput": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "PromotionInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "expiresAt"
+        ]
+      },
+      "WebDraftData": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "number"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "step",
+          "businessName",
+          "fields"
+        ]
+      },
+      "WebDraftView": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "number"
+          },
+          "data": {
+            "$ref": "#/components/schemas/WebDraftData"
+          }
+        },
+        "required": [
+          "revision",
+          "data"
+        ]
+      },
+      "DraftInput": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "number",
+            "minimum": 0
+          },
+          "step": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 8
+          },
+          "businessName": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "fields": {
+            "type": "string",
+            "maxLength": 5000,
+            "description": "JSON onboarding fields; no identity files or credentials"
+          }
+        },
+        "required": [
+          "revision",
+          "step",
+          "businessName"
+        ]
+      },
+      "WebApplication": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "status",
+          "created_at"
+        ]
+      },
+      "WebApplications": {
+        "type": "object",
+        "properties": {
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebApplication"
+            }
+          }
+        },
+        "required": [
+          "nextOffset",
+          "items"
+        ]
+      },
+      "WebDocumentMeta": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "mime",
+          "created_at"
+        ]
+      },
+      "WebDocuments": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebDocumentMeta"
+            }
+          },
+          "verificationStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "verificationStatus"
+        ]
+      },
+      "WebUploadResult": {
+        "type": "object",
+        "properties": {
+          "stored": {
+            "type": "boolean"
+          },
+          "document": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WebDocumentMeta"
+              }
+            ]
+          },
+          "verificationStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "stored",
+          "verificationStatus"
+        ]
+      },
+      "UploadInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "mime": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "application/pdf"
+            ]
+          },
+          "base64": {
+            "type": "string",
+            "maxLength": 349528
+          }
+        },
+        "required": [
+          "name",
+          "mime",
+          "base64"
+        ]
+      },
+      "WebDocumentFile": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "base64": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "mime",
+          "base64"
         ]
       },
       "PaymentStatusResponse": {

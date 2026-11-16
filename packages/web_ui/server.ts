@@ -16,7 +16,7 @@ export async function platformProxy(request:NextRequest,audience:'customer'|'bus
   const {api,origin}=authConfiguration();
   if(request.method!=='GET' && request.headers.get('origin')!==origin)return Response.json({message:'Invalid request origin.'},{status:403,headers:responseHeaders});
   const body=request.method==='GET'?undefined:await request.text();
-  if(body&&new TextEncoder().encode(body).length>65536)return new Response(null,{status:413,headers:responseHeaders});
+  if(body&&new TextEncoder().encode(body).length>(/^business\/onboarding\/[^/]+\/verification-documents$/.test(path)?380000:65536))return new Response(null,{status:413,headers:responseHeaders});
   const target=new URL('/api/v1/'+path+request.nextUrl.search,api);
   const upstream=await fetch(target,{method:request.method,headers:{cookie:authCookies(request.headers.get('cookie')??''),'content-type':'application/json',origin},body,cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(10000)});
   if(upstream.status>=300&&upstream.status<400)throw Error('Redirect refused');

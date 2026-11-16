@@ -12,6 +12,9 @@ const ownReview=`id,branch_id AS "branchId",reservation_id AS "reservationId",or
 const supportCase=`id,category,resource_id AS "resourceId",subject,status,created_at AS "createdAt",updated_at AS "updatedAt"`;
 const notification=`id,resource_type AS "resourceType",resource_id AS "resourceId",status,title,read_at AS "readAt",created_at AS "createdAt"`;
 
+// A former business member must not retain access through the customer support routes.
+const currentBusinessCase=`NOT EXISTS(SELECT 1 FROM web_merchant_support w WHERE w.customer_case_id=customer_support_cases.id) OR EXISTS(SELECT 1 FROM web_merchant_support w JOIN resource_memberships m ON m.resource_type='business' AND m.resource_id=w.business_id AND m.identity_subject=customer_support_cases.customer_subject AND m.active AND m.role IN ('owner','manager') JOIN business_onboarding b ON b.id=w.business_id AND b.status='approved' WHERE w.customer_case_id=customer_support_cases.id)`;
+
 @Injectable()
 export class CustomerAccountService {
  constructor(@Inject(DATABASE_POOL) private readonly pool:Pool,@Inject(CustomerService) private readonly customer:CustomerService){}
@@ -81,10 +84,10 @@ export class CustomerAccountService {
   });
  }
  async support(subject:string,input:PageQuery){
-  const result=await this.pool.query(`SELECT ${supportCase} FROM customer_support_cases WHERE customer_subject=$1 ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`,[subject,input.limit+1,input.offset]);return page(result.rows,input);
+  const result=await this.pool.query(`SELECT ${supportCase} FROM customer_support_cases WHERE customer_subject=$1 AND (${currentBusinessCase}) ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`,[subject,input.limit+1,input.offset]);return page(result.rows,input);
  }
  private async ownedCase(c:Pool|PoolClient,subject:string,id:string,lock=false){
-  const result=await c.query(`SELECT ${supportCase} FROM customer_support_cases WHERE id=$1 AND customer_subject=$2${lock?' FOR UPDATE':''}`,[id,subject]);
+  const result=await c.query(`SELECT ${supportCase} FROM customer_support_cases WHERE id=$1 AND customer_subject=$2 AND (${currentBusinessCase})${lock?' FOR UPDATE':''}`,[id,subject]);
   if(!result.rowCount)throw new NotFoundException('Support case not found');return result.rows[0];
  }
  async supportDetail(subject:string,id:string){return this.ownedCase(this.pool,subject,id);}

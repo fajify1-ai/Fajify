@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import {WEB_COMPLETION_PATHS} from '../src/web-completion/contracts';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {isDeepStrictEqual} from 'node:util';
 import {M5_OPERATIONS} from '../src/payments/m5-contracts';
@@ -164,10 +165,10 @@ async function run(){
   const snapshot=resolve(__dirname,'../../../packages/api_contracts/openapi.json');
   const previous=JSON.parse(readFileSync(snapshot,'utf8')) as typeof doc;
   for(const [path,operation] of Object.entries(previous.paths))
-   if(!path.startsWith('/api/auth/faji/')&&!path.startsWith('/api/v1/auth/')&&!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!isDeepStrictEqual(doc.paths[path],operation))
+   if(!path.startsWith('/api/auth/faji/')&&!path.startsWith('/api/v1/auth/')&&!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!WEB_COMPLETION_PATHS.includes(path)&&!isDeepStrictEqual(doc.paths[path],operation))
     throw new Error('Existing identity/merchant contract changed: '+path);
   for(const [name,schema] of Object.entries(previous.components?.schemas??{}))
-   if(!isDeepStrictEqual(doc.components?.schemas?.[name],schema))throw new Error('Existing schema changed: '+name);
+   if(!name.startsWith('Web')&&!isDeepStrictEqual(doc.components?.schemas?.[name],schema))throw new Error('Existing schema changed: '+name);
   writeFileSync(resolve(__dirname,'../../../packages/api_contracts/openapi.json'),JSON.stringify(doc,null,2)+"\n");
  }finally{await app.close();}
 }

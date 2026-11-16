@@ -737,7 +737,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["WebMerchantController_publicProfile_v1"];
         put: operations["MerchantPublicController_profile_v1"];
         post?: never;
         delete?: never;
@@ -769,7 +769,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["WebMerchantController_options_v1"];
         put: operations["MerchantPublicController_package_v1"];
         post?: never;
         delete?: never;
@@ -995,6 +995,310 @@ export interface paths {
         };
         get?: never;
         put: operations["CustomerAccountController_close_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/cart": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebCustomerController_cart_v1"];
+        put: operations["WebCustomerController_setCart_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebCustomerController_events_v1"];
+        put?: never;
+        post: operations["WebCustomerController_event_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/events/{id}/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["WebCustomerController_invite_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/invitations/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["WebCustomerController_preview_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/invitations/acceptance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["WebCustomerController_accept_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/promotions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebCustomerController_promotions_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/payments/{id}/receipt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebCustomerController_receipt_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/businesses/{businessId}/branches/{branchId}/catalogue/{id}/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebMerchantController_media_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/businesses/{businessId}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebMerchantController_report_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/businesses/{businessId}/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebMerchantController_health_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/businesses/{businessId}/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebMerchantController_notifications_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/businesses/{businessId}/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["WebMerchantController_read_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/businesses/{businessId}/support": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebMerchantController_support_v1"];
+        put?: never;
+        post: operations["WebMerchantController_createSupport_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/businesses/{businessId}/support/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebMerchantController_thread_v1"];
+        put?: never;
+        post: operations["WebMerchantController_reply_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/businesses/{businessId}/promotions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebMerchantController_promotions_v1"];
+        put?: never;
+        post: operations["WebMerchantController_promotion_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business/onboarding/draft/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebOnboardingController_draft_v1"];
+        put: operations["WebOnboardingController_save_v1"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business/onboarding/applications/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebOnboardingController_applications_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business/onboarding/{id}/verification-documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebOnboardingController_documents_v1"];
+        put?: never;
+        post: operations["WebOnboardingController_upload_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/business/onboarding/{id}/verification-documents/{documentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebOnboardingController_document_v1"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -3249,6 +3553,239 @@ export interface components {
             requestKey: string;
             message: string;
         };
+        WebCartLine: {
+            catalogueId: string;
+            quantity: number;
+        };
+        WebCartQuote: {
+            id: string;
+            name: string;
+            branch_id: string;
+            price_minor: string;
+            currency: string;
+        };
+        WebCart: {
+            revision: number;
+            items: components["schemas"]["WebCartLine"][];
+            quotes: components["schemas"]["WebCartQuote"][];
+            checkoutEnabled: boolean;
+        };
+        CartLine: {
+            /** Format: uuid */
+            catalogueId: string;
+            quantity: number;
+        };
+        CartInput: {
+            revision: number;
+            items: components["schemas"]["CartLine"][];
+        };
+        WebHostedEvent: {
+            is_owner?: boolean;
+            id: string;
+            name: string;
+            description: string;
+            location: string;
+            starts_at: string;
+            ends_at: string;
+            capacity: number;
+        };
+        WebHostedEvents: {
+            nextOffset: number | null;
+            items: components["schemas"]["WebHostedEvent"][];
+        };
+        HostedEventInput: {
+            name: string;
+            description: string;
+            location: string;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: date-time */
+            endsAt: string;
+            capacity: number;
+        };
+        WebInvitation: {
+            id: string;
+            expires_at: string;
+            token: string;
+            delivery: string;
+            grants: string;
+        };
+        InvitationAcceptance: {
+            token: string;
+        };
+        WebInvitationAccepted: {
+            eventId: string;
+            status: string;
+            bookingCreated: boolean;
+        };
+        WebPromotion: {
+            id: string;
+            business_id: string;
+            title: string;
+            description: string;
+            expires_at: string;
+        };
+        WebPromotions: {
+            nextOffset: number | null;
+            items: components["schemas"]["WebPromotion"][];
+        };
+        WebReceipt: {
+            id: string;
+            amount_minor: string;
+            currency: string;
+            verified_at: string;
+            filename: string;
+            contentType: string;
+            content: string;
+        };
+        WebPackageAddon: {
+            catalogueId: string;
+            maxQuantity: number;
+        };
+        WebPackageOptions: {
+            configured: boolean;
+            pricingModel: string;
+            minGuests: number;
+            maxGuests: number;
+            addOns: components["schemas"]["WebPackageAddon"][];
+        };
+        WebPublicProfile: {
+            summary: string;
+            city: string;
+            public_phone: string | null;
+            latitude: number | null;
+            longitude: number | null;
+        };
+        WebMediaItem: {
+            id: string;
+            url: string;
+            alt: string;
+            position: number;
+        };
+        WebMedia: {
+            items: components["schemas"]["WebMediaItem"][];
+        };
+        WebOrderMetric: {
+            currency: string;
+            orders: number;
+            cancelled: number;
+            fulfilled_minor: string;
+        };
+        WebReservationMetric: {
+            status: string;
+            count: number;
+        };
+        WebDailyMetric: {
+            day: string;
+            currency: string;
+            orders: number;
+            fulfilled_minor: string;
+        };
+        WebReport: {
+            orders: components["schemas"]["WebOrderMetric"][];
+            reservations: components["schemas"]["WebReservationMetric"][];
+            daily: components["schemas"]["WebDailyMetric"][];
+            timezone: string;
+            periodDays: number;
+            metric: string;
+        };
+        WebMerchantNotification: {
+            id: string;
+            title: string;
+            created_at: string;
+            read: boolean;
+        };
+        WebMerchantNotifications: {
+            nextOffset: number | null;
+            items: components["schemas"]["WebMerchantNotification"][];
+        };
+        WebNotificationRead: {
+            read: boolean;
+        };
+        WebSupportCase: {
+            id: string;
+            title: string;
+            status: string;
+            created_at: string;
+        };
+        WebSupportCases: {
+            nextOffset: number | null;
+            items: components["schemas"]["WebSupportCase"][];
+        };
+        MerchantSupportInput: {
+            title: string;
+            message: string;
+        };
+        WebSupportMessage: {
+            id: string;
+            body: string;
+            created_at: string;
+        };
+        WebSupportMessages: {
+            nextOffset: number | null;
+            items: components["schemas"]["WebSupportMessage"][];
+        };
+        MerchantMessageInput: {
+            message: string;
+        };
+        PromotionInput: {
+            title: string;
+            description: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        WebDraftData: {
+            step: number;
+            businessName: string;
+            fields: string;
+        };
+        WebDraftView: {
+            revision: number;
+            data: components["schemas"]["WebDraftData"];
+        };
+        DraftInput: {
+            revision: number;
+            step: number;
+            businessName: string;
+            /** @description JSON onboarding fields; no identity files or credentials */
+            fields?: string;
+        };
+        WebApplication: {
+            id: string;
+            display_name: string;
+            status: string;
+            created_at: string;
+        };
+        WebApplications: {
+            nextOffset: number | null;
+            items: components["schemas"]["WebApplication"][];
+        };
+        WebDocumentMeta: {
+            id: string;
+            name: string;
+            mime: string;
+            created_at: string;
+        };
+        WebDocuments: {
+            items: components["schemas"]["WebDocumentMeta"][];
+            verificationStatus: string;
+        };
+        WebUploadResult: {
+            stored: boolean;
+            document?: components["schemas"]["WebDocumentMeta"] | null;
+            verificationStatus: string;
+        };
+        UploadInput: {
+            name: string;
+            /** @enum {string} */
+            mime: "image/jpeg" | "image/png" | "application/pdf";
+            base64: string;
+        };
+        WebDocumentFile: {
+            name: string;
+            mime: string;
+            base64: string;
+        };
         PaymentStatusResponse: {
             /** Format: uuid */
             paymentIntentId: string;
@@ -4994,6 +5531,27 @@ export interface operations {
             };
         };
     };
+    WebMerchantController_publicProfile_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebPublicProfile"];
+                    };
+                };
+            };
+        };
+    };
     MerchantPublicController_profile_v1: {
         parameters: {
             query?: never;
@@ -5042,6 +5600,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MediaPage"];
+                };
+            };
+        };
+    };
+    WebMerchantController_options_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebPackageOptions"];
+                    };
                 };
             };
         };
@@ -5466,6 +6045,606 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SupportCaseView"];
+                };
+            };
+        };
+    };
+    WebCustomerController_cart_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebCart"];
+                    };
+                };
+            };
+        };
+    };
+    WebCustomerController_setCart_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CartInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebCart"];
+                    };
+                };
+            };
+        };
+    };
+    WebCustomerController_events_v1: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebHostedEvents"];
+                    };
+                };
+            };
+        };
+    };
+    WebCustomerController_event_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HostedEventInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebHostedEvent"];
+                    };
+                };
+            };
+        };
+    };
+    WebCustomerController_invite_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebInvitation"];
+                    };
+                };
+            };
+        };
+    };
+    WebCustomerController_preview_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationAcceptance"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebHostedEvent"];
+                    };
+                };
+            };
+        };
+    };
+    WebCustomerController_accept_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationAcceptance"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebInvitationAccepted"];
+                    };
+                };
+            };
+        };
+    };
+    WebCustomerController_promotions_v1: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebPromotions"];
+                    };
+                };
+            };
+        };
+    };
+    WebCustomerController_receipt_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebReceipt"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_media_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebMedia"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_report_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebReport"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_health_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebReport"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_notifications_v1: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebMerchantNotifications"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_read_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebNotificationRead"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_support_v1: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebSupportCases"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_createSupport_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MerchantSupportInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebSupportCase"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_thread_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebSupportMessages"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_reply_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MerchantMessageInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebSupportMessages"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_promotions_v1: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebPromotions"];
+                    };
+                };
+            };
+        };
+    };
+    WebMerchantController_promotion_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromotionInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebPromotion"];
+                    };
+                };
+            };
+        };
+    };
+    WebOnboardingController_draft_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebDraftView"];
+                    };
+                };
+            };
+        };
+    };
+    WebOnboardingController_save_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebDraftView"];
+                    };
+                };
+            };
+        };
+    };
+    WebOnboardingController_applications_v1: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebApplications"];
+                    };
+                };
+            };
+        };
+    };
+    WebOnboardingController_documents_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebDocuments"];
+                    };
+                };
+            };
+        };
+    };
+    WebOnboardingController_upload_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebUploadResult"];
+                    };
+                };
+            };
+        };
+    };
+    WebOnboardingController_document_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebDocumentFile"];
+                    };
                 };
             };
         };
