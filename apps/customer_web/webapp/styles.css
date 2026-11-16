@@ -484,7 +484,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 
 /* Browser adaptations preserve mobile geometry while giving forms room on larger displays. */
 @media (min-width: 768px) {
-  .max-w-\[430px\] { max-width: 680px; }
+  .max-w-\[430px\]:not([data-business-experience] *) { max-width: 680px; }
   .app-bottom-nav ~ * { scroll-margin-bottom: 100px; }
 }
 @media (prefers-reduced-motion: reduce) {

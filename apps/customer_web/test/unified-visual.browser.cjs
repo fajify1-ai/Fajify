@@ -1,5 +1,5 @@
 const {chromium}=require('playwright');const fs=require('fs');const assert=require('node:assert/strict');
-const out='/workspace/Fajify-unified/docs/engineering/evidence/unified-implementation';
+const out=process.env.FAJI_WEB_SCREENSHOTS??require('node:path').resolve(__dirname,'../../../..','docs/engineering/evidence/unified-implementation');
 (async()=>{fs.mkdirSync(out+'/before',{recursive:true});fs.mkdirSync(out+'/after',{recursive:true});const b=await chromium.launch({executablePath:'/usr/bin/chromium',args:['--no-sandbox']});const p=await b.newPage({ignoreHTTPSErrors:true});p.setDefaultTimeout(30000);const records=[];
 async function capture(path){await p.waitForLoadState('networkidle');await p.evaluate(()=>document.fonts.ready);await p.addStyleTag({content:'[data-design-review]{display:none!important}'});await p.screenshot({path,fullPage:true,animations:'disabled'});}
 const screens=['landing','home','restaurant','planForMe','browsePlans','profile','settings','help','wishlist','myTickets','notifications','offers','inviteFriends','createEvent','onboarding','checkout','reservation','globalCart','confirmation','auth'];

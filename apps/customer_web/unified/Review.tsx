@@ -7,5 +7,5 @@ const customerScreens:Record<string,Screen>={home:{name:'home'},onboarding:{name
 export default function Review({business,screen}:{business:boolean;screen:string}){
  const mode:AppMode=screen==='auth'?'customer-auth':screen==='landing'?'landing':'customer';
  const businessMode=screen==='onboarding'?'onboarding':screen==='signin'?'signin':screen==='entry'?'entry':'dashboard';
- return <><aside data-design-review role="note" style={{position:'fixed',top:0,left:0,right:0,zIndex:10000,padding:6,background:'#fff1f0',color:'#771d18',fontSize:12,textAlign:'center'}}>Design review · Fictional local data only · No real booking, payment, payout or check-in · <a href="/">Exit review</a></aside>{business?<Business initialMode={businessMode}/>:<Customer deferRide initialMode={mode} initialScreen={customerScreens[screen]??{name:'home'}}/>}</>;
+ return <><aside data-design-review role="note" style={{position:'fixed',top:0,left:0,right:0,zIndex:10000,padding:6,background:'#fff1f0',color:'#771d18',fontSize:12,textAlign:'center'}}>Design review · Fictional local data only · No real booking, payment, payout or check-in · <a href="/">Exit review</a></aside>{business?<div data-business-experience style={{display:'contents'}}><Business initialMode={businessMode}/></div>:<Customer deferRide initialMode={mode} initialScreen={customerScreens[screen]??{name:'home'}}/>}</>;
 }

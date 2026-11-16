@@ -101,7 +101,7 @@ function StepHeader({ step, s, onPrev }: { step: number; s: S; onPrev: () => voi
   return (
     <div className="sticky top-0 z-10 px-5 pt-14 pb-4" style={{ background: s.bg }}>
       <div className="flex items-center gap-2 mb-5">
-        <button onClick={onPrev}
+        <button aria-label="Go back" onClick={onPrev}
           className="h-9 w-9 rounded-full flex items-center justify-center shrink-0"
           style={{ background: s.surface, border: `1px solid ${s.border}` }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={s.ink} strokeWidth="2.2">
@@ -573,7 +573,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
         style={{ background: s.bg }}>
         <button disabled={submitting} onClick={() => onComplete({businessName:bizName})}
           className="w-full rounded-[18px] py-4 text-[15px] font-black text-white"
-          style={{ background: AMBER, boxShadow: '0 8px 32px rgba(250,63,56,0.3)' }}>
+          style={{ background: AMBER, boxShadow: '0 8px 32px rgba(245,158,11,0.3)' }}>
           {submitting ? 'Submitting…' : 'Submit Application'}
         </button>
         <p className="text-center text-[11px] mt-3" style={{ color: s.muted }}>

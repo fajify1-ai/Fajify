@@ -19,7 +19,7 @@ type View={name:string;id?:string};
 const illustration='/reference/ec7238b7cf1876f2.jpg';
 export default function CustomerApp({initial='landing'}:{initial?:string}) {
  const [view,setView]=useState<View>(()=>{const parts=window.location.hash.slice(1).split('/');return {name:parts[0]||initial,id:parts[1]};});
- useEffect(()=>{const restore=()=>{const [name,id]=window.location.hash.slice(1).split('/');setView({name:name||initial,id});};window.addEventListener('hashchange',restore);return()=>window.removeEventListener('hashchange',restore);},[initial]);
+ useEffect(()=>{const restore=()=>{const [name,id]=window.location.hash.slice(1).split('/');setView({name:name||initial,id});};window.addEventListener('hashchange',restore);restore();return()=>window.removeEventListener('hashchange',restore);},[initial]);
  const [query,setQuery]=useState(''),[category,setCategory]=useState('All');
  const categories=useResource<{items:{id:string;name:string}[]}>('discovery/categories');
  const venues=useResource<Schema<'VenuePage'>>('discovery/venues?'+new URLSearchParams({...(query?{q:query}:{}),...(category==='All'?{}:{category})}));
