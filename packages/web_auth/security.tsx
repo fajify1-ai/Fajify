@@ -1,7 +1,7 @@
 "use client";
 import {useState} from 'react';
 import {authPost} from './client';
-export function SecuritySettings({deliveryDeferred=false}:{deliveryDeferred?:boolean}={}){
+export function SecuritySettings({deliveryDeferred=false,workspaceHref='/dashboard'}:{deliveryDeferred?:boolean;workspaceHref?:'/dashboard'|'/customer#profile'|'/business/dashboard'}={}){
  const [password,setPassword]=useState(''),[code,setCode]=useState(''),[phone,setPhone]=useState(''),[backup,setBackup]=useState(''),[setup,setSetup]=useState(''),[codes,setCodes]=useState<string[]>([]),[message,setMessage]=useState(''),[busy,setBusy]=useState(false);
  async function run(action:string){if(busy)return;setBusy(true);setMessage('');try{
   const data=action==='step-up'?await authPost('faji/step-up',{password,code:code||undefined,backupCode:backup||undefined}):action==='enable'?await authPost('two-factor/enable',{password}):action==='verify'?await authPost('two-factor/verify-totp',{code,trustDevice:false}):action==='disable'?await authPost('two-factor/disable',{password}):action==='codes'?await authPost('two-factor/generate-backup-codes',{password}):action==='send-phone'?await authPost('phone-number/send-otp',{phoneNumber:phone}):action==='verify-phone'?await authPost('phone-number/verify',{phoneNumber:phone,code,updatePhoneNumber:true,disableSession:true}):await authPost('faji/unlink-phone',{});
@@ -17,5 +17,5 @@ export function SecuritySettings({deliveryDeferred=false}:{deliveryDeferred?:boo
  {setup&&<p>Enter this setup key in your authenticator, then verify enrollment: <code>{setup}</code></p>}
  {codes.length>0&&<div><p>Store these recovery codes offline. Each works once.</p><pre>{codes.join('\n')}</pre><button onClick={()=>setCodes([])}>I saved my codes</button></div>}
  {deliveryDeferred&&<p role="note">Email and SMS delivery are deferred. Phone verification is disabled; authenticator MFA and recovery codes remain available.</p>}
- <p role="status">{message}</p><a href="/dashboard">Workspace</a> · <a href="/login">Sign in</a></main>;
+ <p role="status">{message}</p><a href={workspaceHref}>Workspace</a> · <a href={workspaceHref==='/business/dashboard'?'/business/login':'/login'}>Sign in</a></main>;
 }

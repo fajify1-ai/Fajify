@@ -6,6 +6,7 @@ import CustomerAuthScreen from '../webapp/screens/CustomerAuthScreen';
 import BusinessSignInScreen from '../../business_web/webapp/screens/BusinessSignInScreen';
 import {AuthForm} from '@faji/web-auth/form';
 import BusinessEntry from '@faji/business-web/webapp/components/BusinessEntry';
+import {SecuritySettings} from '@faji/web-auth/security';
 import DeferredDelivery from '../unified/DeferredDelivery';
 Object.assign(globalThis,{React});
 test('restored real credential forms require credentials and keep fixture bypass outside real mode',()=>{
@@ -39,4 +40,16 @@ test('delivery policy blocks reset and SMS transports while preserving password 
 test('public Business entry reuses the original composition and opens real workspace actions',()=>{
  const html=renderToStaticMarkup(React.createElement(BusinessEntry,{preview:false,onSignIn(){},onRegister(){},onExplore(){}}));
  assert.match(html,/Your operation/);assert.match(html,/d2aaaff55cdcccab.jpg/);assert.match(html,/Business workspace/);assert.doesNotMatch(html,/Explore merchant demo/);
+});
+
+
+test('legacy Customer deep links remain on-origin and keep planning screens separate',async()=>{
+ const {legacyDestination}=await import('../unified/legacy-navigation');
+ assert.equal(legacyDestination('#planForMe'),'/customer#planForMe');assert.equal(legacyDestination('#browsePlans'),'/customer#browsePlans');assert.equal(legacyDestination('#restaurant/venue-id'),'/customer#restaurant/venue-id');assert.equal(legacyDestination('#transportation'),'/ride');assert.equal(legacyDestination('#//outside.test'),null);assert.equal(legacyDestination('https://outside.test'),null);
+});
+
+
+test('shared security retains merchant navigation and disables delivery controls without removing authenticator MFA',()=>{
+ const html=renderToStaticMarkup(React.createElement(SecuritySettings,{deliveryDeferred:true,workspaceHref:'/business/dashboard'}));
+ assert.match(html,/href="\/business\/dashboard"/);assert.match(html,/href="\/business\/login"/);assert.match(html,/Enroll authenticator/);assert.match(html,/disabled=""[^>]*>Send phone OTP/);
 });
