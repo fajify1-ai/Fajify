@@ -7,7 +7,7 @@ import {IdentityModule} from '../src/auth/identity.module';
 import {DATABASE_POOL} from '../src/tokens';
 import {DatabaseModule} from '../src/database.module';
 const ctx=(authorization?:string)=>({switchToHttp:()=>({getRequest:()=>({headers:{authorization}})})}) as any;
-test('M1 identity module denies bearer tokens until verified OIDC is integrated',async()=>{
+test('Better Auth identity module denies unverified bearer tokens',async()=>{
  const module=await Test.createTestingModule({imports:[DatabaseModule,IdentityModule]})
   .overrideProvider(DATABASE_POOL)
   .useValue({query:async()=>{throw Error('Database must not be queried by invalid token');},end:async()=>{}})

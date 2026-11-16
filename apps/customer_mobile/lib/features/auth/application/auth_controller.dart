@@ -40,8 +40,6 @@ class AuthController extends ChangeNotifier {
   Future<void> refresh() =>
       _run(AuthStatus.restoring, _repository.refreshSession);
 
-  bool get usesBrowserAuthentication => _repository is BrowserOidcAuthorization;
-  bool get supportsBrowserJourneys => _repository is CustomerBrowserJourneys;
   bool get isBusy => _busy;
 
   Future<String> loadCustomerDisplayName() async {
@@ -62,65 +60,6 @@ class AuthController extends ChangeNotifier {
       );
     }
     return name;
-  }
-
-  Future<void> authorize() async {
-    final provider = _repository;
-    if (provider is! BrowserOidcAuthorization) return;
-    await _run(
-      AuthStatus.authenticating,
-      () => (provider as BrowserOidcAuthorization).authorize(),
-    );
-  }
-
-  /// Delegates callback validation, transaction replay protection and token
-  /// verification to the maintained SDK adapter. A URI alone grants no access.
-  Future<void> completeAuthorization(Uri callback) async {
-    final provider = _repository;
-    if (provider is! BrowserOidcAuthorization) {
-      if (!_disposed && !_busy) {
-        _fail(
-          const AuthFailure(
-            AuthErrorCode.providerUnavailable,
-            'Browser authentication is not configured.',
-          ),
-        );
-      }
-      return;
-    }
-    await _run(
-      AuthStatus.authenticating,
-      () => (provider as BrowserOidcAuthorization).completeAuthorization(
-        callback,
-      ),
-    );
-  }
-
-  Future<void> beginRegistration() async {
-    final provider = _repository;
-    if (provider is! BrowserOidcAuthorization || _disposed || _busy) return;
-    if (provider is CustomerBrowserJourneys) {
-      await _run(
-        AuthStatus.authenticating,
-        (provider as CustomerBrowserJourneys).registerInBrowser,
-      );
-      return;
-    }
-    // Starting registration does not authenticate the caller. Only a verified
-    // callback accepted by the provider may create a session.
-    await _run(AuthStatus.authenticating, () async {
-      await (provider as BrowserOidcAuthorization).beginRegistration();
-      return null;
-    });
-  }
-
-  Future<void> verifyEmail() async {
-    final provider = _repository;
-    if (provider is! CustomerBrowserJourneys || _disposed || _busy) return;
-    await _run(
-      AuthStatus.authenticating,
-      (provider as CustomerBrowserJourneys).verifyEmailInBrowser,
-    );
   }
 
   bool get needsSecondFactor =>
@@ -229,26 +168,7 @@ class AuthController extends ChangeNotifier {
         );
       }
     }
-    if (provider is CustomerBrowserJourneys) {
-      if (_disposed || _busy) return unavailable;
-      await _run(
-        AuthStatus.authenticating,
-        (provider as CustomerBrowserJourneys).recoverInBrowser,
-      );
-      return _state.failure;
-    }
-    if (_disposed || provider is! CustomerAccountRecovery) return unavailable;
-    try {
-      await (provider as CustomerAccountRecovery).beginRecovery();
-      return null;
-    } on AuthFailure catch (error) {
-      return error;
-    } catch (_) {
-      return const AuthFailure(
-        AuthErrorCode.operationFailed,
-        'We could not open account recovery. Please try again.',
-      );
-    }
+    return unavailable;
   }
 
   /// Also used on app resume: timers may have paused in the background.

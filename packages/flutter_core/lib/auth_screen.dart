@@ -47,14 +47,6 @@ class _FajiAuthScreenState extends State<FajiAuthScreen> {
         case 'mfa':
           await widget.client.verifyMfa(_token.text, backup: _backup);
           break;
-        case 'claim':
-          await widget.client.claim(_token.text.trim(), _password.text);
-          if (mounted)
-            setState(() {
-              _mode = 'login';
-              _message = 'Account claimed. Sign in.';
-            });
-          return;
         case 'phone-reset':
           if (!_phoneSent) {
             await widget.client.recoverPhone(_email.text);
@@ -158,13 +150,13 @@ class _FajiAuthScreenState extends State<FajiAuthScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (_mode == 'register') _field('Name', _name),
-                    if (!['reset', 'claim', 'mfa'].contains(_mode))
+                    if (!['reset', 'mfa'].contains(_mode))
                       _field(
                           ['phone', 'phone-reset'].contains(_mode)
                               ? 'Phone number'
                               : 'Email',
                           _email),
-                    if (['reset', 'claim', 'mfa'].contains(_mode) ||
+                    if (['reset', 'mfa'].contains(_mode) ||
                         ['phone', 'phone-reset'].contains(_mode) && _phoneSent)
                       _field(
                           _mode == 'mfa'
@@ -173,9 +165,7 @@ class _FajiAuthScreenState extends State<FajiAuthScreen> {
                                   : 'Authenticator code')
                               : _mode == 'phone'
                                   ? 'Phone OTP'
-                                  : _mode == 'claim'
-                                      ? 'Account claim token'
-                                      : 'Recovery link or token',
+                                  : 'Recovery link or token',
                           _token),
                     if (!['recover', 'mfa', 'phone'].contains(_mode) &&
                         (_mode != 'phone-reset' || _phoneSent))
@@ -198,7 +188,6 @@ class _FajiAuthScreenState extends State<FajiAuthScreen> {
                           'register': 'Register',
                           'recover': 'Forgot password',
                           'reset': 'Use recovery link',
-                          'claim': 'Claim existing account',
                           'phone': 'Phone sign-in',
                           'phone-reset': 'Phone password recovery',
                         }.entries)

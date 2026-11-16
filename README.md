@@ -23,3 +23,5 @@ This repository follows the established Faji System Architecture & Engineering D
 
 ## Authentication and authorization decision
 All registration, sign-in, password recovery, phone OTP, sign-out and session handling occur within Faji web/mobile applications using application-hosted Better Auth. No external browser or hosted login redirect is permitted. NestJS validates authenticated sessions/tokens and enforces server-side roles, memberships, approvals, suspensions and resource scope. One identity can hold multiple roles. The implementation and rollout boundary are documented in [Better Auth implementation](docs/engineering/BETTER_AUTH_IMPLEMENTATION.md); historical OIDC evidence does not validate the replacement.
+
+Fajify is pre-launch with no real users: no legacy identity import or account claiming is needed. [Current merge verification and removal audit](docs/engineering/BETTER_AUTH_MERGE_READINESS.md) records retained acceptance evidence and remaining deployment/device checks.

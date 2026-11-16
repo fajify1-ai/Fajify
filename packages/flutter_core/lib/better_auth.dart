@@ -214,11 +214,6 @@ class FajiAuthClient {
     if (epoch == _generation) await _save(result);
   }
 
-  Future<void> claim(String token, String password) async {
-    await request('/api/auth/faji/claim',
-        body: {'token': token, 'password': password}, authenticated: false);
-  }
-
   Future<void> sendPhoneOtp(String phone) async {
     await request('/api/auth/phone-number/send-otp',
         body: {'phoneNumber': phone}, authenticated: false);

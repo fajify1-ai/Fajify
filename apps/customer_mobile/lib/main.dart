@@ -122,7 +122,7 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
         ),
       ),
       routes: {
-        '/account-claim': (_) => FajiAuthScreen(
+        '/account-recovery': (_) => FajiAuthScreen(
           client: FajiAuthClient(
             baseUrl: const String.fromEnvironment('API_BASE_URL'),
           ),

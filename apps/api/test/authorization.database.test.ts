@@ -202,7 +202,7 @@ test('actual Business workspace HTTP route rejects pending, rejected, foreign an
  await business.review(actor,foreignWorkspace.id,'approved');
  let active=first;
  const verifier:IdentityVerifier={verifyAccessToken:async()=>({
-  subject:active,issuer:'https://issuer.example/realms/faji',audience:['faji-api'],
+  subject:active,issuer:'https://api.example.test',audience:['faji-api'],
   issuedAt:Math.floor(Date.now()/1000)+1,expiresAt:Math.floor(Date.now()/1000)+300,
   roles:['customer'],sessionId:'workspace-session'
  })};

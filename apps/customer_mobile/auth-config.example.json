@@ -1,0 +1,4 @@
+{
+  "API_BASE_URL": "https://api.faji.test:8443",
+  "FAJI_RECOVERY_URL": "https://customer.faji.test:8443/reset-password"
+}

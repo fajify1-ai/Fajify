@@ -126,13 +126,6 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
   await this.pool.query("INSERT INTO identity_security_events(actor_subject,event_type) VALUES($1,'password_step_up')",[identity.subject]);
   return {verified:true};
  }
- async claim(token:string,password:string,address:string){
-  const {hashPassword}=await load<typeof import('better-auth/crypto')>('better-auth/crypto');
-  const hash=await hashPassword(password);
-  const r=await this.pool.query<{accepted:boolean}>('SELECT consume_identity_claim($1,$2,$3) AS accepted',[createHash('sha256').update(token).digest('hex'),hash,createHash('sha256').update(address).digest('hex')]);
-  if(!r.rows[0]?.accepted)throw new BadRequestException('Claim is invalid, expired, used or rate limited');
-  return {claimed:true};
- }
  async unlinkPhone(headers:Headers){
   const identity=await this.verifyHeaders(headers);await this.requireStepUp(identity.sessionId!,identity.subject);
   await this.pool.query('UPDATE auth_user SET phone_number=NULL,phone_number_verified=false WHERE id=$1',[identity.subject]);

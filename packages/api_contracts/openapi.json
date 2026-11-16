@@ -48,25 +48,20 @@
         ]
       }
     },
-    "/api/auth/faji/claim": {
-      "post": {
-        "operationId": "AuthSecurityController_claim",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "summary": "Claim a reconciled legacy identity using independently verified ownership proof",
-        "tags": [
-          "account-security"
-        ]
-      }
-    },
     "/api/auth/faji/step-up": {
       "post": {
         "operationId": "AuthSecurityController_stepUp",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StepUpInput"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -8577,6 +8572,28 @@
       "ReadyStatus": {
         "type": "object",
         "properties": {}
+      },
+      "StepUpInput": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "format": "password"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6
+          },
+          "backupCode": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "password"
+        ]
       },
       "BranchInput": {
         "type": "object",

@@ -4,7 +4,7 @@
 **Status:** Approved architecture; implementation is on the Better Auth continuation branch. Release gates remain open; see [acceptance report](../engineering/BETTER_AUTH_RELEASE_ACCEPTANCE.md).
 
 ## Authentication
-Keycloak is removed from the **target** architecture. Better Auth is hosted within the Faji application backend, primarily integrated with NestJS, and persists authentication data in Faji PostgreSQL. Registration, login, password recovery, phone OTP, logout and session management are rendered and completed within each Faji application. No external system browser, hosted login page or browser-based OIDC redirect is part of the target journey. External message delivery for OTP or recovery does not imply an external login interface.
+Keycloak is removed from the active architecture. Better Auth is hosted within the Faji application backend, primarily integrated with NestJS, and persists authentication data in Faji PostgreSQL. Registration, login, password recovery, phone OTP, logout and session management are rendered and completed within each Faji application. No external system browser, hosted login page or browser-based OIDC redirect is part of the target journey. External message delivery for OTP or recovery does not imply an external login interface.
 
 NestJS must validate the session or token presented to each protected API/WebSocket request and enforce all resource-scoped authorization: user status, business/branch memberships, driver eligibility, dispatcher scope, admin privileges, approvals and suspensions. UI-level checks are never sufficient. One account may hold customer, business staff, driver, dispatcher and admin roles. Authentication records, profiles and memberships share Faji PostgreSQL while retaining explicit ownership boundaries. The implementation uses a Drizzle PostgreSQL adapter, web session cookies and native bearer sessions. Phone delivery and safe identity claiming are described in [implementation documentation](../engineering/BETTER_AUTH_IMPLEMENTATION.md); real provider/device and staging acceptance remain release gates. MFA enrollment is optional; privileged operations may require proportionate step-up controls.
 
@@ -28,4 +28,8 @@ This decision, `docs/architecture/SYSTEM_ARCHITECTURE.md`, `docs/engineering/MIL
 3. Better Auth schema and application domain data coexist safely in Faji PostgreSQL with versioned migrations, backup and recovery coverage.
 4. NestJS rejects invalid, expired and revoked sessions/tokens and fails closed on missing memberships, unapproved roles, suspensions and cross-tenant requests.
 5. Multi-role identity, optional MFA enrollment, privileged step-up policies and auditable administrative actions pass relevant tests.
-6. Existing user migration, rollout and rollback have separate reviewed plans; documentation changes do not constitute migration acceptance.
+6. Fajify is pre-launch with no real users; no identity migration or legacy-provider rollback is required. Preserve normal database backups, restore verification and application rollout safeguards.
+
+## Pre-launch finalization
+
+Fajify has no real users. Better Auth is the sole active provider. Account import/claiming, legacy password conversion and Keycloak-specific rollback are unnecessary and removed from release requirements. Applied SQL history remains immutable; normal backups/recovery remain mandatory. See [merge readiness](../engineering/BETTER_AUTH_MERGE_READINESS.md).

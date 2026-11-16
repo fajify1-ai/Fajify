@@ -194,7 +194,7 @@ test('PostGIS geometry, geography, distance and GiST index work with synthetic c
  }finally{await client.query('ROLLBACK');client.release();}
 });
 
-test('runtime role is restricted and cannot connect to the isolated Keycloak sentinel',async()=>{
+test('runtime role is restricted and cannot connect to the isolated unrelated-database sentinel',async()=>{
  const roles=await runtime.query('SELECT rolsuper,rolcreatedb,rolcreaterole FROM pg_roles WHERE rolname=current_user');
  assert.deepEqual(roles.rows[0],{rolsuper:false,rolcreatedb:false,rolcreaterole:false});
  const identity=new URL(process.env.FAJI_ISOLATION_TEST_URL!);

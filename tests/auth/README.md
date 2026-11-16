@@ -1,6 +1,6 @@
 # Private authentication acceptance
 
-Only use synthetic accounts and the disposable database checks described in the migration/release runbooks. The fixture server refuses unmarked databases and `NODE_ENV` other than `test`. It binds to loopback, exposes a secret-protected fixture endpoint for synthetic role/suspension/expiry decisions, and is **never** a deployment service.
+Only use synthetic accounts and the disposable database checks described in the database/release verification instructions. The fixture server refuses unmarked databases and `NODE_ENV` other than `test`. It binds to loopback, exposes a secret-protected fixture endpoint for synthetic role/suspension/expiry decisions, and is **never** a deployment service.
 
 ## Browser: four applications with real TLS cookies
 

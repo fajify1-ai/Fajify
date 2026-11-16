@@ -164,7 +164,7 @@ async function run(){
   const snapshot=resolve(__dirname,'../../../packages/api_contracts/openapi.json');
   const previous=JSON.parse(readFileSync(snapshot,'utf8')) as typeof doc;
   for(const [path,operation] of Object.entries(previous.paths))
-   if(!path.startsWith('/api/v1/auth/')&&!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!isDeepStrictEqual(doc.paths[path],operation))
+   if(!path.startsWith('/api/auth/faji/')&&!path.startsWith('/api/v1/auth/')&&!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!isDeepStrictEqual(doc.paths[path],operation))
     throw new Error('Existing identity/merchant contract changed: '+path);
   for(const [name,schema] of Object.entries(previous.components?.schemas??{}))
    if(!isDeepStrictEqual(doc.components?.schemas?.[name],schema))throw new Error('Existing schema changed: '+name);

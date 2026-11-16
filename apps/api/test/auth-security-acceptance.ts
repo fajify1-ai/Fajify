@@ -11,7 +11,6 @@ import {DatabaseModule} from '../src/database.module';
 import {BetterAuthService} from '../src/auth/better-auth.service';
 import {DATABASE_POOL} from '../src/tokens';
 import {setupApi} from '../src/main';
-import {prepareClaims} from '../../../packages/database/scripts/prepare-identity-claims';
 import {assertDisposable} from '../../../packages/database/scripts/disposable-target';
 import type {NestExpressApplication} from '@nestjs/platform-express';
 const owner=new Pool({connectionString:process.env.FAJI_DATABASE_URL}),runtime=new Pool({connectionString:process.env.FAJI_RUNTIME_DATABASE_URL});
@@ -20,7 +19,7 @@ const password='disposable-password-123';const http=()=>app.getHttpServer();
 const bearer=(token:string)=>({Authorization:`Bearer ${token}`});
 const cookies=(r:request.Response)=>(r.headers['set-cookie'] as unknown as string[]??[]).map(c=>c.split(';')[0]).join('; ');
 function totp(uri:string){const secret=new URL(uri).searchParams.get('secret')!;let bits='';for(const c of secret.replace(/=+$/,''))bits+='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.indexOf(c.toUpperCase()).toString(2).padStart(5,'0');const key=Buffer.from(bits.match(/.{8}/g)!.map(b=>parseInt(b,2)));const counter=Buffer.alloc(8);counter.writeBigUInt64BE(BigInt(Math.floor(Date.now()/30000)));const hash=createHmac('sha1',key).update(counter).digest();return String((hash.readUInt32BE(hash[19]&15)&0x7fffffff)%1000000).padStart(6,'0');}
-async function clearLimits(){await owner.query('DELETE FROM auth_rate_limit');await owner.query('DELETE FROM auth_claim_attempts');}
+async function clearLimits(){await owner.query('DELETE FROM auth_rate_limit');}
 before(async()=>{
  await assertDisposable(owner);await assertDisposable(runtime);
  process.env.NODE_ENV='test';process.env.BETTER_AUTH_SECRET='disposable-auth-secret-over-thirty-two-characters';process.env.BETTER_AUTH_URL='http://localhost:3001';process.env.FAJI_WEB_ORIGINS='http://localhost:3000';process.env.SMTP_URL='smtp://127.0.0.1:11025';
@@ -69,28 +68,6 @@ test('phone OTP is verified, single-use, rate limited, cannot bypass MFA or admi
  const bypass=await request(http()).post('/api/auth/phone-number/verify').send({phoneNumber:phone,code:deliveries.get(phone)});assert.equal(bypass.status,403,'Enrolled MFA cannot be bypassed through phone OTP');
  await clearLimits();const overBudget=await request(http()).post('/api/auth/phone-number/send-otp').send({phoneNumber:phone});assert.notEqual(overBudget.status,200,'Per-phone hourly budget survives per-IP limiter reset');
 });
-test('legacy claims preserve stable subject, profile and scopes; email reset cannot bypass ownership',async()=>{
- await clearLimits();const subject='legacy-'+randomUUID(),email=`claim-${randomUUID()}@example.test`,profileId=randomUUID(),resource=randomUUID();
- await owner.query('INSERT INTO user_profiles(id,identity_subject,display_name,suspended) VALUES($1,$2,$3,false)',[profileId,subject,'Existing Profile']);await owner.query('INSERT INTO account_access(identity_subject,suspended) VALUES($1,false)',[subject]);await owner.query("INSERT INTO resource_memberships(identity_subject,resource_type,resource_id,role) VALUES($1,'dispatch_area',$2,'dispatcher')",[subject,resource]);
- const [claim]=await prepareClaims(owner,[{subject,email,name:'Existing Profile',roles:['dispatcher'],evidence:{method:'independent-ownership-check',verifiedSubject:subject,ticket:'TEST-ownership',reviewers:['reviewer-a','reviewer-b'],verifiedAt:new Date().toISOString()}}]);
- const duplicate=await request(http()).post('/api/auth/sign-up/email').send({name:'Attacker',email:email.toUpperCase(),password});assert.notEqual(duplicate.status,200);
- await assert.rejects(runtime.query("INSERT INTO application_roles(identity_subject,role) VALUES($1,'platform-admin')",[subject]),{code:'42501'});
- await assert.rejects(runtime.query('SELECT * FROM auth_legacy_claims'),{code:'42501'});
- await assert.rejects(runtime.query("INSERT INTO auth_account(id,account_id,provider_id,user_id,password) VALUES($1,$2,'credential',$2,'unauthorized-password-hash')",[randomUUID(),subject]),{code:'42501'});
- assert.notEqual((await request(http()).post('/api/auth/faji/claim').send({token:'x'.repeat(43),password})).status,201);
- await owner.query("UPDATE auth_legacy_claims SET expires_at=now()-interval '1 second' WHERE identity_subject=$1",[subject]);
- assert.notEqual((await request(http()).post('/api/auth/faji/claim').send({token:claim.token,password})).status,201,'Expired claim rejected');
- const manifest=[{subject,email,name:'Existing Profile',roles:['dispatcher'],evidence:{method:'independent-ownership-check',verifiedSubject:subject,ticket:'TEST-reissue',reviewers:['reviewer-a','reviewer-b'],verifiedAt:new Date().toISOString()}}];
- const [replacement]=await prepareClaims(owner,manifest,true);
- assert.notEqual((await request(http()).post('/api/auth/faji/claim').send({token:claim.token,password})).status,201,'Reissued claim invalidates original proof');
- const attempts=await Promise.all([1,2].map(()=>request(http()).post('/api/auth/faji/claim').send({token:replacement.token,password})));
- assert.equal(attempts.filter(result=>result.status===201).length,1,'Concurrent consumers cannot claim twice');
- await assert.rejects(prepareClaims(owner,manifest,true),/unclaimed/,'Claimed identity cannot be reissued');
- const login=await request(http()).post('/api/auth/sign-in/email').send({email,password});assert.equal(login.status,200,JSON.stringify(login.body));assert.equal(login.body.user.id,subject);
- const profile=await owner.query('SELECT id,display_name FROM user_profiles WHERE identity_subject=$1',[subject]);assert.equal(profile.rows[0].id,profileId);assert.equal(profile.rows[0].display_name,'Existing Profile');
- const scopes=await runtime.query('SELECT resource_id FROM resource_memberships WHERE identity_subject=$1',[subject]);assert.equal(scopes.rows[0].resource_id,resource);
- const roles=await runtime.query('SELECT role FROM application_roles WHERE identity_subject=$1',[subject]);assert.deepEqual(roles.rows.map(r=>r.role),['dispatcher']);
-});
 test('verified phone recovery expires, is single-use, revokes sessions and preserves enrolled MFA',async()=>{
  await clearLimits();const phone='+1555'+String(Date.now()).slice(-7),email=`phone-recovery-${randomUUID()}@example.test`;
  const signup=await request(http()).post('/api/auth/sign-up/email').send({name:'Phone recovery',email,password});let token=signup.body.token;
@@ -128,4 +105,9 @@ test('credential changes revoke sessions atomically and rotate the authenticated
  const changed=await request(http()).post('/api/auth/change-password').set(bearer(token)).send({currentPassword:password,newPassword:password+'-changed',revokeOtherSessions:false});assert.equal(changed.status,200,JSON.stringify(changed.body));
  assert.equal((await request(http()).get('/api/v1/auth/me').set(bearer(token))).status,401);
  const rotated=changed.headers['set-auth-token']??changed.body.token;assert.ok(rotated);assert.equal((await request(http()).get('/api/v1/auth/me').set(bearer(rotated))).status,200);
+});
+test('pre-launch Better Auth has no account-claim endpoint or dormant claim privileges',async()=>{
+ assert.equal((await request(http()).post('/api/auth/faji/claim').send({token:'x'.repeat(43),password})).status,404);
+ const state=await owner.query("SELECT to_regclass('public.auth_legacy_claims') AS claims,to_regclass('public.auth_claim_attempts') AS attempts,to_regprocedure('public.consume_identity_claim(text,text,text)') AS consumer");
+ assert.deepEqual(state.rows[0],{claims:null,attempts:null,consumer:null});
 });

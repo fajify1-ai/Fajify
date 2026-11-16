@@ -31,10 +31,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _send() async {
     final auth = AuthScope.of(context);
-    if (_busy ||
-        auth.isBusy ||
-        (!auth.usesBrowserAuthentication &&
-            !(_form.currentState?.validate() ?? false))) {
+    if (_busy || auth.isBusy || !(_form.currentState?.validate() ?? false)) {
       return;
     }
     setState(() => _busy = true);
@@ -42,7 +39,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (!mounted) return;
     setState(() => _busy = false);
     if (continueToCustomerHome(context, auth)) return;
-    if (auth.usesBrowserAuthentication && auth.state.failure != null) return;
     showAuthMessage(
       context,
       failure?.message ?? 'If the account exists, a recovery email was sent.',
@@ -73,9 +69,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              AuthScope.of(context).usesBrowserAuthentication
-                  ? 'Choose Forgot password on the secure sign-in page. Your account provider handles verification and your new password.'
-                  : 'Enter your email to receive a recovery link. Paste the link into the in-app reset form.',
+              'Enter your email to receive a recovery link. Paste the link into the in-app reset form.',
               style: const TextStyle(color: FajiColors.textSecondary),
             ),
             TextButton(
@@ -89,25 +83,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                 ),
               ),
-              child: const Text('Recovery, phone sign-in or account claim'),
+              child: const Text('Recovery or phone sign-in'),
             ),
             const SizedBox(height: 28),
-            if (!AuthScope.of(context).usesBrowserAuthentication)
-              FajiAuthTextField(
-                controller: _email,
-                hint: 'you@email.com',
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.done,
-                autofillHints: const [AutofillHints.email],
-                recoveryAppearance: true,
-                validator: AuthInput.email,
-              ),
+            FajiAuthTextField(
+              controller: _email,
+              hint: 'you@email.com',
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.email],
+              recoveryAppearance: true,
+              validator: AuthInput.email,
+            ),
             const SizedBox(height: 20),
             AuthStatusView(state: AuthScope.of(context).state),
             AuthPrimaryButton.recovery(
-              label: AuthScope.of(context).usesBrowserAuthentication
-                  ? 'Continue in browser'
-                  : 'Send reset link',
+              label: 'Send reset link',
               busy: _busy || AuthScope.of(context).isBusy,
               onTap: _send,
             ),

@@ -30,7 +30,7 @@ RequireResource('business','businessId','owner','manager')(
 test('HTTP scoped business endpoint blocks cross-tenant access and revoked membership',async()=>{
  let suspended=false,revoked=false;
  const memberships=new Set([tenantA]);
- const identity={subject:'business-operator',issuer:'https://issuer.example/realms/faji',
+ const identity={subject:'business-operator',issuer:'https://api.example.test',
   audience:['faji-api'],roles:['merchant'],issuedAt:1800000000,expiresAt:1900000000,sessionId:'sid-1'};
  const verifier:IdentityVerifier={verifyAccessToken:async()=>identity};
  const access={

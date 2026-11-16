@@ -1,40 +1,15 @@
-# faji_app
+# Faji Customer Mobile
 
-A new Flutter project.
+Flutter is native Android/iOS only. Better Auth is the sole provider; registration, login, password recovery, optional MFA and phone verification run inside the app. No external browser or hosted identity service is required.
 
-## Getting Started
+```sh
+flutter pub get
+flutter run --dart-define=API_BASE_URL=https://YOUR-PRIVATE-API \
+  --dart-define=FAJI_RECOVERY_URL=https://YOUR-TRUSTED-WEB/reset-password
+flutter analyze --no-fatal-infos
+flutter test
+```
 
-This project is a starting point for a Flutter application.
+Only public endpoints belong in build defines. Keep SMTP/SMS/database credentials on the backend. Opaque session tokens use platform secure storage. Business approval, memberships, scopes and suspended accounts are checked by NestJS; client navigation never grants access. MFA remains optional; privileged operations require recent server-verified proof.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-## M2-P2 integration status
-
-See [current OIDC adapter report](../../docs/engineering/M2_P2_OIDC_ADAPTERS.md).
-Native AppAuth, secure storage, refresh/restoration and logout are connected
-through environment-gated composition. Live authentication is disabled by
-default until approved deployment settings and platform acceptance are supplied.
-Customer data fallbacks do not fabricate live data.
-
-`CustomerIdentityClient` consumes the merged Phase 1 `GET /api/v1/auth/me`
-contract (`subject`, `roles`) through native HTTPS. Its native OIDC adapter
-caller must supply a reviewed API origin, the verified provider subject and
-access token. It performs a fresh active-account check, rejects redirected,
-unauthorized, mismatched or malformed results, and requires the customer role.
-The returned identity has no display name or photo fields. Profile UI remains
-unavailable until a display-profile contract exists. Browser bearer transport
-is unsupported; the customer website uses its separate server-only boundary.
-Copy `oidc-config.example.json` to ignored `oidc-config.local.json`, supply only
-reviewed public settings, and use `flutter run --dart-define-from-file=oidc-config.local.json`.
-Do not put secrets in native build settings. Keep the enable flag false until
-the deployment is approved. Native browser/device acceptance remains pending.
-
-Registration, email-verification retry and provider-guided recovery now share the verified browser-session pipeline and AuthStatusView. See [current journey report](../../docs/engineering/M2_P2_ACCOUNT_JOURNEYS.md) for behavior, evidence and all eight acceptance statuses. Live settings remain pending.
+Mocks/sample business data are development fixtures, not another authentication provider. Native device acceptance is documented in [tests/auth](../../tests/auth/README.md) and must be executed on an approved device before a mobile release. See [current implementation](../../docs/engineering/BETTER_AUTH_IMPLEMENTATION.md), [merge report](../../docs/engineering/BETTER_AUTH_MERGE_READINESS.md) and the existing product/domain documentation for business features.

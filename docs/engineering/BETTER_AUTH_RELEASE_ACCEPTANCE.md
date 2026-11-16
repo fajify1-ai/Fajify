@@ -1,3 +1,5 @@
+> Historical evidence at commit 361657b. The confirmed pre-launch/no-users decision supersedes legacy-account migration/claim and provider-rollback gates. See [current merge report](BETTER_AUTH_MERGE_READINESS.md). Normal backup/recovery safeguards remain.
+
 # Better Auth continuation — final acceptance
 
 Date: 2026-11-16 (Africa/Lagos). Repository: `fajify1-ai/Fajify`. Branch: `feat/better-auth-nextjs-in-app`.

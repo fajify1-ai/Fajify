@@ -1,0 +1,171 @@
+{
+  "date": "2026-11-16",
+  "baseline": "361657b78ede429ff322a144e813161179aa5496",
+  "main_reconciled": "4162bd572e6b4e9cd6351d7e1e1e909a09bcda70",
+  "retained_browser_evidence": "BETTER_AUTH_TEST_EVIDENCE.json at 361657b78ede429ff322a144e813161179aa5496",
+  "checks": [
+    {
+      "check": "merge-lint",
+      "log_sha256": "8e0f7fb9c0729b4d6d1fcb45c177a963b8a63a8b8a5dd2256d71bd9f14b94bf6",
+      "outcomes": [
+        "Tasks:    6 successful, 6 total"
+      ]
+    },
+    {
+      "check": "merge-types",
+      "log_sha256": "cdfa6bfe0fa1e9e131de26d66b76e45ed2bc939acd5bb85365fd12368c8d214d",
+      "outcomes": [
+        "Tasks:    7 successful",
+        "Tasks:    7 successful, 7 total"
+      ]
+    },
+    {
+      "check": "merge-tests",
+      "log_sha256": "16ad749e462a3bdf3ea1213bf0321f00ef0cef6e7f4fca5248c4c5c759e4d670",
+      "outcomes": [
+        "@faji/web-auth:test: \u2139 tests 5",
+        "@faji/web-auth:test: \u2139 pass 5",
+        "@faji/web-auth:test: \u2139 fail 0",
+        "@faji/web-auth:test: \u2139 skipped 0",
+        "@faji/worker:test: \u2139 tests 3",
+        "@faji/worker:test: \u2139 pass 3",
+        "@faji/worker:test: \u2139 fail 0",
+        "@faji/worker:test: \u2139 skipped 0",
+        "@faji/api:test: \u2139 tests 171",
+        "@faji/api:test: \u2139 pass 171",
+        "@faji/api:test: \u2139 fail 0",
+        "@faji/api:test: \u2139 skipped 0",
+        "Tasks:    3 successful, 3 total"
+      ]
+    },
+    {
+      "check": "merge-api-build",
+      "log_sha256": "cb8c0946d34b0102c483b2ab6bac499a782aba1cd3b0602de7857738eecb8235",
+      "outcomes": []
+    },
+    {
+      "check": "merge-worker-build",
+      "log_sha256": "75de0fec1b585ea01991ac49e0a818ce9edd1ada005eb5dab17e1896f2d6b8ff",
+      "outcomes": []
+    },
+    {
+      "check": "merge-customer-build",
+      "log_sha256": "a8629a178b8b73d16c8a5bd29013a830afa4da6b0a41ae20b313b61eb30de000",
+      "outcomes": []
+    },
+    {
+      "check": "merge-admin-build",
+      "log_sha256": "e9bad0b58980c418aec7a680ce935c7c24081a756820694c70c00b15bcda93f6",
+      "outcomes": []
+    },
+    {
+      "check": "merge-business-build",
+      "log_sha256": "a65d47e55043164136048b408d0de767644da9b243c1593b9c8c27d304362118",
+      "outcomes": []
+    },
+    {
+      "check": "merge-ride-dispatch-build",
+      "log_sha256": "dd1ebae264c5d891ea5e2aa34736779abbd12ad8826876c1eb16b78c7fa3189e",
+      "outcomes": []
+    },
+    {
+      "check": "merge-migrate",
+      "log_sha256": "17a63ca2ea98ba636fb7700789591816ba20b5bf4381401fa75a79030658b90d",
+      "outcomes": [
+        "Applied migration 0108_retire_prelaunch_identity_claims.sql"
+      ]
+    },
+    {
+      "check": "merge-database-tests",
+      "log_sha256": "01150baf3c0aff4d78210620f5ba46a91518c4941edc3339f3e7dec76af33be7",
+      "outcomes": [
+        "Applied migration 9001_fixture.sql",
+        "Applied migration 9002_fixture.sql",
+        "Applied migration 9003_fixture.sql",
+        "\u2139 tests 11",
+        "\u2139 pass 11",
+        "\u2139 fail 0",
+        "\u2139 skipped 0"
+      ]
+    },
+    {
+      "check": "merge-auth-tests",
+      "log_sha256": "86cb2e99c0602f35b3c28b1d6c7734fa73ad564a29227a100c4d1b3ae8f19c3c",
+      "outcomes": [
+        "\u2139 tests 6",
+        "\u2139 pass 6",
+        "\u2139 fail 0",
+        "\u2139 skipped 0"
+      ]
+    },
+    {
+      "check": "merge-contracts",
+      "log_sha256": "fa747fbf964b795a91f8f8191def8b7548a105dc7bc4d8df76de42b8325e4b3f",
+      "outcomes": []
+    },
+    {
+      "check": "merge-node22-runtime",
+      "log_sha256": "cc90619593c719578d0b72ee046a8ffda586a340ae1804997cb425b653a68de2",
+      "outcomes": [
+        "PASS: Node 22.23.5 customer_web standalone renders login, removes claim route and rejects unauthenticated dashboard",
+        "PASS: Node 22.23.5 admin_web standalone renders login, removes claim route and rejects unauthenticated dashboard",
+        "PASS: Node 22.23.5 business_web standalone renders login, removes claim route and rejects unauthenticated dashboard",
+        "PASS: Node 22.23.5 ride_dispatch_web standalone renders login, removes claim route and rejects unauthenticated dashboard",
+        "PASS: production-only API package boots, validates PostgreSQL health, serves Better Auth and enforces authenticated identity on loopback"
+      ]
+    },
+    {
+      "check": "merge-customer_mobile-analyze",
+      "log_sha256": "cd56a1dc88a8d31dc4c6d285abbe3d406ac945fc88023996c2a4837ffbe37e1c",
+      "outcomes": []
+    },
+    {
+      "check": "merge-customer_mobile-tests",
+      "log_sha256": "3b14af6836fc05f746f258418304be95aa10316a9ba679311fbfb5a8bdbc5005",
+      "outcomes": [
+        "00:30 +49: All tests passed!"
+      ]
+    },
+    {
+      "check": "merge-business_mobile-analyze",
+      "log_sha256": "8f9f7cd3974e3927737c8f3946e9ce2d374835088ce92373c6b61a7a9518778f",
+      "outcomes": []
+    },
+    {
+      "check": "merge-business_mobile-tests",
+      "log_sha256": "b9d2355a4f91a1518a39d8a7451613106321484dc4bcc41f2173d3e65674f142",
+      "outcomes": [
+        "00:22 +43: All tests passed!"
+      ]
+    },
+    {
+      "check": "merge-ride_dispatch-analyze",
+      "log_sha256": "add19c35d25cf1bf6002c2f5aa6e65f66bbd63a26bcf2d85217f3b7d929f1f5d",
+      "outcomes": []
+    },
+    {
+      "check": "merge-ride_dispatch-tests",
+      "log_sha256": "081bccdf5bb5230d2d268862429a3054ba76a6cb5f68bc4ae4313a9c2a42758b",
+      "outcomes": [
+        "00:03 +3: All tests passed!"
+      ]
+    },
+    {
+      "check": "merge-flutter_core-analyze",
+      "log_sha256": "e2fc3886c720104f86987973f6cbe4634702dec8da8b79740c8b215b7ef5d0bb",
+      "outcomes": []
+    },
+    {
+      "check": "merge-flutter_core-tests",
+      "log_sha256": "332aa04db68790c8608e744a5c8fe6f388a54b9e15273636b5688dc5d20d72c6",
+      "outcomes": [
+        "00:00 +9: All tests passed!"
+      ]
+    }
+  ],
+  "limitations": [
+    "No native device or native release build execution",
+    "No real SMTP/SMS delivery",
+    "Full staging Docker stack not started"
+  ]
+}

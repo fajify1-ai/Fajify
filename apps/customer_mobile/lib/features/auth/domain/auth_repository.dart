@@ -65,33 +65,6 @@ class UnavailableAuthRepository implements CustomerAuthRepository {
   Future<void> signOut() async {}
 }
 
-abstract interface class CustomerAccountRecovery {
-  /// Delegates to the provider's account flow; never accepts a password.
-  Future<void> beginRecovery();
-}
-
-/// Future adapter uses a maintained native OIDC SDK, the system browser and
-/// Authorization Code + S256 PKCE. Password collection is deliberately absent.
-abstract interface class BrowserOidcAuthorization
-    implements CustomerAccountRecovery {
-  Future<AuthSession> authorize();
-  Future<AuthSession> completeAuthorization(Uri callback);
-  Future<void> beginRegistration();
-  @override
-  Future<void> beginRecovery();
-}
-
-enum CustomerAuthJourney { signIn, registration, recovery, verifyEmail }
-
-/// Browser actions return only fully verified client session metadata. Opening
-/// a provider page or requesting an email action is never proof of completion.
-abstract interface class CustomerBrowserJourneys
-    implements BrowserOidcAuthorization {
-  Future<AuthSession> registerInBrowser();
-  Future<AuthSession> recoverInBrowser();
-  Future<AuthSession> verifyEmailInBrowser();
-}
-
 abstract interface class CustomerPasswordRecovery {
   Future<void> recover(String email);
 }
