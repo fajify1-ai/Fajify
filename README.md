@@ -1,4 +1,9 @@
 # Fajify — Faji Platform
+
+## Unified delivery experience
+
+**Approved first-release target:** one public Fajify web application at `preview.fajify.com` and one installable Flutter Android application, each presenting Customer, Faji Business, and Faji Ride entry points. Customer and Business are active; Ride is Coming Soon. Administration remains a separate internal web console. Existing separate `apps/*` packages are implementation modules to reconcile, not evidence that unified packaging is complete. See [unified client experience](docs/architecture/UNIFIED_CLIENT_EXPERIENCE.md).
+
 **Unified lifestyle, hospitality, entertainment, commerce and mobility ecosystem.**
 
 Faji connects customers with venues, businesses, experiences, reservations, events, products and transportation through the Faji Customer, Faji Business, Faji Ride & Dispatch and Faji Administration domains.
