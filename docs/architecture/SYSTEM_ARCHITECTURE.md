@@ -1,4 +1,7 @@
 # Faji — System Architecture
+
+> **Delivery clarification (2026-11-16):** The approved user-facing target is **one public web application and one installable Flutter app**, each with Customer, Business, and Ride (Coming Soon) entry points. The separate apps shown below describe the *current source modules*, not the intended number of installations or public websites. Admin stays separate. [Unified client experience](UNIFIED_CLIENT_EXPERIENCE.md) governs packaging and first-release scope.
+
 **Classification:** Engineering specification | **Baseline:** v1.1 | **Status:** Approved architecture; Better Auth implemented; see [merge and release boundaries](../engineering/BETTER_AUTH_MERGE_READINESS.md)
 
 ## 1. Product and application boundaries

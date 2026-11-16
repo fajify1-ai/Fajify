@@ -1,5 +1,8 @@
 # Approved architecture decision — Better Auth and unified Next.js web
 
+> **Client packaging clarification (2026-11-16):** The matrix below describes supported role surfaces and current development modules, **not separate user-facing app installations**. The approved target is one unified public Next.js web experience at `preview.fajify.com` and one unified Flutter Android/iOS application with Customer, Business, and Ride entry points; Ride is Coming Soon for the first release. Admin remains separate. See [unified client experience](UNIFIED_CLIENT_EXPERIENCE.md).
+
+
 **Decision date:** 2026-11-16  
 **Status:** Approved architecture; implementation is on the Better Auth continuation branch. Release gates remain open; see [acceptance report](../engineering/BETTER_AUTH_RELEASE_ACCEPTANCE.md).
 
