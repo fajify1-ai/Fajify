@@ -1,2 +1,2 @@
-import Client from '../connected/Client';
-export default function Page(){return <Client/>;}
+import Entry from '../unified/Entry';
+export default function Page(){return <Entry/>;}

@@ -6,8 +6,8 @@ import VendorDashboardScreen from './screens/VendorDashboardScreen'
 import FajifyLogo from './components/FajifyLogo'
 import { Button } from '../components/ui/button'
 type Mode = 'entry' | 'signin' | 'onboarding' | 'dashboard'
-export default function App() {
-  const [mode, setMode] = useState<Mode>('entry')
+export default function App({initialMode='entry'}:{initialMode?:Mode}={}) {
+  const [mode, setMode] = useState<Mode>(initialMode)
   const navigate = (next: Mode) => { window.scrollTo(0, 0); setMode(next) }
   return <>
     <div role="note" className="preview-notice">Business preview · Local data only · Sign-in, verification, QR and payouts are simulations</div>

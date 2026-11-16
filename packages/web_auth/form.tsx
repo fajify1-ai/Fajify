@@ -1,10 +1,10 @@
 "use client";
 import {useState,useEffect,type FormEvent} from 'react';
 import {authClient,authPost} from './client';
-export function AuthForm({mode}:{mode:'login'|'register'|'recover'|'reset'|'phone'|'phone-reset'}){
+export function AuthForm({mode,initialSecondFactor=false,returnTo='/dashboard'}:{mode:'login'|'register'|'recover'|'reset'|'phone'|'phone-reset';initialSecondFactor?:boolean;returnTo?:'/dashboard'|'/customer'|'/business/dashboard'}){
  const [resetToken,setResetToken]=useState('');
  useEffect(()=>{if(mode==='reset'){const url=new URL(window.location.href);setResetToken(url.searchParams.get('token')??'');url.searchParams.delete('token');window.history.replaceState(null,'',url.pathname+url.search+url.hash);}},[mode]);
- const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[mfa,setMfa]=useState(false),[backup,setBackup]=useState(false),[sent,setSent]=useState(false);
+ const [busy,setBusy]=useState(false),[message,setMessage]=useState(''),[mfa,setMfa]=useState(initialSecondFactor),[backup,setBackup]=useState(false),[sent,setSent]=useState(false);
  async function submit(event:FormEvent<HTMLFormElement>){
   event.preventDefault();if(busy)return;setBusy(true);setMessage('');
   const values=new FormData(event.currentTarget),email=String(values.get('email')??''),password=String(values.get('password')??''),code=String(values.get('code')??'');
@@ -13,7 +13,7 @@ export function AuthForm({mode}:{mode:'login'|'register'|'recover'|'reset'|'phon
    if(data.twoFactorRedirect){setMfa(true);return;}
    if((mode==='phone'||mode==='phone-reset')&&!sent){setSent(true);setMessage('Enter the verification code sent to your phone.');return;}
    if(mode==='phone-reset'){setMessage('Password updated. Sign in.');return;}
-   if(mode==='login'||mode==='register'||mode==='phone')window.location.assign('/dashboard');
+   if(mode==='login'||mode==='register'||mode==='phone')window.location.assign(returnTo);
    else setMessage(mode==='recover'?'If the account exists, a recovery email has been sent.':'Password updated. You can sign in.');
   }catch(error){setMessage(error instanceof Error?error.message:'Authentication unavailable');}finally{setBusy(false);}
  }

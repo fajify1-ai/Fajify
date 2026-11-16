@@ -7,7 +7,7 @@ import QRTicket from '../components/QRTicket'
 import { addBooking } from '../store/bookings'
 import SuccessOverlay from '../components/SuccessOverlay'
 
-type Props = { navigate: NavigateFn; venueId: string; bookingDate?: string; bookingTime?: string }
+type Props = { navigate: NavigateFn; venueId: string; bookingDate?: string; bookingTime?: string; onRide?:()=>void }
 
 const VENUE_TIME_MAP: Record<string, VenueTimeType> = {
   v1: 'restaurant', v2: 'beach', v3: 'cinema', v4: 'park',
@@ -296,7 +296,7 @@ const VENUE_MENU: Record<string, MenuItem[]> = {
   ],
 }
 
-export default function CheckoutScreen({ navigate, venueId, bookingDate, bookingTime }: Props) {
+export default function CheckoutScreen({ navigate, venueId, bookingDate, bookingTime, onRide }: Props) {
   const { dark } = useDarkMode()
   const [payMethod, setPayMethod] = useState('')
   const [bookingReference, setBookingReference] = useState('')
@@ -573,7 +573,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
                   className="flex-1 rounded-full py-2.5 text-[13px] font-bold text-white/80 border border-white/30">
                   No Thanks
                 </button>
-                <button onClick={() => setTState('configuring')}
+                <button onClick={() => onRide?onRide():setTState('configuring')}
                   className="flex-1 rounded-full py-2.5 text-[13px] font-black text-white"
                   style={{ background: RED }}>
                   Yes, Book a Ride
@@ -596,7 +596,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
                 <p className="text-[11px]" style={{ color: muted }}>Add transport — from ₦6,500</p>
               </div>
             </div>
-            <button onClick={() => setTState('configuring')}
+            <button onClick={() => onRide?onRide():setTState('configuring')}
               className="rounded-full px-4 py-2 text-[12px] font-black text-white"
               style={{ background: RED }}>
               Add
@@ -759,7 +759,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
                   </p>
                 </div>
               </div>
-              <button onClick={() => setTState('configuring')}
+              <button onClick={() => onRide?onRide():setTState('configuring')}
                 className="text-[12px] font-bold shrink-0 ml-2" style={{ color: RED }}>
                 Edit
               </button>

@@ -82,7 +82,7 @@ const billboardItems = [
 ]
 
 // ── Category pills ────────────────────────────────────────────────────────────
-const categories = ['All', 'Restaurant', 'Beach', 'Cinema', 'Park', 'Bar', 'Club', 'Outdoor', 'Business']
+const categories = ['All', 'Restaurant', 'Beach', 'Cinema', 'Park', 'Bar', 'Club', 'Outdoor']
 
 // ── Venues (vertical list, filterable) ───────────────────────────────────────
 const allVenues = [
@@ -365,7 +365,7 @@ export default function HomeScreen({ navigate, onVendorSwitch, initialSearch = '
       <div className="mb-5 flex w-full items-end justify-between px-5 md:px-10 lg:px-16">
         <div>
           <h1 className="text-[24px] font-black tracking-[-0.04em] md:text-[30px]" style={{ color: ink }}>Recommended for you</h1>
-          <p className="mt-1 text-[13px]" style={{ color: muted }}>Published places and experiences available on Fajify.</p>
+          <p className="mt-1 text-[13px]" style={{ color: muted }}>{live?'Published places and experiences available on Fajify.':'Places matching what people are booking around Lagos.'}</p>
         </div>
         <span className="hidden text-[13px] font-semibold md:block" style={{ color: muted }}>{filteredVenues.length} places</span>
       </div>

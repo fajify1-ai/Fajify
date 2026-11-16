@@ -5,7 +5,7 @@ import { useSaved } from '../store/saved'
 import { useCart } from '../store/cart'
 import CalendarSheet, { type VenueTimeType } from '../components/CalendarSheet'
 
-type Props = { id: string; navigate: NavigateFn }
+type Props = { id: string; navigate: NavigateFn; liveVenue?: VenueConfig; onBook?: (id:string)=>void; onSaveOffering?: (id:string)=>void }
 
 const RED = '#FA3F38'
 
@@ -16,13 +16,13 @@ type Offering = {
   tag: string
   tagColor: string
   price: number
-  rating: number
+  rating: number | string
   reviews: string
   image: string
   category: string
 }
 
-type VenueConfig = {
+export type VenueConfig = {
   id: string
   name: string
   subtitle: string
@@ -31,7 +31,7 @@ type VenueConfig = {
   avatarImage: string
   verified: boolean
   openHours: string
-  rating: number
+  rating: number | string
   reviewCount: string
   stat2Label: string
   stat2Value: string
@@ -263,7 +263,7 @@ const VENUE_TIME_TYPE: Record<string, VenueTimeType> = {
   v9: 'club', v10: 'bar',
 }
 
-export default function RestaurantScreen({ id, navigate }: Props) {
+export default function RestaurantScreen({ id, navigate, liveVenue, onBook, onSaveOffering }: Props) {
   const { dark } = useDarkMode()
   const [heroIdx, setHeroIdx] = useState(0)
   const heroTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -272,7 +272,7 @@ export default function RestaurantScreen({ id, navigate }: Props) {
   const [activeCategory, setActiveCategory] = useState('All')
   const [calOpen, setCalOpen] = useState(false)
 
-  const venue = VENUES[id] ?? DEFAULT_VENUE
+  const venue = liveVenue ?? VENUES[id] ?? DEFAULT_VENUE
   const gallery = venue.galleryImages?.length ? venue.galleryImages : [venue.heroImage]
 
   useEffect(() => { window.scrollTo(0, 0) }, [id])
@@ -324,7 +324,7 @@ export default function RestaurantScreen({ id, navigate }: Props) {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <div className="flex items-center gap-2">
-            <button onClick={() => toggle(venue.id)}
+            <button disabled={!!liveVenue} title={liveVenue?"Save individual experiences from the catalogue":undefined} onClick={() => toggle(venue.id)}
               className="h-10 w-10 rounded-full flex items-center justify-center"
               style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)' }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill={venueSaved ? RED : 'none'} stroke={venueSaved ? RED : 'white'} strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
@@ -399,7 +399,7 @@ export default function RestaurantScreen({ id, navigate }: Props) {
 
           {/* Book CTA button */}
           <button
-            onClick={() => setCalOpen(true)}
+            onClick={() => onBook ? (venue.offerings[0] && onBook(venue.offerings[0].id)) : setCalOpen(true)}
             className="w-full flex items-center gap-3 rounded-[16px] px-4 py-4 mb-4 text-white"
             style={{ background: RED }}>
             <div className="h-10 w-10 rounded-[10px] flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.25)' }}>
@@ -424,7 +424,7 @@ export default function RestaurantScreen({ id, navigate }: Props) {
                 <p className="text-[11px]" style={{ color: muted }}>{venue.promoDesc}</p>
               </div>
             </div>
-            <button onClick={() => setCalOpen(true)} className="rounded-full px-3 py-1.5 text-[11px] font-bold text-white shrink-0 ml-2" style={{ background: RED }}>Book Now</button>
+            <button onClick={() => onBook ? (venue.offerings[0] && onBook(venue.offerings[0].id)) : setCalOpen(true)} className="rounded-full px-3 py-1.5 text-[11px] font-bold text-white shrink-0 ml-2" style={{ background: RED }}>Book Now</button>
           </div>
         </div>
 
@@ -465,7 +465,7 @@ export default function RestaurantScreen({ id, navigate }: Props) {
                       🎉 {item.tag}
                     </span>
                   </div>
-                  <button onClick={() => toggle(item.id)} className="ml-2 shrink-0 mt-0.5">
+                  <button aria-label={`Save ${item.name}`} onClick={() => onSaveOffering ? onSaveOffering(item.id) : toggle(item.id)} className="ml-2 shrink-0 mt-0.5">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill={isSaved(item.id) ? RED : 'none'} stroke={isSaved(item.id) ? RED : muted} strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
                   </button>
                 </div>
@@ -495,7 +495,7 @@ export default function RestaurantScreen({ id, navigate }: Props) {
                       </button>
                     )
                   })() : (
-                    <button onClick={() => setCalOpen(true)}
+                    <button aria-label={`View availability for ${item.name}`} onClick={() => onBook ? onBook(item.id) : setCalOpen(true)}
                       className="h-9 w-9 rounded-lg border-2 flex items-center justify-center"
                       style={{ borderColor: RED }}>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={RED} strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>

@@ -3,7 +3,7 @@ import { useDarkMode } from '../store/darkMode'
 
 type Props = { onComplete: (draft?: {businessName:string}) => void | Promise<void>; onBack: () => void; connected?: boolean; submitting?: boolean }
 
-const AMBER = '#D92D27'
+const AMBER = '#F59E0B'
 
 const CATEGORIES = [
   { id: 'restaurant', emoji: '🍽', label: 'Restaurant / Bar',       sub: 'Dine-in, takeout, cocktail bar' },
@@ -189,7 +189,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
     bg:      dark ? '#080808' : '#F8F8F8',
     surface: dark ? '#1A1A1A' : '#FFFFFF',
     ink:     dark ? '#F0F0F0' : '#1A1A1A',
-    muted:   dark ? '#AAA'    : '#666666',
+    muted:   dark ? '#777'    : '#888888',
     border:  dark ? '#2A2A2A' : '#EEEEEE',
     inputBg: dark ? '#222'    : '#F4F4F6',
     subBg:   dark ? '#141414' : '#F0F0F4',
@@ -382,7 +382,6 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
   )
 
   // ── STEP 6: Identity verification ─────────────────────────────────────────────
-  if (step === 6 && connected) return wrap(<div className="px-5 pb-40"><h1 className="text-2xl font-bold mb-5">Identity verification</h1><p>Identity document and selfie verification are not connected. Do not upload sensitive documents here.</p><p className="mt-4">Only your business name will be submitted. Other details remain an unsent draft.</p><Cta label="Continue with application draft" action={next} disabled={false} bg={s.bg}/></div>)
   if (step === 6) return wrap(
     <>
       <div className="px-5 pb-4">
@@ -390,6 +389,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
           Verify your<br/>identity
         </h1>
         <p className="text-[13px]" style={{ color: s.muted }}>Required to keep fajify safe for everyone.</p>
+        {connected&&<p role="note" className="mt-3 text-[13px]" style={{color:s.ink}}>Verification preview only. Sample selections do not upload documents, use the camera, verify identity or grant approval. Your application remains subject to review.</p>}
       </div>
       <div className="px-5 pb-36 flex flex-col gap-4">
         <div>

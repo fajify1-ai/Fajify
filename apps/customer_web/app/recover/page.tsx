@@ -1,2 +1,1 @@
-import {AuthPage} from '../../connected/AuthPage';
-export default function Page(){return <AuthPage mode="recover"/>;}
+export {default} from '../../unified/DeferredDelivery';

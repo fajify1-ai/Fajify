@@ -27,3 +27,13 @@ test('mutations reject untrusted origins and oversized payloads before fetch',as
 test('upstream failures, redirects and permission errors never expose internals',async()=>{
  setup();for(const status of [302,500,401,403]){globalThis.fetch=async()=>new Response('password-private-stack',{status});const result=await platformProxy(req('customer/profile'),'customer');assert.equal(result.status,status>=300&&status<400||status>=500?503:status);assert.ok(!(await result.text()).includes('password-private-stack'));}
 });
+
+// One public host combines contract audiences; this never adds Admin/Ride authority.
+test('unified bridge accepts both product contracts and preserves server denials',async()=>{
+ assert.equal(allowedRoute('customer/profile','GET','unified'),true);
+ assert.equal(allowedRoute('businesses/abc/finance','GET','unified'),true);
+ for(const path of ['admin/finance','rides','customer/rides','business/onboarding/abc/review'])assert.equal(allowedRoute(path,'POST','unified'),false);
+ setup();globalThis.fetch=async()=>Response.json({private:'not exposed'},{status:403});
+ const response=await platformProxy(req('businesses/abc/finance'),'unified');
+ assert.equal(response.status,403);assert.doesNotMatch(await response.text(),/not exposed/);
+});

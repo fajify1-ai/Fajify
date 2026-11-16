@@ -7,7 +7,7 @@ import { useDarkMode } from '../store/darkMode'
 export type PlanningAnswers = { occasion:string; guests:number; location:string; budget:string; date:string; time:string; vibes:string[] }
 type Props = { navigate: NavigateFn; recommend?: (answers:PlanningAnswers)=>Promise<typeof PLANS>; onBook?: (id:string)=>void }
 
-const RED = '#D92D27'
+const RED = '#FA3F38'
 
 // ── SVG icons ────────────────────────────────────────────────────────────────
 function ChevronLeft() {
@@ -234,8 +234,8 @@ export default function PlanForMeScreen({ navigate, recommend, onBook }: Props) 
   const bg       = dark ? '#0F0F0F' : '#F8F8F8'
   const surface  = dark ? '#1C1C1C' : '#FFFFFF'
   const ink      = dark ? '#F0F0F0' : '#1A1A1A'
-  const muted    = dark ? '#AAA' : '#6B6666'
-  const sub      = dark ? '#AAA' : '#6B6666'
+  const muted    = dark ? '#888' : '#999'
+  const sub      = dark ? '#666' : '#AAA'
   const border   = dark ? '#2A2A2A' : '#F0EDED'
   const cardBg   = dark ? '#1A1A1A' : '#FAFAFA'
   const lightRed = dark ? '#2A1010' : '#FFF1F0'

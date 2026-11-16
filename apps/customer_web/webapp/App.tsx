@@ -60,9 +60,9 @@ export type NavigateFn = (s: Screen) => void
 
 export type AppMode = 'landing' | 'customer-auth' | 'customer' | 'business-signin' | 'ride-signin'
 
-export default function App() {
-  const [screen, setScreen] = useState<Screen>({ name: 'home' })
-  const [mode, setMode] = useState<AppMode>('landing')
+export default function App({initialMode='landing',initialScreen={name:'home'},deferRide=false}:{initialMode?:AppMode;initialScreen?:Screen;deferRide?:boolean}={}) {
+  const [screen, setScreen] = useState<Screen>(initialScreen)
+  const [mode, setMode] = useState<AppMode>(initialMode)
   const [pendingScreen, setPendingScreen] = useState<Screen | null>(null)
   const [authReturnMode, setAuthReturnMode] = useState<'landing' | 'customer'>('landing')
   const [customerAuthMode, setCustomerAuthMode] = useState<'signin' | 'register'>('signin')
@@ -90,6 +90,7 @@ export default function App() {
   }, [mode, screen])
 
   const navigate: NavigateFn = (s) => {
+    if(deferRide&&['transportation','deliveryRestaurant','deliveryCart','orderTracking'].includes(s.name)){window.location.assign('/ride');return}
     window.scrollTo(0, 0)
     setScreen(s)
   }
@@ -108,7 +109,7 @@ export default function App() {
         onGetStarted={() => { setAuthReturnMode('landing'); setCustomerAuthMode('register'); setMode('customer-auth') }}
         onSignIn={() => { setAuthReturnMode('landing'); setCustomerAuthMode('signin'); setMode('customer-auth') }}
         onBusiness={() => setMode('business-signin')}
-        onRide={() => setMode('ride-signin')}
+        onRide={() => deferRide?window.location.assign('/ride'):setMode('ride-signin')}
         onVenue={(id) => openCustomer({ name: 'restaurant', id })}
         onPlan={() => openCustomer({ name: 'planForMe' })}
       />
@@ -154,7 +155,7 @@ export default function App() {
   if (screen.name === 'onboarding') return <OnboardingScreen navigate={navigate} />
   if (screen.name === 'home') return <HomeScreen initialSearch={screen.search} navigate={navigate} onVendorSwitch={() => setMode('landing')} />
   if (screen.name === 'restaurant') return <RestaurantScreen id={screen.id} navigate={navigate} />
-  if (screen.name === 'checkout') return <CheckoutScreen venueId={screen.venueId} bookingDate={screen.bookingDate} bookingTime={screen.bookingTime} navigate={navigate} />
+  if (screen.name === 'checkout') return <CheckoutScreen onRide={deferRide?()=>window.location.assign('/ride'):undefined} venueId={screen.venueId} bookingDate={screen.bookingDate} bookingTime={screen.bookingTime} navigate={navigate} />
   if (screen.name === 'reservation') return <ReservationScreen venueId={screen.venueId} navigate={navigate} />
   if (screen.name === 'transportation') return <TransportationScreen venueId={screen.venueId} bookingDetails={screen.bookingDetails} navigate={navigate} />
   if (screen.name === 'createEvent') return <CreateEventScreen restaurantId={screen.restaurantId} navigate={navigate} />

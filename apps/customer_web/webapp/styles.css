@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../../business_web";
 @font-face {
   font-family: 'Inter';
   font-style: normal;

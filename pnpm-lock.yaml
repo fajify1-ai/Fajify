@@ -204,6 +204,9 @@ importers:
 
   apps/customer_web:
     dependencies:
+      '@faji/business-web':
+        specifier: workspace:*
+        version: link:../business_web
       '@faji/web-auth':
         specifier: workspace:*
         version: link:../../packages/web_auth

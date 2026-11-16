@@ -1,2 +1,2 @@
-import {AuthPage} from '../../connected/AuthPage';
-export default function Page(){return <AuthPage mode="login"/>;}
+import Authentication from '../../unified/Authentication';
+export default function Page(){return <Authentication/>;}

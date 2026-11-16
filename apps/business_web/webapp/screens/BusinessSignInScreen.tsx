@@ -5,10 +5,14 @@ type Props = {
   onBack: () => void
   onSignIn: () => void
   onRegister: () => void
+  authenticate?: (email:string,password:string) => Promise<void>
+  onRecovery?: () => void
 }
 
-export default function BusinessSignInScreen({ onBack, onSignIn, onRegister }: Props) {
+export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, authenticate, onRecovery }: Props) {
   const [recoveryPreview, setRecoveryPreview] = useState(false)
+  const [busy,setBusy] = useState(false)
+  const [error,setError] = useState('')
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -51,15 +55,20 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister }: P
           {recoveryPreview && <p role="status" className="mb-4 text-sm">Password recovery is a preview. No email will be sent. Use any sample email and password to explore.</p>}
           <form
             className="flex flex-col gap-5"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault()
-              onSignIn()
+              if(busy)return
+              if(!authenticate){onSignIn();return}
+              setBusy(true);setError('')
+              try{await authenticate(email,password)}catch(error){setError(error instanceof Error?error.message:'Sign-in unavailable. Please retry.')}finally{setBusy(false)}
             }}
           >
             <label className="flex flex-col gap-2">
               <span className="text-xs font-bold text-[#4F4A4B]">Email address</span>
               <input
                 type="email"
+                required={!!authenticate}
+                autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@business.com"
@@ -71,7 +80,10 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister }: P
               <span className="text-xs font-bold text-[#4F4A4B]">Password</span>
               <span className="flex h-14 items-center rounded-2xl border border-[#E4E4E4] bg-[#FAFAFA] px-4 focus-within:border-[#FA3F38]">
                 <input
+                  aria-label="Password"
                   type={showPassword ? "text" : "password"}
+                  required={!!authenticate}
+                  autoComplete="current-password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Enter your password"
@@ -88,12 +100,13 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister }: P
                 <input type="checkbox" className="h-4 w-4 accent-[#FA3F38]" />
                 Remember me
               </label>
-              <button type="button" onClick={() => setRecoveryPreview(true)} className="text-xs font-bold text-[#FA3F38]">Forgot password?</button>
+              <button type="button" onClick={()=>onRecovery?onRecovery():setRecoveryPreview(true)} className="text-xs font-bold text-[#FA3F38]">Forgot password?</button>
             </div>
 
-            <button type="submit" className="mt-2 h-14 rounded-2xl bg-[#FA3F38] text-sm font-black text-white transition hover:bg-[#E9352F]">
-              Sign in to Business
+            <button type="submit" disabled={busy} className="mt-2 h-14 rounded-2xl bg-[#FA3F38] text-sm font-black text-white transition hover:bg-[#E9352F]">
+              {busy?"Please wait…":"Sign in to Business"}
             </button>
+            {error&&<p role="alert" className="text-sm text-red-700">{error}</p>}
           </form>
 
           <div className="mt-8 border-t border-[#EEEEEE] pt-7 text-center">

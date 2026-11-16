@@ -7,9 +7,13 @@ type Props = {
   initialMode: AuthMode
   onBack: () => void
   onComplete: () => void
+  authenticate?: (mode: AuthMode, form: {name:string;email:string;phone:string;password:string}) => Promise<void>
+  onRecovery?: () => void
 }
 
-export default function CustomerAuthScreen({ initialMode, onBack, onComplete }: Props) {
+export default function CustomerAuthScreen({ initialMode, onBack, onComplete, authenticate, onRecovery }: Props) {
+  const [busy,setBusy] = useState(false)
+  const [error,setError] = useState('')
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({
@@ -24,7 +28,7 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete }: 
 
   return (
     <main className="grid min-h-screen bg-white font-[family-name:var(--font-ui)] lg:grid-cols-[1.05fr_0.95fr]">
-      <p role="note" style={{position:"fixed",bottom:8,left:8,zIndex:9999,background:"white",color:"#363437",padding:"8px 12px",borderRadius:8,fontSize:12}}>Visual preview only · No account is created or signed in</p>
+      {!authenticate && <p role="note" style={{position:"fixed",bottom:8,left:8,zIndex:9999,background:"white",color:"#363437",padding:"8px 12px",borderRadius:8,fontSize:12}}>Visual preview only · No account is created or signed in</p>}
       <section className="relative hidden min-h-screen overflow-hidden bg-[#171313] lg:block">
         <img
           src="/reference/d8af0027ad38dbe5.jpg"
@@ -66,15 +70,20 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete }: 
 
           <form
             className="flex flex-col gap-4"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault()
-              onComplete()
+              if(busy)return
+              if(!authenticate){onComplete();return}
+              setBusy(true);setError('')
+              try{await authenticate(mode,form)}catch(error){setError(error instanceof Error?error.message:'Sign-in unavailable. Please retry.')}finally{setBusy(false)}
             }}
           >
             {mode === "register" && (
               <label className="flex flex-col gap-2">
                 <span className="text-xs font-bold text-[#4F4A4B]">Full name</span>
                 <input
+                  required={!!authenticate}
+                  autoComplete="name"
                   value={form.name}
                   onChange={(event) => update("name", event.target.value)}
                   placeholder="Your full name"
@@ -87,6 +96,8 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete }: 
               <span className="text-xs font-bold text-[#4F4A4B]">Email address</span>
               <input
                 type="email"
+                required={!!authenticate}
+                autoComplete="email"
                 value={form.email}
                 onChange={(event) => update("email", event.target.value)}
                 placeholder="you@email.com"
@@ -111,7 +122,12 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete }: 
               <span className="text-xs font-bold text-[#4F4A4B]">Password</span>
               <span className="flex h-14 items-center rounded-2xl border border-[#E4E4E4] bg-[#FAFAFA] px-4 focus-within:border-[#FA3F38]">
                 <input
+                  aria-label="Password"
                   type={showPassword ? "text" : "password"}
+                  required={!!authenticate}
+                  minLength={authenticate && mode==='register'?12:undefined}
+                  maxLength={128}
+                  autoComplete={mode==='signin'?'current-password':'new-password'}
                   value={form.password}
                   onChange={(event) => update("password", event.target.value)}
                   placeholder={mode === "register" ? "Create a password" : "Enter your password"}
@@ -129,13 +145,14 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete }: 
                   <input type="checkbox" className="h-4 w-4 accent-[#FA3F38]" />
                   Remember me
                 </label>
-                <button type="button" className="text-xs font-bold text-[#FA3F38]">Forgot password?</button>
+                <button type="button" onClick={onRecovery} className="text-xs font-bold text-[#FA3F38]">Forgot password?</button>
               </div>
             )}
 
-            <button type="submit" className="mt-2 h-14 rounded-2xl bg-[#FA3F38] text-sm font-black text-white transition hover:bg-[#E9352F]">
-              {mode === "signin" ? "Sign in" : "Create account"}
+            <button type="submit" disabled={busy} className="mt-2 h-14 rounded-2xl bg-[#FA3F38] text-sm font-black text-white transition hover:bg-[#E9352F]">
+              {busy?"Please wait…":mode === "signin" ? "Sign in" : "Create account"}
             </button>
+            {error&&<p role="alert" className="text-sm text-red-700">{error}</p>}
           </form>
 
           <p className="mt-6 text-center text-sm font-medium text-[#777477]">

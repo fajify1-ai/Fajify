@@ -168,7 +168,7 @@ export default function LandingScreen({ onExplore, onSearch, onGetStarted, onSig
               <span className="mt-2 block text-[#FA3F38]">You enjoy the moments.</span>
             </h1>
             <p className="mt-7 max-w-xl text-base font-medium leading-7 text-[#6F6668] sm:text-lg">
-              Find Lagos&apos; best restaurants, events and experiences in one place. Explore published places and check live availability.
+              {live?<>Find Lagos&apos; best restaurants, events and experiences in one place. Explore published places and check live availability.</>:<>Find Lagos&apos; best restaurants, events and experiences in one place. Explore freely and try every booking in this interactive preview.</>}
             </p>
             <div className="mt-8 max-w-2xl">
               <SearchPanel onExplore={onSearch ?? onExplore} />
@@ -327,7 +327,7 @@ export default function LandingScreen({ onExplore, onSearch, onGetStarted, onSig
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:px-10">
           <div>
             <BrandLogo />
-            <p className="mt-4 max-w-xs text-xs font-medium leading-5 text-[#81797A]">Lagos experiences, beautifully planned. Discover places and plan memorable moments.</p>
+            <p className="mt-4 max-w-xs text-xs font-medium leading-5 text-[#81797A]">{live?'Lagos experiences, beautifully planned. Discover places and plan memorable moments.':'Lagos experiences, beautifully planned. Book places, moments and movement in one app.'}</p>
           </div>
           <div>
             <p className="text-xs font-extrabold uppercase tracking-wider text-[#A29A9B]">Explore</p>

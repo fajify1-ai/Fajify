@@ -4,7 +4,7 @@ import { IconArrowRight, IconEdit } from '../components/Icons'
 import { IconGlyph, type IconName } from '../components/Icons'
 import { useDarkMode } from '../store/darkMode'
 
-type Props = { navigate: NavigateFn; onLogout: () => void }
+type Props = { navigate: NavigateFn; onLogout: () => void; profile?: {displayName:string} }
 
 const RED = '#FA3F38'
 
@@ -24,7 +24,7 @@ const stats = [
   { label: 'Reviews',  value: '8' },
 ]
 
-export default function ProfileScreen({ navigate, onLogout }: Props) {
+export default function ProfileScreen({ navigate, onLogout, profile }: Props) {
   const { dark } = useDarkMode()
 
   const surface  = dark ? '#1C1C1C' : '#FFFFFF'
@@ -46,15 +46,15 @@ export default function ProfileScreen({ navigate, onLogout }: Props) {
           <div className="relative">
             <img
               src="/reference/467b6b06e1735885.jpg"
-              alt="Alex Johnson"
+              alt={profile?"Illustrative profile portrait":"Alex Johnson"}
               className="h-[72px] w-[72px] rounded-full object-cover"
               style={{ border: `3px solid ${RED}` }}
             />
             <div className="absolute bottom-0 right-0 h-[18px] w-[18px] rounded-full border-2 border-white bg-[#22c55e]" />
           </div>
           <div className="flex-1">
-            <h1 className="m-0 text-[22px] font-black tracking-[-0.03em]" style={{ color: ink }}>Alex Johnson</h1>
-            <p className="mt-0.5 text-[13px]" style={{ color: muted }}>alexjohnson@email.com</p>
+            <h1 className="m-0 text-[22px] font-black tracking-[-0.03em]" style={{ color: ink }}>{profile?.displayName??'Alex Johnson'}</h1>
+            <p className="mt-0.5 text-[13px]" style={{ color: muted }}>{profile?'Manage your account securely':'alexjohnson@email.com'}</p>
             <span className="mt-1.5 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white" style={{ background: RED }}>
               fajify Member
             </span>
@@ -71,7 +71,7 @@ export default function ProfileScreen({ navigate, onLogout }: Props) {
           style={{ background: dark ? '#2A2A2A' : '#F8F8F8', borderColor: border }}>
           {stats.map(s => (
             <div key={s.label} className="py-4 text-center" style={{ borderColor: border }}>
-              <p className="m-0 text-[24px] font-black" style={{ color: RED }}>{s.value}</p>
+              <p className="m-0 text-[24px] font-black" style={{ color: RED }}>{profile?'—':s.value}</p>
               <p className="m-0 mt-0.5 text-[11px] font-semibold" style={{ color: muted }}>{s.label}</p>
             </div>
           ))}
@@ -99,7 +99,7 @@ export default function ProfileScreen({ navigate, onLogout }: Props) {
                 <IconGlyph name={item.icon as IconName} size={20} color={RED} />
               </div>
               <span className="flex-1 text-[14px] font-semibold" style={{ color: ink }}>{item.label}</span>
-              {item.badge && (
+              {!profile && item.badge && (
                 <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full text-[11px] font-bold text-white"
                   style={{ background: RED }}>
                   {item.badge}

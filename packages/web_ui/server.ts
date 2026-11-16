@@ -3,12 +3,12 @@ import { authConfiguration, authCookies } from '@faji/web-auth/config';
 import type { NextRequest } from 'next/server';
 import rules from './routes.json';
 
-export function allowedRoute(path:string,method:string,audience:'customer'|'business') {
+export function allowedRoute(path:string,method:string,audience:'customer'|'business'|'unified') {
   if (!/^[A-Za-z0-9_/-]+$/.test(path) || path.includes('//')) return false;
-  return rules.some(rule => (rule.audience===audience||rule.audience==='both') && rule.method===method && new RegExp('^'+rule.path.replace(/\{[^}]+\}/g,'[A-Za-z0-9_-]+')+'$').test(path));
+  return rules.some(rule => (rule.audience===audience||rule.audience==='both'||(audience==='unified'&&(rule.audience==='customer'||rule.audience==='business'))) && rule.method===method && new RegExp('^'+rule.path.replace(/\{[^}]+\}/g,'[A-Za-z0-9_-]+')+'$').test(path));
 }
 /** Same-origin, fixed upstream BFF. NestJS remains the authorization authority. */
-export async function platformProxy(request:NextRequest,audience:'customer'|'business') {
+export async function platformProxy(request:NextRequest,audience:'customer'|'business'|'unified') {
  const responseHeaders={'cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'};
  const path=request.nextUrl.pathname.replace(/^\/api\/platform\//,'');
  if(!allowedRoute(path,request.method,audience))return Response.json({message:'This operation is unavailable.'},{status:404,headers:responseHeaders});
