@@ -1,0 +1,2 @@
+PASS original Notifications screen marks real notification read; state persists after reload
+PASS real authorized receipt preview and browser download

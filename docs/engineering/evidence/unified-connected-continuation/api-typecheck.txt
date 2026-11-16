@@ -1,0 +1,2 @@
+> @faji/api@0.1.0 typecheck /workspace/Fajify-unified/apps/api
+> tsc --noEmit

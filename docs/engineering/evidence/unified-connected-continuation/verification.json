@@ -1,0 +1,75 @@
+{
+  "applicationSourceCommit": "f1f0a797184967b652ef53e0918dcbf4d0970e2d",
+  "branch": "integration/unified-application-preservation",
+  "result": "verified partial implementation; mandatory consolidation gates NOT met",
+  "unitAndComponentPasses": 197,
+  "disposableDatabasePasses": 7,
+  "testCounts": {
+    "api-unit": 176,
+    "web-db": 7,
+    "customer-test": 9,
+    "business-test": 1,
+    "auth-test": 5,
+    "bridge-test": 6
+  },
+  "builds": {
+    "unifiedNextHostIncludingBusinessFeature": "passed",
+    "NestJS": "passed",
+    "standaloneBusinessNext": "not rerun; public app uses unified host"
+  },
+  "lintAndTypecheck": [
+    "customer web",
+    "business feature workspace",
+    "NestJS"
+  ],
+  "browserChecks": [
+    "real Better Auth registration/logout/shared sessions and merchant denial",
+    "eight original onboarding steps; invalid contact; failed-save retry; draft reload; pending application recovery",
+    "demo checkout/payout pending/failure/retry/success with zero platform/provider requests",
+    "original Notifications real read mutation and reload; authorized browser receipt download",
+    "merchant media and split-hours controls; real report at 390/768/1440; scoped notifications/support"
+  ],
+  "sampledAccessibilityRoutes": [
+    {
+      "route": "/",
+      "violations": []
+    },
+    {
+      "route": "/login",
+      "violations": []
+    },
+    {
+      "route": "/ride",
+      "violations": []
+    },
+    {
+      "route": "/customer#planForMe",
+      "violations": []
+    },
+    {
+      "route": "/demo-checkout",
+      "violations": []
+    },
+    {
+      "route": "/business/demo-payout",
+      "violations": []
+    },
+    {
+      "route": "/customer#notifications",
+      "violations": []
+    },
+    {
+      "route": "/business/dashboard#onboarding",
+      "violations": []
+    }
+  ],
+  "native": {
+    "flutterAnalyze": "BLOCKED: SDK absent",
+    "widgetTests": "BLOCKED: SDK absent",
+    "androidBuild": "BLOCKED: Flutter and Android SDK absent; filesystem constrained",
+    "nativeVisualEvidence": "NOT captured; no web substitutes"
+  },
+  "visualAcceptance": "partial connected evidence only; previous seven differences and full-state comparisons remain open",
+  "liveProviderCalls": 0,
+  "protectedContinuationTrackedPatchSha256": "fd5c2054733a973f3ad264c61b7bdfab661bc02dc42f1ed27740001ef9b40809"
+}

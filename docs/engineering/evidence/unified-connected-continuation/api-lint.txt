@@ -1,0 +1,2 @@
+> @faji/api@0.1.0 lint /workspace/Fajify-unified/apps/api
+> eslint src --max-warnings=0

@@ -1,5 +1,7 @@
 # Customer and Business web integration — review build
 
+**2026-11-16 connected continuation:** [Implementation, screen status, evidence and remaining gates](UNIFIED_CONTINUATION_CHECKPOINT.md). This supersedes older outstanding-work statements for the recovered draft/receipt/reporting contracts and PR #30 reconciliation. Web and Flutter consolidation remain unaccepted.
+
 **Current implementation:** [Unified application implementation checkpoints](UNIFIED_APPLICATION_IMPLEMENTATION.md) on draft PR #31. The PR #28 report below remains historical provenance, not a claim about the unified branch's current completion.
 
 ## Status and provenance

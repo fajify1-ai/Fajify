@@ -1,0 +1,3 @@
+PASS real merchant media editor and multi-interval controls reachable
+PASS authorized merchant report and responsive layout
+PASS connected merchant notifications and support

@@ -1,0 +1,2 @@
+> @faji/business-web@0.1.0 typecheck /workspace/Fajify-unified/apps/business_web
+> tsc --noEmit

@@ -1,0 +1,2 @@
+> @faji/web-ui@0.1.0 check:routes /workspace/Fajify-unified/packages/web_ui
+> node scripts/routes.mjs --check
