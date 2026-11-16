@@ -257,5 +257,7 @@
     "packages/web_auth/security.tsx": "0f8c7241d39addde43fdad9563fb56ed5c62f43d78fec4c909c45b69b9022895",
     "packages/web_auth/server.ts": "6455bee080e64ccc18f72d94b688d64b72dbffef29dc297ab8ecae391d6b0fa2",
     "packages/web_auth/test/proxy.test.ts": "0315607d80fce0951e780e0d9e997930c2ee64e4e981928e915245c56e7d2e2b"
-  }
+  },
+  "implementationCommit": "2f466eee171fac6abfaa5dfcc2e5b25ecb20e7a3",
+  "pullRequest": "https://github.com/fajify1-ai/Fajify/pull/28"
 }

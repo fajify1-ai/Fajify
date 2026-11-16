@@ -5,6 +5,8 @@
 This branch recovers both prior design implementations and integrates the available Customer and Business contracts. **This is a review build, not a claim that every Milestone 2–8 feature is production ready.** Missing contracts and remaining UI limitations are listed below. No deployment, main merge, Azure change, mobile change or Admin implementation is included.
 
 - Integration branch: `integration/customer-business-web-completion`.
+- Verified implementation commit: `2f466eee171fac6abfaa5dfcc2e5b25ecb20e7a3`.
+- Draft review PR: https://github.com/fajify1-ai/Fajify/pull/28 (do not merge as a full Milestone 2–8 release; see remaining work).
 - Fetched base: `813ff1d25eff8eebb1063a0bca3aeb74a129fc41` (`origin/main`, Better Auth finalization / PR #27).
 - Customer source: `feat/fajify-webapp-ui`, `ec3405fbae86feb427d3426c78de06e674c9a465`, `/workspace/Fajify`.
 - Business source: `feat/fajify-business-webapp-ui`, `b496c5297ccce13c550e0ffc54d1f021744fe60d`, `/workspace/Fajify-business`.
