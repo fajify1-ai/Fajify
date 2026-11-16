@@ -1,5 +1,5 @@
 'use client';
-import { useEffect,useState,useCallback,type ReactNode } from 'react';
+import { useEffect,useState,useCallback,useRef,type ReactNode } from 'react';
 export class PlatformError extends Error { constructor(message:string,public status:number){super(message);} }
 export async function platform<T>(path:string,body?:unknown,method=body===undefined?'GET':'POST'):Promise<T>{
  const response=await fetch('/api/platform/'+path,{method,credentials:'same-origin',cache:'no-store',headers:{'content-type':'application/json'},...(body===undefined?{}:{body:JSON.stringify(body)})});
@@ -25,3 +25,17 @@ export function Action({label,run,onSuccess,disabled=false}:{label:string;run:()
  const [busy,setBusy]=useState(false),[error,setError]=useState('');
  return <div><button className="faji-primary" disabled={disabled||busy} onClick={async()=>{setBusy(true);setError('');try{await run();onSuccess?.();}catch(e){setError(e instanceof Error?e.message:'Unable to complete.');}finally{setBusy(false);}}}>{busy?'Please wait…':label}</button>{error&&<p role="alert">{error}</p>}</div>;
 }
+
+/** Append contract pages while discarding requests from an earlier filter or identity view. */
+export function usePages<T extends {items:unknown[];nextOffset?:number|null}>(path:string|null,unwrapData=false){
+ const [data,setData]=useState<T|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(!!path),[loadingMore,setLoadingMore]=useState(false),[revision,setRevision]=useState(0);
+ const generation=useRef(0),busy=useRef(false);
+ useEffect(()=>{const current=++generation.current;busy.current=false;setData(null);setError('');setLoadingMore(false);if(!path){setLoading(false);return;}setLoading(true);fetchPage<T>(unwrapData,path+(path.includes('?')?'&':'?')+'limit=20&offset=0').then(value=>{if(current===generation.current)setData(value);}).catch(error=>{if(current===generation.current)setError(error instanceof Error?error.message:'Unable to load.');}).finally(()=>{if(current===generation.current)setLoading(false);});return()=>{generation.current++;};},[path,revision,unwrapData]);
+ async function loadMore(){if(!path||busy.current||data?.nextOffset==null)return;busy.current=true;setLoadingMore(true);setError('');const current=generation.current;try{const next=await fetchPage<T>(unwrapData,path+(path.includes('?')?'&':'?')+`limit=20&offset=${data.nextOffset}`);if(current===generation.current)setData(previous=>previous?{...next,items:uniquePageItems([...previous.items,...next.items])} as T:next);}catch(error){if(current===generation.current)setError(error instanceof Error?error.message:'Unable to load more.');}finally{if(current===generation.current){busy.current=false;setLoadingMore(false);}}}
+ return {data,error,loading,loadingMore,hasMore:data?.nextOffset!=null,loadMore,reload:useCallback(()=>setRevision(value=>value+1),[])};
+}
+export function More({resource}:{resource:{hasMore:boolean;loadingMore:boolean;loadMore:()=>void}}){return resource.hasMore?<div className="connection-state"><button className="faji-outline" disabled={resource.loadingMore} onClick={resource.loadMore}>{resource.loadingMore?'Loading more…':'Load more'}</button></div>:null;}
+
+async function fetchPage<T>(unwrap:boolean,path:string):Promise<T>{const result=await platform<T|{data:T}>(path);return unwrap?(result as {data:T}).data:result as T;}
+
+function uniquePageItems(items:unknown[]){const seen=new Set<unknown>();return items.filter(item=>{if(!item||typeof item!=='object'||!('id' in item))return true;if(seen.has(item.id))return false;seen.add(item.id);return true;});}

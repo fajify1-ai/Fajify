@@ -50,6 +50,6 @@ test('legacy Customer deep links remain on-origin and keep planning screens sepa
 
 
 test('shared security retains merchant navigation and disables delivery controls without removing authenticator MFA',()=>{
- const html=renderToStaticMarkup(React.createElement(SecuritySettings,{deliveryDeferred:true,workspaceHref:'/business/dashboard'}));
+ const html=renderToStaticMarkup(React.createElement<NonNullable<React.ComponentProps<typeof SecuritySettings>>>(SecuritySettings,{deliveryDeferred:true,workspaceHref:'/business/dashboard'}));
  assert.match(html,/href="\/business\/dashboard"/);assert.match(html,/href="\/business\/login"/);assert.match(html,/Enroll authenticator/);assert.match(html,/disabled=""[^>]*>Send phone OTP/);
 });

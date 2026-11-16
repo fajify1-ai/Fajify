@@ -234,8 +234,8 @@ export default function PlanForMeScreen({ navigate, recommend, onBook }: Props) 
   const bg       = dark ? '#0F0F0F' : '#F8F8F8'
   const surface  = dark ? '#1C1C1C' : '#FFFFFF'
   const ink      = dark ? '#F0F0F0' : '#1A1A1A'
-  const muted    = dark ? '#888' : '#999'
-  const sub      = dark ? '#666' : '#AAA'
+  const muted    = recommend ? (dark ? '#AAA' : '#666') : (dark ? '#888' : '#999')
+  const sub      = recommend ? (dark ? '#AAA' : '#666') : (dark ? '#666' : '#AAA')
   const border   = dark ? '#2A2A2A' : '#F0EDED'
   const cardBg   = dark ? '#1A1A1A' : '#FAFAFA'
   const lightRed = dark ? '#2A1010' : '#FFF1F0'

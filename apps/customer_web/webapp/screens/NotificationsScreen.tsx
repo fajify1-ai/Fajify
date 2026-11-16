@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react'
 import type { NavigateFn } from '../App'
 import BottomNav from '../components/BottomNav'
 import { IconGear, IconGlyph, type IconName } from '../components/Icons'
 import { useDarkMode } from '../store/darkMode'
 
-type Props = { navigate: NavigateFn }
+export type NotificationCard={id:string;title:string;body:string;time:string;read:boolean};
+type Props = { navigate: NavigateFn; liveItems?: NotificationCard[]; onRead?:(id:string)=>void; status?:ReactNode; pagination?:ReactNode }
 
 const notifications = {
   Today: [
@@ -22,13 +24,13 @@ const notifications = {
   ],
 }
 
-export default function NotificationsScreen({ navigate }: Props) {
+export default function NotificationsScreen({ navigate, liveItems, onRead, status, pagination }: Props) {
   const { dark } = useDarkMode()
 
   const bg      = dark ? '#0F0F0F' : '#F8F8F8'
   const surface = dark ? '#1C1C1C' : '#FFFFFF'
   const ink     = dark ? '#F0F0F0' : '#1F1F1F'
-  const muted   = dark ? '#888' : '#777477'
+  const muted   = liveItems!==undefined ? (dark ? '#AAA' : '#666') : (dark ? '#888' : '#777477')
   const border  = dark ? '#2A2A2A' : '#E8E8E8'
 
   return (
@@ -41,14 +43,15 @@ export default function NotificationsScreen({ navigate }: Props) {
           </button>
           <h1 className="text-[24px] font-black md:text-[32px]" style={{ color: ink }}>Notifications</h1>
         </div>
-        <button onClick={() => navigate({ name: 'settings' })}
+        <button aria-label="Notification settings" onClick={() => navigate({ name: 'settings' })}
           style={{ width: 38, height: 38, borderRadius: '50%', background: dark ? '#2A2A2A' : '#F3F3F3', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <IconGear size={18} color={ink} />
         </button>
       </div>
 
       <div className="w-full px-5 pb-28 pt-6 md:px-10 lg:px-16">
-        {Object.entries(notifications).map(([period, items]) => (
+        {status}
+        {Object.entries(liveItems===undefined?notifications:{'Your notifications':liveItems.map(item=>({icon:'ticket',color:'#FA3F38',bg:'#FFF2F1',darkBg:'#2A1010',...item}))}).map(([period, items]) => (
           <div key={period} style={{ marginBottom: 24 }}>
             <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: muted }}>{period}</p>
             <div className="flex flex-col gap-3">
@@ -63,15 +66,17 @@ export default function NotificationsScreen({ navigate }: Props) {
                       <span style={{ fontSize: 10, color: muted, whiteSpace: 'nowrap' }}>{n.time}</span>
                     </div>
                     <p style={{ margin: 0, fontSize: 12, color: muted, lineHeight: 1.5 }}>{n.body}</p>
+                    {'id' in n && typeof n.id==='string' && 'read' in n && !n.read && <button className="faji-outline mt-3" onClick={()=>onRead?.(String(n.id))}>Mark as read</button>}
                   </div>
                 </div>
               ))}
             </div>
           </div>
         ))}
+        {pagination}
       </div>
 
-      <BottomNav active="home" navigate={navigate} />
+      <BottomNav highContrast={liveItems!==undefined} active="home" navigate={navigate} />
     </div>
   )
 }

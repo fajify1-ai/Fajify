@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useDarkMode } from '../store/darkMode'
 
-type Props = { onComplete: (draft?: {businessName:string}) => void | Promise<void>; onBack: () => void; connected?: boolean; submitting?: boolean }
+export type OnboardingDraft={step:number;businessName:string;fields?:string};
+type Props = { onComplete: (draft?: {businessName:string}) => void | Promise<void>; onBack: () => void; connected?: boolean; submitting?: boolean; initialDraft?: OnboardingDraft; onDraftChange?: (draft:OnboardingDraft)=>void }
 
 const AMBER = '#F59E0B'
 
@@ -97,7 +98,7 @@ function DummyMap({ accent, dark, height = 160 }: { accent: string; dark: boolea
 
 // ── StepHeader — module-level so React never unmounts it on state change ──────
 
-function StepHeader({ step, s, onPrev }: { step: number; s: S; onPrev: () => void }) {
+function StepHeader({ step, s, onPrev, connected = false }: { step: number; s: S; onPrev: () => void; connected?:boolean }) {
   return (
     <div className="sticky top-0 z-10 px-5 pt-14 pb-4" style={{ background: s.bg }}>
       <div className="flex items-center gap-2 mb-5">
@@ -117,7 +118,7 @@ function StepHeader({ step, s, onPrev }: { step: number; s: S; onPrev: () => voi
           {step}/{TOTAL_STEPS}
         </span>
       </div>
-      <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: AMBER }}>
+      <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: connected ? (s.dark ? '#FBBF24' : '#8C5200') : AMBER }}>
         {STEP_LABELS[step - 1]}
       </p>
     </div>
@@ -147,13 +148,13 @@ function Field({ label, value, onChange, placeholder, type = 'text', s }: {
 
 // ── Continue button (module-level so it doesn't remount on state change) ──────
 
-function Cta({ label, action, disabled, bg }: { label: string; action: () => void; disabled: boolean; bg: string }) {
+function Cta({ label, action, disabled, bg, connected = false }: { label: string; action: () => void; disabled: boolean; bg: string; connected?:boolean }) {
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 pb-10 pt-3 md:max-w-[720px]"
       style={{ background: bg }}>
       <button onClick={action} disabled={disabled}
         className="w-full rounded-[18px] py-4 text-[15px] font-black text-white transition-opacity"
-        style={{ background: AMBER, opacity: disabled ? 0.35 : 1 }}>
+        style={{ background: AMBER, color:connected ? '#1A1A1A' : '#fff', opacity: disabled ? 0.35 : 1 }}>
         {label}
       </button>
     </div>
@@ -162,26 +163,29 @@ function Cta({ label, action, disabled, bg }: { label: string; action: () => voi
 
 // ── Main screen ───────────────────────────────────────────────────────────────
 
-export default function BusinessOnboardingScreen({ onComplete, onBack, connected = false, submitting = false }: Props) {
+export default function BusinessOnboardingScreen({ onComplete, onBack, connected = false, submitting = false, initialDraft, onDraftChange }: Props) {
   const { dark } = useDarkMode()
 
-  const [step, setStep] = useState(1)
+  const fields=JSON.parse(initialDraft?.fields??'{}') as Record<string,string|string[]>;
+  const [step, setStep] = useState(initialDraft?.step??1)
 
-  const [category,    setCategory]    = useState('')
-  const [services,    setServices]    = useState<string[]>([])
-  const [scale,       setScale]       = useState('')
-  const [fullName,    setFullName]    = useState('')
-  const [email,       setEmail]       = useState('')
-  const [phone,       setPhone]       = useState('')
-  const [bizName,     setBizName]     = useState('')
-  const [regNum,      setRegNum]      = useState('')
-  const [bizAddr,     setBizAddr]     = useState('')
+  const [category,    setCategory]    = useState(String(fields.category??''))
+  const [services,    setServices]    = useState<string[]>(Array.isArray(fields.services)?fields.services:[])
+  const [scale,       setScale]       = useState(String(fields.scale??''))
+  const [fullName,    setFullName]    = useState(String(fields.fullName??''))
+  const [email,       setEmail]       = useState(String(fields.email??''))
+  const [phone,       setPhone]       = useState(String(fields.phone??''))
+  const [bizName,     setBizName]     = useState(initialDraft?.businessName??'')
+  const [regNum,      setRegNum]      = useState(String(fields.regNum??''))
+  const [bizAddr,     setBizAddr]     = useState(String(fields.bizAddr??''))
   const [idType,      setIdType]      = useState('')
   const [idUploaded,  setIdUploaded]  = useState(false)
   const [faceScanned, setFaceScanned] = useState(false)
-  const [city,        setCity]        = useState('Lagos')
-  const [lga,         setLga]         = useState('')
-  const [landmark,    setLandmark]    = useState('')
+  const [city,        setCity]        = useState(String(fields.city??'Lagos'))
+  const [lga,         setLga]         = useState(String(fields.lga??''))
+  const [landmark,    setLandmark]    = useState(String(fields.landmark??''))
+
+  useEffect(()=>{onDraftChange?.({step,businessName:bizName,fields:JSON.stringify({category,services,scale,fullName,email,phone,regNum,bizAddr,city,lga,landmark})});},[step,bizName,category,services,scale,fullName,email,phone,regNum,bizAddr,city,lga,landmark,onDraftChange]);
 
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -189,7 +193,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
     bg:      dark ? '#080808' : '#F8F8F8',
     surface: dark ? '#1A1A1A' : '#FFFFFF',
     ink:     dark ? '#F0F0F0' : '#1A1A1A',
-    muted:   dark ? '#777'    : '#888888',
+    muted:   connected ? (dark ? '#AAA' : '#666666') : (dark ? '#777' : '#888888'),
     border:  dark ? '#2A2A2A' : '#EEEEEE',
     inputBg: dark ? '#222'    : '#F4F4F6',
     subBg:   dark ? '#141414' : '#F0F0F4',
@@ -199,14 +203,14 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
   const toggleService = (id: string) =>
     setServices(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
 
-  const canAdvance = () => {
-    if (step === 1) return !!category
-    if (step === 2) return services.length > 0
-    if (step === 3) return !!scale
-    if (step === 4) return !!(fullName.trim() && email.trim() && phone.trim())
-    if (step === 5) return !!(bizName.trim() && bizAddr.trim())
-    if (step === 6) return connected || !!(idType && idUploaded && faceScanned)
-    if (step === 7) return !!lga.trim()
+  const canAdvance = (current = step) => {
+    if (current === 1) return !!category
+    if (current === 2) return services.length > 0
+    if (current === 3) return !!scale
+    if (current === 4) return fullName.trim().length >= 2 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) && /^[+()\d\s-]{7,30}$/.test(phone.trim())
+    if (current === 5) return bizName.trim().length >= 2 && bizName.trim().length <= 120 && !!bizAddr.trim()
+    if (current === 6) return connected || !!(idType && idUploaded && faceScanned)
+    if (current === 7) return !!lga.trim()
     return true
   }
 
@@ -216,7 +220,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
   const wrap = (children: React.ReactNode) => (
     <div className="business-onboarding min-h-screen w-full font-[family-name:var(--font-ui)]"
       style={{ background: s.bg }}>
-      <StepHeader step={step} s={s} onPrev={prev} />
+      <StepHeader connected={connected} step={step} s={s} onPrev={prev} />
       {children}
     </div>
   )
@@ -244,7 +248,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
           </button>
         ))}
       </div>
-      <Cta label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
+      <Cta connected={connected} label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
     </>
   )
 
@@ -283,7 +287,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
           )
         })}
       </div>
-      <Cta label={`Continue — ${services.length} selected`} action={next} disabled={!canAdvance()} bg={s.bg} />
+      <Cta connected={connected} label={`Continue — ${services.length} selected`} action={next} disabled={!canAdvance()} bg={s.bg} />
     </>
   )
 
@@ -306,7 +310,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
             }}>
             <p className="text-[28px]">{sc.emoji}</p>
             <div className="flex-1">
-              <p className="text-[15px] font-black" style={{ color: scale === sc.id ? AMBER : s.ink }}>{sc.label}</p>
+              <p className="text-[15px] font-black" style={{ color: scale === sc.id ? (connected ? (dark ? '#FBBF24' : '#8C5200') : AMBER) : s.ink }}>{sc.label}</p>
               <p className="text-[12px] mt-0.5" style={{ color: s.muted }}>{sc.sub}</p>
             </div>
             {scale === sc.id && (
@@ -319,7 +323,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
           </button>
         ))}
       </div>
-      <Cta label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
+      <Cta connected={connected} label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
     </>
   )
 
@@ -338,11 +342,11 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
         <Field label="Phone Number"  value={phone}    onChange={setPhone}    placeholder="+234 801 234 5678" type="tel"   s={s} />
         <div className="rounded-[16px] p-4" style={{ background: s.subBg, border: `1px solid ${s.border}` }}>
           <p className="text-[12px] font-medium leading-relaxed" style={{ color: s.muted }}>
-            Preview only. No verification email will be sent; use sample contact details.
+            {connected ? 'Contact details are saved privately. Email and SMS delivery are deferred; no verification message is sent.' : 'Preview only. No verification email will be sent; use sample contact details.'}
           </p>
         </div>
       </div>
-      <Cta label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
+      <Cta connected={connected} label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
     </>
   )
 
@@ -367,7 +371,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
             style={{ background: AMBER + '12', border: `1.5px solid ${AMBER}40` }}>
             <p className="text-[22px]">{CATEGORIES.find(c => c.id === category)?.emoji}</p>
             <div>
-              <p className="text-[14px] font-black" style={{ color: AMBER }}>
+              <p className="text-[14px] font-black" style={{ color: connected ? (s.dark ? '#FBBF24' : '#8C5200') : AMBER }}>
                 {CATEGORIES.find(c => c.id === category)?.label}
               </p>
               <button onClick={() => setStep(1)} className="text-[11px] font-medium" style={{ color: s.muted }}>
@@ -377,7 +381,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
           </div>
         </div>
       </div>
-      <Cta label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
+      <Cta connected={connected} label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
     </>
   )
 
@@ -475,7 +479,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
           </p>
         </div>
       </div>
-      <Cta label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
+      <Cta connected={connected} label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
     </>
   )
 
@@ -510,7 +514,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
                 className="rounded-full px-4 py-2 text-[12px] font-bold transition-all"
                 style={{
                   background: city === c ? AMBER : s.surface,
-                  color: city === c ? '#fff' : s.ink,
+                  color: city === c ? (connected ? '#1A1A1A' : '#fff') : s.ink,
                   border: `1.5px solid ${city === c ? AMBER : s.border}`,
                 }}>
                 {c}
@@ -522,7 +526,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
         <Field label="LGA / Area"        value={lga}      onChange={setLga}      placeholder="e.g. Victoria Island, Lekki Phase 1" s={s} />
         <Field label="Closest Landmark"  value={landmark} onChange={setLandmark} placeholder="e.g. Near Eko Hotel"                 s={s} />
       </div>
-      <Cta label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
+      <Cta connected={connected} label="Continue" action={next} disabled={!canAdvance()} bg={s.bg} />
     </>
   )
 
@@ -556,7 +560,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
               <p className="text-[13px] font-semibold leading-snug" style={{ color: s.ink }}>{row.content}</p>
             </div>
             <button onClick={() => setStep(row.step)}
-              className="text-[11px] font-black shrink-0 mt-0.5" style={{ color: AMBER }}>
+              className="text-[11px] font-black shrink-0 mt-0.5" style={{ color: connected ? (s.dark ? '#FBBF24' : '#8C5200') : AMBER }}>
               Edit
             </button>
           </div>
@@ -564,16 +568,16 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
 
         <div className="rounded-[18px] p-4" style={{ background: AMBER + '10', border: `1px solid ${AMBER}30` }}>
           <p className="text-[12px] font-medium leading-relaxed" style={{ color: s.ink }}>
-            {connected ? 'Submitting sends your business name for approval. Contact, location and service details above remain an unsent draft until the onboarding contract supports them. No verification or approval is implied.' : 'Local preview only. Submitting opens the merchant demo without sending an application or email.'}
+            {connected ? 'Submitting sends your business name for approval. Contact, location and service details above are saved privately in your onboarding draft. No verification or approval is implied.' : 'Local preview only. Submitting opens the merchant demo without sending an application or email.'}
           </p>
         </div>
       </div>
 
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 pb-10 pt-3 md:max-w-[720px]"
         style={{ background: s.bg }}>
-        <button disabled={submitting} onClick={() => onComplete({businessName:bizName})}
+        <button disabled={submitting} onClick={() => {if(connected){for(let current=1;current<8;current++){if(!canAdvance(current)){setStep(current);return;}}}void onComplete({businessName:bizName});}}
           className="w-full rounded-[18px] py-4 text-[15px] font-black text-white"
-          style={{ background: AMBER, boxShadow: '0 8px 32px rgba(245,158,11,0.3)' }}>
+          style={{ background: AMBER, color:connected ? '#1A1A1A' : '#fff', boxShadow: '0 8px 32px rgba(245,158,11,0.3)' }}>
           {submitting ? 'Submitting…' : 'Submit Application'}
         </button>
         <p className="text-center text-[11px] mt-3" style={{ color: s.muted }}>

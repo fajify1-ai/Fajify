@@ -1,3 +1,8 @@
 @import "@faji/web-ui/styles.css";
 .connected > .faji-tabs {position:sticky;top:0;z-index:150;background:white;border-bottom:1px solid #eee;}
 .connected > main > header.fixed {top:77px;}
+
+/* Connected credential text meets AA contrast; reference-preview colors stay intact. */
+[data-connected-auth] [class*="text-[#FA3F38]"]{color:#C82924}
+[data-connected-auth] [class*="bg-[#FA3F38]"]{background-color:#D92D27}
+[data-connected-auth] [class*="text-[#999]"],[data-connected-auth] [class*="text-[#777477]"]{color:#6B686B}

@@ -18,3 +18,4 @@
 @media(prefers-reduced-motion:no-preference){.faji-primary,.faji-outline {transition:transform 160ms,background-color 160ms;}.faji-primary:active,.faji-outline:active{transform:scale(.98);}}
 
 .connection-state a.faji-primary{color:#fff;text-decoration:none;}
+.demo-layout{min-height:100vh;display:grid}.demo-art{display:none}.demo-layout>.connection-state{width:100%;align-content:center;margin:0;max-width:none}.demo-layout .faji-card{width:100%;max-width:480px}.demo-art img{width:100%;height:100%;object-fit:cover;opacity:.65}.demo-root .demo-art{position:relative;background:#171717}.demo-art p{position:absolute;bottom:48px;left:40px;right:40px;color:white;font-size:42px;font-weight:800;line-height:1.1}@media(min-width:1024px){.demo-layout{grid-template-columns:1fr 1fr}.demo-art{display:block}.demo-layout>.connection-state{padding:40px}}

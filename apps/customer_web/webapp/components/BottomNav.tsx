@@ -8,6 +8,7 @@ export type ActiveTab = 'home' | 'search' | 'cart' | 'dashboard' | 'profile'
 type Props = {
   active: ActiveTab
   navigate: NavigateFn
+  highContrast?: boolean
 }
 
 type IconProps = { active: boolean; inactiveColor: string }
@@ -69,10 +70,11 @@ function formatShort(n: number) {
   return '₦' + n
 }
 
-export default function BottomNav({ active, navigate }: Props) {
+export default function BottomNav({ active, navigate, highContrast = false }: Props) {
   const { dark } = useDarkMode()
   const cart = useCart()
-  const inactiveColor = dark ? '#888888' : '#9A9A9A'
+  const inactiveColor = highContrast ? (dark ? '#AAA' : '#666') : (dark ? '#888888' : '#9A9A9A')
+  const activeText = highContrast ? (dark ? '#FF807A' : '#C82924') : '#FA3F38'
   const isCartActive = active === 'cart'
 
   const left = sideTabs.slice(0, 2)
@@ -106,7 +108,7 @@ export default function BottomNav({ active, navigate }: Props) {
         return (
           <button key={key} onClick={() => navigate(screen)} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '4px 0 3px', background: 'none', border: 'none', cursor: 'pointer' }}>
             <Icon active={isActive} inactiveColor={inactiveColor} />
-            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? '#FA3F38' : inactiveColor, letterSpacing: '0.01em' }}>{label}</span>
+            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? activeText : inactiveColor, letterSpacing: '0.01em' }}>{label}</span>
           </button>
         )
       })}
@@ -156,7 +158,7 @@ export default function BottomNav({ active, navigate }: Props) {
         return (
           <button key={key} onClick={() => navigate(screen)} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '4px 0 3px', background: 'none', border: 'none', cursor: 'pointer' }}>
             <Icon active={isActive} inactiveColor={inactiveColor} />
-            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? '#FA3F38' : inactiveColor, letterSpacing: '0.01em' }}>{label}</span>
+            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? activeText : inactiveColor, letterSpacing: '0.01em' }}>{label}</span>
           </button>
         )
       })}

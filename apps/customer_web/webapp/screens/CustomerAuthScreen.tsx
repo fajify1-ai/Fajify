@@ -27,7 +27,7 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
     setForm((current) => ({ ...current, [field]: value }))
 
   return (
-    <main className="grid min-h-screen bg-white font-[family-name:var(--font-ui)] lg:grid-cols-[1.05fr_0.95fr]">
+    <main data-connected-auth={authenticate ? true : undefined} className="grid min-h-screen bg-white font-[family-name:var(--font-ui)] lg:grid-cols-[1.05fr_0.95fr]">
       {!authenticate && <p role="note" style={{position:"fixed",bottom:8,left:8,zIndex:9999,background:"white",color:"#363437",padding:"8px 12px",borderRadius:8,fontSize:12}}>Visual preview only · No account is created or signed in</p>}
       <section className="relative hidden min-h-screen overflow-hidden bg-[#171313] lg:block">
         <img
