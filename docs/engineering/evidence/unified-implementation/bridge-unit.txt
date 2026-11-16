@@ -1,0 +1,17 @@
+
+> @faji/web-ui@0.1.0 test /workspace/Fajify-unified/packages/web_ui
+> node --conditions=react-server --import tsx --test test/*.test.ts
+
+✔ contract allowlist isolates merchant, customer and deferred products (3.394155ms)
+✔ bridge only forwards session cookies to fixed API and preserves query (7.070082ms)
+✔ mutations reject untrusted origins and oversized payloads before fetch (1.737817ms)
+✔ upstream failures, redirects and permission errors never expose internals (6.675262ms)
+✔ unified bridge accepts both product contracts and preserves server denials (1.454731ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 409.743015

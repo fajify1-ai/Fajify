@@ -1,0 +1,43 @@
+
+> @faji/business-web@0.1.0 build /workspace/Fajify-unified/apps/business_web
+> next build
+
+   ▲ Next.js 15.5.28
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 6.6s
+   Linting and checking validity of types ...
+
+ ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
+   Collecting page data ...
+   Generating static pages (0/11) ...
+   Generating static pages (2/11) 
+   Generating static pages (5/11) 
+   Generating static pages (8/11) 
+ ✓ Generating static pages (11/11)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      134 B         102 kB
+├ ○ /_not-found                            987 B         103 kB
+├ ○ /access-denied                          2 kB         117 kB
+├ ƒ /account-security                    2.93 kB         118 kB
+├ ƒ /api/auth/[...all]                     134 B         102 kB
+├ ƒ /api/platform/[...path]                134 B         102 kB
+├ ƒ /dashboard                           11.4 kB         126 kB
+├ ○ /login                               2.02 kB         117 kB
+├ ○ /phone-login                         2.02 kB         117 kB
+├ ○ /phone-recovery                      2.02 kB         117 kB
+├ ○ /recover                             2.02 kB         117 kB
+├ ○ /register                            2.02 kB         117 kB
+└ ○ /reset-password                      2.02 kB         117 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/544-df4e483c14a48aa3.js       46.1 kB
+  ├ chunks/706b26c1-45d26846699181ad.js  54.2 kB
+  └ other shared chunks (total)          1.96 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

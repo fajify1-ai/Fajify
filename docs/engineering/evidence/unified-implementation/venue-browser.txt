@@ -1,0 +1,1 @@
+PASS original venue screen renders real discovery and catalogue at 390/768/1440

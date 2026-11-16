@@ -1,6 +1,8 @@
 # Unified Fajify preservation — inventory checkpoint
 
-**Status: incomplete preservation gate; no application migration performed.** This checkpoint records sources and original screenshots. It does not claim unified packaging, visual parity, backend completion, Android acceptance or release readiness. The mandatory before-and-after gate remains open. Source-level enumeration is not a substitute for exercising every nested state.
+**Historical inventory checkpoint at `4846897`. Current application-code progress is recorded in [UNIFIED_APPLICATION_IMPLEMENTATION.md](UNIFIED_APPLICATION_IMPLEMENTATION.md). The following inventory status describes that earlier checkpoint, not the current implementation.**
+
+**Inventory checkpoint status: incomplete preservation gate; no application migration performed at that checkpoint.** This checkpoint records sources and original screenshots. It does not claim unified packaging, visual parity, backend completion, Android acceptance or release readiness. The mandatory before-and-after gate remains open. Source-level enumeration is not a substitute for exercising every nested state.
 
 ## Branches and protected work
 

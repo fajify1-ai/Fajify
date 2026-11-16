@@ -1,5 +1,7 @@
 # Customer and Business web integration — review build
 
+**Current implementation:** [Unified application implementation checkpoints](UNIFIED_APPLICATION_IMPLEMENTATION.md) on draft PR #31. The PR #28 report below remains historical provenance, not a claim about the unified branch's current completion.
+
 ## Status and provenance
 
 This branch recovers both prior design implementations and integrates the available Customer and Business contracts. **This is a review build, not a claim that every Milestone 2–8 feature is production ready.** Missing contracts and remaining UI limitations are listed below. No deployment, main merge, Azure change, mobile change or Admin implementation is included.

@@ -1,0 +1,1 @@
+PASS Business: registration, eight onboarding steps, real pending application, no approval escalation, API isolation and no page errors.

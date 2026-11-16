@@ -1,0 +1,22 @@
+[
+  {
+    "url": "http://127.0.0.1:3062/design-review/business",
+    "method": "GET",
+    "status": 404
+  },
+  {
+    "url": "https://localhost:3440/api/auth/request-password-reset",
+    "method": "POST",
+    "status": 503
+  },
+  {
+    "url": "https://localhost:3440/api/platform/customer/rides",
+    "method": "POST",
+    "status": 404
+  },
+  {
+    "url": "https://localhost:3440/api/platform/admin/finance",
+    "method": "GET",
+    "status": 404
+  }
+]

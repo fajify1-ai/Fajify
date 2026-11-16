@@ -1,0 +1,17 @@
+
+> @faji/web-auth@0.1.0 test /workspace/Fajify-unified/packages/web_auth
+> node --conditions=react-server --import tsx --test test/*.test.ts
+
+✔ proxy strips nested tokens and forwards only authentication cookies (8.311964ms)
+✔ untrusted origin and oversized bodies do not reach the upstream (1.534098ms)
+✔ credentials, query strings and non-web upstream protocols are rejected (1.67116ms)
+✔ network failures, redirects and upstream errors never expose credentials or cookies (2.981849ms)
+✔ HTTPS host rejects insecure or domain-scoped upstream cookies (2.096025ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 263.540929

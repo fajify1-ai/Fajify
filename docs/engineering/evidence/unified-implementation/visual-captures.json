@@ -1,0 +1,434 @@
+[
+  {
+    "screen": "landing",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "home",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "restaurant",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "planForMe",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "browsePlans",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "profile",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "settings",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "help",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "wishlist",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "myTickets",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "notifications",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "offers",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "inviteFriends",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "createEvent",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "onboarding",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "checkout",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "reservation",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "globalCart",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "confirmation",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "auth",
+    "product": "customer",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "entry",
+    "product": "business",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "signin",
+    "product": "business",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "onboarding",
+    "product": "business",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "dashboard",
+    "product": "business",
+    "width": 390,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "landing",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "home",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "restaurant",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "planForMe",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "browsePlans",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "profile",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "settings",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "help",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "wishlist",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "myTickets",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "notifications",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "offers",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "inviteFriends",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "createEvent",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "onboarding",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "checkout",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "reservation",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "globalCart",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "confirmation",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "auth",
+    "product": "customer",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "entry",
+    "product": "business",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "signin",
+    "product": "business",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "onboarding",
+    "product": "business",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "dashboard",
+    "product": "business",
+    "width": 768,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "landing",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "home",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "restaurant",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "planForMe",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "browsePlans",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "profile",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "settings",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "help",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "wishlist",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "myTickets",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "notifications",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "offers",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "inviteFriends",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "createEvent",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "onboarding",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "checkout",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "reservation",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "globalCart",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "confirmation",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "auth",
+    "product": "customer",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "entry",
+    "product": "business",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "signin",
+    "product": "business",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "onboarding",
+    "product": "business",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  },
+  {
+    "screen": "dashboard",
+    "product": "business",
+    "width": 1440,
+    "type": "retained source visual comparison; fixtures isolated"
+  }
+]

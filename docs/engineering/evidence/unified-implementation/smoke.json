@@ -1,0 +1,11 @@
+{
+  "result": "passed",
+  "auth": "real local Nest/Better Auth; disposable PostgreSQL",
+  "viewports": [
+    390,
+    768,
+    1440
+  ],
+  "runtimeErrors": [],
+  "notes": "No provider calls, deployment or real payments."
+}

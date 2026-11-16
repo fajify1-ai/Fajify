@@ -1,0 +1,46 @@
+{
+  "status": "implementation-checkpoints-partial-not-release-ready",
+  "sourceCommit": "d065a79224ea15e055b6d028657cd86b748ec96b",
+  "branch": "integration/unified-application-preservation",
+  "base": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+  "publicNextHost": "apps/customer_web",
+  "unitTests": {
+    "customer": 9,
+    "business": 1,
+    "auth": 5,
+    "bridge": 5,
+    "api": 171,
+    "total": 191
+  },
+  "checks": {
+    "webLintTypecheckBuild": "both applications passed",
+    "lockfile": "offline frozen lockfile validated in clean manifest workspace",
+    "realAuth": "passed on disposable Nest/Better Auth/PostgreSQL",
+    "sharedSession": "both login routes resume validated identity; Business registration reuses existing Customer account",
+    "merchantScope": "approved finance 200; other-account finance 403; security returns to Business",
+    "realFreeReservation": "passed inherited connected-browser test with merchant-created offering",
+    "pendingOnboarding": "eight steps passed; server pending, memberships empty",
+    "native": "blocked: Flutter/Dart unavailable; exit-session source change unverified"
+  },
+  "visual": {
+    "pairs": 183,
+    "pixelIdentical": 176,
+    "sameDimensions": 183,
+    "remainingDifferences": "see visual-differences.json; not auto-approved"
+  },
+  "screenshots": 396,
+  "venueTestMedia": "media.fixture.test transport uses bundled ec7238b7cf1876f2.jpg; production adapter unchanged",
+  "accessibility": "entry and Ride sampled scans pass; reference contrast violations remain",
+  "notVerified": [
+    "complete connected-layout preservation",
+    "every nested state and data variant",
+    "real browser MFA enrollment/challenge",
+    "clean-room standalone packaging",
+    "native analysis/tests/screenshots/APK/device acceptance",
+    "PR30 reconciliation",
+    "protected continuation integration",
+    "deployment/DNS/TLS/signing/distribution"
+  ],
+  "deployed": false,
+  "merged": false
+}

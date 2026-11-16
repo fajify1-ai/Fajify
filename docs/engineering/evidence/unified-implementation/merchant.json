@@ -1,0 +1,10 @@
+{
+  "result": "passed",
+  "source": "real NestJS/Better Auth, existing disposable test identities",
+  "checks": [
+    "approved merchant operational navigation",
+    "authorized finance read",
+    "logout/login account isolation",
+    "other-account merchant finance denied 403"
+  ]
+}
