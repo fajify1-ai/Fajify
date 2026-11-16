@@ -1,0 +1,23 @@
+  ✔ runtime cannot perform DDL, change migrations, edit capture history or reach identity sentinel (112.807369ms)
+  ✔ immutable environment initializes concurrently with SELECT/INSERT only and rejects a different provider domain (307.739127ms)
+  ✔ server-priced checkout persists once, capture allocates exact fee and policy snapshots and gates fulfilment (1143.702636ms)
+  ✔ lost initialization stays uncertain and an explicit same-reference retry cannot create a second charge (399.84889ms)
+  ✔ concurrent holds consume one seat; expiry releases once; a late capture creates refund without a reservation (329.22017ms)
+  ✔ verified paid reservation confirms once; cancellation restores capacity and refunds remaining capture (230.472484ms)
+  ✔ ticket inventory, owned QR, wrong-branch denial and concurrent one-time redemption (191.406557ms)
+  ✔ ambiguous refund is discovered without another POST; verified processing is idempotent; cumulative excess is rejected (349.480169ms)
+  ✔ failed order retry keeps stable attempts and late old success never confirms a second purchase (438.799738ms)
+  ✔ settlement claims race safely; OTP requires canonical success; reversal compensates and fee recovery remains exact (360.43477ms)
+  ✔ post-payout refunds create recovery debt and the next eligible balance can be a recovery-only idempotent batch (554.243851ms)
+  ✔ disputes reserve exposure, a win restores funding and partial loss consumes only verified loss (378.821844ms)
+  ✔ worker deduplicates outbox, recovers expired leases and dead-letters repeated errors with redacted diagnostics (276.942812ms)
+✔ M5 complete financial lifecycle on marked PostgreSQL 16 with restricted runtime and isolated Paystack transport (5295.120239ms)
+✔ M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings and atomic rollback (1456.105336ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8388.623794

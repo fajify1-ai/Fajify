@@ -1,0 +1,1 @@
+export default function Page(){return <main className="connected"><section className="connection-state"><h1>Fajify Business</h1><p>Merchant operations run in the separate Business web application.</p><a href="/">Back to homepage</a></section></main>}

@@ -1,6 +1,6 @@
 # Faji monorepo boundaries
 
-Customer Flutter: `apps/customer_mobile`. Business Flutter: `apps/business_mobile`. Driver/dispatcher Flutter: `apps/ride_dispatch` (one application, two roles). Customer and administration web: `apps/customer_web`, `apps/admin_web`. Backend: `apps/api` (NestJS modular monolith) and `apps/worker` (BullMQ). Shared modules live under `packages`; infrastructure and docs have independent directories.
+Customer Flutter: `apps/customer_mobile`. Business Flutter: `apps/business_mobile`. Driver/dispatcher Flutter: `apps/ride_dispatch` (one application, two roles). Customer, Business and administration web: `apps/customer_web`, `apps/business_web`, `apps/admin_web`. Customer and Business web use Next.js App Router / React / TypeScript and the shared Better Auth web package. Backend: `apps/api` (NestJS modular monolith) and `apps/worker` (BullMQ). Shared modules live under `packages`; infrastructure and docs have independent directories.
 
 ### Target platform
 

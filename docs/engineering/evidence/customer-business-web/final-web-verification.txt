@@ -1,0 +1,162 @@
+
+> @faji/customer-web@0.1.0 lint /workspace/Fajify-integration/apps/customer_web
+> eslint app components lib connected --max-warnings=0
+
+
+> @faji/customer-web@0.1.0 build /workspace/Fajify-integration/apps/customer_web
+> next build
+
+   ▲ Next.js 15.5.28
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 3.6s
+   Linting and checking validity of types ...
+
+ ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
+   Collecting page data ...
+   Generating static pages (0/12) ...
+   Generating static pages (3/12)
+   Generating static pages (6/12)
+   Generating static pages (9/12)
+ ✓ Generating static pages (12/12)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    1.34 kB         104 kB
+├ ○ /_not-found                            988 B         104 kB
+├ ○ /access-denied                       1.98 kB         117 kB
+├ ƒ /account-security                    2.76 kB         118 kB
+├ ƒ /api/auth/[...all]                     134 B         103 kB
+├ ƒ /api/platform/[...path]                134 B         103 kB
+├ ○ /business                              134 B         103 kB
+├ ƒ /dashboard                           1.34 kB         104 kB
+├ ○ /login                                  2 kB         117 kB
+├ ○ /phone-login                            2 kB         117 kB
+├ ○ /phone-recovery                         2 kB         117 kB
+├ ○ /recover                                2 kB         117 kB
+├ ○ /register                               2 kB         117 kB
+└ ○ /reset-password                         2 kB         117 kB
++ First Load JS shared by all             103 kB
+  ├ chunks/372-a3acc2614ebe8471.js       46.5 kB
+  ├ chunks/d02de58d-4922b2630c75b8c8.js  54.2 kB
+  └ other shared chunks (total)          2.02 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> @faji/customer-web@0.1.0 typecheck /workspace/Fajify-integration/apps/customer_web
+> tsc --noEmit
+
+
+> @faji/customer-web@0.1.0 test /workspace/Fajify-integration/apps/customer_web
+> tsx --tsconfig test/tsconfig.json --test test/*.test.ts
+
+✔ registration and recovery render accessible required credentials without a demo bypass (10.172554ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 520.921629
+
+> @faji/business-web@0.1.0 lint /workspace/Fajify-integration/apps/business_web
+> eslint app components lib connected --max-warnings=0
+
+
+> @faji/business-web@0.1.0 build /workspace/Fajify-integration/apps/business_web
+> next build
+
+   ▲ Next.js 15.5.28
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 2.6s
+   Linting and checking validity of types ...
+
+ ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
+   Collecting page data ...
+   Generating static pages (0/11) ...
+   Generating static pages (2/11)
+   Generating static pages (5/11)
+   Generating static pages (8/11)
+ ✓ Generating static pages (11/11)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      134 B         103 kB
+├ ○ /_not-found                            988 B         104 kB
+├ ○ /access-denied                       1.98 kB         117 kB
+├ ƒ /account-security                    2.76 kB         118 kB
+├ ƒ /api/auth/[...all]                     134 B         103 kB
+├ ƒ /api/platform/[...path]                134 B         103 kB
+├ ƒ /dashboard                            9.7 kB         125 kB
+├ ○ /login                                  2 kB         117 kB
+├ ○ /phone-login                            2 kB         117 kB
+├ ○ /phone-recovery                         2 kB         117 kB
+├ ○ /recover                                2 kB         117 kB
+├ ○ /register                               2 kB         117 kB
+└ ○ /reset-password                         2 kB         117 kB
++ First Load JS shared by all             103 kB
+  ├ chunks/372-a3acc2614ebe8471.js       46.5 kB
+  ├ chunks/d02de58d-4922b2630c75b8c8.js  54.2 kB
+  └ other shared chunks (total)          1.96 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> @faji/business-web@0.1.0 typecheck /workspace/Fajify-integration/apps/business_web
+> tsc --noEmit
+
+
+> @faji/business-web@0.1.0 test /workspace/Fajify-integration/apps/business_web
+> tsx --tsconfig test/tsconfig.json --test test/*.test.ts
+
+✔ registration and recovery render accessible required credentials without a demo bypass (7.821556ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 274.08924
+
+> @faji/web-auth@0.1.0 test /workspace/Fajify-integration/packages/web_auth
+> node --conditions=react-server --import tsx --test test/*.test.ts
+
+✔ proxy strips nested tokens and forwards only authentication cookies (8.577006ms)
+✔ untrusted origin and oversized bodies do not reach the upstream (1.795081ms)
+✔ credentials, query strings and non-web upstream protocols are rejected (2.258082ms)
+✔ network failures, redirects and upstream errors never expose credentials or cookies (1.990648ms)
+✔ HTTPS host rejects insecure or domain-scoped upstream cookies (1.768071ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 215.859009
+
+> @faji/web-ui@0.1.0 test /workspace/Fajify-integration/packages/web_ui
+> node --conditions=react-server --import tsx --test test/*.test.ts
+
+✔ contract allowlist isolates merchant, customer and deferred products (3.2904ms)
+✔ bridge only forwards session cookies to fixed API and preserves query (6.673937ms)
+✔ mutations reject untrusted origins and oversized payloads before fetch (1.730065ms)
+✔ upstream failures, redirects and permission errors never expose internals (2.804866ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 178.296635

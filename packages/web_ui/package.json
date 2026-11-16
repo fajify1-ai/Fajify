@@ -2,5 +2,31 @@
   "name": "@faji/web-ui",
   "private": true,
   "version": "0.1.0",
-  "description": "Shared Next.js design components"
+  "description": "Shared Next.js design components",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "openapi-typescript": "^7.13.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  },
+  "exports": {
+    "./client": "./client.tsx",
+    "./server": "./server.ts",
+    "./contracts": "./contracts.ts",
+    "./types": "./types.ts",
+    "./styles.css": "./styles.css"
+  },
+  "dependencies": {
+    "@faji/web-auth": "workspace:*",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "server-only": "0.0.1"
+  },
+  "scripts": {
+    "generate:contracts": "openapi-typescript ../api_contracts/openapi.json -o contracts.ts",
+    "test": "node --conditions=react-server --import tsx --test test/*.test.ts",
+    "generate:routes": "node scripts/routes.mjs",
+    "check:routes": "node scripts/routes.mjs --check"
+  }
 }

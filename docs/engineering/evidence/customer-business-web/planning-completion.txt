@@ -1,0 +1,17 @@
+✔ private plans enforce owner and optimistic revision (230.179008ms)
+✔ feedback is private and updates a single customer response (27.364933ms)
+✔ PostGIS filters distance and recommendation evidence remains owner-scoped (54.313074ms)
+✔ package booking reserves group and component capacity atomically, retries safely, releases once (93.612674ms)
+✔ stale displayed package amount cannot create a hold (16.03864ms)
+✔ non-NGN paid packages cannot appear as M5-bookable recommendations (45.804153ms)
+✔ revoked session cannot update plans or give feedback (9.933556ms)
+✔ expired package holds restore every allocated component exactly once (53.992982ms)
+✔ provider-verified package capture issues one confirmed reservation without releasing component capacity (151.471237ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1068.696243
