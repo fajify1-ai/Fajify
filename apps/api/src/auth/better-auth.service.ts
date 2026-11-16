@@ -27,8 +27,9 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
   const [{betterAuth},{drizzleAdapter},{bearer,twoFactor,phoneNumber},{toNodeHandler},{createAuthMiddleware,APIError}]=await Promise.all([
    load<typeof import('better-auth')>('better-auth'),load<typeof import('better-auth/adapters/drizzle')>('better-auth/adapters/drizzle'),
    load<typeof import('better-auth/plugins')>('better-auth/plugins'),load<typeof import('better-auth/node')>('better-auth/node'),load<typeof import('better-auth/api')>('better-auth/api')]);
-  const mail=nodemailer.createTransport(process.env.SMTP_URL??'smtp://127.0.0.1:1025',{disableFileAccess:true,disableUrlAccess:true});
-  if(['production','staging'].includes(process.env.NODE_ENV??'')&&(!process.env.SMTP_URL||!process.env.AUTH_EMAIL_FROM))throw new Error('Configure authentication email delivery');
+  const emailEnabled=process.env.FAJI_EMAIL_DELIVERY_ENABLED!=='false';
+  if(emailEnabled&&['production','staging'].includes(process.env.NODE_ENV??'')&&(!process.env.SMTP_URL||!process.env.AUTH_EMAIL_FROM))throw new Error('Configure authentication email delivery');
+  const mail=emailEnabled?nodemailer.createTransport(process.env.SMTP_URL??'smtp://127.0.0.1:1025',{disableFileAccess:true,disableUrlAccess:true}):null;
   const sendSms=async({phoneNumber,code}:{phoneNumber:string;code:string},purpose:string)=>{
      const budget=await this.pool.query<{attempts:number}>(`INSERT INTO auth_sms_budgets(phone_hash,attempts) VALUES($1,1) ON CONFLICT(phone_hash) DO UPDATE SET attempts=CASE WHEN auth_sms_budgets.window_started<now()-interval '1 hour' THEN 1 ELSE auth_sms_budgets.attempts+1 END,window_started=CASE WHEN auth_sms_budgets.window_started<now()-interval '1 hour' THEN now() ELSE auth_sms_budgets.window_started END RETURNING attempts`,[createHash('sha256').update(phoneNumber).digest('hex')]);
      if(budget.rows[0].attempts>3)throw new APIError('TOO_MANY_REQUESTS',{message:'Phone verification rate limited'});
@@ -47,7 +48,7 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
     termsAccepted:{type:'boolean',required:false,defaultValue:false},
    }},
    emailAndPassword:{enabled:true,minPasswordLength:12,revokeSessionsOnPasswordReset:true,
-    sendResetPassword:async({user,url,token})=>{await mail.sendMail({from:process.env.AUTH_EMAIL_FROM??'Faji <auth@localhost>',to:user.email,subject:'Reset your Faji password',text:`Your password recovery token is: ${token}\nPaste it into the recovery form in your Faji app. Or reset on the Faji website: ${url}`});}},
+    sendResetPassword:async({user,url,token})=>{if(!mail)throw new APIError('SERVICE_UNAVAILABLE',{message:'Password recovery email is temporarily unavailable'});await mail.sendMail({from:process.env.AUTH_EMAIL_FROM??'Faji <auth@localhost>',to:user.email,subject:'Reset your Faji password',text:`Your password recovery token is: ${token}\nPaste it into the recovery form in your Faji app. Or reset on the Faji website: ${url}`});}},
    session:{expiresIn:60*60*24*7,updateAge:60*60*24,cookieCache:{enabled:false}},
    advanced:{ipAddress:{ipAddressHeaders:['x-faji-client-ip']},useSecureCookies:baseURL.startsWith('https://'),defaultCookieAttributes:{httpOnly:true,sameSite:'lax'}},
    rateLimit:{enabled:true,storage:'database',customRules:{'/phone-number/*':{window:60,max:3},'/two-factor/*':{window:60,max:5}}},
