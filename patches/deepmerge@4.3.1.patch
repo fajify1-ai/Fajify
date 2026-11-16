@@ -1,0 +1,36 @@
+diff --git a/dist/cjs.js b/dist/cjs.js
+index 7c36cbdd06cc22c92d590be3f87a08a91ca06b40..d2ff8946c468f524c485a7b446e3c30fe2a0f0fd 100644
+--- a/dist/cjs.js
++++ b/dist/cjs.js
+@@ -80,11 +80,12 @@ function mergeObject(target, source, options) {
+ 	var destination = {};
+ 	if (options.isMergeableObject(target)) {
+ 		getKeys(target).forEach(function(key) {
++            if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
+ 			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
+ 		});
+ 	}
+ 	getKeys(source).forEach(function(key) {
+-		if (propertyIsUnsafe(target, key)) {
++		if (key === '__proto__' || key === 'constructor' || key === 'prototype' || propertyIsUnsafe(target, key)) {
+ 			return
+ 		}
+ 
+diff --git a/index.js b/index.js
+index 77968aed5d456cccc294f60912ef381fa1e52a7b..d9a48bf6456488fed648990f7e4f45a6da271daf 100644
+--- a/index.js
++++ b/index.js
+@@ -55,11 +55,12 @@ function mergeObject(target, source, options) {
+ 	var destination = {}
+ 	if (options.isMergeableObject(target)) {
+ 		getKeys(target).forEach(function(key) {
++            if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
+ 			destination[key] = cloneUnlessOtherwiseSpecified(target[key], options)
+ 		})
+ 	}
+ 	getKeys(source).forEach(function(key) {
+-		if (propertyIsUnsafe(target, key)) {
++		if (key === '__proto__' || key === 'constructor' || key === 'prototype' || propertyIsUnsafe(target, key)) {
+ 			return
+ 		}
+ 

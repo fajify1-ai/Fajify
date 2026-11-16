@@ -25,7 +25,7 @@ const privacyPolicy = LegalDocument(
     LegalSection(
       'Authentication and account security',
       [
-        'The native app sends account requests over configured HTTPS connections to the backend and authentication service. Keycloak handles passwords and issues session tokens; Fajify’s customer profile tables do not store the submitted password. On the device, session credentials are kept using platform secure storage.',
+        'The native app sends account requests over configured HTTPS connections to the backend and authentication service. Better Auth handles passwords and issues session tokens; Fajify’s customer profile tables do not store the submitted password. On the device, session credentials are kept using platform secure storage.',
         'The backend checks signed tokens and account status before permitting protected customer access. Sign-in does not itself prove email ownership, and the current customer policy does not require a separate email-verification step. Actual verification metadata is not changed merely to permit access.',
         'Session identifiers, access decisions, revocation information and account-security events may be processed to protect accounts. Never send a password, security code or payment PIN through an ordinary support conversation.',
       ],

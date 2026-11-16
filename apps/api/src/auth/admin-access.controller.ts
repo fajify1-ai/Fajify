@@ -1,3 +1,4 @@
+import {AdminScopeGuard,RequireAdminScope} from '../admin/admin-scope.guard';
 import {Body,Controller,Param,Post,Req,UseGuards,BadRequestException,Inject} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
 import {IsBoolean,IsIn,IsUUID} from 'class-validator';
@@ -19,13 +20,14 @@ class SuspensionInput {
  @IsBoolean() suspended!:boolean;
 }
 
-/** Administrative approval and suspension require signed Keycloak identity,
- * an active backend account, platform-admin role and recent verified MFA.
+/** Administrative approval and suspension require signed Better Auth identity,
+ * an active backend account, platform-admin role and explicit password/factor step-up and identity.write scope.
  */
 @ApiTags('identity-admin')
-@ApiBearerAuth('keycloak')
+@ApiBearerAuth('session')
 @Controller({path:'admin/accounts',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
+@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,AdminScopeGuard)
+@RequireAdminScope('identity.write')
 export class AdminAccessController {
  constructor(@Inject(AccessService) private readonly access:AccessService){}
  @Post(':subject/suspension')

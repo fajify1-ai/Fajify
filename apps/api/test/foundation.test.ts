@@ -4,12 +4,12 @@ import assert from 'node:assert/strict';
 import {validateEnvironment} from '../src/config';
 import {extractBearerToken} from '../src/auth/identity.types';
 import {RequestContextMiddleware} from '../src/request-context.middleware';
-const config={FAJI_DATABASE_URL:'postgresql://localhost:5432/faji',REDIS_URL:'redis://localhost:6379',KEYCLOAK_ISSUER:'http://localhost:8080/realms/faji',KEYCLOAK_AUDIENCE:'faji-api',S3_ENDPOINT:'http://localhost:9000',S3_BUCKET:'faji'};
+const config={FAJI_DATABASE_URL:'postgresql://localhost:5432/faji',REDIS_URL:'redis://localhost:6379',BETTER_AUTH_URL:'http://localhost:3001',BETTER_AUTH_SECRET:'test-secret-at-least-thirty-two-characters',FAJI_WEB_ORIGINS:'http://localhost:3000',S3_ENDPOINT:'http://localhost:9000',S3_BUCKET:'faji'};
 test('validated config accepts local development',()=>assert.equal(validateEnvironment(config).PORT,3001));
 test('production rejects insecure identity and object storage',()=>assert.throws(()=>validateEnvironment({...config,NODE_ENV:'production'})));
 test('issuer localhost exception checks hostname and protocol',()=>{
  for(const issuer of ['http://localhost.attacker.example/realms/faji','http://attacker.example/localhost','ftp://localhost/realms/faji']) {
-  assert.throws(()=>validateEnvironment({...config,KEYCLOAK_ISSUER:issuer}));
+  assert.throws(()=>validateEnvironment({...config,BETTER_AUTH_URL:issuer}));
  }
 });
 test('bearer parsing does not accept malformed credentials',()=>{assert.equal(extractBearerToken('Basic abc'),null);assert.equal(extractBearerToken('Bearer abc.def.sig'),'abc.def.sig');});

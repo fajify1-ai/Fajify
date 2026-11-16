@@ -17,7 +17,7 @@ function parse<T>(schema:z.ZodType<T>,input:unknown):T{
  if(!checked.success)throw new BadRequestException('Invalid ride request fields');
  return checked.data;
 }
-@ApiTags('rides-customer') @ApiBearerAuth('keycloak')
+@ApiTags('rides-customer') @ApiBearerAuth('session')
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 @RequireRoles('customer')
 @Controller({path:'customer/rides',version:'1'})

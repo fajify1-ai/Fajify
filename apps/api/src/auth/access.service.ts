@@ -26,8 +26,7 @@ export class AccessService {
   const result=await this.pool.query('SELECT 1 FROM revoked_identity_sessions WHERE identity_subject=$1 AND session_id=$2 LIMIT 1',[subject,sessionId]);
   return result.rowCount===1;
  }
- /** Revoke the current signed session. The client must also call Keycloak end-session
-  * to revoke refresh tokens; this API blocks any still-valid access bearer. */
+ /** Revoke the Better Auth session and audit the decision atomically. */
  async revokeSession(subject:string,sessionId:string):Promise<void>{
   if(!subject||!sessionId||sessionId.length>255)throw Error('Invalid session');
   const client=await this.pool.connect();
@@ -36,11 +35,12 @@ export class AccessService {
    await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',['session:'+subject+':'+sessionId]);
    await client.query('INSERT INTO revoked_identity_sessions(identity_subject,session_id) VALUES($1,$2) ON CONFLICT DO NOTHING',[subject,sessionId]);
    await client.query("INSERT INTO identity_security_events(actor_subject,event_type) VALUES($1,'session_revoked')",[subject]);
+   await client.query('DELETE FROM auth_session WHERE id=$1 AND user_id=$2',[sessionId,subject]);
    await client.query('COMMIT');
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
  }
  /** Only verified, active account memberships for approved businesses are exposed.
-  * No Keycloak realm role can independently grant a business scope. */
+  * No coarse application role can independently grant a business scope. */
  async approvedBusinessMemberships(subject:string):Promise<ApprovedBusinessMembership[]>{
   const result=await this.pool.query<{resource_id:string;role:ResourceRole}>(`
    SELECT DISTINCT m.resource_id,m.role FROM resource_memberships m

@@ -1,3 +1,6 @@
+import 'package:faji_flutter_core/security_screen.dart';
+import 'package:faji_flutter_core/auth_screen.dart';
+import '../core/better_auth_identity_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -70,7 +73,13 @@ class LoginPage extends StatelessWidget {
   final VoidCallback? onExit;
   @override
   Widget build(BuildContext context) {
-    final demoMode = controller.identity is MockIdentityService;
+    final identity = controller.identity;
+    if (identity is BetterAuthIdentityService)
+      return FajiAuthScreen(
+        client: identity.client,
+        onAuthenticated: controller.signIn,
+      );
+    final demoMode = identity is MockIdentityService;
     return Scaffold(
       body: SafeArea(
         child: PageBody(
@@ -91,7 +100,7 @@ class LoginPage extends StatelessWidget {
                   Text(
                     demoMode
                         ? 'Explore sample business workflows. No live merchant data or account access is used.'
-                        : 'Sign in or create a Faji identity with Keycloak. Only backend-confirmed merchant accounts can continue.',
+                        : 'Sign in or create a Faji identity with Better Auth. Only backend-confirmed merchant accounts can continue.',
                     style: const TextStyle(color: muted),
                   ),
                 ],
@@ -130,7 +139,7 @@ class LoginPage extends StatelessWidget {
               ),
               TextButton(
                 onPressed: controller.signingIn ? null : controller.signIn,
-                child: const Text('Forgot password? Continue to Keycloak'),
+                child: const Text('Forgot password? Continue to Better Auth'),
               ),
             ],
             TextButton(
@@ -150,18 +159,20 @@ class LoginPage extends StatelessWidget {
 }
 
 class IdentityHandoffPage extends StatelessWidget {
-  const IdentityHandoffPage({
-    super.key,
-    required this.controller,
-    this.onExit,
-  });
+  const IdentityHandoffPage({super.key, required this.controller, this.onExit});
 
   final BusinessController controller;
   final VoidCallback? onExit;
 
   @override
   Widget build(BuildContext context) {
-    final demoMode = controller.identity is MockIdentityService;
+    final identity = controller.identity;
+    if (identity is BetterAuthIdentityService)
+      return FajiAuthScreen(
+        client: identity.client,
+        onAuthenticated: controller.signIn,
+      );
+    final demoMode = identity is MockIdentityService;
     return Scaffold(
       body: SafeArea(
         child: PageBody(
@@ -170,14 +181,14 @@ class IdentityHandoffPage extends StatelessWidget {
           children: [
             const Panel(
               child: Text(
-                'Continue to Keycloak to create or sign in to a Faji identity. '
+                'Continue to Better Auth to create or sign in to a Faji identity. '
                 'Identity registration does not register, approve, or grant access '
                 'to a business. Merchant onboarding and approval are handled separately.',
               ),
             ),
             if (demoMode)
               const Text(
-                'Identity registration is unavailable in sample mode. Use a configured Keycloak build.',
+                'Identity registration is unavailable in sample mode. Use a configured Better Auth build.',
                 style: TextStyle(color: muted),
               )
             else
@@ -396,6 +407,19 @@ class _ProfilePageState extends State<ProfilePage> {
     title: 'Profile & settings',
     subtitle: widget.controller.businessName,
     children: [
+      if (widget.controller.identity is BetterAuthIdentityService)
+        TextButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => FajiSecurityScreen(
+                client:
+                    (widget.controller.identity as BetterAuthIdentityService)
+                        .client,
+              ),
+            ),
+          ),
+          child: const Text('Account security'),
+        ),
       Panel(
         child: Form(
           key: form,

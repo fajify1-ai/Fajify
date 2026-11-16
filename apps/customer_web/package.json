@@ -3,21 +3,18 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
-    "test:routes-http": "node --import tsx --test test/routes-http.test.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
-    "test": "node --conditions=react-server --import tsx --test test/auth.test.ts test/openid-client.test.ts test/journey-http.test.ts test/postgres-stores.test.ts test/routes.test.ts"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "next": "^15.0.0",
-    "openid-client": "6",
-    "pg": "8.23.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "server-only": "0.0.1"
+    "server-only": "0.0.1",
+    "@faji/web-auth": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

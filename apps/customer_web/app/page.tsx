@@ -1,3 +1,1 @@
-export default function Page() {
-  return <main style={{padding:'3rem'}}><h1>Faji Customer</h1><p>Engineering foundation — application features are implemented in their assigned milestones.</p></main>;
-}
+export default function Page(){return <main><h1>Faji Customer</h1><a href="/dashboard">Open workspace</a> · <a href="/login">Sign in</a></main>;}

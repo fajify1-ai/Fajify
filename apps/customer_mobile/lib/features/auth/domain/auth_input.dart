@@ -18,5 +18,5 @@ abstract final class AuthInput {
       value == null || value.isEmpty ? 'Password is required' : null;
 
   static String? registrationPassword(String? value) =>
-      value == null || value.length < 8 ? 'Use at least 8 characters' : null;
+      value == null || value.length < 12 ? 'Use at least 12 characters' : null;
 }

@@ -36,8 +36,8 @@ async function run(){
   for(const [suffix,verb,hasBody] of required){
    const operation=doc.paths[root+suffix]?.[verb as 'get'|'post'|'patch'];
    if(!operation)throw new Error('Missing M3 merchant contract: '+verb.toUpperCase()+' '+root+suffix);
-   if(!operation.security?.some(v=>Object.hasOwn(v,'keycloak')))
-    throw new Error('Missing Keycloak bearer contract on '+verb+' '+suffix);
+   if(!operation.security?.some(v=>Object.hasOwn(v,'session')))
+    throw new Error('Missing session bearer contract on '+verb+' '+suffix);
    if(hasBody&&!operation.requestBody)
     throw new Error('Missing M3 request body schema: '+verb+' '+suffix);
   }
@@ -46,16 +46,16 @@ async function run(){
    throw new Error('Missing signed M5 payment webhook contract');
   for(const path of ['/api/v1/customer/payments/{id}','/api/v1/admin/finance/payments/{id}/reconciliation']){
    const operation=doc.paths[path]?.get;
-   if(!operation?.security?.some(v=>Object.hasOwn(v,'keycloak'))||!operation.responses?.['200']||
+   if(!operation?.security?.some(v=>Object.hasOwn(v,'session'))||!operation.responses?.['200']||
     !operation.parameters?.some(p=>'name' in p&&p.name==='id'&&p.in==='path'&&p.required))
     throw new Error('Missing protected M5 payment read contract: '+path);
   }
   const recovery=doc.paths['/api/v1/admin/finance/payments/{id}/provider-recheck']?.post;
-  if(!recovery?.security?.some(v=>Object.hasOwn(v,'keycloak'))||!recovery.responses?.['200']||
+  if(!recovery?.security?.some(v=>Object.hasOwn(v,'session'))||!recovery.responses?.['200']||
    !recovery.parameters?.some(p=>'name' in p&&p.name==='id'&&p.in==='path'&&p.required))
    throw new Error('Missing privileged M5 provider-recheck contract');
   const prepare=doc.paths['/api/v1/customer/orders/{id}/payment-intent']?.post;
-  if(!prepare?.security?.some(s=>Object.hasOwn(s,'keycloak'))||!prepare.requestBody||!prepare.responses?.['200'])
+  if(!prepare?.security?.some(s=>Object.hasOwn(s,'session'))||!prepare.requestBody||!prepare.responses?.['200'])
    throw new Error('Missing authoritative M5 order-intent preparation contract');
   for(const contract of M4_OPERATIONS){
    const operation=doc.paths[contract.path]?.[contract.method];
@@ -65,7 +65,7 @@ async function run(){
      throw new Error('Missing M4 path parameter: '+name+' '+contract.path);
    if(contract.paginated&&!operation.parameters?.some(p=>'name' in p&&p.in==='query'&&p.name==='limit'))
     throw new Error('Missing M4 pagination: '+contract.path);
-   if(contract.protected&&!operation.security?.some(s=>Object.hasOwn(s,'keycloak')))
+   if(contract.protected&&!operation.security?.some(s=>Object.hasOwn(s,'session')))
     throw new Error('Missing M4 bearer security: '+contract.path);
    if(contract.body&&!operation.requestBody)throw new Error('Missing M4 request schema: '+contract.path);
    const response=operation.responses[String(contract.status)];
@@ -74,7 +74,7 @@ async function run(){
   }
   for(const [path,method,body] of M5_OPERATIONS){
    const op=doc.paths[path]?.[method];
-   if(!op?.security?.some(s=>Object.hasOwn(s,'keycloak')))throw new Error('Missing protected M5 lifecycle operation: '+method+' '+path);
+   if(!op?.security?.some(s=>Object.hasOwn(s,'session')))throw new Error('Missing protected M5 lifecycle operation: '+method+' '+path);
    if(body&&!op.requestBody)throw new Error('Missing M5 lifecycle body: '+path);
    const response=op.responses['200'];
    if(!response||!('content' in response)||!response.content?.['application/json']?.schema)throw new Error('Missing M5 lifecycle response: '+path);
@@ -85,7 +85,7 @@ async function run(){
   for(const contract of M6_OPERATIONS){
    const operation=doc.paths[contract.path]?.[contract.method];
    if(!operation)throw new Error('Missing M6 planning route: '+contract.method+' '+contract.path);
-   if(!operation.security?.some(s=>Object.hasOwn(s,'keycloak')))throw new Error('Missing M6 identity protection: '+contract.path);
+   if(!operation.security?.some(s=>Object.hasOwn(s,'session')))throw new Error('Missing M6 identity protection: '+contract.path);
    if(contract.body&&!operation.requestBody)throw new Error('Missing M6 request body: '+contract.path);
    const response=operation.responses[String(contract.status)];
    if(!response||!('content' in response)||!response.content?.['application/json']?.schema)
@@ -143,14 +143,14 @@ async function run(){
   for(const [path,method,hasBody] of rides){
    const op=doc.paths[path]?.[method];
    if(!op)throw new Error('Missing M7 ride operation: '+method+' '+path);
-   if(!op.security?.some(s=>Object.hasOwn(s,'keycloak')))throw new Error('M7 ride route lacks bearer schema: '+path);
+   if(!op.security?.some(s=>Object.hasOwn(s,'session')))throw new Error('M7 ride route lacks bearer schema: '+path);
    if(hasBody&&!op.requestBody)throw new Error('M7 ride operation lacks request schema: '+path);
    if(!op.responses?.['200']&&!op.responses?.['201'])throw new Error('M7 ride operation lacks a success response: '+path);
   }
   for(const contract of [...M8_OPERATIONS,...M8_CUSTOMER_OPERATIONS]){
    const op=doc.paths[contract.path]?.[contract.method];
    if(!op)throw new Error('Missing M8 administrative route: '+contract.method+' '+contract.path);
-   if(!op.security?.some(s=>Object.hasOwn(s,'keycloak')))throw new Error('Missing M8 bearer auth: '+contract.path);
+   if(!op.security?.some(s=>Object.hasOwn(s,'session')))throw new Error('Missing M8 bearer auth: '+contract.path);
    if(contract.body&&!op.requestBody)throw new Error('Missing M8 command body: '+contract.path);
    const response=op.responses[String(contract.status)];
    if(!response||!('content' in response)||!response.content?.['application/json']?.schema)
@@ -164,7 +164,7 @@ async function run(){
   const snapshot=resolve(__dirname,'../../../packages/api_contracts/openapi.json');
   const previous=JSON.parse(readFileSync(snapshot,'utf8')) as typeof doc;
   for(const [path,operation] of Object.entries(previous.paths))
-   if(!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!isDeepStrictEqual(doc.paths[path],operation))
+   if(!path.startsWith('/api/auth/faji/')&&!path.startsWith('/api/v1/auth/')&&!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!isDeepStrictEqual(doc.paths[path],operation))
     throw new Error('Existing identity/merchant contract changed: '+path);
   for(const [name,schema] of Object.entries(previous.components?.schemas??{}))
    if(!isDeepStrictEqual(doc.components?.schemas?.[name],schema))throw new Error('Existing schema changed: '+name);

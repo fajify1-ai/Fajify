@@ -34,7 +34,7 @@ export class MarketplaceController {
  quote(@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(PlanQuoteInput)) input:PlanQuoteInput){return this.service.quote(id,input);}
 }
 
-@ApiTags('merchant-public-content') @ApiBearerAuth('keycloak')
+@ApiTags('merchant-public-content') @ApiBearerAuth('session')
 @Controller({path:'businesses/:businessId/branches/:branchId',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,ResourceGuard,CustomerWriteGuard)
 @RequireResource('business','businessId','owner','manager')

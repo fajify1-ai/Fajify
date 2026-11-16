@@ -18,8 +18,9 @@ export NODE_ENV=test
 unset PAYSTACK_SECRET_KEY PAYSTACK_PUBLIC_KEY PAYMENT_CALLBACK_URL TICKET_SIGNING_KEYS TICKET_ACTIVE_KEY_ID
 export FAJI_DATABASE_URL='postgresql://faji_contract_only:unused@127.0.0.1:1/faji_contract_unconnected'
 export REDIS_URL='redis://127.0.0.1:1'
-export KEYCLOAK_ISSUER='http://localhost:8080/realms/faji'
-export KEYCLOAK_AUDIENCE='faji-api'
+export BETTER_AUTH_URL=http://localhost:3001
+export BETTER_AUTH_SECRET=disposable-test-secret-over-thirty-two-characters
+export FAJI_WEB_ORIGINS=http://localhost:3000
 export S3_ENDPOINT='http://localhost:9000'
 export S3_BUCKET='faji-contract-only'
 corepack pnpm@9.15.9 --filter @faji/api contracts

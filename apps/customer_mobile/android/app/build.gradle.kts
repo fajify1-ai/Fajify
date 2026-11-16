@@ -19,7 +19,6 @@ android {
     defaultConfig {
         applicationId = "com.faji.app"
         // Published Phase 1 mobile callback; issuer/client activation is separate.
-        manifestPlaceholders["appAuthRedirectScheme"] = "com.faji.customer"
 
         minSdk = maxOf(flutter.minSdkVersion, 23)
         targetSdk = flutter.targetSdkVersion

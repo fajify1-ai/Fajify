@@ -54,7 +54,7 @@ test('M8 support notifications are protected and bind customer identity from a v
    ['/api/v1/customer/support-notifications/{id}/read','put']
   ] as const){
    const operation=doc.paths[path]?.[verb];
-   assert.ok(operation?.security?.some(s=>Object.hasOwn(s,'keycloak')),path);
+   assert.ok(operation?.security?.some(s=>Object.hasOwn(s,'session')),path);
    assert.ok(operation?.responses?.['200'],path);
   }
  }finally{await app.close();}

@@ -1,0 +1,17 @@
+.git
+**/node_modules
+**/.next
+**/build
+**/dist
+**/.dart_tool
+.turbo
+work
+.env*
+**/.env*
+**/secrets
+infrastructure/certs
+*.log
+
+**/.secrets
+**/*.claims.json
+**/*.dump

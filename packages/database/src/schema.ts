@@ -1,4 +1,4 @@
-import {pgTable,uuid,varchar,timestamp,boolean,index,text} from 'drizzle-orm/pg-core';
+import {pgTable,uuid,varchar,timestamp,boolean,index,text,date} from 'drizzle-orm/pg-core';
 import {sql} from 'drizzle-orm';
 export const userProfiles=pgTable('user_profiles',{
  id:uuid('id').primaryKey().defaultRandom(),
@@ -6,7 +6,8 @@ export const userProfiles=pgTable('user_profiles',{
  displayName:varchar('display_name',{length:120}),
  suspended:boolean('suspended').notNull().default(false),
  createdAt:timestamp('created_at',{withTimezone:true}).notNull().defaultNow(),
- updatedAt:timestamp('updated_at',{withTimezone:true}).notNull().defaultNow()
+ updatedAt:timestamp('updated_at',{withTimezone:true}).notNull().defaultNow(),
+ phoneNumber:varchar('phone_number',{length:32}),dateOfBirth:date('date_of_birth'),homeAddress:varchar('home_address',{length:500}),termsAcceptedAt:timestamp('terms_accepted_at',{withTimezone:true})
 });
 export const auditEvents=pgTable('audit_events',{
  id:uuid('id').primaryKey().defaultRandom(),

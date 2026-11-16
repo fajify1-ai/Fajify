@@ -16,7 +16,7 @@ import {AdminPagedResult,AdminModerateInput,AdminRestrictionInput,AdminAssignInp
 type ActorRequest={identity:VerifiedIdentity};
 const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard,AdminReadAuditGuard];
 
-@ApiTags('admin-governance') @ApiBearerAuth('keycloak')
+@ApiTags('admin-governance') @ApiBearerAuth('session')
 @Controller({path:'admin/governance',version:'1'}) @UseGuards(...guards)
 export class AdminGovernanceController {
  constructor(@Inject(AdminGovernanceService)private readonly service:AdminGovernanceService){}
@@ -49,7 +49,7 @@ export class AdminGovernanceController {
  }
 }
 
-@ApiTags('admin-support') @ApiBearerAuth('keycloak')
+@ApiTags('admin-support') @ApiBearerAuth('session')
 @Controller({path:'admin/support',version:'1'}) @UseGuards(...guards)
 export class AdminSupportController {
  constructor(@Inject(AdminSupportService)private readonly service:AdminSupportService){}
@@ -79,7 +79,7 @@ export class AdminSupportController {
  }
 }
 
-@ApiTags('admin-incidents') @ApiBearerAuth('keycloak')
+@ApiTags('admin-incidents') @ApiBearerAuth('session')
 @Controller({path:'admin/incidents',version:'1'}) @UseGuards(...guards)
 export class AdminIncidentController {
  constructor(@Inject(AdminIncidentService)private readonly service:AdminIncidentService){}

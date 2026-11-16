@@ -93,6 +93,14 @@ class _UserAuthScreenState extends State<UserAuthScreen>
     final auth = AuthScope.of(context);
     setState(() => signingIn = true);
     await auth.signIn(email, _signPassword.text);
+    if (mounted && auth.needsSecondFactor) {
+      final result = await showDialog<({String code, bool backup})>(
+        context: context,
+        builder: (_) => const _SecondFactorDialog(),
+      );
+      if (result != null)
+        await auth.verifySecondFactor(result.code, backup: result.backup);
+    }
     if (!mounted) return;
     _signPassword.clear();
     setState(() => signingIn = false);
@@ -464,11 +472,10 @@ class _SignInFields extends StatelessWidget {
       _Label('EMAIL OR USERNAME'),
       FajiAuthTextField(
         controller: email,
-        hint: 'Enter your email or username',
+        hint: 'Enter your email',
         keyboardType: TextInputType.emailAddress,
         textInputAction: TextInputAction.next,
-        validator: (value) =>
-            AuthInput.requiredValue(value, 'Email or username'),
+        validator: (value) => AuthInput.email(value),
         autofillHints: const [AutofillHints.username],
       ),
       const SizedBox(height: 18),
@@ -740,5 +747,50 @@ class _Label extends StatelessWidget {
         letterSpacing: .2,
       ),
     ),
+  );
+}
+
+class _SecondFactorDialog extends StatefulWidget {
+  const _SecondFactorDialog();
+  @override
+  State<_SecondFactorDialog> createState() => _SecondFactorDialogState();
+}
+
+class _SecondFactorDialogState extends State<_SecondFactorDialog> {
+  final input = TextEditingController();
+  bool backup = false;
+  @override
+  void dispose() {
+    input.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Second factor'),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: input,
+          autofillHints: const [AutofillHints.oneTimeCode],
+          decoration: const InputDecoration(
+            labelText: 'Authenticator or recovery code',
+          ),
+        ),
+        CheckboxListTile(
+          value: backup,
+          onChanged: (v) => setState(() => backup = v ?? false),
+          title: const Text('Use recovery code'),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: () =>
+            Navigator.pop(context, (code: input.text, backup: backup)),
+        child: const Text('Verify'),
+      ),
+    ],
   );
 }

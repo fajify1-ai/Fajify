@@ -19,7 +19,7 @@ export class SupportNoticeEmptyBodyGuard implements CanActivate {
  }
 }
 
-@ApiTags('customer-support-notifications') @ApiBearerAuth('keycloak')
+@ApiTags('customer-support-notifications') @ApiBearerAuth('session')
 @Controller({path:'customer/support-notifications',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class CustomerSupportNotificationsController {

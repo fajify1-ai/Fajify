@@ -72,7 +72,7 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
   for(const subject of [owner,a,b]){await admin.query('INSERT INTO account_access(identity_subject) VALUES($1)',[subject]);await admin.query('INSERT INTO user_profiles(identity_subject) VALUES($1)',[subject]);}
   await t.test('runtime cannot perform DDL, change migrations, edit capture history or reach identity sentinel',async()=>{
    for(const sql of ['CREATE TABLE m5_escape(id int)','TRUNCATE ledger_entries','UPDATE _faji_migrations SET checksum=checksum'])await assert.rejects(runtime.query(sql),{code:'42501'});
-   assert.equal((await runtime.query("SELECT has_database_privilege(current_user,'keycloak_m1_sentinel','CONNECT') AS allowed")).rows[0].allowed,false);
+   assert.equal((await runtime.query("SELECT has_database_privilege(current_user,'unrelated_m1_sentinel','CONNECT') AS allowed")).rows[0].allowed,false);
   });
   await t.test('immutable environment initializes concurrently with SELECT/INSERT only and rejects a different provider domain',async()=>{
    assert.equal((await runtime.query("SELECT has_table_privilege(current_user,'finance_environment','UPDATE') AS allowed")).rows[0].allowed,false);

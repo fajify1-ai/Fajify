@@ -58,7 +58,7 @@ void main() {
       expect(AuthInput.signInPassword('short'), isNull);
       expect(AuthInput.registrationPassword('short'), isNotNull);
       expect(AuthInput.signInPassword(''), 'Password is required');
-      expect(AuthInput.registrationPassword('12345678'), isNull);
+      expect(AuthInput.registrationPassword('123456789012'), isNull);
     },
   );
 

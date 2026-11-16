@@ -3,7 +3,7 @@ import {test,before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {Pool} from 'pg';
 import {randomUUID,generateKeyPairSync,createPublicKey,sign} from 'node:crypto';
-import {KeycloakAccessTokenVerifier} from '../src/auth/keycloak.verifier';
+import {DATABASE_POOL} from '../src/tokens';
 import {AccessService} from '../src/auth/access.service';
 import {BusinessApprovalService} from '../src/auth/business-approval.service';
 import {Test} from '@nestjs/testing';
@@ -120,44 +120,6 @@ test('real PostgreSQL suspension immediately denies an already-verified bearer a
  }finally{await app.close();}
 });
 
-test('real RSA signature verifier and PostgreSQL reject the same bearer across suspension/reinstatement',async()=>{
- const access=new AccessService(runtime!);
- await access.provisionSubject(signedSubject);
- await access.setSuspended(actor,signedSubject,false);
- const issuer='https://identity.example.test/realms/faji';
- const pair=generateKeyPairSync('rsa',{modulusLength:2048});
- const pub=createPublicKey(pair.privateKey).export({format:'jwk'});
- const now=Math.floor(Date.now()/1000);
- const encoded=(x:unknown)=>Buffer.from(JSON.stringify(x)).toString('base64url');
- const head=encoded({alg:'RS256',kid:'ephemeral',typ:'JWT'});
- const payload=encoded({iss:issuer,aud:'faji-api',sub:signedSubject,azp:'faji-customer-mobile',
-  iat:now-120,exp:now+180,realm_access:{roles:['customer']}});
- const token=head+'.'+payload+'.'+sign('RSA-SHA256',Buffer.from(head+'.'+payload),pair.privateKey).toString('base64url');
- const verifier=new KeycloakAccessTokenVerifier(issuer,'faji-api',async()=>({
-  keys:[{...pub,kid:'ephemeral',alg:'RS256',use:'sig'}]
- }));
- const module=await Test.createTestingModule({controllers:[SessionController],providers:[
-  IdentityGuard,AccountGuard,{provide:IDENTITY_VERIFIER,useValue:verifier},
-  {provide:AccessService,useValue:access}
- ]}).compile();
- const app=module.createNestApplication();
- app.setGlobalPrefix('api');app.enableVersioning({type:VersioningType.URI,defaultVersion:'1'});
- await app.init();
- try{
-  const get=()=>request(app.getHttpServer()).get('/api/v1/auth/me')
-   .set('Authorization','Bearer '+token);
-  assert.equal((await get()).status,200);
-  const tampered=token.split('.');
-  tampered[1]=encoded({iss:issuer,aud:'faji-api',sub:'attacker',iat:now-120,exp:now+180});
-  assert.equal((await request(app.getHttpServer()).get('/api/v1/auth/me')
-   .set('Authorization','Bearer '+tampered.join('.'))).status,401);
-  await access.setSuspended(actor,signedSubject,true);
-  assert.equal((await get()).status,403);
-  await access.setSuspended(actor,signedSubject,false);
-  assert.equal((await get()).status,403,'previously valid signed bearer must stay invalid');
- }finally{await app.close();}
-});
-
 test('revoked signed session stays denied across independent service instances',async()=>{
  const subjectId='m2_'+randomUUID(),sessionId=randomUUID();
  const first=new AccessService(runtime!);
@@ -240,12 +202,12 @@ test('actual Business workspace HTTP route rejects pending, rejected, foreign an
  await business.review(actor,foreignWorkspace.id,'approved');
  let active=first;
  const verifier:IdentityVerifier={verifyAccessToken:async()=>({
-  subject:active,issuer:'https://issuer.example/realms/faji',audience:['faji-api'],
+  subject:active,issuer:'https://api.example.test',audience:['faji-api'],
   issuedAt:Math.floor(Date.now()/1000)+1,expiresAt:Math.floor(Date.now()/1000)+300,
   roles:['customer'],sessionId:'workspace-session'
  })};
  const module=await Test.createTestingModule({controllers:[BusinessApprovalController],providers:[
-  Reflector,IdentityGuard,AccountGuard,
+  Reflector,IdentityGuard,AccountGuard,{provide:DATABASE_POOL,useValue:runtime},
   {provide:ResourceGuard,useFactory:()=>new ResourceGuard(new Reflector(),access)},
   {provide:IDENTITY_VERIFIER,useValue:verifier},
   {provide:AccessService,useValue:access},

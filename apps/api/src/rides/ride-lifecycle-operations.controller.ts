@@ -10,7 +10,7 @@ import {RideLifecycleOperations} from './ride-lifecycle-operations.service';
 import {RideAreasService} from './ride-areas.service';
 const reassignSchema=z.object({areaId:z.string().uuid()}).strict();
 type Request={identity:VerifiedIdentity};
-@ApiTags('ride-operations') @ApiBearerAuth('keycloak')
+@ApiTags('ride-operations') @ApiBearerAuth('session')
 @Controller({path:'',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideLifecycleOperationsController {

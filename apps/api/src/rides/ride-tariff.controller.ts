@@ -11,7 +11,7 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideTariffService} from './ride-tariff.service';
 const policy=z.object({category:z.string().min(1).max(32),baseMinor:z.string().regex(/^[0-9]{1,16}$/),
  perKmMinor:z.string().regex(/^[0-9]{1,16}$/),commissionBps:z.number().int().min(0).max(10000)}).strict();
-@ApiTags('ride-fare-policy') @ApiBearerAuth('keycloak')
+@ApiTags('ride-fare-policy') @ApiBearerAuth('session')
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,PrivilegedGuard,AdminRateGuard,CustomerWriteGuard)
 @RequireRoles('platform-admin')
 @Controller({path:'admin/ride-tariffs',version:'1'})

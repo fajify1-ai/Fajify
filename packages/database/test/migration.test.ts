@@ -22,7 +22,7 @@ const code=(error:unknown):string|undefined=>{
 before(async()=>{
  assert.ok(process.env.FAJI_DATABASE_URL,'FAJI_DATABASE_URL required; database tests cannot be skipped');
  assert.ok(process.env.FAJI_RUNTIME_DATABASE_URL,'Separate runtime credentials required');
- assert.ok(process.env.FAJI_KEYCLOAK_TEST_URL,'Isolated identity sentinel URL required');
+ assert.ok(process.env.FAJI_ISOLATION_TEST_URL,'Isolated identity sentinel URL required');
  await assertDisposable(pool);
  await assertDisposable(runtime);
  const migrationTarget=new URL(process.env.FAJI_DATABASE_URL!);
@@ -194,14 +194,14 @@ test('PostGIS geometry, geography, distance and GiST index work with synthetic c
  }finally{await client.query('ROLLBACK');client.release();}
 });
 
-test('runtime role is restricted and cannot connect to the isolated Keycloak sentinel',async()=>{
+test('runtime role is restricted and cannot connect to the isolated unrelated-database sentinel',async()=>{
  const roles=await runtime.query('SELECT rolsuper,rolcreatedb,rolcreaterole FROM pg_roles WHERE rolname=current_user');
  assert.deepEqual(roles.rows[0],{rolsuper:false,rolcreatedb:false,rolcreaterole:false});
- const identity=new URL(process.env.FAJI_KEYCLOAK_TEST_URL!);
+ const identity=new URL(process.env.FAJI_ISOLATION_TEST_URL!);
  const application=new URL(process.env.FAJI_RUNTIME_DATABASE_URL!);
  assert.equal(identity.username,application.username);assert.equal(identity.password,application.password);
- assert.equal(identity.host,application.host);assert.equal(identity.pathname,'/keycloak_m1_sentinel');
- assert.equal((await runtime.query("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname='keycloak_m1_sentinel') AS present")).rows[0].present,true);
+ assert.equal(identity.host,application.host);assert.equal(identity.pathname,'/unrelated_m1_sentinel');
+ assert.equal((await runtime.query("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname='unrelated_m1_sentinel') AS present")).rows[0].present,true);
  const forbidden=new Pool({connectionString:identity.toString(),connectionTimeoutMillis:3000});
  try{await assert.rejects(forbidden.query('SELECT 1'),e=>code(e)==='42501');}finally{await forbidden.end();}
  await assert.rejects(runtime.query('CREATE TABLE public.m1_forbidden(id int)'),e=>code(e)==='42501');

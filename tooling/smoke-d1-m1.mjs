@@ -14,8 +14,9 @@ const child=spawn(process.execPath,['apps/api/dist/main.js'],{
  env:{...process.env,NODE_ENV:'test',PORT:String(port),
   FAJI_DATABASE_URL:unavailable?'postgresql://smoke:synthetic@127.0.0.1:1/faji_smoke':(process.env.FAJI_RUNTIME_DATABASE_URL||process.env.FAJI_DATABASE_URL||'postgresql://localhost:1/faji_smoke'),
   REDIS_URL:process.env.REDIS_URL||'redis://localhost:1',
-  KEYCLOAK_ISSUER:process.env.KEYCLOAK_ISSUER||'http://localhost:8080/realms/faji',
-  KEYCLOAK_AUDIENCE:process.env.KEYCLOAK_AUDIENCE||'faji-api',
+  BETTER_AUTH_URL:process.env.BETTER_AUTH_URL||'http://localhost:3001',
+  BETTER_AUTH_SECRET:process.env.BETTER_AUTH_SECRET||'disposable-test-secret-over-thirty-two-characters',
+  FAJI_WEB_ORIGINS:process.env.FAJI_WEB_ORIGINS||'http://localhost:3000',
   S3_ENDPOINT:process.env.S3_ENDPOINT||'http://localhost:9000',S3_BUCKET:process.env.S3_BUCKET||'faji-smoke'},
  stdio:'ignore'
 });

@@ -1,3 +1,7 @@
+import 'package:faji_flutter_core/better_auth.dart';
+import 'package:faji_flutter_core/security_screen.dart';
+import 'package:faji_flutter_core/auth_screen.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -118,6 +122,20 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
         ),
       ),
       routes: {
+        '/account-recovery': (_) => FajiAuthScreen(
+          client: FajiAuthClient(
+            baseUrl: const String.fromEnvironment('API_BASE_URL'),
+          ),
+          onAuthenticated: () => _auth.restore(),
+        ),
+        '/account-security': (_) =>
+            _auth.state.status == AuthStatus.authenticated
+            ? FajiSecurityScreen(
+                client: FajiAuthClient(
+                  baseUrl: const String.fromEnvironment('API_BASE_URL'),
+                ),
+              )
+            : const RoleSelectionScreen(),
         FajiRoutes.termsOfService: (_) => const TermsOfServiceScreen(),
         FajiRoutes.privacyPolicy: (_) => const PrivacyPolicyScreen(),
         FajiRoutes.roleSelection: (_) => const RoleSelectionScreen(),

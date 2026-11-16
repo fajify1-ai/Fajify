@@ -45,7 +45,7 @@ class OrderInput{
 class OrderTransition { @ApiProperty({enum:['accepted','preparing','ready','fulfilled','cancelled']}) @IsIn(['accepted','preparing','ready','fulfilled','cancelled']) status!:'accepted'|'preparing'|'ready'|'fulfilled'|'cancelled'; }
 class ReservationTransition { @ApiProperty({enum:['checked_in','completed','cancelled']}) @IsIn(['checked_in','completed','cancelled']) status!:'checked_in'|'completed'|'cancelled'; }
 type Request={identity:VerifiedIdentity};
-@ApiTags('merchant-operations') @ApiBearerAuth('keycloak')
+@ApiTags('merchant-operations') @ApiBearerAuth('session')
 @Controller({path:'businesses/:businessId',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,ResourceGuard)
 export class BusinessController{

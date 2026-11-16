@@ -9,7 +9,7 @@ import {AdminRateGuard} from '../auth/admin-rate.guard';
 import {FinanceEmptyBodyGuard} from '../payments/m5-lifecycle.controller';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideFinanceService} from './ride-finance.service';
-@ApiTags('ride-finance') @ApiBearerAuth('keycloak')
+@ApiTags('ride-finance') @ApiBearerAuth('session')
 @Controller({path:'',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideFinanceController {

@@ -16,7 +16,7 @@ import {AdminReportRangeQuery,AdminPagedResult,AdminFinanceSummary,AdminReportSu
 type ActorRequest={identity:VerifiedIdentity};
 const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard,AdminReadAuditGuard];
 
-@ApiTags('admin-finance-reports') @ApiBearerAuth('keycloak')
+@ApiTags('admin-finance-reports') @ApiBearerAuth('session')
 @Controller({path:'admin',version:'1'}) @UseGuards(...guards)
 export class AdminInsightsController{
  constructor(@Inject(AdminInsightsService)private readonly insights:AdminInsightsService,

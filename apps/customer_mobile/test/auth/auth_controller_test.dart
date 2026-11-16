@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:faji_app/features/auth/application/auth_controller.dart';
-import 'package:faji_app/features/auth/data/oidc_auth_boundary.dart';
 import 'package:faji_app/features/auth/domain/auth_session.dart';
 
 import 'fake_auth_repository.dart';
@@ -31,14 +30,14 @@ void main() {
   });
 
   testWidgets(
-    'Keycloak refresh starts before expiry and failure removes access',
+    'Better Auth refresh starts before expiry and failure removes access',
     (tester) async {
       var time = now;
       final timed = AuthController(repository, clock: () => time);
       addTearDown(timed.dispose);
       repository.session = AuthSession(
         subject: 'fixture-subject',
-        provider: IdentityProvider.keycloak,
+        provider: IdentityProvider.betterAuth,
         expiresAt: now.add(const Duration(minutes: 5)),
         emailVerified: true,
         customerAccess: true,
@@ -206,8 +205,8 @@ void main() {
     'customer sign-in accepts unverified email without inventing verification',
     () async {
       repository.session = AuthSession(
-        subject: 'fixture-keycloak-subject',
-        provider: IdentityProvider.keycloak,
+        subject: 'fixture-better_auth-subject',
+        provider: IdentityProvider.betterAuth,
         expiresAt: now.add(const Duration(minutes: 5)),
         emailVerified: false,
         customerAccess: true,
@@ -227,14 +226,4 @@ void main() {
     expect(disposable.canAccessCustomer, isFalse);
   });
 
-  test('pending Keycloak adapter never fabricates authentication', () async {
-    const pending = PendingKeycloakRepository(CustomerOidcConfiguration());
-    expect(await pending.restoreSession(), isNull);
-    await expectLater(pending.authorize(), throwsA(isA<AuthFailure>()));
-    await expectLater(
-      pending.completeAuthorization(Uri(path: '/test-callback')),
-      throwsA(isA<AuthFailure>()),
-    );
-    await expectLater(pending.beginRecovery(), throwsA(isA<AuthFailure>()));
-  });
 }

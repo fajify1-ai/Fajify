@@ -193,6 +193,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const HomeHeader(),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.of(context)
+                                    .pushNamed('/account-security'),
+                            child: const Text('Account security'),
+                          ),
                           const SizedBox(height: 18),
                           HomeSearchBar(
                             controller: _searchController,

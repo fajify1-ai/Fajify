@@ -19,7 +19,7 @@ const bank=z.object({recipientReference:z.string().regex(/^[A-Za-z0-9_-]{8,160}$
 function parse<T>(schema:z.ZodType<T>,body:unknown):T{
  const r=schema.safeParse(body);if(!r.success)throw new BadRequestException('Invalid driver operation request');return r.data;
 }
-@ApiTags('ride-driver-operations') @ApiBearerAuth('keycloak')
+@ApiTags('ride-driver-operations') @ApiBearerAuth('session')
 @Controller({path:'drivers',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideDriverOperationsController {

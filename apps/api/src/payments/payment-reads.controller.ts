@@ -1,3 +1,4 @@
+import {AdminScopeGuard,RequireAdminScope} from '../admin/admin-scope.guard';
 import {Controller,Get,Header,Inject,Param,ParseUUIDPipe,Req,UseGuards} from '@nestjs/common';
 import {ApiBearerAuth,ApiOkResponse,ApiOperation,ApiParam,ApiProperty,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
@@ -34,7 +35,7 @@ class CaptureReconciliationResponse {
  @ApiProperty({type:[String],description:'Names of failed internal consistency checks'}) issues!:string[];
 }
 
-@ApiTags('customer-payments') @ApiBearerAuth('keycloak')
+@ApiTags('customer-payments') @ApiBearerAuth('session')
 @Controller({path:'customer/payments',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard)
 export class CustomerPaymentsController {
@@ -48,9 +49,10 @@ export class CustomerPaymentsController {
  }
 }
 
-@ApiTags('finance-admin') @ApiBearerAuth('keycloak')
+@ApiTags('finance-admin') @ApiBearerAuth('session')
 @Controller({path:'admin/finance/payments',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
+@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,AdminScopeGuard)
+@RequireAdminScope('finance.read')
 export class FinancePaymentsController {
  constructor(@Inject(PaymentReadsService)private readonly service:PaymentReadsService){}
  @Get(':id/reconciliation') @ApiOperation({summary:'Audit internal capture consistency; provider statements and settlement are not checked'})

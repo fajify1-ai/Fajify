@@ -36,8 +36,9 @@ else echo "SKIP: Redis integration (no REDIS_URL)"; fi
 # Contract generation needs validated configuration, but does not contact these services.
 FAJI_DATABASE_URL="${FAJI_DATABASE_URL:-postgresql://localhost:1/faji_contracts}" \
 REDIS_URL="${REDIS_URL:-redis://localhost:1}" \
-KEYCLOAK_ISSUER="${KEYCLOAK_ISSUER:-http://localhost:8080/realms/faji}" \
-KEYCLOAK_AUDIENCE="${KEYCLOAK_AUDIENCE:-faji-api}" \
+BETTER_AUTH_URL="${BETTER_AUTH_URL:-http://localhost:3001}" \
+BETTER_AUTH_SECRET="${BETTER_AUTH_SECRET:-disposable-test-secret-over-thirty-two-characters}" \
+FAJI_WEB_ORIGINS="${FAJI_WEB_ORIGINS:-http://localhost:3000}" \
 S3_ENDPOINT="${S3_ENDPOINT:-http://localhost:9000}" \
 S3_BUCKET="${S3_BUCKET:-faji-contracts}" \
 corepack pnpm --filter @faji/api contracts

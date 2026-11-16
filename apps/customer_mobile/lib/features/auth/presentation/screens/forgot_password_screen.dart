@@ -1,3 +1,5 @@
+import 'package:faji_flutter_core/auth_screen.dart';
+import 'package:faji_flutter_core/better_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/faji_colors.dart';
@@ -29,21 +31,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _send() async {
     final auth = AuthScope.of(context);
-    if (_busy ||
-        auth.isBusy ||
-        (!auth.usesBrowserAuthentication &&
-            !(_form.currentState?.validate() ?? false))) {
+    if (_busy || auth.isBusy || !(_form.currentState?.validate() ?? false)) {
       return;
     }
     setState(() => _busy = true);
-    final failure = await auth.requestRecovery();
+    final failure = await auth.requestRecovery(_email.text);
     if (!mounted) return;
     setState(() => _busy = false);
     if (continueToCustomerHome(context, auth)) return;
-    if (auth.usesBrowserAuthentication && auth.state.failure != null) return;
     showAuthMessage(
       context,
-      failure?.message ?? 'Continue recovery in your account provider.',
+      failure?.message ?? 'If the account exists, a recovery email was sent.',
     );
   }
 
@@ -71,28 +69,36 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              AuthScope.of(context).usesBrowserAuthentication
-                  ? 'Choose Forgot password on the secure sign-in page. Your account provider handles verification and your new password.'
-                  : 'Account recovery is awaiting the shared identity integration.',
+              'Enter your email to receive a recovery link. Paste the link into the in-app reset form.',
               style: const TextStyle(color: FajiColors.textSecondary),
             ),
-            const SizedBox(height: 28),
-            if (!AuthScope.of(context).usesBrowserAuthentication)
-              FajiAuthTextField(
-                controller: _email,
-                hint: 'you@email.com',
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.done,
-                autofillHints: const [AutofillHints.email],
-                recoveryAppearance: true,
-                validator: AuthInput.email,
+            TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => FajiAuthScreen(
+                    client: FajiAuthClient(
+                      baseUrl: const String.fromEnvironment('API_BASE_URL'),
+                    ),
+                    onAuthenticated: () => Navigator.of(context).pop(),
+                  ),
+                ),
               ),
+              child: const Text('Recovery or phone sign-in'),
+            ),
+            const SizedBox(height: 28),
+            FajiAuthTextField(
+              controller: _email,
+              hint: 'you@email.com',
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.email],
+              recoveryAppearance: true,
+              validator: AuthInput.email,
+            ),
             const SizedBox(height: 20),
             AuthStatusView(state: AuthScope.of(context).state),
             AuthPrimaryButton.recovery(
-              label: AuthScope.of(context).usesBrowserAuthentication
-                  ? 'Continue in browser'
-                  : 'Send reset link',
+              label: 'Send reset link',
               busy: _busy || AuthScope.of(context).isBusy,
               onTap: _send,
             ),

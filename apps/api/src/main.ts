@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import {BetterAuthService} from './auth/better-auth.service';
 import {NestFactory} from '@nestjs/core';
 import {DocumentBuilder,SwaggerModule} from '@nestjs/swagger';
 import {ValidationPipe,VersioningType} from '@nestjs/common';
@@ -13,11 +14,14 @@ export function setupApi(app:import('@nestjs/common').INestApplication){
  app.useGlobalFilters(new HttpErrorFilter());
 }
 export function apiDocument(app:import('@nestjs/common').INestApplication){
- return SwaggerModule.createDocument(app,new DocumentBuilder().setTitle('Faji API').setDescription('Faji server-authoritative API v1').setVersion('1.0.0').addBearerAuth({type:'http',scheme:'bearer',bearerFormat:'JWT'},'keycloak').build());
+ return SwaggerModule.createDocument(app,new DocumentBuilder().setTitle('Faji API').setDescription('Faji server-authoritative API v1').setVersion('1.0.0').addBearerAuth({type:'http',scheme:'bearer',bearerFormat:'Session token'},'session').build());
 }
 async function bootstrap(){
  const {AppModule}=await import('./app.module');
- const app=await NestFactory.create(AppModule,{bufferLogs:true,rawBody:true});
+ const app=await NestFactory.create<import('@nestjs/platform-express').NestExpressApplication>(AppModule,{bufferLogs:true,rawBody:true,bodyParser:false});
+ app.use('/api/auth', (req:import('node:http').IncomingMessage,res:import('node:http').ServerResponse,next:(error?:unknown)=>void)=>{if((req as import('node:http').IncomingMessage & {originalUrl:string}).originalUrl.split('?')[0].startsWith('/api/auth/faji/'))return next();app.get(BetterAuthService).handle(req,res).catch(next);});
+ app.useBodyParser('json');
+ app.useBodyParser('urlencoded',{extended:true});
  setupApi(app);
  if(process.env.NODE_ENV!=='production') SwaggerModule.setup('api/docs',app,apiDocument(app));
  app.enableShutdownHooks();

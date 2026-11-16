@@ -7,7 +7,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repoPath = Split-Path -Parent $PSScriptRoot
 $appPath = Join-Path $repoPath 'apps\customer_mobile'
-$configPath = Join-Path $appPath 'oidc-config.local.json'
+$configPath = Join-Path $appPath 'auth-config.local.json'
 $caPath = Join-Path $repoPath 'infrastructure\certs\fajify-rootCA.crt'
 $rawPath = Join-Path $appPath 'android\app\src\debug\res\raw'
 foreach ($requiredPath in @($FlutterBin, $AdbPath, $configPath, $caPath)) {

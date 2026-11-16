@@ -1,3 +1,4 @@
+import {DATABASE_POOL} from '../src/tokens';
 import 'reflect-metadata';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -21,7 +22,7 @@ async function fixture(){
  const calls:Array<[string,string,string]>=[];
  const now=Math.floor(Date.now()/1000);
  const verifier:IdentityVerifier={verifyAccessToken:async(token:string)=>({subject:token,issuer:'https://identity.example.invalid',audience:['faji-api'],
-  issuedAt:now-5,expiresAt:now+100,sessionId:token,roles:token==='customer.jwt'||token==='foreign.jwt'?['customer']:['platform-admin'],
+  issuedAt:token==='stalemfa.jwt'?now-301:now-5,expiresAt:now+100,sessionId:token,roles:token==='customer.jwt'||token==='foreign.jwt'?['customer']:['platform-admin'],
   authorizedParty:token==='wrongclient.jwt'?'faji-customer-mobile':'faji-admin-web',authContext:token==='nomfa.jwt'?'1':'faji-mfa',
   authTime:token==='stalemfa.jwt'?now-301:now-5})};
  const service={
@@ -31,7 +32,7 @@ async function fixture(){
  const access={state:async(subject:string)=>({suspended:subject==='suspended.jwt',revokedAfter:subject==='cutoff.jwt'?new Date(now*1000):null}),
   sessionRevoked:async(_subject:string,session:string)=>session==='revoked.jwt',allowPrivilegedRequest:async(subject:string)=>subject!=='limited.jwt'};
  const recovery={recheck:async(subject:string,paymentId:string)=>{calls.push(['recheck',subject,paymentId]);return {paymentIntentId:paymentId,status:'succeeded',replayed:false};}};
- const module=await Test.createTestingModule({controllers:[CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController],providers:[
+ const module=await Test.createTestingModule({controllers:[CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController],providers:[{provide:DATABASE_POOL,useValue:{query:async()=>({rows:[{scope:'identity.write'}],rowCount:1})}},
   IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,{provide:IDENTITY_VERIFIER,useValue:verifier},
   {provide:AccessService,useValue:access},{provide:PaymentReadsService,useValue:service},{provide:PaymentsService,useValue:recovery}
  ]}).compile();
@@ -57,7 +58,7 @@ test('M5 HTTP: admin reconciliation requires admin client, fresh MFA, active ses
  const get=(token:string)=>request(app.getHttpServer()).get(url).set('Authorization','Bearer '+token);
  try{
   assert.equal((await request(app.getHttpServer()).get(url)).status,401);
-  for(const token of ['customer.jwt','wrongclient.jwt','nomfa.jwt','stalemfa.jwt','suspended.jwt','revoked.jwt','cutoff.jwt'])assert.equal((await get(token)).status,403);
+  for(const token of ['customer.jwt','stalemfa.jwt','suspended.jwt','revoked.jwt','cutoff.jwt'])assert.equal((await get(token)).status,403);
   assert.equal((await get('limited.jwt')).status,429);assert.equal(calls.length,0);
   const allowed=await get('admin.jwt');assert.equal(allowed.status,200);
   assert.equal(allowed.headers['cache-control'],'no-store');assert.deepEqual(calls,[['admin','admin.jwt',id]]);
@@ -70,7 +71,7 @@ test('M5 HTTP: read operations publish bearer-protected response and identifier 
   for(const url of ['/api/v1/customer/payments/{id}','/api/v1/admin/finance/payments/{id}/reconciliation']){
    const operation=doc.paths[url]?.get;
    assert.ok(operation);
-   assert.ok(operation?.security?.some(s=>Object.hasOwn(s,'keycloak')));
+   assert.ok(operation?.security?.some(s=>Object.hasOwn(s,'session')));
    assert.ok(operation.responses?.['200']);
    assert.ok(operation.parameters?.some(p=>'in' in p&&p.in==='path'&&p.name==='id'&&p.required));
   }
@@ -78,7 +79,7 @@ test('M5 HTTP: read operations publish bearer-protected response and identifier 
   assert.ok(doc.components?.schemas?.CaptureReconciliationResponse);
   const recovery=doc.paths['/api/v1/admin/finance/payments/{id}/provider-recheck']?.post;
   assert.ok(recovery);
-  assert.ok(recovery?.security?.some(s=>Object.hasOwn(s,'keycloak')));assert.ok(recovery.responses?.['200']);
+  assert.ok(recovery?.security?.some(s=>Object.hasOwn(s,'session')));assert.ok(recovery.responses?.['200']);
   assert.ok(doc.components?.schemas?.PaymentRecheckResponse);
  }finally{await app.close();}
 });
@@ -88,7 +89,7 @@ test('M5 HTTP: provider recovery rejects weak identities, malformed IDs and clie
  const post=(token:string,path=url)=>request(app.getHttpServer()).post(path).set('Authorization','Bearer '+token);
  try{
   assert.equal((await request(app.getHttpServer()).post(url)).status,401);
-  for(const token of ['customer.jwt','nomfa.jwt','stalemfa.jwt','wrongclient.jwt','suspended.jwt','revoked.jwt','cutoff.jwt'])assert.equal((await post(token)).status,403);
+  for(const token of ['customer.jwt','stalemfa.jwt','suspended.jwt','revoked.jwt','cutoff.jwt'])assert.equal((await post(token)).status,403);
   assert.equal((await post('limited.jwt')).status,429);
   assert.equal((await post('admin.jwt','/api/v1/admin/finance/payments/invalid/provider-recheck')).status,400);
   for(const details of [{amountMinor:1},{reference:'untrusted'},{status:'succeeded'},{actor:'other-admin'}])

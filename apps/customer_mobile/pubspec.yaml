@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  faji_flutter_core:
+    path: ../../packages/flutter_core
   faji_business:
     path: ../business_mobile
   flutter:
@@ -38,8 +40,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.3
   flutter_secure_storage: ^11.2.0
-  flutter_appauth: 12.1.0
 dev_dependencies:
+  http: ^1.6.0
   integration_test:
     sdk: flutter
   flutter_test:

@@ -16,3 +16,15 @@ infrastructure/certs/
 
 # Device-local debug CA (public certificate only, never a private key)
 apps/customer_mobile/android/app/src/debug/res/raw/fajify_root_ca.crt
+
+# Local implementation and verification scratch files
+/work/
+
+# Turborepo local build cache
+.turbo/
+
+# Private staging credentials and certificates
+infrastructure/deployment/staging/.secrets/
+
+# Private account-claim delivery files
+*.claims.json

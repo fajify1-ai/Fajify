@@ -11,7 +11,7 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {DriverOnboardingService} from './driver-onboarding.service';
 const register=z.object({vehicleCategory:z.string().trim().min(1).max(32),registration:z.string().trim().min(3).max(40)}).strict();
 const decision=z.object({approve:z.boolean()}).strict();
-@ApiTags('ride-drivers') @ApiBearerAuth('keycloak')
+@ApiTags('ride-drivers') @ApiBearerAuth('session')
 @Controller({path:'drivers',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class DriverOnboardingController {
  constructor(@Inject(DriverOnboardingService)private readonly service:DriverOnboardingService){}

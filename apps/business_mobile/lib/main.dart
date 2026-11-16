@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'app/business_app.dart';
 
-void main() => runApp(const BusinessApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const BusinessApp());
+}

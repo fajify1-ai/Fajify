@@ -1,3 +1,4 @@
+import 'package:faji_flutter_core/security_screen.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -5,7 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/business_controller.dart';
 import '../core/config.dart';
-import '../core/keycloak_identity_service.dart';
+import '../core/better_auth_identity_service.dart';
 import '../core/models.dart';
 import '../core/services.dart';
 import '../features/account.dart';
@@ -122,10 +123,7 @@ GoRouter businessRouter(
       page('/login', (_) => LoginPage(controller: controller, onExit: onExit)),
       page(
         '/register',
-        (_) => IdentityHandoffPage(
-          controller: controller,
-          onExit: onExit,
-        ),
+        (_) => IdentityHandoffPage(controller: controller, onExit: onExit),
       ),
       page(
         '/access-denied',
@@ -133,9 +131,26 @@ GoRouter businessRouter(
           body: SafeArea(
             child: PageBody(
               title: 'Merchant access required',
-              subtitle: controller.error ??
+              subtitle:
+                  controller.error ??
                   'Your Faji identity is valid, but no merchant access was confirmed.',
               children: [
+                if (controller.identity is BetterAuthIdentityService)
+                  Builder(
+                    builder: (context) => TextButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => FajiSecurityScreen(
+                            client:
+                                (controller.identity
+                                        as BetterAuthIdentityService)
+                                    .client,
+                          ),
+                        ),
+                      ),
+                      child: const Text('Account security'),
+                    ),
+                  ),
                 FilledButton(
                   onPressed: controller.logout,
                   child: const Text('Return to login'),
@@ -255,7 +270,7 @@ class _BusinessAppState extends State<BusinessApp> with WidgetsBindingObserver {
       BusinessController(
         identity: widget.config.useMocks
             ? MockIdentityService()
-            : KeycloakIdentityService(widget.config),
+            : BetterAuthIdentityService(widget.config),
       );
   late final router = businessRouter(
     controller,

@@ -7,7 +7,7 @@ import type {VerifiedIdentity} from '../src/auth/identity.types';
 
 const issuedAt=1800000000;
 const identity={
- subject:'synthetic-subject',issuer:'https://issuer.example/realms/faji',
+ subject:'synthetic-subject',issuer:'https://api.example.test',
  audience:['faji-api'],issuedAt,expiresAt:issuedAt+300,roles:['customer']
 } satisfies VerifiedIdentity;
 

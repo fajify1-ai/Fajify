@@ -17,8 +17,9 @@ corepack pnpm@9.15.9 install --frozen-lockfile
 export NODE_ENV=test
 export FAJI_DATABASE_URL="${FAJI_DATABASE_URL:-postgresql://faji_contract_only:unused@127.0.0.1:5432/faji_contract_unconnected}"
 export REDIS_URL="${REDIS_URL:-redis://127.0.0.1:6379}"
-export KEYCLOAK_ISSUER="${KEYCLOAK_ISSUER:-http://localhost:8080/realms/faji}"
-export KEYCLOAK_AUDIENCE="${KEYCLOAK_AUDIENCE:-faji-api}"
+export BETTER_AUTH_URL=http://localhost:3001
+export BETTER_AUTH_SECRET=disposable-test-secret-over-thirty-two-characters
+export FAJI_WEB_ORIGINS=http://localhost:3000
 export S3_ENDPOINT="${S3_ENDPOINT:-http://localhost:9000}"
 export S3_BUCKET="${S3_BUCKET:-faji-contract-only}"
 corepack pnpm@9.15.9 --filter @faji/api contracts

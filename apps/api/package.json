@@ -29,7 +29,10 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "4.6.6",
-    "pg": "^8.13.0"
+    "pg": "^8.13.0",
+    "better-auth": "1.7.25",
+    "drizzle-orm": "^0.45.2",
+    "nodemailer": "10.6.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
@@ -43,6 +46,10 @@
     "typescript-eslint": "^8.0.0",
     "supertest": "^7.0.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.8.0"
-  }
+    "typescript": "^5.8.0",
+    "@types/nodemailer": "8.0.2"
+  },
+  "files": [
+    "dist"
+  ]
 }
