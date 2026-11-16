@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:faji_app/core/data/service_unavailable.dart';
-import 'package:faji_app/features/auth/application/auth_controller.dart';
-import 'package:faji_app/features/auth/data/oidc_auth_boundary.dart';
-import 'package:faji_app/features/auth/domain/auth_session.dart';
 import 'package:faji_app/features/auth/presentation/screens/user_home_screen.dart';
 import 'package:faji_app/features/bookings/data/models/booking_draft.dart';
 import 'package:faji_app/features/bookings/data/repositories/booking_repository.dart';
@@ -45,20 +42,6 @@ void main() {
     expect(repository.items, isEmpty);
     expect(repository.savedIds, isEmpty);
     expect(repository.loadError, contains('unavailable'));
-  });
-
-  test('pending browser identity cannot authorize or register', () async {
-    final controller = AuthController(
-      const PendingKeycloakRepository(CustomerOidcConfiguration()),
-    );
-    addTearDown(controller.dispose);
-    await controller.restore();
-    await controller.authorize();
-    expect(controller.canAccessCustomer, isFalse);
-    expect(controller.state.failure?.code, AuthErrorCode.providerUnavailable);
-    await controller.beginRegistration();
-    expect(controller.canAccessCustomer, isFalse);
-    expect(controller.state.failure?.code, AuthErrorCode.providerUnavailable);
   });
 
   testWidgets('discovery unavailability retains customer navigation', (

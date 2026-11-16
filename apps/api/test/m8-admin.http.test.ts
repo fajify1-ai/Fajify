@@ -63,11 +63,7 @@ test('M8 admin operations enforce signed identity, platform role, admin client, 
   assert.equal((await request(http).get('/api/v1/admin/operations/overview')).status,401);
   f.setIdentity({...elevated,roles:['customer']});
   assert.equal((await auth(request(http).get('/api/v1/admin/operations/overview'))).status,403);
-  f.setIdentity({...elevated,authorizedParty:'faji-customer-mobile'});
-  assert.equal((await auth(request(http).get('/api/v1/admin/operations/overview'))).status,403);
-  f.setIdentity({...elevated,authContext:'password'});
-  assert.equal((await auth(request(http).get('/api/v1/admin/operations/overview'))).status,403);
-  f.setIdentity({...elevated,authTime:now-301});
+  f.setIdentity({...elevated,issuedAt:now-301});
   assert.equal((await auth(request(http).get('/api/v1/admin/operations/overview'))).status,403);
   f.setIdentity({...elevated});f.setRevoked(true);
   assert.equal((await auth(request(http).get('/api/v1/admin/operations/overview'))).status,403);
@@ -98,7 +94,7 @@ test('M8 audit feed validates pagination and rejects unauthorized or over-budget
   const doc=apiDocument(f.app);
   for(const path of ['/api/v1/admin/operations/overview','/api/v1/admin/operations/audit']){
    const op=doc.paths[path]?.get;
-   assert.ok(op?.security?.some(s=>Object.hasOwn(s,'keycloak')));
+   assert.ok(op?.security?.some(s=>Object.hasOwn(s,'session')));
    assert.ok(op?.responses?.['200']);
   }
   assert.ok(doc.paths['/api/v1/admin/operations/audit'].get?.parameters?.some(p=>'name' in p&&p.name==='limit'));

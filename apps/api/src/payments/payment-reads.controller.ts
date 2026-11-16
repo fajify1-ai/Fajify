@@ -34,7 +34,7 @@ class CaptureReconciliationResponse {
  @ApiProperty({type:[String],description:'Names of failed internal consistency checks'}) issues!:string[];
 }
 
-@ApiTags('customer-payments') @ApiBearerAuth('keycloak')
+@ApiTags('customer-payments') @ApiBearerAuth('session')
 @Controller({path:'customer/payments',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard)
 export class CustomerPaymentsController {
@@ -48,7 +48,7 @@ export class CustomerPaymentsController {
  }
 }
 
-@ApiTags('finance-admin') @ApiBearerAuth('keycloak')
+@ApiTags('finance-admin') @ApiBearerAuth('session')
 @Controller({path:'admin/finance/payments',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
 export class FinancePaymentsController {

@@ -1,5 +1,3 @@
-# Faji Administration
+# Faji Admin web
 
-Next.js, React and TypeScript; platform administration and audit surfaces.
-
-**Status:** planned module; no implementation has been merged.
+Next.js application with embedded Better Auth forms and server-validated sessions. See [implementation and setup](../../docs/engineering/BETTER_AUTH_IMPLEMENTATION.md).

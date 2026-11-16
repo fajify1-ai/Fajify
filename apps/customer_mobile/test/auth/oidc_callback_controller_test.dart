@@ -42,7 +42,7 @@ void main() {
     bool expired = false,
   }) => AuthSession(
     subject: 'verified-test-subject',
-    provider: IdentityProvider.keycloak,
+    provider: IdentityProvider.betterAuth,
     expiresAt: expired ? now : now.add(const Duration(minutes: 5)),
     emailVerified: email,
     customerAccess: access,

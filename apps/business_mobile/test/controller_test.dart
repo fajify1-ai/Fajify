@@ -226,7 +226,6 @@ void main() {
     expect(
       const BusinessConfig(
         useMocks: false,
-        oidcIssuer: 'https://identity.example.test/realms/faji',
         apiBaseUrl: 'https://api.example.test',
       ).problem,
       isNull,
@@ -234,8 +233,7 @@ void main() {
     expect(
       const BusinessConfig(
         useMocks: false,
-        oidcIssuer: 'http://identity.example.test/realms/faji',
-        apiBaseUrl: 'https://api.example.test',
+        apiBaseUrl: 'http://api.example.test',
       ).problem,
       isNotNull,
     );

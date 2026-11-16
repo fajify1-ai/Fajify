@@ -10,7 +10,7 @@ import {RideAreasService} from './ride-areas.service';
 import {RideService} from './ride.service';
 const schema=z.object({driverId:z.string().uuid(),areaId:z.string().uuid(),validForSeconds:z.number().int().min(5).max(120)}).strict();
 const matching=z.object({areaId:z.string().uuid(),offerCount:z.number().int().min(1).max(5),validForSeconds:z.number().int().min(5).max(120)}).strict();
-@ApiTags('ride-dispatch') @ApiBearerAuth('keycloak')
+@ApiTags('ride-dispatch') @ApiBearerAuth('session')
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 @RequireRoles('dispatcher')
 @Controller({path:'dispatch',version:'1'})

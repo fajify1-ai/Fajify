@@ -1,0 +1,20 @@
+{
+  "name": "@faji/web-auth",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./client": "./client.ts",
+    "./form": "./form.tsx",
+    "./server": "./server.ts",
+    "./proxy": "./proxy.ts"
+  },
+  "dependencies": {
+    "better-auth": "1.7.25",
+    "next": "^15.0.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/node": "^22.0.0"
+  }
+}

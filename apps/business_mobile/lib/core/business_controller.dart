@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'models.dart';
 import 'services.dart';
-import 'keycloak_identity_service.dart';
+import 'better_auth_identity_service.dart';
 
 enum SessionStatus { signedOut, merchant, denied }
 

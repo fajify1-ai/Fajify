@@ -6,9 +6,10 @@ environment:
   sdk: '>=3.9.0 <4.0.0'
   flutter: '>=3.35.0'
 dependencies:
+  faji_flutter_core:
+    path: ../../packages/flutter_core
   flutter:
     sdk: flutter
-  flutter_appauth: ^12.1.0
   flutter_secure_storage: ^11.2.0
   go_router: ^14.0.0
   http: ^1.6.0

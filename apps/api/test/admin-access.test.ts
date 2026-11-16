@@ -18,7 +18,7 @@ async function fixture(acr?:string,roles:string[]=['customer']){
  const members:{actor:string;subject:string;type:string;resourceId:string;role:string;active:boolean}[]=[];
  const verifier:IdentityVerifier={verifyAccessToken:async()=>({
   subject:'admin-subject',issuer:'https://identity.example/realms/faji',audience:['faji-api'],
-  expiresAt:now+300,issuedAt:now-10,roles,authorizedParty:'faji-admin-web',authContext:acr,authTime:now-10
+  expiresAt:now+300,issuedAt:acr?now-10:now-301,roles,authorizedParty:'faji-admin-web',authContext:acr,authTime:now-10
  })};
  const access={
   state:async()=>({suspended:false,revokedAfter:null}),
@@ -43,7 +43,7 @@ test('admin mutation refuses a customer without privileged role and MFA',async()
   assert.equal(response.status,403);assert.equal(f.events.length,0);
  }finally{await f.app.close();}
 });
-test('admin mutation refuses platform-admin without enforced assurance claim',async()=>{
+test('admin mutation refuses platform-admin with an old password session',async()=>{
  const f=await fixture(undefined,['platform-admin']);
  try {
   const response=await request(f.app.getHttpServer()).post('/api/v1/admin/accounts/subject-2/suspension')

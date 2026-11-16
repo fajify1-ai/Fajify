@@ -37,8 +37,8 @@ CREATE DATABASE :"db" OWNER m1_migrator;
 COMMENT ON DATABASE :"db" IS 'fajify:m1:disposable';
 REVOKE ALL ON DATABASE :"db" FROM PUBLIC;
 GRANT CONNECT, TEMPORARY ON DATABASE :"db" TO m1_runtime;
-CREATE DATABASE keycloak_m1_sentinel;
-REVOKE ALL ON DATABASE keycloak_m1_sentinel FROM PUBLIC;
+CREATE DATABASE unrelated_m1_sentinel;
+REVOKE ALL ON DATABASE unrelated_m1_sentinel FROM PUBLIC;
 SQL
 PGDATABASE="$FAJI_DISPOSABLE_DATABASE" "$pg_bin/psql" -X -v ON_ERROR_STOP=1 <<'SQL'
 CREATE EXTENSION postgis;
@@ -47,7 +47,7 @@ GRANT USAGE ON SCHEMA public TO m1_runtime;
 SQL
 export FAJI_DATABASE_URL="postgresql://m1_migrator:$FAJI_MIGRATION_PASSWORD@127.0.0.1:$pg_port/$FAJI_DISPOSABLE_DATABASE"
 export FAJI_RUNTIME_DATABASE_URL="postgresql://m1_runtime:$FAJI_RUNTIME_PASSWORD@127.0.0.1:$pg_port/$FAJI_DISPOSABLE_DATABASE"
-export FAJI_KEYCLOAK_TEST_URL="postgresql://m1_runtime:$FAJI_RUNTIME_PASSWORD@127.0.0.1:$pg_port/keycloak_m1_sentinel"
+export FAJI_ISOLATION_TEST_URL="postgresql://m1_runtime:$FAJI_RUNTIME_PASSWORD@127.0.0.1:$pg_port/unrelated_m1_sentinel"
 export REDIS_URL="redis://127.0.0.1:$redis_port"
 redis-server --bind 127.0.0.1 --port "$redis_port" --save '' --appendonly no --dir "$run_dir" > "$run_dir/redis.log" 2>&1 &
 redis_pid=$!

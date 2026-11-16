@@ -33,7 +33,7 @@ export class DiscoveryController {
  slots(@Param('id',new ParseUUIDPipe()) id:string,@Query(body(PageQuery)) query:PageQuery){return this.service.slots(id,query);}
 }
 
-@ApiTags('customer-workflows') @ApiBearerAuth('keycloak')
+@ApiTags('customer-workflows') @ApiBearerAuth('session')
 @Controller({path:'customer',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class CustomerController {
  constructor(@Inject(CustomerService) private readonly service:CustomerService){}

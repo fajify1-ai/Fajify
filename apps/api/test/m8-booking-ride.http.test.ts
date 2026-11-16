@@ -61,7 +61,7 @@ test('M8 booking-to-ride HTTP requires verified customer consent, ownership and 
   const ops=[['get',url],['post',url],['put',url+'/{id}/unlink']] as const;
   for(const [method,path] of ops){
    const operation=doc.paths[path]?.[method];
-   assert.ok(operation?.security?.some(s=>Object.hasOwn(s,'keycloak')),path);
+   assert.ok(operation?.security?.some(s=>Object.hasOwn(s,'session')),path);
    assert.ok(operation?.responses['200'],path);
   }
  }finally{await app.close();}

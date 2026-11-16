@@ -4,10 +4,10 @@ import { extractBearerToken,IDENTITY_VERIFIER,IdentityVerifier } from './identit
 export class IdentityGuard implements CanActivate {
  constructor(@Inject(IDENTITY_VERIFIER) private readonly verifier: IdentityVerifier){}
  async canActivate(ctx: ExecutionContext){
-  const req=ctx.switchToHttp().getRequest<{headers:{authorization?:string},identity?:unknown}>();
+  const req=ctx.switchToHttp().getRequest<{headers:{authorization?:string;cookie?:string},identity?:unknown}>();
   const token=extractBearerToken(req.headers.authorization);
-  if(!token) throw new UnauthorizedException();
-  try { req.identity=await this.verifier.verifyAccessToken(token);return true; }
+  if((req.headers.authorization&&!token)||(!token&&!req.headers.cookie))throw new UnauthorizedException();
+  try { req.identity=await (this.verifier.verifyHeaders ? this.verifier.verifyHeaders(new Headers(req.headers as Record<string,string>)) : this.verifier.verifyAccessToken(token??''));return true; }
   catch {throw new UnauthorizedException();}
  }
 }

@@ -51,7 +51,7 @@ test('marketplace and account HTTP contracts validate public filters and preserv
   assert.deepEqual(calls.at(-1)?.args[0],identity);
   assert.equal((await auth(request(http).put('/api/v1/businesses/'+id+'/branches/'+id+'/public-profile').send({summary:'Welcome',city:'Lagos'}))).status,403);
   const doc=apiDocument(app);
-  assert.deepEqual(doc.paths['/api/v1/customer/support'].post?.security,[{keycloak:[]}]);
+  assert.deepEqual(doc.paths['/api/v1/customer/support'].post?.security,[{session:[]}]);
   assert.equal(doc.paths['/api/v1/discovery/plans/{id}/quote'].post?.security,undefined);
   assert.ok(doc.components?.schemas?.VenueDetail);assert.ok(doc.components?.schemas?.SupportCaseView);
  }finally{await app.close();}

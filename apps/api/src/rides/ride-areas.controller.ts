@@ -11,7 +11,7 @@ import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideAreasService} from './ride-areas.service';
 const areaSchema=z.object({name:z.string().trim().min(3).max(120),geojson:z.string().min(20).max(20000)}).strict();
 const toggleSchema=z.object({active:z.boolean()}).strict();
-@ApiTags('ride-dispatch-areas') @ApiBearerAuth('keycloak')
+@ApiTags('ride-dispatch-areas') @ApiBearerAuth('session')
 @Controller({path:'dispatch/areas',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideAreasController {

@@ -6,7 +6,7 @@ import {AccountGuard} from '../auth/account.guard';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {RideTrackingService} from './ride-tracking.service';
 const isUuid=(x:string|undefined)=>!x||/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(x);
-@ApiTags('ride-tracking') @ApiBearerAuth('keycloak')
+@ApiTags('ride-tracking') @ApiBearerAuth('session')
 @Controller({path:'rides',version:'1'}) @UseGuards(IdentityGuard,AccountGuard)
 export class RideTrackingController {
  constructor(@Inject(RideTrackingService)private readonly tracking:RideTrackingService){}

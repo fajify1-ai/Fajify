@@ -1,4 +1,4 @@
-enum IdentityProvider { external, keycloak }
+enum IdentityProvider { external, betterAuth }
 
 /// Client session metadata only. Never contains passwords or bearer tokens.
 class AuthSession {

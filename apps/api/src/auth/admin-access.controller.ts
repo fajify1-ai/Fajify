@@ -19,11 +19,11 @@ class SuspensionInput {
  @IsBoolean() suspended!:boolean;
 }
 
-/** Administrative approval and suspension require signed Keycloak identity,
+/** Administrative approval and suspension require signed Better Auth identity,
  * an active backend account, platform-admin role and recent verified MFA.
  */
 @ApiTags('identity-admin')
-@ApiBearerAuth('keycloak')
+@ApiBearerAuth('session')
 @Controller({path:'admin/accounts',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
 export class AdminAccessController {

@@ -12,11 +12,11 @@ import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
 import {AdminReadAuditGuard} from './admin-read-audit.guard';
 
 /** M8-P1: privileged read-only operational foundation.
- * Admin scope is server enforced (Keycloak signed identity, active session,
+ * Admin scope is server enforced (Better Auth signed identity, active session,
  * platform-admin + faji-admin-web + recent MFA + PostgreSQL request budget).
  */
 @ApiTags('admin-operations')
-@ApiBearerAuth('keycloak')
+@ApiBearerAuth('session')
 @Controller({path:'admin/operations',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard,AdminReadAuditGuard)
 export class AdminOperationsController {

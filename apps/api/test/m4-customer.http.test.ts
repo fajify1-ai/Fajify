@@ -52,7 +52,7 @@ test('customer HTTP contract: public filters, strict input, signed ownership, re
   revoked=false;suspended=true;assert.equal((await auth(request(http).get('/api/v1/customer/reservations'))).status,403);
   const doc=apiDocument(app);
   assert.equal(doc.paths['/api/v1/discovery/offerings'].get?.security,undefined);
-  assert.deepEqual(doc.paths['/api/v1/customer/orders'].post?.security,[{keycloak:[]}]);
+  assert.deepEqual(doc.paths['/api/v1/customer/orders'].post?.security,[{session:[]}]);
   assert.ok(doc.paths['/api/v1/customer/orders'].post?.responses['201']);
   assert.ok(doc.components?.schemas?.CustomerOrderInput);
   assert.ok(doc.components?.schemas?.OrderDetail);

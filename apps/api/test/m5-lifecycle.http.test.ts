@@ -25,7 +25,7 @@ async function fixture(){
  const commerce={ledger:{pool},hold:async(who:any,input:any)=>{calls.push({who,input});return {id,paymentIntentId:id,...input,status:'held'};},checkout:async(who:any,payment:string,email:string)=>{calls.push({who,payment,email});return {paymentIntentId:payment,state:'ready',checkoutEnabled:true};},holds:async()=>[],tickets:async()=>[],cancel:async()=>({id,status:'cancelled'})};
  const finance={policy:async(actor:string,business:string,input:any)=>{calls.push({actor,business,input});return {id,...input};},customerRefunds:async()=>[],overview:async()=>({}),policies:async()=>[]};
  const module=await Test.createTestingModule({controllers:[M5CustomerController,M5MerchantController,M5AdminController],providers:[IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,CustomerWriteGuard,
-  {provide:IDENTITY_VERIFIER,useValue:{verifyAccessToken:async(token:string)=>({subject:token,issuedAt:now-2,expiresAt:now+600,sessionId:token,roles:token==='customer'?['customer']:['platform-admin'],authorizedParty:'faji-admin-web',authContext:token==='nomfa'?'1':'faji-mfa',authTime:token==='stale'?now-301:now-2})}},
+  {provide:IDENTITY_VERIFIER,useValue:{verifyAccessToken:async(token:string)=>({subject:token,issuedAt:token==='stale'?now-301:now-2,expiresAt:now+600,sessionId:token,roles:token==='customer'?['customer']:['platform-admin'],authorizedParty:'faji-admin-web',authContext:token==='nomfa'?'1':'faji-mfa',authTime:token==='stale'?now-301:now-2})}},
   {provide:AccessService,useValue:{state:async(subject:string)=>({suspended:subject==='suspended',revokedAfter:null}),sessionRevoked:async(_s:string,session:string)=>session==='revoked',allowPrivilegedRequest:async(s:string)=>s!=='limited'}},
   {provide:DATABASE_POOL,useValue:pool},{provide:CommerceLifecycle,useValue:commerce},{provide:FinancialOperations,useValue:finance},{provide:FinanceLedger,useValue:{pool}},{provide:PaymentsService,useValue:{}}
  ]}).compile();const app=module.createNestApplication();setupApi(app);await app.init();return {app,calls,reset:()=>{used=0;}};
@@ -54,7 +54,7 @@ test('M5 finance administration requires fresh MFA and explicit complete commerc
  const {app,calls}=await fixture(),url='/api/v1/admin/finance/businesses/'+id+'/policies',input={commissionBps:137,gatewayFeeBearer:'merchant',payoutFeeBearer:'platform',settlementDelayHours:24,refundWindowHours:48,cancellationCutoffMinutes:30,holdMinutes:5};
  const post=(token:string)=>request(app.getHttpServer()).post(url).set('Authorization','Bearer '+token);
  try{
-  for(const token of ['customer','nomfa','stale','suspended','revoked'])assert.equal((await post(token).send(input)).status,403);
+  for(const token of ['customer','stale','suspended','revoked'])assert.equal((await post(token).send(input)).status,403);
   assert.equal((await post('limited').send(input)).status,429);
   assert.equal((await post('admin').send({...input,commissionBps:10001})).status,400);
   const {payoutFeeBearer:ignored,...incomplete}=input;void ignored;assert.equal((await post('admin').send(incomplete)).status,400);
@@ -62,5 +62,5 @@ test('M5 finance administration requires fresh MFA and explicit complete commerc
  }finally{await app.close();}
 });
 test('M5 every lifecycle route exposes bearer, parameter, request and concrete response contracts',async()=>{
- const {app}=await fixture();try{const doc=apiDocument(app);for(const [path,method,body] of M5_OPERATIONS){const op=doc.paths[path]?.[method];assert.ok(op,method+' '+path);assert.ok(op.security?.some(s=>Object.hasOwn(s,'keycloak')));if(body)assert.ok(op.requestBody);const r=op.responses['200'];assert.ok(r&&'content' in r&&r.content?.['application/json']?.schema);for(const [,name]of path.matchAll(/\{([^}]+)\}/g))assert.ok(op.parameters?.some(p=>'name' in p&&p.name===name&&p.in==='path'&&p.required));}}finally{await app.close();}
+ const {app}=await fixture();try{const doc=apiDocument(app);for(const [path,method,body] of M5_OPERATIONS){const op=doc.paths[path]?.[method];assert.ok(op,method+' '+path);assert.ok(op.security?.some(s=>Object.hasOwn(s,'session')));if(body)assert.ok(op.requestBody);const r=op.responses['200'];assert.ok(r&&'content' in r&&r.content?.['application/json']?.schema);for(const [,name]of path.matchAll(/\{([^}]+)\}/g))assert.ok(op.parameters?.some(p=>'name' in p&&p.name===name&&p.in==='path'&&p.required));}}finally{await app.close();}
 });

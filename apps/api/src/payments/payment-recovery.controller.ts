@@ -13,7 +13,7 @@ class PaymentRecheckResponse {
  @ApiProperty({type:Boolean,description:'True when the matching capture was already posted'}) replayed!:boolean;
 }
 
-@ApiTags('finance-admin') @ApiBearerAuth('keycloak')
+@ApiTags('finance-admin') @ApiBearerAuth('session')
 @Controller({path:'admin/finance/payments',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
 export class PaymentRecoveryController {

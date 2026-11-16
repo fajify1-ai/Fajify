@@ -11,7 +11,7 @@ import {NotificationPage, NotificationView, PrivateReviewPage, PrivateReviewView
 import {pagination, resourceId, validated} from './customer-http';
 type AuthRequest={identity:VerifiedIdentity};
 
-@ApiTags('customer-account') @ApiBearerAuth('keycloak')
+@ApiTags('customer-account') @ApiBearerAuth('session')
 @Controller({path:'customer',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class CustomerAccountController {
  constructor(@Inject(CustomerAccountService) private readonly service:CustomerAccountService){}

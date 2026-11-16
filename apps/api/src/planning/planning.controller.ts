@@ -10,7 +10,7 @@ type Request={identity:VerifiedIdentity};
 const resource=()=>ApiParam({name:'id',schema:{type:'string',format:'uuid'}});
 const page=()=>applyDecorators(ApiQuery({name:'limit',required:false,schema:{type:'integer',minimum:1,maximum:50,default:20}}),ApiQuery({name:'offset',required:false,schema:{type:'integer',minimum:0,maximum:10000,default:0}}));
 const strict=<T extends object>(expectedType:new()=>T)=>new ValidationPipe({expectedType,whitelist:true,forbidNonWhitelisted:true,transform:true});
-@ApiTags('experience-planning') @ApiBearerAuth('keycloak')
+@ApiTags('experience-planning') @ApiBearerAuth('session')
 @Controller({path:'plans',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class PlanningController {
  constructor(private readonly planning:PlanningService){}

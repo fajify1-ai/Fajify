@@ -13,7 +13,7 @@ class ApplyInput {@IsString() @Length(2,120) displayName!:string;}
 class ReviewInput {@IsIn(['approved','rejected']) decision!:'approved'|'rejected';}
 
 @ApiTags('business-onboarding')
-@ApiBearerAuth('keycloak')
+@ApiBearerAuth('session')
 @Controller({path:'business/onboarding',version:'1'})
 export class BusinessApprovalController{
  constructor(@Inject(BusinessApprovalService) private readonly business:BusinessApprovalService){}

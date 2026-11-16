@@ -1,3 +1,5 @@
+import 'package:faji_flutter_core/auth_screen.dart';
+import 'package:faji_flutter_core/better_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/faji_colors.dart';
@@ -36,14 +38,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
     setState(() => _busy = true);
-    final failure = await auth.requestRecovery();
+    final failure = await auth.requestRecovery(_email.text);
     if (!mounted) return;
     setState(() => _busy = false);
     if (continueToCustomerHome(context, auth)) return;
     if (auth.usesBrowserAuthentication && auth.state.failure != null) return;
     showAuthMessage(
       context,
-      failure?.message ?? 'Continue recovery in your account provider.',
+      failure?.message ?? 'If the account exists, a recovery email was sent.',
     );
   }
 
@@ -73,8 +75,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Text(
               AuthScope.of(context).usesBrowserAuthentication
                   ? 'Choose Forgot password on the secure sign-in page. Your account provider handles verification and your new password.'
-                  : 'Account recovery is awaiting the shared identity integration.',
+                  : 'Enter your email to receive a recovery link. Paste the link into the in-app reset form.',
               style: const TextStyle(color: FajiColors.textSecondary),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => FajiAuthScreen(
+                    client: FajiAuthClient(
+                      baseUrl: const String.fromEnvironment('API_BASE_URL'),
+                    ),
+                    onAuthenticated: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ),
+              child: const Text('Use a recovery link'),
             ),
             const SizedBox(height: 28),
             if (!AuthScope.of(context).usesBrowserAuthentication)

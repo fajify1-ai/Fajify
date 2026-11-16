@@ -7,13 +7,13 @@ import type {VerifiedIdentity} from './identity.types';
 
 /** Server-side proof of verified identity and active Faji account. */
 @ApiTags('identity')
-@ApiBearerAuth('keycloak')
+@ApiBearerAuth('session')
 @Controller({path:'auth',version:'1'})
 export class SessionController {
  constructor(@Inject(AccessService) private readonly access:AccessService){}
  @Post('sessions/revoke-current')
  @UseGuards(IdentityGuard,AccountGuard)
- @ApiOperation({summary:'Revoke this Keycloak session at the Faji API; clients must also end the Keycloak session to invalidate refresh tokens'})
+ @ApiOperation({summary:'Revoke the current Better Auth session'})
  async revokeCurrent(@Req() req:{identity:VerifiedIdentity}){
   if(!req.identity.sessionId)throw new BadRequestException('Signed session identifier required');
   await this.access.revokeSession(req.identity.subject,req.identity.sessionId);

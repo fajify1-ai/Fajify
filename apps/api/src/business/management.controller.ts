@@ -30,7 +30,7 @@ class PackageLine { @ApiProperty({type:String}) @IsUUID() catalogueId!:string; @
 class PackageConfig { @ApiProperty({type:()=>[PackageLine]}) @IsArray() @ArrayMaxSize(50) @ValidateNested({each:true}) @Type(()=>PackageLine) components!:PackageLine[]; }
 class WeeklyHour { @ApiProperty({type:Number}) @IsInt() @Min(0) @Max(6) weekday!:number; @ApiProperty({type:Number}) @IsInt() @Min(0) @Max(1439) opensMinute!:number; @ApiProperty({type:Number}) @IsInt() @Min(1) @Max(1440) closesMinute!:number; }
 class WeeklyHours { @ApiProperty({type:()=>[WeeklyHour]}) @IsArray() @ArrayMaxSize(70) @ValidateNested({each:true}) @Type(()=>WeeklyHour) slots!:WeeklyHour[]; }
-@ApiTags('merchant-administration') @ApiBearerAuth('keycloak')
+@ApiTags('merchant-administration') @ApiBearerAuth('session')
 @Controller({path:'businesses/:businessId',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,ResourceGuard)
 export class ManagementController{

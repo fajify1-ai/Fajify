@@ -13,8 +13,9 @@ test('session revocation is persisted and audited atomically',async()=>{
  assert.match(queries[1],/pg_advisory_xact_lock/);
  assert.match(queries[2],/INSERT INTO revoked_identity_sessions/);
  assert.match(queries[3],/session_revoked/);
- assert.equal(queries[4],'COMMIT');
- assert.equal(queries[5],'RELEASE');
+ assert.match(queries[4],/DELETE FROM auth_session/);
+ assert.equal(queries[5],'COMMIT');
+ assert.equal(queries[6],'RELEASE');
 });
 test('session revocation rolls back if audit fails',async()=>{
  const queries:string[]=[];

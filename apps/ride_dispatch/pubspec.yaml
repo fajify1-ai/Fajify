@@ -5,6 +5,8 @@ version: 0.1.0+1
 environment:
   sdk: '>=3.5.0 <4.0.0'
 dependencies:
+  faji_flutter_core:
+    path: ../../packages/flutter_core
   flutter:
     sdk: flutter
   go_router: ^14.0.0

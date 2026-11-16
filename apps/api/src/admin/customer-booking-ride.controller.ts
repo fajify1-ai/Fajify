@@ -18,7 +18,7 @@ export class BookingRideEmptyBodyGuard implements CanActivate {
   return true;
  }
 }
-@ApiTags('customer-booking-ride') @ApiBearerAuth('keycloak')
+@ApiTags('customer-booking-ride') @ApiBearerAuth('session')
 @Controller({path:'customer/integrations/booking-rides',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class CustomerBookingRideController {

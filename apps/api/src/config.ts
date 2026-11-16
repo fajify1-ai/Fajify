@@ -5,16 +5,14 @@ export const environmentSchema = z.object({
   LOG_LEVEL: z.enum(['error','warn','log','debug']).default('log'),
   FAJI_DATABASE_URL: z.url().refine(s => s.startsWith('postgres://') || s.startsWith('postgresql://'), {error:'Must be PostgreSQL URL'}),
   REDIS_URL: z.url().refine(s=>s.startsWith('redis://') || s.startsWith('rediss://'), {error:'Must be Redis URL'}),
-  KEYCLOAK_ISSUER: z.url().refine(s=>{
-    const url=new URL(s);
-    return url.protocol==='https:' || (url.protocol==='http:' && url.hostname==='localhost');
-  }, {error:'Issuer must use HTTPS outside localhost'}),
-  KEYCLOAK_AUDIENCE: z.string().min(1),
+  BETTER_AUTH_SECRET: z.string().min(32),
+  BETTER_AUTH_URL: z.url().refine(s=>{const u=new URL(s);return u.protocol==='https:'||(u.protocol==='http:'&&['localhost','127.0.0.1'].includes(u.hostname));}),
+  FAJI_WEB_ORIGINS: z.string().min(1),
   S3_ENDPOINT: z.url(),
   S3_BUCKET: z.string().min(1)
 }).superRefine((cfg,ctx)=>{
  if (['production','staging'].includes(cfg.NODE_ENV)) {
-  for(const key of ['KEYCLOAK_ISSUER','S3_ENDPOINT'] as const) if (!cfg[key].startsWith('https://')) ctx.addIssue({code:'custom',path:[key],message:'HTTPS required'});
+  for(const key of ['BETTER_AUTH_URL','S3_ENDPOINT'] as const) if (!cfg[key].startsWith('https://')) ctx.addIssue({code:'custom',path:[key],message:'HTTPS required'});
  }
 });
 export type ApiEnvironment = z.infer<typeof environmentSchema>;

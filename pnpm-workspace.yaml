@@ -8,3 +8,6 @@ packages:
   - 'packages/domain'
   - 'packages/web_ui'
   - 'packages/shared_config'
+  - 'apps/business_web'
+  - 'apps/ride_dispatch_web'
+  - 'packages/web_auth'

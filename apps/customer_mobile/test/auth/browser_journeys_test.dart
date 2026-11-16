@@ -18,7 +18,7 @@ class JourneyRepository extends UnavailableAuthRepository
   Completer<AuthSession>? pending;
   AuthSession session = AuthSession(
     subject: 'fixture-subject',
-    provider: IdentityProvider.keycloak,
+    provider: IdentityProvider.betterAuth,
     expiresAt: DateTime.now().add(const Duration(minutes: 5)),
     emailVerified: true,
     customerAccess: true,
@@ -76,7 +76,7 @@ void main() {
     (tester) async {
       final session = AuthSession(
         subject: 'fixture-private-subject',
-        provider: IdentityProvider.keycloak,
+        provider: IdentityProvider.betterAuth,
         expiresAt: DateTime.now().add(const Duration(minutes: 5)),
         emailVerified: true,
         customerAccess: false,
@@ -123,7 +123,7 @@ void main() {
   test('customer registration accepts unverified email but expired callbacks remain denied', () async {
     repo.session = AuthSession(
       subject: 'fixture-subject',
-      provider: IdentityProvider.keycloak,
+      provider: IdentityProvider.betterAuth,
       expiresAt: DateTime.now().add(const Duration(minutes: 5)),
       emailVerified: false,
       customerAccess: true,
@@ -134,7 +134,7 @@ void main() {
     expect(controller.canAccessCustomer, isTrue);
     repo.session = AuthSession(
       subject: 'fixture-subject',
-      provider: IdentityProvider.keycloak,
+      provider: IdentityProvider.betterAuth,
       expiresAt: DateTime.utc(2000),
       emailVerified: true,
       customerAccess: true,
@@ -183,7 +183,7 @@ void main() {
       await tester.pumpAndSettle();
       navigatorKey.currentState!.pushNamed(FajiRoutes.userLogin);
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(FajiAuthTextField).first, 'test-user');
+      await tester.enterText(find.byType(FajiAuthTextField).first, 'test-user@example.test');
       await tester.enterText(
         find.byType(FajiAuthTextField).last,
         'test-only-password',
@@ -211,7 +211,7 @@ void main() {
       await tester.pumpAndSettle();
       navigatorKey.currentState!.pushNamed(FajiRoutes.userLogin);
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(FajiAuthTextField).first, 'test-user');
+      await tester.enterText(find.byType(FajiAuthTextField).first, 'test-user@example.test');
       await tester.enterText(
         find.byType(FajiAuthTextField).last,
         'test-only-password',

@@ -97,7 +97,7 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
   assert.equal((await request(server).get('/api/v1/admin/finance/summary')).status,401);
   identity={...full,roles:['customer']};
   assert.equal((await auth(request(server).get('/api/v1/admin/finance/summary'))).status,403);
-  identity={...full,authTime:now-301};
+  identity={...full,issuedAt:now-301};
   assert.equal((await auth(request(server).get('/api/v1/admin/finance/summary'))).status,403);
   identity={...full};revoked=true;
   assert.equal((await auth(request(server).get('/api/v1/admin/finance/summary'))).status,403);
@@ -133,7 +133,7 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
    '/api/v1/admin/monitoring/status','/api/v1/admin/finance/summary']){
    const verb=path.includes('moderation')||path.includes('assignment')||path.endsWith('/incidents')?'post':'get';
    const op=doc.paths[path]?.[verb];
-   assert.ok(op?.security?.some(s=>Object.hasOwn(s,'keycloak')),path);
+   assert.ok(op?.security?.some(s=>Object.hasOwn(s,'session')),path);
    assert.ok(op?.responses?.[verb==='post'&&path.endsWith('/incidents')?'201':'200'],path);
   }
  }finally{await app.close();}

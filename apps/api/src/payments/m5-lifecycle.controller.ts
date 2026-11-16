@@ -118,7 +118,7 @@ class M5TicketPage {
 }
 function page<T>(rows:T[],q:PageQuery){return {items:rows.slice(0,q.limit),nextOffset:rows.length>q.limit?q.offset+q.limit:null};}
 @ApiResponse({status:409,description:'Purchase, policy, capacity or financial state conflict; refresh before retry'}) @ApiResponse({status:503,description:'Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation'})
-@ApiTags('customer-finance') @ApiBearerAuth('keycloak')
+@ApiTags('customer-finance') @ApiBearerAuth('session')
 @Controller({path:'customer',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class M5CustomerController {
  constructor(@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle,@Inject(FinancialOperations)readonly finance:FinancialOperations,@Inject(PaymentsService)readonly payments:PaymentsService){}
@@ -141,7 +141,7 @@ export class M5CustomerController {
  @paginated() @Get('tickets') @Header('Cache-Control','no-store') @ApiOkResponse({type:M5TicketPage})
  async tickets(@Req()r:IdentityRequest,@Query(strict(PageQuery))q:PageQuery){return page(await this.commerce.tickets(r.identity.subject,q.limit+1,q.offset),q);}
 }
-@ApiTags('merchant-finance') @ApiBearerAuth('keycloak')
+@ApiTags('merchant-finance') @ApiBearerAuth('session')
 @Controller({path:'businesses/:businessId',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class M5MerchantController {
  constructor(@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle,@Inject(FinancialOperations)readonly finance:FinancialOperations){}
@@ -155,7 +155,7 @@ export class M5MerchantController {
  redeem(@Req()r:IdentityRequest,@Param('businessId',new ParseUUIDPipe())b:string,@Param('branchId',new ParseUUIDPipe())branch:string,@Body(strict(M5RedeemInput))i:M5RedeemInput){return this.commerce.redeem(r.identity,b,branch,i.token);}
 }
 @ApiResponse({status:409,description:'Financial state conflict; unresolved provider evidence blocks money movement'}) @ApiResponse({status:503,description:'Provider unavailable; reconcile ambiguous writes before retry'})
-@ApiTags('finance-admin') @ApiBearerAuth('keycloak')
+@ApiTags('finance-admin') @ApiBearerAuth('session')
 @Controller({path:'admin/finance',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
 export class M5AdminController {
  constructor(@Inject(FinancialOperations)readonly finance:FinancialOperations,@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle){}

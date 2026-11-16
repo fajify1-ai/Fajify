@@ -17,7 +17,7 @@ class PreparedOrderIntentResponse {
  @ApiProperty({enum:['pending','succeeded']}) status!:string;
  @ApiProperty({enum:[false],description:'Preparation does not initialize a gateway session or initiate a charge'}) checkoutEnabled!:boolean;
 }
-@ApiTags('customer-payments') @ApiBearerAuth('keycloak')
+@ApiTags('customer-payments') @ApiBearerAuth('session')
 @Controller({path:'customer/orders',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class OrderIntentsController {

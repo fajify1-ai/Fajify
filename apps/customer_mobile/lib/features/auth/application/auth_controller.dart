@@ -202,12 +202,23 @@ class AuthController extends ChangeNotifier {
   }
 
   /// Missing recovery integration is explicit and does not mutate a session.
-  Future<AuthFailure?> requestRecovery() async {
+  Future<AuthFailure?> requestRecovery([String email = '']) async {
     const unavailable = AuthFailure(
       AuthErrorCode.providerUnavailable,
       'Password recovery is awaiting the shared identity integration.',
     );
     final provider = _repository;
+    if (provider is CustomerPasswordRecovery) {
+      try {
+        await (provider as CustomerPasswordRecovery).recover(email);
+        return null;
+      } catch (_) {
+        return const AuthFailure(
+          AuthErrorCode.operationFailed,
+          'Unable to send recovery email. Please retry.',
+        );
+      }
+    }
     if (provider is CustomerBrowserJourneys) {
       if (_disposed || _busy) return unavailable;
       await _run(
@@ -250,7 +261,7 @@ class AuthController extends ChangeNotifier {
       final untilRefresh =
           session.expiresAt.difference(_clock()) - const Duration(seconds: 30);
       if (session.customerAccess &&
-          session.provider == IdentityProvider.keycloak &&
+          session.provider == IdentityProvider.betterAuth &&
           untilRefresh > Duration.zero) {
         _refreshTimer = Timer(untilRefresh, () => unawaited(refresh()));
       }

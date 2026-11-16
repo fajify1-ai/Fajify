@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 [[ -z "$(git status --porcelain)" ]] || { echo 'Commit source and generated contract before acceptance' >&2; exit 2; }
 : "${FAJI_DATABASE_URL:?Disposable migrator URL required}"
 : "${FAJI_RUNTIME_DATABASE_URL:?Distinct disposable runtime URL required}"
-: "${FAJI_KEYCLOAK_TEST_URL:?Isolated identity sentinel URL required}"
+: "${FAJI_ISOLATION_TEST_URL:?Isolated identity sentinel URL required}"
 [[ "${FAJI_DISPOSABLE_DATABASE:-}" =~ ^fajify_m4_test_[a-z0-9_]+$ ]] || { echo 'M4 disposable name required' >&2; exit 2; }
 source_commit="$(git rev-parse HEAD)"
 report_dir="${FAJI_M4_REPORT_DIR:-}"

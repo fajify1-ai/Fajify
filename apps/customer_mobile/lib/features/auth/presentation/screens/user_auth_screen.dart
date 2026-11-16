@@ -464,11 +464,11 @@ class _SignInFields extends StatelessWidget {
       _Label('EMAIL OR USERNAME'),
       FajiAuthTextField(
         controller: email,
-        hint: 'Enter your email or username',
+        hint: 'Enter your email',
         keyboardType: TextInputType.emailAddress,
         textInputAction: TextInputAction.next,
         validator: (value) =>
-            AuthInput.requiredValue(value, 'Email or username'),
+            AuthInput.email(value),
         autofillHints: const [AutofillHints.username],
       ),
       const SizedBox(height: 18),

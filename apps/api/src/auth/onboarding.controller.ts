@@ -8,13 +8,13 @@ import type {VerifiedIdentity} from './identity.types';
  * A provisioned account remains suspended until an authorized approval.
  */
 @ApiTags('identity')
-@ApiBearerAuth('keycloak')
+@ApiBearerAuth('session')
 @Controller({path:'auth',version:'1'})
 export class OnboardingController {
  constructor(@Inject(AccessService) private readonly access:AccessService){}
  @Post('enroll')
  @UseGuards(IdentityGuard)
- @ApiOperation({summary:'Register verified Keycloak subject for approval (pending by default)'})
+ @ApiOperation({summary:'Register verified Better Auth subject for approval (pending by default)'})
  async enroll(@Req() req:{identity:VerifiedIdentity}){
   await this.access.provisionSubject(req.identity.subject);
   return {subject:req.identity.subject,status:'pending_approval'};

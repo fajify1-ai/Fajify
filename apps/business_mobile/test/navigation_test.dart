@@ -190,7 +190,7 @@ void main() {
     await tester.pumpWidget(
       const BusinessApp(config: BusinessConfig(useMocks: false)),
     );
-    expect(find.textContaining('Configure OIDC_ISSUER'), findsOneWidget);
+    expect(find.textContaining('Configure HTTPS API_BASE_URL'), findsOneWidget);
     expect(find.byKey(const ValueKey('enter-demo')), findsNothing);
   });
   testWidgets('business identity registration never grants sample access', (

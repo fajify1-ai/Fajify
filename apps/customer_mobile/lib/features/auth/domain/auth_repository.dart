@@ -91,3 +91,7 @@ abstract interface class CustomerBrowserJourneys
   Future<AuthSession> recoverInBrowser();
   Future<AuthSession> verifyEmailInBrowser();
 }
+
+abstract interface class CustomerPasswordRecovery {
+  Future<void> recover(String email);
+}

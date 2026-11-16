@@ -2,17 +2,11 @@ class BusinessConfig {
   const BusinessConfig({
     this.environment = 'development',
     this.useMocks = true,
-    this.oidcIssuer = '',
-    this.oidcClientId = 'faji-business-mobile',
-    this.oidcRedirectUri = 'com.faji.business:/oauth/callback',
     this.apiBaseUrl = '',
   });
 
   final String environment;
   final bool useMocks;
-  final String oidcIssuer;
-  final String oidcClientId;
-  final String oidcRedirectUri;
   final String apiBaseUrl;
 
   static const fromBuild = BusinessConfig(
@@ -20,15 +14,6 @@ class BusinessConfig {
     useMocks:
         String.fromEnvironment('USE_MOCK_SERVICES', defaultValue: 'false') ==
         'true',
-    oidcIssuer: String.fromEnvironment('OIDC_ISSUER'),
-    oidcClientId: String.fromEnvironment(
-      'OIDC_CLIENT_ID',
-      defaultValue: 'faji-business-mobile',
-    ),
-    oidcRedirectUri: String.fromEnvironment(
-      'OIDC_REDIRECT_URI',
-      defaultValue: 'com.faji.business:/oauth/callback',
-    ),
     apiBaseUrl: String.fromEnvironment('API_BASE_URL'),
   );
 
@@ -38,21 +23,8 @@ class BusinessConfig {
     }
     if (useMocks) return null;
 
-    final issuer = Uri.tryParse(oidcIssuer);
-    final api = Uri.tryParse(apiBaseUrl);
-    final redirect = Uri.tryParse(oidcRedirectUri);
-    if (!_isSafeEndpoint(issuer) ||
-        !_isSafeEndpoint(api) ||
-        issuer!.pathSegments.isEmpty ||
-        (api!.path.isNotEmpty && api.path != '/') ||
-        oidcClientId.trim().isEmpty ||
-        redirect == null ||
-        redirect.scheme != 'com.faji.business' ||
-        redirect.path != '/oauth/callback' ||
-        redirect.hasQuery ||
-        redirect.hasFragment) {
-      return 'Configure OIDC_ISSUER, API_BASE_URL, OIDC_CLIENT_ID and the registered OIDC_REDIRECT_URI before using live authentication.';
-    }
+    final api=Uri.tryParse(apiBaseUrl);
+    if(!_isSafeEndpoint(api))return 'Configure HTTPS API_BASE_URL for live authentication.';
     return null;
   }
 

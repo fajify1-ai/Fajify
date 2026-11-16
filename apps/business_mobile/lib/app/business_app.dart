@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/business_controller.dart';
 import '../core/config.dart';
-import '../core/keycloak_identity_service.dart';
+import '../core/better_auth_identity_service.dart';
 import '../core/models.dart';
 import '../core/services.dart';
 import '../features/account.dart';
@@ -255,7 +255,7 @@ class _BusinessAppState extends State<BusinessApp> with WidgetsBindingObserver {
       BusinessController(
         identity: widget.config.useMocks
             ? MockIdentityService()
-            : KeycloakIdentityService(widget.config),
+            : BetterAuthIdentityService(widget.config),
       );
   late final router = businessRouter(
     controller,

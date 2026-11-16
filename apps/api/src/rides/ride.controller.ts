@@ -21,7 +21,7 @@ class TripTransitionInput {
 }
 type AuthRequest={identity:VerifiedIdentity};
 const strict = new ValidationPipe({whitelist:true,forbidNonWhitelisted:true,transform:true});
-@ApiTags('rides') @ApiBearerAuth('keycloak')
+@ApiTags('rides') @ApiBearerAuth('session')
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard) @RequireRoles('driver')
 @Controller({path:'rides',version:'1'})
 export class RideController {

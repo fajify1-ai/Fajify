@@ -11,7 +11,7 @@ const reportSchema=z.object({kind:z.enum(['sos','accident','harassment','vehicle
  severity:z.enum(['normal','urgent','emergency']),requestKey:z.string().regex(/^[A-Za-z0-9_-]{16,120}$/)}).strict();
 const resolveSchema=z.object({areaId:z.string().uuid(),status:z.enum(['investigating','resolved'])}).strict();
 type Auth={identity:VerifiedIdentity};
-@ApiTags('ride-safety') @ApiBearerAuth('keycloak')
+@ApiTags('ride-safety') @ApiBearerAuth('session')
 @Controller({path:'ride-safety',version:'1'})
 @UseGuards(IdentityGuard,AccountGuard,RolesGuard,CustomerWriteGuard)
 export class RideSafetyController {

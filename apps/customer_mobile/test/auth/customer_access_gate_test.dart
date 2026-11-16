@@ -15,12 +15,13 @@ void main() {
       await tester.pumpAndSettle();
       navigatorKey.currentState!.pushNamed(FajiRoutes.forgotPassword);
       await tester.pumpAndSettle();
-      expect(find.byType(TextField), findsNothing);
-      await tester.tap(find.text('Continue in browser'));
+      expect(find.byType(TextField), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'user@example.test');
+      await tester.tap(find.text('Send reset link'));
       await tester.pumpAndSettle();
       expect(
         find.textContaining(
-          'Native sign-in is disabled or missing configuration.',
+          'Password recovery is awaiting the shared identity integration.',
         ),
         findsOneWidget,
       );

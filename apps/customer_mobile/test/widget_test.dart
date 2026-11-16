@@ -124,11 +124,11 @@ void main() {
     await tester.tap(find.text('Register Your Business'));
     await tester.pumpAndSettle();
     expect(find.text('Register Your Business'), findsOneWidget);
-    expect(find.text('Business name'), findsOneWidget);
+    expect(find.textContaining('does not register, approve, or grant access'), findsOneWidget);
     expect(find.text('Dashboard'), findsNothing);
     expect(find.byKey(const ValueKey('enter-demo')), findsNothing);
-    await tester.ensureVisible(find.text('Sign In'));
-    await tester.tap(find.text('Sign In'));
+    await tester.ensureVisible(find.text('Back to Sign In'));
+    await tester.tap(find.text('Back to Sign In'));
     await tester.pumpAndSettle();
     expect(find.text('Welcome to Faji Business'), findsOneWidget);
   });
