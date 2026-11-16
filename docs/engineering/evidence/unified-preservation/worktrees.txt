@@ -1,0 +1,16 @@
+worktree /workspace/Fajify
+HEAD ec3405fbae86feb427d3426c78de06e674c9a465
+branch refs/heads/feat/fajify-webapp-ui
+
+worktree /workspace/Fajify-business
+HEAD b496c5297ccce13c550e0ffc54d1f021744fe60d
+branch refs/heads/feat/fajify-business-webapp-ui
+
+worktree /workspace/Fajify-integration
+HEAD 321fead305a986562dae039f1f1a21bb02a4c43d
+branch refs/heads/integration/customer-business-web-completion
+
+worktree /workspace/Fajify-unified
+HEAD 98e0e0f1b23bebadbfcf3149716645154e5d746f
+branch refs/heads/integration/unified-application-preservation
+

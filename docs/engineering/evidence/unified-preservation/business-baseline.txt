@@ -1,0 +1,9 @@
+PASS entry/sign-in/dashboard navigation, five tabs and settings at 390/768/1440
+PASS eight-step registration, simulated identity and review → fixture dashboard
+PASS five-business switching, health detail and keyboard dismissal
+PASS reservation calendar and order status transition
+PASS catalogue creation, availability and state across business switching
+PASS enabling/disabling merchant services updates navigation
+PASS simulated valid check-in, duplicate protection and invalid ticket
+PASS profile save/isolation, staff invite/access and simulated support
+PASS payout simulation; zero runtime errors and zero external requests

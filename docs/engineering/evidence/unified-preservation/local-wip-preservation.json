@@ -1,0 +1,9 @@
+{
+  "protectedHead": "321fead305a986562dae039f1f1a21bb02a4c43d",
+  "trackedDiffUnchanged": true,
+  "trackedDiffSha256": "fd5c2054733a973f3ad264c61b7bdfab661bc02dc42f1ed27740001ef9b40809",
+  "untrackedArchiveSha256": "5e9549424df8aff5e99f4a4c2d463fe949d3bc6d73b7d1aef89169bc83d721ac",
+  "untrackedPathsArchived": 51,
+  "backupLocation": "/workspace/work/preservation-backup",
+  "note": "Backup archive and diff remain local; not uploaded or included in this PR."
+}
