@@ -9,8 +9,8 @@ export class PrivilegedGuard implements CanActivate {
   const identity=context.switchToHttp().getRequest<{identity?:VerifiedIdentity}>().identity;
   const now=this.now();
   if(!identity||!identity.roles.includes('platform-admin')||
-     !Number.isInteger(identity.issuedAt)||identity.issuedAt>now||
-     now-identity.issuedAt>300)throw new ForbiddenException('Privileged authentication required');
+     !identity.authTime||!Number.isInteger(identity.authTime)||identity.authTime>now||
+     now-identity.authTime>300)throw new ForbiddenException('Privileged authentication required');
   return true;
  }
 }

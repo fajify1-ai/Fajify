@@ -97,7 +97,7 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
   assert.equal((await request(server).get('/api/v1/admin/finance/summary')).status,401);
   identity={...full,roles:['customer']};
   assert.equal((await auth(request(server).get('/api/v1/admin/finance/summary'))).status,403);
-  identity={...full,issuedAt:now-301};
+  identity={...full,authTime:now-301};
   assert.equal((await auth(request(server).get('/api/v1/admin/finance/summary'))).status,403);
   identity={...full};revoked=true;
   assert.equal((await auth(request(server).get('/api/v1/admin/finance/summary'))).status,403);

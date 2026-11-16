@@ -5,7 +5,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class FajiAuthException implements Exception {
-  const FajiAuthException(this.message);
+  const FajiAuthException(this.message, {this.mfaRequired = false});
+  final bool mfaRequired;
   final String message;
   @override
   String toString() => message;
@@ -34,6 +35,9 @@ class FajiAuthClient {
       );
     }
   }
+  int _generation = 0;
+  bool challengePending = false;
+  final Map<String, String> _challengeCookies = {};
   final Uri base;
   final FlutterSecureStorage storage;
   final http.Client client;
@@ -43,20 +47,50 @@ class FajiAuthClient {
     Map<String, dynamic>? body,
     bool authenticated = true,
   }) async {
+    final requestGeneration = _generation;
     final token = authenticated ? await storage.read(key: _key) : null;
     final headers = {
       'content-type': 'application/json',
       if (token != null) 'authorization': 'Bearer $token',
+      if (_challengeCookies.isNotEmpty &&
+          !authenticated &&
+          path.startsWith('/api/auth/two-factor/'))
+        'cookie': _challengeCookies.entries
+            .map((e) => '${e.key}=${e.value}')
+            .join('; '),
     };
     final req = http.Request(body == null ? 'GET' : 'POST', base.resolve(path))
       ..headers.addAll(headers)
       ..followRedirects = false;
     if (body != null) req.body = jsonEncode(body);
-    final response = await http.Response.fromStream(
-      await client.send(req).timeout(const Duration(seconds: 15)),
-    );
+    final response =
+        await (() async => http.Response.fromStream(await client.send(req)))()
+            .timeout(const Duration(seconds: 15));
+    final cookies = response.headers['set-cookie'];
+    if (cookies != null && requestGeneration == _generation) {
+      for (final cookie in cookies.split(RegExp(r',(?=[^;,]+=)'))) {
+        final pair = cookie.split(';').first;
+        final i = pair.indexOf('=');
+        if (i > 0) {
+          final key = pair.substring(0, i).trim();
+          if (key.contains('better-auth.') && !key.contains('session_token'))
+            _challengeCookies[key] = pair.substring(i + 1);
+        }
+      }
+    }
+    final rotated = response.headers['set-auth-token'];
+    if (response.statusCode >= 200 &&
+        response.statusCode < 300 &&
+        rotated != null &&
+        authenticated &&
+        token != null &&
+        requestGeneration == _generation &&
+        await storage.read(key: _key) == token) {
+      await storage.write(key: _key, value: rotated);
+    }
     if (response.statusCode == 401) {
-      if (authenticated) await storage.delete(key: _key);
+      if (authenticated && await storage.read(key: _key) == token)
+        await storage.delete(key: _key);
       throw const FajiAuthException(
         'Your session expired. Please sign in again.',
       );
@@ -71,20 +105,34 @@ class FajiAuthClient {
       );
     }
     if (response.body.isEmpty || response.body == 'null') return null;
-    return jsonDecode(response.body) as Map<String, dynamic>;
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    if (rotated != null) data['token'] = rotated;
+    return data;
   }
 
   Future<void> signIn(String email, String password) async {
+    final epoch = ++_generation;
+    challengePending = false;
+    _challengeCookies.clear();
+    await storage.delete(key: _key);
     final result = await request(
       '/api/auth/sign-in/email',
       body: {'email': email.trim(), 'password': password},
       authenticated: false,
     );
-    await _save(result);
+    if (epoch != _generation) return;
+    if (result?['twoFactorRedirect'] == true) {
+      challengePending = true;
+      throw const FajiAuthException(
+          'Enter your authenticator or recovery code.',
+          mfaRequired: true);
+    }
+    if (epoch == _generation) await _save(result);
   }
 
   Future<void> register(String name, String email, String password,
       {Map<String, dynamic> profile = const {}}) async {
+    final epoch = ++_generation;
     final result = await request(
       '/api/auth/sign-up/email',
       body: {
@@ -95,7 +143,7 @@ class FajiAuthClient {
       },
       authenticated: false,
     );
-    await _save(result);
+    if (epoch == _generation) await _save(result);
   }
 
   Future<void> _save(Map<String, dynamic>? result) async {
@@ -103,6 +151,8 @@ class FajiAuthClient {
     if (token is! String || token.isEmpty)
       throw const FajiAuthException('No authenticated session was returned.');
     await storage.write(key: _key, value: token);
+    challengePending = false;
+    _challengeCookies.clear();
   }
 
   Future<Map<String, dynamic>?> session() async {
@@ -138,7 +188,90 @@ class FajiAuthClient {
     );
   }
 
+  Future<void> recoverPhone(String phone) async {
+    await request('/api/auth/phone-number/request-password-reset',
+        body: {'phoneNumber': phone}, authenticated: false);
+  }
+
+  Future<void> resetPhone(String phone, String code, String password) async {
+    await request('/api/auth/phone-number/reset-password',
+        body: {'phoneNumber': phone, 'otp': code, 'newPassword': password},
+        authenticated: false);
+  }
+
+  void cancelChallenge() {
+    ++_generation;
+    challengePending = false;
+    _challengeCookies.clear();
+  }
+
+  Future<void> verifyMfa(String code, {bool backup = false}) async {
+    final epoch = _generation;
+    final result = await request(
+        '/api/auth/two-factor/${backup ? 'verify-backup-code' : 'verify-totp'}',
+        body: {'code': code, 'trustDevice': false},
+        authenticated: false);
+    if (epoch == _generation) await _save(result);
+  }
+
+  Future<void> claim(String token, String password) async {
+    await request('/api/auth/faji/claim',
+        body: {'token': token, 'password': password}, authenticated: false);
+  }
+
+  Future<void> sendPhoneOtp(String phone) async {
+    await request('/api/auth/phone-number/send-otp',
+        body: {'phoneNumber': phone}, authenticated: false);
+  }
+
+  Future<void> phoneLogin(String phone, String code) async {
+    final epoch = ++_generation;
+    await storage.delete(key: _key);
+    final result = await request('/api/auth/phone-number/verify',
+        body: {'phoneNumber': phone, 'code': code}, authenticated: false);
+    if (epoch == _generation) await _save(result);
+  }
+
+  Future<Map<String, dynamic>?> security(String action,
+      {required String password,
+      String code = '',
+      String phone = '',
+      String backupCode = ''}) {
+    switch (action) {
+      case 'step-up':
+        return request('/api/auth/faji/step-up', body: {
+          'password': password,
+          if (code.isNotEmpty) 'code': code,
+          if (backupCode.isNotEmpty) 'backupCode': backupCode
+        });
+      case 'enable':
+        return request('/api/auth/two-factor/enable',
+            body: {'password': password});
+      case 'verify':
+        return request('/api/auth/two-factor/verify-totp',
+            body: {'code': code, 'trustDevice': false});
+      case 'disable':
+        return request('/api/auth/two-factor/disable',
+            body: {'password': password});
+      case 'codes':
+        return request('/api/auth/two-factor/generate-backup-codes',
+            body: {'password': password});
+      case 'verify-phone':
+        return request('/api/auth/phone-number/verify', body: {
+          'phoneNumber': phone,
+          'code': code,
+          'updatePhoneNumber': true,
+          'disableSession': true
+        });
+      default:
+        return request('/api/auth/faji/unlink-phone', body: {});
+    }
+  }
+
   Future<void> signOut() async {
+    ++_generation;
+    challengePending = false;
+    _challengeCookies.clear();
     // Keep the token on network failure so server revocation can be retried.
     await request('/api/auth/sign-out', body: {});
     await storage.delete(key: _key);

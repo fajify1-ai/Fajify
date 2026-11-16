@@ -12,8 +12,8 @@ export interface VerifiedIdentity {
 export interface IdentityVerifier {verifyAccessToken(token:string):Promise<VerifiedIdentity>;verifyHeaders?(headers:Headers):Promise<VerifiedIdentity>;}
 export const IDENTITY_VERIFIER=Symbol('IDENTITY_VERIFIER');
 export function extractBearerToken(header:string|undefined):string|null {
- if(!header||!/^Bearer [A-Za-z0-9._~+/-]+=*$/i.test(header))return null;
- return header.slice(7);
+ if(!header||header.length>8192||!/^Bearer /i.test(header))return null;
+ try{const token=decodeURIComponent(header.slice(7));return /^[A-Za-z0-9._~+/-]+=*$/.test(token)?token:null;}catch{return null;}
 }
 /** Server-side resource scoping; Coarse roles never imply tenant ownership. */
 export function requireResourceMembership(

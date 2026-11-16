@@ -22,7 +22,12 @@
       "next>postcss": "^8.5.23",
       "@nestjs/swagger>js-yaml": "^5.4.1",
       "@nestjs/cli>webpack": "^5.112.1",
-      "multer": "2.5.0"
+      "multer": "2.5.0",
+      "glob": "14.0.6",
+      "minimatch": "11.0.8"
+    },
+    "patchedDependencies": {
+      "deepmerge@4.3.1": "patches/deepmerge@4.3.1.patch"
     }
   }
 }

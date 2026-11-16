@@ -83,7 +83,9 @@ void main() {
       expect(await store.read(key: key), 'session');
     },
   );
-  test('password reset sends token and new password without creating a local session', () async {
+  test(
+      'password reset sends token and new password without creating a local session',
+      () async {
     final store = const FlutterSecureStorage();
     final auth = FajiAuthClient(
       baseUrl: 'https://api.example.test',
@@ -105,5 +107,58 @@ void main() {
       () => FajiAuthClient(baseUrl: 'http://api.example.test'),
       throwsA(isA<FajiAuthException>()),
     );
+  });
+  test(
+      'MFA challenge stays in memory until successful verification; old session is removed',
+      () async {
+    const store = FlutterSecureStorage();
+    await store.write(key: key, value: 'old-session');
+    final auth = FajiAuthClient(
+        baseUrl: 'https://api.example.test',
+        storage: store,
+        client: MockClient((request) async {
+          if (request.url.path == '/api/auth/sign-in/email')
+            return http.Response(jsonEncode({'twoFactorRedirect': true}), 200,
+                headers: {
+                  'set-cookie':
+                      'better-auth.two_factor=challenge; HttpOnly; Secure; SameSite=Lax'
+                });
+          expect(request.url.path, '/api/auth/two-factor/verify-totp');
+          expect(request.headers['cookie'], 'better-auth.two_factor=challenge');
+          expect(request.headers['authorization'], null);
+          return http.Response(jsonEncode({'token': 'new-session'}), 200);
+        }));
+    await expectLater(
+        auth.signIn('user@example.test', 'password'),
+        throwsA(isA<FajiAuthException>()
+            .having((e) => e.mfaRequired, 'mfaRequired', true)));
+    expect(auth.challengePending, true);
+    expect(await store.readAll(), isEmpty);
+    await auth.verifyMfa('123456');
+    expect(auth.challengePending, false);
+    expect(await store.read(key: key), 'new-session');
+  });
+  test('expired get-session response drops saved token without granting access',
+      () async {
+    const store = FlutterSecureStorage();
+    await store.write(key: key, value: 'expired');
+    final auth = FajiAuthClient(
+        baseUrl: 'https://api.example.test',
+        storage: store,
+        client: MockClient((_) async => http.Response('null', 200)));
+    expect(await auth.session(), null);
+    expect(await store.readAll(), isEmpty);
+  });
+  test('transport failure preserves a session for a later restore attempt',
+      () async {
+    const store = FlutterSecureStorage();
+    await store.write(key: key, value: 'valid');
+    final auth = FajiAuthClient(
+        baseUrl: 'https://api.example.test',
+        storage: store,
+        client: MockClient(
+            (_) async => throw http.ClientException('network unavailable')));
+    await expectLater(auth.session(), throwsA(isA<http.ClientException>()));
+    expect(await store.read(key: key), 'valid');
   });
 }

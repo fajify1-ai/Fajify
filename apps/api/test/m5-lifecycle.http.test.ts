@@ -21,7 +21,7 @@ import {M5_OPERATIONS} from '../src/payments/m5-contracts';
 const id='ae5d7bce-c422-4eae-bf45-e68e46c06c11';
 async function fixture(){
  const calls:any[]=[];let used=0;const now=Math.floor(Date.now()/1000);
- const pool={query:async(sql:string,args:unknown[])=>{if(sql.includes('customer_request_buckets'))return {rows:[{used:++used}]};calls.push({sql,args});return {rows:[],rowCount:0};}};
+ const pool={query:async(sql:string,args:unknown[])=>{if(sql.includes('admin_scope_grants'))return {rows:[{scope:'finance.write'}],rowCount:1};if(sql.includes('customer_request_buckets'))return {rows:[{used:++used}]};calls.push({sql,args});return {rows:[],rowCount:0};}};
  const commerce={ledger:{pool},hold:async(who:any,input:any)=>{calls.push({who,input});return {id,paymentIntentId:id,...input,status:'held'};},checkout:async(who:any,payment:string,email:string)=>{calls.push({who,payment,email});return {paymentIntentId:payment,state:'ready',checkoutEnabled:true};},holds:async()=>[],tickets:async()=>[],cancel:async()=>({id,status:'cancelled'})};
  const finance={policy:async(actor:string,business:string,input:any)=>{calls.push({actor,business,input});return {id,...input};},customerRefunds:async()=>[],overview:async()=>({}),policies:async()=>[]};
  const module=await Test.createTestingModule({controllers:[M5CustomerController,M5MerchantController,M5AdminController],providers:[IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,CustomerWriteGuard,

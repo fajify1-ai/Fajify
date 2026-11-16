@@ -25,6 +25,8 @@ class _FajiAuthScreenState extends State<FajiAuthScreen> {
       _token = TextEditingController();
   String _mode = 'login', _message = '';
   bool _busy = false;
+  bool _backup = false;
+  bool _phoneSent = false;
   @override
   void dispose() {
     _email.dispose();
@@ -42,6 +44,39 @@ class _FajiAuthScreenState extends State<FajiAuthScreen> {
     });
     try {
       switch (_mode) {
+        case 'mfa':
+          await widget.client.verifyMfa(_token.text, backup: _backup);
+          break;
+        case 'claim':
+          await widget.client.claim(_token.text.trim(), _password.text);
+          if (mounted)
+            setState(() {
+              _mode = 'login';
+              _message = 'Account claimed. Sign in.';
+            });
+          return;
+        case 'phone-reset':
+          if (!_phoneSent) {
+            await widget.client.recoverPhone(_email.text);
+            if (mounted) setState(() => _phoneSent = true);
+            return;
+          }
+          await widget.client
+              .resetPhone(_email.text, _token.text, _password.text);
+          if (mounted)
+            setState(() {
+              _mode = 'login';
+              _message = 'Password updated. Sign in.';
+            });
+          return;
+        case 'phone':
+          if (!_phoneSent) {
+            await widget.client.sendPhoneOtp(_email.text);
+            if (mounted) setState(() => _phoneSent = true);
+            return;
+          }
+          await widget.client.phoneLogin(_email.text, _token.text);
+          break;
         case 'login':
           await widget.client.signIn(_email.text, _password.text);
           break;
@@ -74,6 +109,10 @@ class _FajiAuthScreenState extends State<FajiAuthScreen> {
       await widget.client.identity();
       if (mounted) widget.onAuthenticated();
     } catch (error) {
+      if (error is FajiAuthException && error.mfaRequired && mounted) {
+        setState(() => _mode = 'mfa');
+        _password.clear();
+      }
       if (mounted)
         setState(
           () => _message = error is FajiAuthException
@@ -119,16 +158,39 @@ class _FajiAuthScreenState extends State<FajiAuthScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (_mode == 'register') _field('Name', _name),
-                    if (_mode != 'reset') _field('Email', _email),
-                    if (_mode == 'reset')
-                      _field('Recovery link or token', _token),
-                    if (_mode != 'recover')
+                    if (!['reset', 'claim', 'mfa'].contains(_mode))
+                      _field(
+                          ['phone', 'phone-reset'].contains(_mode)
+                              ? 'Phone number'
+                              : 'Email',
+                          _email),
+                    if (['reset', 'claim', 'mfa'].contains(_mode) ||
+                        ['phone', 'phone-reset'].contains(_mode) && _phoneSent)
+                      _field(
+                          _mode == 'mfa'
+                              ? (_backup
+                                  ? 'MFA recovery code'
+                                  : 'Authenticator code')
+                              : _mode == 'phone'
+                                  ? 'Phone OTP'
+                                  : _mode == 'claim'
+                                      ? 'Account claim token'
+                                      : 'Recovery link or token',
+                          _token),
+                    if (!['recover', 'mfa', 'phone'].contains(_mode) &&
+                        (_mode != 'phone-reset' || _phoneSent))
                       _field('Password', _password, password: true),
                     FilledButton(
                       onPressed: _busy ? null : _submit,
                       child: Text(_busy ? 'Please wait…' : 'Continue'),
                     ),
                     Semantics(liveRegion: true, child: Text(_message)),
+                    if (_mode == 'mfa')
+                      TextButton(
+                          onPressed: () => setState(() => _backup = !_backup),
+                          child: Text(_backup
+                              ? 'Use authenticator'
+                              : 'Use recovery code')),
                     Wrap(
                       children: [
                         for (final entry in const {
@@ -136,14 +198,20 @@ class _FajiAuthScreenState extends State<FajiAuthScreen> {
                           'register': 'Register',
                           'recover': 'Forgot password',
                           'reset': 'Use recovery link',
+                          'claim': 'Claim existing account',
+                          'phone': 'Phone sign-in',
+                          'phone-reset': 'Phone password recovery',
                         }.entries)
                           TextButton(
                             onPressed: _busy
                                 ? null
                                 : () => setState(() {
+                                      widget.client.cancelChallenge();
                                       _mode = entry.key;
                                       _message = '';
                                       _password.clear();
+                                      _token.clear();
+                                      _phoneSent = false;
                                     }),
                             child: Text(entry.value),
                           ),

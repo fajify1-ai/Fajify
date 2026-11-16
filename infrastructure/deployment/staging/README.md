@@ -1,0 +1,31 @@
+# Private staging preparation
+
+This configuration **does not deploy itself**. It publishes only loopback 8443 (TLS ingress) and 8025 (Mailpit). PostgreSQL/PostGIS, Redis, API and four Next.js services have no host ports. Do not change bindings to public addresses without separate authorization. No production credentials or data are supported.
+
+## Prepare and review
+
+1. `./prepare-local.sh` generates independent sandbox passwords, an auth secret, SMS test secret and a three-day local TLS certificate. It refuses to overwrite existing secrets. `.secrets/` is host mode 0700 and excluded from Git **and Docker build contexts**. File secrets are readable inside only their assigned service containers. Use an approved secret manager and managed certificates for a real staging environment.
+2. Copy `.env.example` to an ignored `.env`, choosing approved **sandbox** S3 and SMS webhook resources. `smtp_url` defaults to private Mailpit; replace it with approved transactional SMTP credentials when delivery acceptance is authorized. The SMS provider is a generic owned HTTPS webhook accepting `{phoneNumber, code, purpose}` and a bearer credential. It must not log codes and must enforce provider budgets. No provider account is provisioned or contacted by preparation.
+3. Review `compose.yaml`, `api.Dockerfile`, `web.Dockerfile`, `read-secrets.mjs`, `init-db.sh` and `nginx.conf`. PostgreSQL creates a non-superuser migration owner and a distinct restricted runtime role. The DBA installs PostGIS. A one-shot migration job runs the full checksummed chain and marker-checked staging grants before API startup. The owner/DBA passwords are never mounted in API/web containers.
+4. `docker compose --env-file .env -f compose.yaml config --quiet` validates configuration. `nginx -t` with the mounted sandbox TLS files validates ingress independently. Actual image builds and running the staging stack are separate acceptance steps; **no public deployment was performed**.
+
+For a later authorized private staging session, from this directory:
+
+```sh
+docker compose --env-file .env -f compose.yaml build
+docker compose --env-file .env -f compose.yaml up -d
+```
+
+Map `api.faji.test`, `customer.faji.test`, `admin.faji.test`, `business.faji.test` and `dispatch.faji.test` to the private host through approved local DNS/hosts configuration, then use HTTPS port 8443. Trust the test certificate only in the sandbox. Do not disable certificate verification in application code.
+
+## Controls and acceptance gates
+
+- Web cookies are host-only, HttpOnly, Secure and SameSite=Lax. All mutations require an exact approved web origin. The auth proxy validates its upstream, rejects redirects/oversized requests, forwards only auth cookies, recursively removes bearer credentials and sanitizes failures.
+- `BETTER_AUTH_URL` is the owned HTTPS API endpoint; `FAJI_WEB_ORIGINS` lists the four exact HTTPS origins. Only the explicitly private API hop may use HTTP (`FAJI_ALLOW_INTERNAL_HTTP=true`). If using separate machines, replace it with TLS.
+- Nginx overwrites forwarding headers and applies per-client auth/API budgets. Only the isolated, configured app-network CIDR is trusted by the API. Next.js accepts the ingress IP header only with `FAJI_TRUSTED_INGRESS=true`; never expose these Next.js ports directly. Adjust the subnet to avoid host-network collisions.
+- PostgreSQL and Redis stay on the isolated data network. Redis requires a mounted password and persists to a named volume. API secret loading happens at runtime; no secret is an image build argument. API/web containers run as the non-root Node user with read-only root filesystems and temporary cache mounts.
+- Registration is **closed** by default. Reconcile legacy identities and approve the registration policy before setting `FAJI_REGISTRATION_ENABLED=true`. Claim preparation intentionally supports only marked disposable rehearsals; production migration requires a separately reviewed change.
+- MFA remains optional for all roles. Admin mutations require recent explicit password proof; enrolled users must also prove their factor. Older admin routes now require operator scopes (`identity.write`, `governance.write`, `finance.read` or `finance.write`). Provision only approved grants; the runtime cannot grant them.
+- Validate image builds/startup, health endpoints, restricted grants, SMTP/SMS sandbox delivery, fresh/expired sessions, recovery, optional MFA, ingress budgets, DNS/TLS renewal, backups and restart behavior before declaring staging accepted. The local acceptance harness tests the same application over loopback TLS; it is not evidence that this entire container stack has been deployed.
+
+Do not run `docker compose down -v` on a shared staging environment: it deletes persistent database/Redis volumes. Use the migration runbook for backups and rollback; never replace persistent data as a routine code deployment step.

@@ -1,3 +1,4 @@
+import {AdminScopeGuard,RequireAdminScope} from '../admin/admin-scope.guard';
 import {Body,Controller,Get,Param,Post,Req,UseGuards,Inject} from '@nestjs/common';
 import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
 import {IsIn,IsString,Length} from 'class-validator';
@@ -35,8 +36,9 @@ export class BusinessApprovalController{
  workspace(@Req() req:{identity:VerifiedIdentity},@Param('id') id:string){
   return this.business.getOwnWorkspace(req.identity.subject,id);
  }
+ @RequireAdminScope('governance.write')
  @Post(':id/review')
- @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
+ @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,AdminScopeGuard)
  review(@Req() req:{identity:VerifiedIdentity},@Param('id') id:string,@Body() body:ReviewInput){
   return this.business.review(req.identity.subject,id,body.decision);
  }

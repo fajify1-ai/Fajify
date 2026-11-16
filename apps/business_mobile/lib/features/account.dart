@@ -1,3 +1,4 @@
+import 'package:faji_flutter_core/security_screen.dart';
 import 'package:faji_flutter_core/auth_screen.dart';
 import '../core/better_auth_identity_service.dart';
 import 'package:flutter/material.dart';
@@ -406,6 +407,19 @@ class _ProfilePageState extends State<ProfilePage> {
     title: 'Profile & settings',
     subtitle: widget.controller.businessName,
     children: [
+      if (widget.controller.identity is BetterAuthIdentityService)
+        TextButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => FajiSecurityScreen(
+                client:
+                    (widget.controller.identity as BetterAuthIdentityService)
+                        .client,
+              ),
+            ),
+          ),
+          child: const Text('Account security'),
+        ),
       Panel(
         child: Form(
           key: form,

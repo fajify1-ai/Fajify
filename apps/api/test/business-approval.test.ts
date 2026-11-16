@@ -1,3 +1,4 @@
+import {DATABASE_POOL} from '../src/tokens';
 import 'reflect-metadata';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';

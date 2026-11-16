@@ -1,0 +1,374 @@
+{
+  "date": "2026-11-16",
+  "baseline": "edb2c94ddec5b1803650a204da0641ea5b59b738",
+  "scope": "Private synthetic disposable data only. Full source SHA recorded in adjacent acceptance report after code commit.",
+  "environment": {
+    "node": "24.22.1",
+    "pnpm": "9.15.9",
+    "postgres": "16.16",
+    "postgis": "3.6.4",
+    "flutter": "3.50.0",
+    "dart": "3.14.0",
+    "mobile_devices": false,
+    "staging_runtime_unverified": "Dockerfiles target Node 22; executed native application builds/tests used Node 24.22.1. Container acceptance remains open."
+  },
+  "results": [
+    {
+      "check": "release-lint",
+      "command": "pnpm lint",
+      "result": "PASS",
+      "log_sha256": "66ba7455fee0adb0945a922503c5417994b172fdec3c2c3e87a076b53801a7e2",
+      "outcomes": [
+        "Tasks:    6 successful, 6 total"
+      ]
+    },
+    {
+      "check": "release-types",
+      "command": "pnpm typecheck",
+      "result": "PASS",
+      "log_sha256": "9ad9b03ea83eaf9c4a67ec3fffe56f454e4bff3682e43ce39fc901687f418bf4",
+      "outcomes": [
+        "Tasks:    7 successful, 7 total"
+      ]
+    },
+    {
+      "check": "release-tests",
+      "command": "pnpm test",
+      "result": "PASS",
+      "log_sha256": "de3e0e3f684db60865fbd98e97cc8501009574da9c51d04edf2ebd3f2b670fdf",
+      "outcomes": [
+        "@faji/worker:test: \u2139 tests 3",
+        "@faji/worker:test: \u2139 pass 3",
+        "@faji/worker:test: \u2139 fail 0",
+        "@faji/worker:test: \u2139 skipped 0",
+        "@faji/web-auth:test: \u2139 tests 5",
+        "@faji/web-auth:test: \u2139 pass 5",
+        "@faji/web-auth:test: \u2139 fail 0",
+        "@faji/web-auth:test: \u2139 skipped 0",
+        "@faji/api:test: \u2139 tests 171",
+        "@faji/api:test: \u2139 pass 171",
+        "@faji/api:test: \u2139 fail 0",
+        "@faji/api:test: \u2139 skipped 0",
+        "Tasks:    3 successful, 3 total"
+      ]
+    },
+    {
+      "check": "release-api-build",
+      "command": "pnpm --filter @faji/api build",
+      "result": "PASS",
+      "log_sha256": "cb8c0946d34b0102c483b2ab6bac499a782aba1cd3b0602de7857738eecb8235",
+      "outcomes": []
+    },
+    {
+      "check": "static-customer-build",
+      "command": "pnpm --filter @faji/customer-web build",
+      "result": "PASS",
+      "log_sha256": "e272cefc2af7a0e3abf2f56b251f1009c8ddabe393f6c4468d3c67963d56a7e3",
+      "outcomes": []
+    },
+    {
+      "check": "static-admin-build",
+      "command": "pnpm --filter @faji/admin-web build",
+      "result": "PASS",
+      "log_sha256": "211169f7bd241fd74261c0a8f172ec47b39e0e551333a12fe1b234284ce3fbe2",
+      "outcomes": []
+    },
+    {
+      "check": "static-business-build",
+      "command": "pnpm --filter @faji/business-web build",
+      "result": "PASS",
+      "log_sha256": "669635d51cfe1a864d509bda49afdf0ac298b194f6f8974a0601071b9a100b8c",
+      "outcomes": []
+    },
+    {
+      "check": "static-ride-dispatch-build",
+      "command": "pnpm --filter @faji/ride-dispatch-web build",
+      "result": "PASS",
+      "log_sha256": "74ef6d04c1732269b511a1bef88d38a06a79283e17bf418e85d6d9f60152beb7",
+      "outcomes": []
+    },
+    {
+      "check": "final-focused-auth",
+      "command": "FAJI_AUTH_TEST_DATABASE_URL=<fresh disposable> pnpm --filter @faji/api exec tsx --test test/better-auth.database.test.ts",
+      "result": "PASS",
+      "log_sha256": "6212358e1e5d0c379d32f30c287f842301527897828dd2c047e7454a0a9d60bb",
+      "outcomes": [
+        "\u2714 Better Auth: native bearer and web cookie lifecycle, recovery and authorization (2740.429786ms)",
+        "\u2139 tests 1",
+        "\u2139 pass 1",
+        "\u2139 fail 0",
+        "\u2139 skipped 0"
+      ]
+    },
+    {
+      "check": "final-fresh-database",
+      "command": "bash tooling/verify-auth-database.sh",
+      "result": "PASS",
+      "log_sha256": "ceb14d0020cbc9750004dd5435a81565672ec636b21444445a62d5544293ca9e",
+      "outcomes": [
+        "PASS: explicitly marked disposable PostgreSQL 16 target",
+        "\u2714 disposable preflight rejects a database name that does not match the opt-in (26.49412ms)",
+        "\u2714 PostgreSQL 16/PostGIS versions and full schema match Drizzle metadata (91.725557ms)",
+        "\u2714 migration ledger checksums and timestamps survive repeat execution with data intact (39.034825ms)",
+        "\u2714 changed historical SQL is rejected without rewriting the ledger (24.068424ms)",
+        "\u2714 migration filenames execute in sorted order (26.250019ms)",
+        "\u2714 failed multi-file migration rolls back DDL and ledger atomically (6.6176ms)",
+        "\u2714 Drizzle runtime CRUD, defaults, audit and outbox commit to PostgreSQL (18.328997ms)",
+        "\u2714 database enforces unique, not-null, length and UUID constraints (42.938716ms)",
+        "\u2714 Drizzle rolls back profile, audit and outbox writes together (8.637681ms)",
+        "\u2714 PostGIS geometry, geography, distance and GiST index work with synthetic coordinates (67.23428ms)",
+        "\u2714 runtime role is restricted and cannot connect to the isolated Keycloak sentinel (37.686752ms)",
+        "\u2139 tests 11",
+        "\u2139 pass 11",
+        "\u2139 fail 0",
+        "\u2139 skipped 0",
+        "\u2714 unapproved identity denied then privileges remain scoped to verified resource (110.970483ms)",
+        "\u2714 suspension sets revocation cutoff and audit trail exists (5.978135ms)",
+        "\u2714 real PostgreSQL suspension immediately denies an already-verified bearer at the HTTP API boundary (164.733651ms)",
+        "\u2714 revoked signed session stays denied across independent service instances (21.980623ms)",
+        "\u2714 privileged request budget is enforced across concurrent service instances (60.842887ms)",
+        "\u2714 business application stays pending, approval creates only its own scoped ownership (38.663996ms)",
+        "\u2714 actual Business workspace HTTP route rejects pending, rejected, foreign and suspended identities (75.268271ms)",
+        "\u2714 approved /auth/me business memberships enforce real PostgreSQL identity, approval, revocation and account/profile suspension (341.426795ms)",
+        "\u2139 tests 8",
+        "\u2139 pass 8",
+        "\u2139 fail 0",
+        "\u2139 skipped 0",
+        "\u2714 optional MFA: enrollment, challenge, recovery, step-up and revocation (1814.517588ms)",
+        "\u2714 phone OTP is verified, single-use, rate limited, cannot bypass MFA or admin step-up (370.054552ms)",
+        "\u2714 legacy claims preserve stable subject, profile and scopes; email reset cannot bypass ownership (426.364415ms)",
+        "\u2714 verified phone recovery expires, is single-use, revokes sessions and preserves enrolled MFA (526.49347ms)",
+        "\u2714 legacy administrative mutations require password step-up and an operator scope (275.100193ms)",
+        "\u2714 credential changes revoke sessions atomically and rotate the authenticated session (335.509706ms)",
+        "\u2139 tests 6",
+        "\u2139 pass 6",
+        "\u2139 fail 0",
+        "\u2139 skipped 0",
+        "\u2714 M7 acceptance: owner-only customer reads, idempotent request and quote binding (150.246693ms)",
+        "\u2714 M7 acceptance: two simultaneous offer accepts have exactly one winner (102.335416ms)",
+        "\u2714 M7 acceptance: stale/duplicate GPS rejected, explicit consent withdrawal clears position (5.719336ms)",
+        "\u2714 M7 acceptance: expiry requeues one unassigned request, new generation fences old offers (27.509854ms)",
+        "\u2714 M7 acceptance: customer cancellation is scoped, idempotent and cannot reopen (9.198658ms)",
+        "\u2714 M7 acceptance: safety incidents are scoped, durable and replay-safe (16.540371ms)",
+        "\u2714 M7 acceptance: trip and financial evidence rows are append-only (9.87276ms)",
+        "\u2714 M7 acceptance: per-category fare policy versions are serialized and quotes preserve prices (30.295273ms)",
+        "\u2714 M7 acceptance: driver matching rejects out-of-scope dispatch and disabled accounts (51.857458ms)",
+        "\u2714 M7 acceptance: restricted runtime cannot alter schema, delete trip evidence or access unrelated database sentinel (2.352215ms)",
+        "\u2714 M7 acceptance: suspended driver is released and pre-arrival ride requeued (32.372302ms)",
+        "\u2714 M7 acceptance: in-trip driver suspension escalates only once, without unsafe automated reassignment (97.13233ms)",
+        "\u2714 M7 acceptance: partial document approval cannot make a driver dispatch-eligible (26.715347ms)",
+        "\u2139 tests 13",
+        "\u2139 pass 13",
+        "\u2139 fail 0",
+        "\u2139 skipped 0",
+        "\u2714 M8 restricted PostgreSQL: scope grants, immutable commands, moderation barriers, support and incidents (289.48728ms)",
+        "\u2139 tests 1",
+        "\u2139 pass 1",
+        "\u2139 fail 0",
+        "\u2139 skipped 0"
+      ]
+    },
+    {
+      "check": "final-auth-security",
+      "command": "pnpm --filter @faji/api exec tsx --test test/auth-security-acceptance.ts",
+      "result": "PASS",
+      "log_sha256": "dc0675df80bbeb5f0400df5b14c8bbd5d273ea08b6a43a5d55399b162e1763e7",
+      "outcomes": [
+        "\u2714 optional MFA: enrollment, challenge, recovery, step-up and revocation (4713.276697ms)",
+        "\u2714 phone OTP is verified, single-use, rate limited, cannot bypass MFA or admin step-up (688.184031ms)",
+        "\u2714 legacy claims preserve stable subject, profile and scopes; email reset cannot bypass ownership (865.513452ms)",
+        "\u2714 verified phone recovery expires, is single-use, revokes sessions and preserves enrolled MFA (812.706558ms)",
+        "\u2714 legacy administrative mutations require password step-up and an operator scope (455.392312ms)",
+        "\u2714 credential changes revoke sessions atomically and rotate the authenticated session (639.714869ms)",
+        "\u2139 tests 6",
+        "\u2139 pass 6",
+        "\u2139 fail 0",
+        "\u2139 skipped 0"
+      ]
+    },
+    {
+      "check": "domain-m3",
+      "command": "M3 disposable capacity/isolation suites",
+      "result": "PASS",
+      "log_sha256": "057016b9fa0167fb464771931276b2f95b7e215b429b4dbaaca112b62eee7ee0",
+      "outcomes": [
+        "PASS: M3 capacity contention, cancellation release, retry idempotency, unpublished-item blocking",
+        "PASS: merchant/branch isolation, concurrent revocation lock, staff least-privilege and immediate revocation",
+        "\u2139 tests 2",
+        "\u2139 pass 2",
+        "\u2139 fail 0",
+        "\u2139 skipped 0"
+      ]
+    },
+    {
+      "check": "domain-m45",
+      "command": "M4/M5 disposable customer/marketplace/payment/lifecycle suites",
+      "result": "PASS",
+      "log_sha256": "cafc68898e08de80379449014641107884d370a393a633be4d296a53557f02b8",
+      "outcomes": [
+        "\u2139 tests 28",
+        "\u2139 pass 28",
+        "\u2139 fail 0",
+        "\u2139 skipped 0"
+      ]
+    },
+    {
+      "check": "domain-m6",
+      "command": "M6 disposable planning suite",
+      "result": "PASS",
+      "log_sha256": "ebc5076b73c93a389418844850349b8ba11c6843d383d010e0f505ed97892ea8",
+      "outcomes": [
+        "\u2139 tests 9",
+        "\u2139 pass 9",
+        "\u2139 fail 0",
+        "\u2139 skipped 0"
+      ]
+    },
+    {
+      "check": "final-backup-recovery",
+      "command": "bash tooling/backup-rehearsal.sh",
+      "result": "PASS",
+      "log_sha256": "67ed9452e736c5f1f847591eb173440c39f65ed684696e40c772628f2915eeda",
+      "outcomes": [
+        "PASS: explicitly marked disposable PostgreSQL 16 target",
+        "PASS: explicitly marked disposable PostgreSQL 16 target",
+        "PASS: 102 complete table row counts and content checksums match, including migration ledger, claims, roles, memberships, sessions and domain records",
+        "PASS: backup restored with all content and migration checksums intact. Private backup: /workspace/Fajify/work/auth-backup.rMlV5L"
+      ]
+    },
+    {
+      "check": "production-browser-final",
+      "command": "python tests/auth/browser_acceptance.py",
+      "result": "PASS",
+      "log_sha256": "22d5ee2d6d216c3d36771352f57d2fcec8240a814e28187851986888b0ea9d64",
+      "outcomes": [
+        "PASS customer: registration/login/logout/recovery/reset/replay/expiry; Secure HttpOnly Lax cookies; CSRF, role and suspension isolation; MFA enrollment/recovery, step-up and phone verification",
+        "PASS admin: registration/login/logout/recovery/reset/replay/expiry; Secure HttpOnly Lax cookies; CSRF, role and suspension isolation; MFA enrollment/recovery, step-up and phone verification",
+        "PASS business: registration/login/logout/recovery/reset/replay/expiry; Secure HttpOnly Lax cookies; CSRF, role and suspension isolation; MFA enrollment/recovery, step-up and phone verification",
+        "PASS dispatch: registration/login/logout/recovery/reset/replay/expiry; Secure HttpOnly Lax cookies; CSRF, role and suspension isolation; MFA enrollment/recovery, step-up and phone verification"
+      ]
+    },
+    {
+      "check": "final-production-api-package",
+      "command": "node tooling/verify-api-bundle.cjs work/api-production-bundle",
+      "result": "PASS",
+      "log_sha256": "2b93ebfa3ad05d9d822717ad55e526c1141ab4c3049623294b8519708370d9b8",
+      "outcomes": [
+        "PASS: production-only API package boots, validates PostgreSQL health, serves Better Auth and enforces authenticated identity on loopback"
+      ]
+    },
+    {
+      "check": "final-frozen-install",
+      "command": "pnpm install --frozen-lockfile",
+      "result": "PASS",
+      "log_sha256": "75262dd71f6bc31aeb29fda2bb02fa907a85e7eaaa299944e33b53f309fba8d4",
+      "outcomes": []
+    },
+    {
+      "check": "final-compose-check",
+      "command": "docker compose --env-file .env.example -f compose.yaml config --quiet",
+      "result": "PASS",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outcomes": []
+    },
+    {
+      "check": "final-nginx-check",
+      "command": "nginx:1.28-alpine nginx -t (private mounted config/certificates)",
+      "result": "PASS",
+      "log_sha256": "d65a321ff6825ed2c0e064eaa9814b85f4047183cc3425e80f38ab47923c9634",
+      "outcomes": [
+        "nginx: the configuration file /etc/nginx/nginx.conf syntax is ok",
+        "nginx: configuration file /etc/nginx/nginx.conf test is successful"
+      ]
+    },
+    {
+      "check": "final-contracts",
+      "command": "pnpm --filter @faji/api contracts",
+      "result": "PASS",
+      "log_sha256": "c5dd42e2370e1529671b3044111f512812d60f18c129af4106ec9383f6a8e6b5",
+      "outcomes": []
+    },
+    {
+      "check": "final-structure-check",
+      "command": "pnpm structure:check",
+      "result": "PASS",
+      "log_sha256": "27a44adc41ce3385999128f4283782bbd5cab3788bb846a772a61fd69b6651eb",
+      "outcomes": [
+        "PASS: structured workspaces are present (not a runtime/build verification)."
+      ]
+    },
+    {
+      "check": "last-customer-tests",
+      "command": "flutter test (customer, host runner)",
+      "result": "PASS",
+      "log_sha256": "421d146239669cfc433b6c4b7bdf6296aa83082d970a72b554635909cc3ed6e8",
+      "outcomes": [
+        "00:37 +67: All tests passed!"
+      ]
+    },
+    {
+      "check": "last-business-tests",
+      "command": "flutter test (business, host runner)",
+      "result": "PASS",
+      "log_sha256": "80eb636652cac025b40380b5161e4e460be70af0cee6637fb1bf7a42f5b38e27",
+      "outcomes": [
+        "00:23 +43: All tests passed!"
+      ]
+    },
+    {
+      "check": "last-core-tests",
+      "command": "flutter test (core, host runner)",
+      "result": "PASS",
+      "log_sha256": "eb6dc0adfe379fc68891a5226fbdfd8722fed88b6c5ad6491dbc6ddfdf9980d1",
+      "outcomes": [
+        "00:00 +9: All tests passed!"
+      ]
+    },
+    {
+      "check": "last-ride-tests",
+      "command": "flutter test (ride, host runner)",
+      "result": "PASS",
+      "log_sha256": "315c9d5fed8ae83ff86c9c1a09c37a219b93a88d812c3855e1f76bc4c01e9e69",
+      "outcomes": [
+        "00:03 +3: All tests passed!"
+      ]
+    },
+    {
+      "check": "final-customer_mobile-analyze",
+      "command": "flutter analyze --no-fatal-infos (customer_mobile)",
+      "result": "PASS (deprecation information only)",
+      "log_sha256": "4e9fa9311b854452e3f05389d2674a6dd439fdd6a128384d4e2b7521c4c86c27"
+    },
+    {
+      "check": "final-business_mobile-analyze",
+      "command": "flutter analyze --no-fatal-infos (business_mobile)",
+      "result": "PASS (deprecation information only)",
+      "log_sha256": "41e028722e1f33a044565ac0d8ad75b21967786e168dbd057864b43bd759ae0d"
+    },
+    {
+      "check": "final-ride_dispatch-analyze",
+      "command": "flutter analyze --no-fatal-infos (ride_dispatch)",
+      "result": "PASS (deprecation information only)",
+      "log_sha256": "53fa76ee7369ae7e576201e9b9e50e564ae8f15a2dfe284969b3371a2bcfcfe2"
+    },
+    {
+      "check": "final-flutter_core-analyze",
+      "command": "flutter analyze --no-fatal-infos (flutter_core)",
+      "result": "PASS (deprecation information only)",
+      "log_sha256": "52997107326f97b682ab01dd9406441851d486484cd17e13840f91a63a40bbd8"
+    }
+  ],
+  "unexecuted": [
+    "Android/iOS device tests and native release builds",
+    "Full staging Docker image builds and stack startup",
+    "Approved real SMTP/SMS provider delivery",
+    "Production account migration, key escrow and cutover"
+  ],
+  "audit": {
+    "critical": 0,
+    "high": 0,
+    "moderate": 0,
+    "low": 1,
+    "remaining": "GHSA-gcqx-w48m-w2h4 deepmerge 4.3.1: local patch plus regression test; version scanner still reports low advisory"
+  }
+}

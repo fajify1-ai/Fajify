@@ -22,3 +22,9 @@ apps/customer_mobile/android/app/src/debug/res/raw/fajify_root_ca.crt
 
 # Turborepo local build cache
 .turbo/
+
+# Private staging credentials and certificates
+infrastructure/deployment/staging/.secrets/
+
+# Private account-claim delivery files
+*.claims.json

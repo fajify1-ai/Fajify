@@ -3,6 +3,7 @@ import {test,before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {Pool} from 'pg';
 import {randomUUID,generateKeyPairSync,createPublicKey,sign} from 'node:crypto';
+import {DATABASE_POOL} from '../src/tokens';
 import {AccessService} from '../src/auth/access.service';
 import {BusinessApprovalService} from '../src/auth/business-approval.service';
 import {Test} from '@nestjs/testing';
@@ -206,7 +207,7 @@ test('actual Business workspace HTTP route rejects pending, rejected, foreign an
   roles:['customer'],sessionId:'workspace-session'
  })};
  const module=await Test.createTestingModule({controllers:[BusinessApprovalController],providers:[
-  Reflector,IdentityGuard,AccountGuard,
+  Reflector,IdentityGuard,AccountGuard,{provide:DATABASE_POOL,useValue:runtime},
   {provide:ResourceGuard,useFactory:()=>new ResourceGuard(new Reflector(),access)},
   {provide:IDENTITY_VERIFIER,useValue:verifier},
   {provide:AccessService,useValue:access},

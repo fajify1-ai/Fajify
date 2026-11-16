@@ -1,3 +1,4 @@
+import {DATABASE_POOL} from '../src/tokens';
 import 'reflect-metadata';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -31,7 +32,7 @@ async function fixture(){
  const access={state:async(subject:string)=>({suspended:subject==='suspended.jwt',revokedAfter:subject==='cutoff.jwt'?new Date(now*1000):null}),
   sessionRevoked:async(_subject:string,session:string)=>session==='revoked.jwt',allowPrivilegedRequest:async(subject:string)=>subject!=='limited.jwt'};
  const recovery={recheck:async(subject:string,paymentId:string)=>{calls.push(['recheck',subject,paymentId]);return {paymentIntentId:paymentId,status:'succeeded',replayed:false};}};
- const module=await Test.createTestingModule({controllers:[CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController],providers:[
+ const module=await Test.createTestingModule({controllers:[CustomerPaymentsController,FinancePaymentsController,PaymentRecoveryController],providers:[{provide:DATABASE_POOL,useValue:{query:async()=>({rows:[{scope:'identity.write'}],rowCount:1})}},
   IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,{provide:IDENTITY_VERIFIER,useValue:verifier},
   {provide:AccessService,useValue:access},{provide:PaymentReadsService,useValue:service},{provide:PaymentsService,useValue:recovery}
  ]}).compile();

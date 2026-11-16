@@ -11,9 +11,21 @@ class BetterAuthRepository
         CustomerPasswordSignIn,
         CustomerPasswordRegistration,
         CustomerProfileAccess,
-        CustomerPasswordRecovery {
+        CustomerPasswordRecovery,
+        CustomerSecondFactor {
   BetterAuthRepository(this.client);
   final FajiAuthClient client;
+  @override
+  bool get challengePending => client.challengePending;
+  @override
+  Future<AuthSession> verifySecondFactor(
+    String code, {
+    bool backup = false,
+  }) async {
+    await client.verifyMfa(code, backup: backup);
+    return _authenticated();
+  }
+
   @override
   Stream<AuthSession?> get sessionChanges => const Stream.empty();
   @override

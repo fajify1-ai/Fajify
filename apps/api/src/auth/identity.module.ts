@@ -1,3 +1,5 @@
+import {AdminScopeGuard} from '../admin/admin-scope.guard';
+import {AuthSecurityController} from './security.controller';
 import {Module} from '@nestjs/common';
 import { IDENTITY_VERIFIER } from './identity.types';
 import {IdentityGuard} from './identity.guard';
@@ -13,6 +15,6 @@ import {AdminAccessController} from './admin-access.controller';
 import {OnboardingController} from './onboarding.controller';
 import {BusinessApprovalController} from './business-approval.controller';
 import {BusinessApprovalService} from './business-approval.service';
-@Module({controllers:[SessionController,AdminAccessController,OnboardingController,BusinessApprovalController],providers:[BetterAuthService,{provide:IDENTITY_VERIFIER,useExisting:BetterAuthService},IdentityGuard,RolesGuard,AccessService,BusinessApprovalService,AccountGuard,ResourceGuard,PrivilegedGuard,AdminRateGuard],
- exports:[BetterAuthService,IDENTITY_VERIFIER,IdentityGuard,RolesGuard,AccessService,AccountGuard,ResourceGuard,PrivilegedGuard,AdminRateGuard]})
+@Module({controllers:[AuthSecurityController,SessionController,AdminAccessController,OnboardingController,BusinessApprovalController],providers:[AdminScopeGuard,BetterAuthService,{provide:IDENTITY_VERIFIER,useExisting:BetterAuthService},IdentityGuard,RolesGuard,AccessService,BusinessApprovalService,AccountGuard,ResourceGuard,PrivilegedGuard,AdminRateGuard],
+ exports:[AdminScopeGuard,BetterAuthService,IDENTITY_VERIFIER,IdentityGuard,RolesGuard,AccessService,AccountGuard,ResourceGuard,PrivilegedGuard,AdminRateGuard]})
 export class IdentityModule {}

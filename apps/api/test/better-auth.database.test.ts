@@ -29,6 +29,8 @@ test('Better Auth: native bearer and web cookie lifecycle, recovery and authoriz
  await pool.query(readFileSync(resolve(__dirname,'../../../packages/database/migrations/0002_identity_authorization.sql'),'utf8'));
  await pool.query(`CREATE TABLE revoked_identity_sessions(identity_subject varchar(255),session_id varchar(255),PRIMARY KEY(identity_subject,session_id));`);
  await pool.query(readFileSync(resolve(__dirname,'../../../packages/database/migrations/0104_better_auth.sql'),'utf8'));
+ await pool.query(readFileSync(resolve(__dirname,'../../../packages/database/migrations/0105_auth_claims_and_factors.sql'),'utf8'));
+ await pool.query(readFileSync(resolve(__dirname,'../../../packages/database/migrations/0107_password_session_revocation.sql'),'utf8'));
  const module=await Test.createTestingModule({imports:[DatabaseModule,IdentityModule]}).overrideProvider(DATABASE_POOL).useValue(pool).compile();
  const app=module.createNestApplication<NestExpressApplication>({bodyParser:false});
  app.use('/api/auth',(req:import('node:http').IncomingMessage,res:import('node:http').ServerResponse,next:(error?:unknown)=>void)=>{module.get(BetterAuthService).handle(req,res).catch(next);});

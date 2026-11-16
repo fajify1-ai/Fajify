@@ -1,3 +1,4 @@
+import {AdminScopeGuard,RequireAdminScope} from '../admin/admin-scope.guard';
 import {applyDecorators,BadRequestException,Body,Controller,Get,Header,HttpCode,Inject,NotFoundException,Param,ParseUUIDPipe,Post,Query,Req,UseGuards,ValidationPipe,type Type,type CanActivate,type ExecutionContext} from '@nestjs/common';
 import {ApiBearerAuth,ApiBody,ApiOkResponse,ApiParam,ApiQuery,ApiResponse,ApiProperty,ApiPropertyOptional,ApiTags} from '@nestjs/swagger';
 import {IsBoolean,IsEmail,IsIn,IsInt,IsOptional,IsString,IsUUID,Length,Matches,Max,Min} from 'class-validator';
@@ -156,12 +157,13 @@ export class M5MerchantController {
 }
 @ApiResponse({status:409,description:'Financial state conflict; unresolved provider evidence blocks money movement'}) @ApiResponse({status:503,description:'Provider unavailable; reconcile ambiguous writes before retry'})
 @ApiTags('finance-admin') @ApiBearerAuth('session')
-@Controller({path:'admin/finance',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
+@Controller({path:'admin/finance',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,AdminScopeGuard)
+@RequireAdminScope('finance.write')
 export class M5AdminController {
  constructor(@Inject(FinancialOperations)readonly finance:FinancialOperations,@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle){}
- @paginated() @Get('businesses/:businessId/policies') @Header('Cache-Control','no-store') @ApiParam({name:'businessId',format:'uuid'}) @ApiOkResponse({schema:{type:'array',items:schemas.policy}})
+ @RequireAdminScope('finance.read') @paginated() @Get('businesses/:businessId/policies') @Header('Cache-Control','no-store') @ApiParam({name:'businessId',format:'uuid'}) @ApiOkResponse({schema:{type:'array',items:schemas.policy}})
  policies(@Param('businessId',new ParseUUIDPipe())b:string,@Query(strict(PageQuery))q:PageQuery){return this.finance.policies(b,q.limit,q.offset);}
- @paginated() @Get('audit') @Header('Cache-Control','no-store') @ApiOkResponse({schema:schemas.audit})
+ @RequireAdminScope('finance.read') @paginated() @Get('audit') @Header('Cache-Control','no-store') @ApiOkResponse({schema:schemas.audit})
  async history(@Req()r:IdentityRequest,@Query(strict(PageQuery))q:PageQuery){await this.audit('operations','audit',r.identity.subject);return (await this.ledger.pool.query('SELECT id,resource_type,resource_id,action,actor,created_at FROM finance_operation_events ORDER BY created_at DESC,id DESC LIMIT $1 OFFSET $2',[q.limit,q.offset])).rows;}
  @Post('payments/:id/checkout-retry') @UseGuards(FinanceEmptyBodyGuard) @ApiBody({required:false,schema:{type:'object',additionalProperties:false}}) @HttpCode(200) @ApiParam({name:'id',format:'uuid'}) @ApiOkResponse({type:M5CheckoutResponse})
  retryCheckout(@Req()r:IdentityRequest,@Param('id',new ParseUUIDPipe())id:string){return this.commerce.retryInitialization(r.identity.subject,id);}
@@ -193,7 +195,7 @@ export class M5AdminController {
  async disputeCheck(@Req()r:IdentityRequest,@Param('providerId')id:string){this.providerId(id);await this.audit('dispute',id,r.identity.subject);return {id,terminal:await this.finance.reconcileDispute(id)};}
  @Post('disputes/:providerId/resolution') @HttpCode(200) @ApiParam({name:'providerId',type:String}) @ApiBody({type:M5DisputeInput}) @ApiOkResponse({schema:schemas.pending})
  dispute(@Req()r:IdentityRequest,@Param('providerId')id:string,@Body(strict(M5DisputeInput))i:M5DisputeInput){this.providerId(id);return this.finance.resolveDispute(r.identity.subject,id,i);}
- @paginated() @Get('operations') @Header('Cache-Control','no-store') @ApiOkResponse({schema:M5_OVERVIEW_SCHEMA})
+ @RequireAdminScope('finance.read') @paginated() @Get('operations') @Header('Cache-Control','no-store') @ApiOkResponse({schema:M5_OVERVIEW_SCHEMA})
  async overview(@Req()r:IdentityRequest,@Query(strict(PageQuery))q:PageQuery){await this.audit('operations','overview',r.identity.subject);return this.finance.overview(q.limit,q.offset);}
  @Post('jobs/:id/retry') @UseGuards(FinanceEmptyBodyGuard) @ApiBody({required:false,schema:{type:'object',additionalProperties:false}}) @HttpCode(200) @ApiParam({name:'id',format:'uuid'}) @ApiOkResponse({schema:schemas.queued})
  async retryJob(@Req()r:IdentityRequest,@Param('id',new ParseUUIDPipe())id:string){await this.audit('job',id,r.identity.subject);const result=await this.ledger.pool.query("UPDATE finance_jobs SET state='queued',attempts=0,next_at=now(),last_error=NULL WHERE id=$1 AND state='dead' RETURNING id",[id]);if(!result.rowCount)throw new BadRequestException('Job is not dead');return {id,queued:true};}

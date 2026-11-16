@@ -48,6 +48,60 @@
         ]
       }
     },
+    "/api/auth/faji/claim": {
+      "post": {
+        "operationId": "AuthSecurityController_claim",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Claim a reconciled legacy identity using independently verified ownership proof",
+        "tags": [
+          "account-security"
+        ]
+      }
+    },
+    "/api/auth/faji/step-up": {
+      "post": {
+        "operationId": "AuthSecurityController_stepUp",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "summary": "Establish recent password and enrolled-factor proof",
+        "tags": [
+          "account-security"
+        ]
+      }
+    },
+    "/api/auth/faji/unlink-phone": {
+      "post": {
+        "operationId": "AuthSecurityController_unlink",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "account-security"
+        ]
+      }
+    },
     "/api/v1/auth/sessions/revoke-current": {
       "post": {
         "operationId": "SessionController_revokeCurrent_v1",

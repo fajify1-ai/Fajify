@@ -1,13 +1,15 @@
 import {Pool} from 'pg';
 import {assertDisposable} from './disposable-target';
-import {grantM5Runtime} from './grant-m5-runtime';
+import {grantM5RuntimeGrants} from './grant-m5-runtime';
 
 /** Grant only the M7 operations needed by the API; no destructive schema privileges. */
 export async function grantM7Runtime(pool:Pool,runtimeUrl:string){
- await assertDisposable(pool);
+ await assertDisposable(pool);return grantM7RuntimeGrants(pool,runtimeUrl);
+}
+export async function grantM7RuntimeGrants(pool:Pool,runtimeUrl:string){
  const role=new URL(runtimeUrl).username;
  if(!/^[a-z_][a-z0-9_]*$/.test(role))throw new Error('Invalid runtime role');
- await grantM5Runtime(pool,runtimeUrl);
+ await grantM5RuntimeGrants(pool,runtimeUrl);
  const named='"'+role+'"';
  const mutable=[
   'ride_drivers','ride_vehicles','ride_driver_documents','ride_requests',

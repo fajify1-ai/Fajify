@@ -1,5 +1,5 @@
 # Faji — System Architecture
-**Classification:** Engineering specification | **Baseline:** v1.1 | **Status:** Approved target architecture; implementation migration pending
+**Classification:** Engineering specification | **Baseline:** v1.1 | **Status:** Approved architecture; continuation implemented, release acceptance pending (see [report](../engineering/BETTER_AUTH_RELEASE_ACCEPTANCE.md))
 
 ## 1. Product and application boundaries
 Faji is a unified lifestyle, hospitality, entertainment, commerce, and mobility platform with four operational domains:

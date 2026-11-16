@@ -95,3 +95,8 @@ abstract interface class CustomerBrowserJourneys
 abstract interface class CustomerPasswordRecovery {
   Future<void> recover(String email);
 }
+
+abstract interface class CustomerSecondFactor {
+  bool get challengePending;
+  Future<AuthSession> verifySecondFactor(String code, {bool backup = false});
+}

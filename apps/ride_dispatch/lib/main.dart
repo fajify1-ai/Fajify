@@ -1,3 +1,4 @@
+import 'package:faji_flutter_core/security_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:faji_flutter_core/better_auth.dart';
 import 'package:faji_flutter_core/auth_screen.dart';
@@ -8,7 +9,8 @@ void main() {
 }
 
 class FajiApp extends StatefulWidget {
-  const FajiApp({super.key});
+  const FajiApp({super.key, this.authClient});
+  final FajiAuthClient? authClient;
   @override
   State<FajiApp> createState() => _FajiAppState();
 }
@@ -22,8 +24,8 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     const base = String.fromEnvironment('API_BASE_URL');
-    if (base.isNotEmpty) {
-      client = FajiAuthClient(baseUrl: base);
+    if (widget.authClient != null || base.isNotEmpty) {
+      client = widget.authClient ?? FajiAuthClient(baseUrl: base);
       _restore();
     }
   }
@@ -60,6 +62,14 @@ class _FajiAppState extends State<FajiApp> with WidgetsBindingObserver {
                   appBar: AppBar(
                       title: const Text('Faji Ride & Dispatch'),
                       actions: [
+                        Builder(
+                            builder: (context) => IconButton(
+                                tooltip: 'Account security',
+                                icon: const Icon(Icons.security),
+                                onPressed: () => Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                        builder: (_) => FajiSecurityScreen(
+                                            client: client!))))),
                         TextButton(
                             onPressed: () async {
                               try {

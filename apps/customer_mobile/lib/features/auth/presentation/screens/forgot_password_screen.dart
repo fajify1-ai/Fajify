@@ -89,7 +89,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                 ),
               ),
-              child: const Text('Use a recovery link'),
+              child: const Text('Recovery, phone sign-in or account claim'),
             ),
             const SizedBox(height: 28),
             if (!AuthScope.of(context).usesBrowserAuthentication)

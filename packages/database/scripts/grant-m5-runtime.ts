@@ -1,11 +1,16 @@
 import {Pool} from 'pg';
 import {assertDisposable} from './disposable-target';
 export async function grantM5Runtime(pool:Pool,runtimeUrl:string){
- await assertDisposable(pool);const role=new URL(runtimeUrl).username;if(!/^[a-z_][a-z0-9_]*$/.test(role))throw Error('Invalid runtime role');
+ await assertDisposable(pool);return grantM5RuntimeGrants(pool,runtimeUrl);
+}
+export async function grantM5RuntimeGrants(pool:Pool,runtimeUrl:string){
+ const role=new URL(runtimeUrl).username;if(!/^[a-z_][a-z0-9_]*$/.test(role))throw Error('Invalid runtime role');
  const quoted='"'+role+'"';
  await pool.query('GRANT USAGE ON SCHEMA public TO '+quoted);
- await pool.query('GRANT SELECT,INSERT,UPDATE,DELETE ON auth_user,auth_session,auth_account,auth_verification,auth_rate_limit TO '+quoted);
+ await pool.query('GRANT SELECT,INSERT,UPDATE,DELETE ON auth_user,auth_session,auth_account,auth_verification,auth_rate_limit,auth_two_factor TO '+quoted);
+ await pool.query('GRANT SELECT,INSERT,UPDATE ON auth_sms_budgets TO '+quoted);
  await pool.query('GRANT SELECT ON application_roles TO '+quoted);
+ await pool.query('GRANT EXECUTE ON FUNCTION consume_identity_claim(text,text,text) TO '+quoted);
  const mutable=['user_profiles','audit_events','account_access','resource_memberships','identity_security_events','revoked_identity_sessions','business_onboarding','outbox_events','business_branches','business_catalogue','business_availability','business_reservations','business_orders','business_order_items','business_branch_hours','business_event_config','business_package_components','customer_request_keys','business_public_profiles','business_public_media','business_public_packages','business_package_addons','customer_wishlist','customer_reviews','customer_notifications','customer_support_cases','customer_support_messages','customer_request_buckets','customer_plans','customer_plan_feedback'];
  await pool.query('GRANT SELECT,INSERT,UPDATE,DELETE ON '+mutable.join(',')+' TO '+quoted);
  const state=['payment_intents','payment_terms','checkout_sessions','ticket_inventory','paid_holds','issued_tickets','finance_refunds','merchant_recipients','settlement_batches','finance_disputes','finance_jobs','finance_reconciliation_cases','payment_order_current','package_component_holds'];

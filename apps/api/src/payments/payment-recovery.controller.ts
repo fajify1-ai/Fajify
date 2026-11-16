@@ -1,3 +1,4 @@
+import {AdminScopeGuard,RequireAdminScope} from '../admin/admin-scope.guard';
 import {BadRequestException,Body,Controller,Header,HttpCode,Inject,Param,ParseUUIDPipe,Post,Req,UseGuards} from '@nestjs/common';
 import {ApiBearerAuth,ApiBody,ApiOkResponse,ApiOperation,ApiParam,ApiProperty,ApiResponse,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
@@ -15,7 +16,8 @@ class PaymentRecheckResponse {
 
 @ApiTags('finance-admin') @ApiBearerAuth('session')
 @Controller({path:'admin/finance/payments',version:'1'})
-@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard)
+@UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,AdminScopeGuard)
+@RequireAdminScope('finance.write')
 export class PaymentRecoveryController {
  constructor(@Inject(PaymentsService)private readonly service:PaymentsService){}
  @Post(':id/provider-recheck') @HttpCode(200) @Header('Cache-Control','no-store')

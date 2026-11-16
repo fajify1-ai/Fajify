@@ -1,3 +1,4 @@
+import {DATABASE_POOL} from '../src/tokens';
 import 'reflect-metadata';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -18,7 +19,7 @@ async function fixture(acr?:string,roles:string[]=['customer']){
  const members:{actor:string;subject:string;type:string;resourceId:string;role:string;active:boolean}[]=[];
  const verifier:IdentityVerifier={verifyAccessToken:async()=>({
   subject:'admin-subject',issuer:'https://identity.example/realms/faji',audience:['faji-api'],
-  expiresAt:now+300,issuedAt:acr?now-10:now-301,roles,authorizedParty:'faji-admin-web',authContext:acr,authTime:now-10
+  expiresAt:now+300,issuedAt:acr?now-10:now-301,roles,authorizedParty:'faji-admin-web',authContext:acr,authTime:acr?now-10:now-301
  })};
  const access={
   state:async()=>({suspended:false,revokedAfter:null}),
@@ -26,7 +27,7 @@ async function fixture(acr?:string,roles:string[]=['customer']){
   setMembership:async(actor:string,subject:string,type:string,resourceId:string,role:string,active:boolean)=>{members.push({actor,subject,type,resourceId,role,active});},
   allowPrivilegedRequest:async()=>true
  };
- const module=await Test.createTestingModule({controllers:[AdminAccessController],providers:[
+ const module=await Test.createTestingModule({controllers:[AdminAccessController],providers:[{provide:DATABASE_POOL,useValue:{query:async()=>({rows:[{scope:'identity.write'}],rowCount:1})}},
   IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,
   {provide:IDENTITY_VERIFIER,useValue:verifier},{provide:AccessService,useValue:access}
  ]}).compile();

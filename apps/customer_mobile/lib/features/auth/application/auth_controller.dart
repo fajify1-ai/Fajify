@@ -123,6 +123,16 @@ class AuthController extends ChangeNotifier {
     );
   }
 
+  bool get needsSecondFactor =>
+      _repository is CustomerSecondFactor &&
+      (_repository as CustomerSecondFactor).challengePending;
+  Future<void> verifySecondFactor(String code, {bool backup = false}) => _run(
+    AuthStatus.authenticating,
+    () => (_repository as CustomerSecondFactor).verifySecondFactor(
+      code,
+      backup: backup,
+    ),
+  );
   Future<void> signIn(String email, String password) async {
     final provider = _repository;
     if (provider is! CustomerPasswordSignIn) {

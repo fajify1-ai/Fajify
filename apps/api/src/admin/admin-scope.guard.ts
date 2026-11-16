@@ -4,7 +4,7 @@ import {DATABASE_POOL} from '../tokens';
 import type {VerifiedIdentity} from '../auth/identity.types';
 
 export type AdminScope='operations.read'|'audit.read'|'governance.read'|'governance.write'|
- 'finance.read'|'support.read'|'support.write'|'integrations.read'|'reports.read'|'monitoring.read'|'incidents.write';
+ 'identity.write'|'finance.write'|'finance.read'|'support.read'|'support.write'|'integrations.read'|'reports.read'|'monitoring.read'|'incidents.write';
 const ADMIN_SCOPE_KEY='faji:m8:required-admin-scope';
 export const RequireAdminScope=(scope:AdminScope)=>SetMetadata(ADMIN_SCOPE_KEY,scope);
 export const RequireAdminScopes=(...scopes:AdminScope[])=>SetMetadata(ADMIN_SCOPE_KEY,scopes);
@@ -16,7 +16,7 @@ export const RequireAdminScopes=(...scopes:AdminScope[])=>SetMetadata(ADMIN_SCOP
 export class AdminScopeGuard implements CanActivate {
  constructor(@Inject(DATABASE_POOL)private readonly pool:Pool){}
  async canActivate(ctx:ExecutionContext):Promise<boolean>{
-  const scope=Reflect.getMetadata(ADMIN_SCOPE_KEY,ctx.getHandler()) as AdminScope|AdminScope[]|undefined;
+  const scope=(Reflect.getMetadata(ADMIN_SCOPE_KEY,ctx.getHandler())??(ctx.getClass?Reflect.getMetadata(ADMIN_SCOPE_KEY,ctx.getClass()):undefined)) as AdminScope|AdminScope[]|undefined;
   const identity=ctx.switchToHttp().getRequest<{identity?:VerifiedIdentity}>().identity;
   if(!scope||!identity?.subject)throw new ForbiddenException('Administrative scope required');
   try{
