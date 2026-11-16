@@ -1034,6 +1034,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/events/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebCustomerController_eventDetail_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/events/{id}/invitations": {
         parameters: {
             query?: never;
@@ -1298,6 +1314,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["WebOnboardingController_document_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/discovery/events/{id}/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebEventDiscoveryController_availability_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2687,6 +2719,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/governance/approvals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminGovernanceController_application_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/governance/reviews": {
         parameters: {
             query?: never;
@@ -3050,6 +3098,11 @@ export interface components {
             password: string;
             code?: string;
             backupCode?: string;
+        };
+        ApplyInput: {
+            displayName: string;
+            /** @description Revision of the complete saved eight-step application. Legacy name-only applications remain supported. */
+            draftRevision?: number;
         };
         BranchInput: {
             name: string;
@@ -3465,6 +3518,7 @@ export interface components {
             /** @description Integer minor units; string preserves bigint precision. */
             priceMinor: string;
             currency: string;
+            media: components["schemas"]["PublicMediaView"][];
             /** Format: date-time */
             savedAt: string;
         };
@@ -3557,10 +3611,19 @@ export interface components {
             catalogueId: string;
             quantity: number;
         };
+        WebMediaItem: {
+            id: string;
+            url: string;
+            alt: string;
+            position: number;
+        };
         WebCartQuote: {
             id: string;
             name: string;
             branch_id: string;
+            branch_name: string;
+            business_name: string;
+            media: components["schemas"]["WebMediaItem"][];
             price_minor: string;
             currency: string;
         };
@@ -3580,6 +3643,7 @@ export interface components {
             items: components["schemas"]["CartLine"][];
         };
         WebHostedEvent: {
+            accepted_guests?: number;
             is_owner?: boolean;
             id: string;
             name: string;
@@ -3655,12 +3719,6 @@ export interface components {
             public_phone: string | null;
             latitude: number | null;
             longitude: number | null;
-        };
-        WebMediaItem: {
-            id: string;
-            url: string;
-            alt: string;
-            position: number;
         };
         WebMedia: {
             items: components["schemas"]["WebMediaItem"][];
@@ -3785,6 +3843,16 @@ export interface components {
             name: string;
             mime: string;
             base64: string;
+        };
+        WebEventAvailability: {
+            capacity: number;
+            issued: number;
+            held: number;
+            remaining: number;
+            /** Format: date-time */
+            startsAt: string;
+            /** Format: date-time */
+            endsAt: string;
         };
         PaymentStatusResponse: {
             /** Format: uuid */
@@ -4189,6 +4257,44 @@ export interface components {
             }[];
             nextOffset: number | null;
         };
+        WebApplicationContact: {
+            fullName: string;
+            /** Format: email */
+            email: string;
+            phone: string;
+        };
+        WebApplicationBusiness: {
+            registrationNumber: string;
+            address: string;
+        };
+        WebApplicationLocation: {
+            city: string;
+            area: string;
+            landmark: string;
+        };
+        WebApplicationSnapshot: {
+            businessName: string;
+            category: string;
+            services: string[];
+            scale: string;
+            contact: components["schemas"]["WebApplicationContact"];
+            business: components["schemas"]["WebApplicationBusiness"];
+            location: components["schemas"]["WebApplicationLocation"];
+            /** @enum {string} */
+            verificationStatus: "not_reviewed";
+        };
+        WebApplicationReviewDetail: {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            /** @enum {string} */
+            status: "pending" | "approved" | "rejected";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            submittedAt: string | null;
+            application: components["schemas"]["WebApplicationSnapshot"] | null;
+        };
         AdminModerateInput: {
             requestKey: string;
             reason: string;
@@ -4587,7 +4693,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyInput"];
+            };
+        };
         responses: {
             201: {
                 headers: {
@@ -6144,6 +6254,27 @@ export interface operations {
             };
         };
     };
+    WebCustomerController_eventDetail_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebHostedEvent"];
+                    };
+                };
+            };
+        };
+    };
     WebCustomerController_invite_v1: {
         parameters: {
             query?: never;
@@ -6644,6 +6775,27 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: components["schemas"]["WebDocumentFile"];
+                    };
+                };
+            };
+        };
+    };
+    WebEventDiscoveryController_availability_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WebEventAvailability"];
                     };
                 };
             };
@@ -9480,6 +9632,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminPagedResult"];
+                };
+            };
+        };
+    };
+    AdminGovernanceController_application_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebApplicationReviewDetail"];
                 };
             };
         };

@@ -1,27 +1,28 @@
+import type {ReactNode} from 'react'
 import { addBooking, cancelBooking, useBookings } from '../store/bookings'
 import { useState } from 'react'
 import type { NavigateFn } from '../App'
 import { getEvent } from '../data'
-import { IconArrowLeft, IconMapPin } from '../components/Icons'
+import { IconArrowLeft, IconMapPin, IconGlyph } from '../components/Icons'
 
-type Props = { id: string; navigate: NavigateFn }
+type Props = { id: string; navigate: NavigateFn; liveEvent?:NonNullable<ReturnType<typeof getEvent>>; actions?:ReactNode; remaining?:number }
 
-export default function EventDetailScreen({ id, navigate }: Props) {
-  const evt = getEvent(id)
+export default function EventDetailScreen({ id, navigate, liveEvent, actions, remaining }: Props) {
+  const evt = liveEvent??getEvent(id)
   const bookings = useBookings()
   const joined = bookings.some(booking => booking.qrValue === `FAJI:DEMO:EVENT:${id}` && booking.status === 'Upcoming')
   const [messageOpen, setMessageOpen] = useState(false)
 
   if (!evt) return <main className="p-8"><h1>Event unavailable</h1><button aria-label="Back to discovery" onClick={() => navigate({ name: 'home' })}>Back to discovery</button></main>
 
-  const spotsLeft = evt.maxGuests - evt.guests
-  const fillPct = evt.guests / evt.maxGuests
+  const spotsLeft = remaining ?? evt.maxGuests - evt.guests
+  const fillPct = (evt.maxGuests-spotsLeft) / evt.maxGuests
 
   return (
-    <div style={{ background: '#F8F8F8', minHeight: '100vh', maxWidth: 430, margin: '0 auto', fontFamily: "'Montserrat:Regular', sans-serif" }}>
+    <div data-original-screen={liveEvent?true:undefined} style={{ background: '#F8F8F8', minHeight: '100vh', maxWidth: 430, margin: '0 auto', fontFamily: "'Montserrat:Regular', sans-serif" }}>
       {/* Hero */}
       <div style={{ position: 'relative', height: 280 }}>
-        <img src={evt.image} alt={evt.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {evt.image?<img src={evt.image} alt={evt.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>:<div style={{width:'100%',height:'100%',background:'#333'}}/>}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%, rgba(28,20,16,0.85) 100%)' }} />
         <button aria-label="Back to discovery"
           onClick={() => navigate({ name: 'home' })}
@@ -35,7 +36,7 @@ export default function EventDetailScreen({ id, navigate }: Props) {
           </span>
         )}
         {evt.ticketPrice === 0 && (
-          <span style={{ position: 'absolute', top: 52, right: 16, background: '#22c55e', color: '#fff', fontSize: 13, fontWeight: 700, padding: '6px 14px', borderRadius: 999 }}>
+          <span style={{ position: 'absolute', top: 52, right: 16, background: liveEvent?'#146C37':'#22c55e', color: '#fff', fontSize: 13, fontWeight: 700, padding: '6px 14px', borderRadius: 999 }}>
             Free
           </span>
         )}
@@ -48,7 +49,7 @@ export default function EventDetailScreen({ id, navigate }: Props) {
       <div style={{ padding: '20px 18px 120px' }}>
         {/* Host */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', borderRadius: 14, padding: '14px 16px', border: '1px solid #E8E8E8', marginBottom: 18 }}>
-          <img src={evt.hostAvatar} alt={evt.host} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }} />
+          {evt.hostAvatar?<img src={evt.hostAvatar} alt={evt.host} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }}/>:<span aria-hidden="true"><IconGlyph name="user" size={44} color="#666"/></span>}
           <div>
             <p style={{ margin: 0, fontSize: 11, color: '#777477', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Hosted by</p>
             <p style={{ margin: '2px 0 0', fontSize: 15, fontWeight: 700, color: '#1F1F1F' }}>{evt.host}</p>
@@ -58,7 +59,7 @@ export default function EventDetailScreen({ id, navigate }: Props) {
           </button>
         </div>
 
-        {messageOpen && <p role="status">Messaging is a visual preview. No message is sent.</p>}
+        {messageOpen && <p role="status">{liveEvent?'Direct host messaging is unavailable. Use Help & Support from your account.':'Messaging is a visual preview. No message is sent.'}</p>}
         {/* Description */}
         <div style={{ background: '#fff', borderRadius: 14, padding: '16px', border: '1px solid #E8E8E8', marginBottom: 18 }}>
           <p style={{ margin: 0, fontSize: 14, color: '#1F1F1F', lineHeight: 1.65 }}>{evt.description}</p>
@@ -89,18 +90,18 @@ export default function EventDetailScreen({ id, navigate }: Props) {
         <div style={{ background: '#fff', borderRadius: 14, padding: '16px', border: '1px solid #E8E8E8' }}>
           <p style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#777477' }}>Venue</p>
           <p style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 700, color: '#1F1F1F', fontFamily: "'Montserrat:Bold', sans-serif" }}>{evt.restaurantName}</p>
-          <button
+          <button disabled={!!liveEvent&&!evt.restaurantId}
             onClick={() => navigate({ name: 'restaurant', id: ({r1:'v1',r2:'v5'} as Record<string,string>)[evt.restaurantId] ?? evt.restaurantId })}
             style={{ marginTop: 8, padding: '8px 16px', borderRadius: 8, border: '1.5px solid #FA3F38', background: 'transparent', color: '#FA3F38', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: "'Montserrat:Regular', sans-serif" }}
           >
-            View restaurant →
+            {liveEvent&&!evt.restaurantId?'Venue arrangements are separate':'View restaurant →'}
           </button>
         </div>
       </div>
 
       {/* CTA */}
       <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 430, background: '#fff', borderTop: '1.5px solid #E8E8E8', padding: '16px 18px 24px', zIndex: 90 }}>
-        {joined ? (
+        {liveEvent ? actions : joined ? (
           <div style={{ display: 'flex', gap: 10 }}>
             <div style={{ flex: 1, padding: '13px', borderRadius: 12, background: '#f0fdf4', border: '1.5px solid #22c55e', textAlign: 'center' }}>
               <span style={{ fontSize: 14, fontWeight: 700, color: '#16a34a' }}>✓ You're going!</span>

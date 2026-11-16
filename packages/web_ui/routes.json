@@ -365,6 +365,11 @@
     "audience": "customer"
   },
   {
+    "path": "customer/events/{id}",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
     "path": "customer/events/{id}/invitations",
     "method": "POST",
     "audience": "customer"
@@ -473,6 +478,11 @@
     "path": "business/onboarding/{id}/verification-documents/{documentId}",
     "method": "GET",
     "audience": "business"
+  },
+  {
+    "path": "discovery/events/{id}/availability",
+    "method": "GET",
+    "audience": "customer"
   },
   {
     "path": "customer/payments/{id}",

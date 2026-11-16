@@ -53,3 +53,28 @@ test('shared security retains merchant navigation and disables delivery controls
  const html=renderToStaticMarkup(React.createElement<NonNullable<React.ComponentProps<typeof SecuritySettings>>>(SecuritySettings,{deliveryDeferred:true,workspaceHref:'/business/dashboard'}));
  assert.match(html,/href="\/business\/dashboard"/);assert.match(html,/href="\/business\/login"/);assert.match(html,/Enroll authenticator/);assert.match(html,/disabled=""[^>]*>Send phone OTP/);
 });
+
+
+test('Customer invitation return targets preserve only local validated one-use token routes',async()=>{
+ const {customerReturnTo}=await import('../unified/return-to');
+ const target='/customer#inviteFriends/'+'ab'.repeat(32);
+ assert.equal(customerReturnTo(target),target);
+ for(const value of ['https://evil.example','//evil.example','/business/dashboard','/customer#inviteFriends/not-a-token',null,['/customer']])assert.equal(customerReturnTo(value),'/customer');
+});
+
+test('connected original checkout excludes sample bank/card and ride workflows without fabricating a ticket',async()=>{
+ const oldWindow=globalThis.window,oldDocument=globalThis.document;
+ Object.assign(globalThis,{window:{matchMedia:()=>({matches:false,addEventListener(){}})},document:{documentElement:{setAttribute(){}}}});
+ try{
+ const {default:Checkout}=await import('../webapp/screens/CheckoutScreen');
+ const html=renderToStaticMarkup(React.createElement(Checkout,{venueId:'real-offering',navigate(){},connected:{venue:{name:'Connected venue',location:'Published branch',image:'/reference/2b62efd44783a784.jpg',inclusions:[],date:'Future scheduled date',time:'18:00',guests:'1 Guest',basePrice:0,discount:0},guests:1,onEdit(){},onPay(){},busy:false,canPay:true,payment:React.createElement('p',{},'Provider checkout only'),status:null,actionLabel:'Reserve a place'}}));
+ assert.match(html,/Connected venue/);assert.match(html,/Provider checkout only/);assert.match(html,/Coming Soon/);
+ assert.doesNotMatch(html,/Ada Okonkwo|4242|GTBank|0123456789|FAJI:BOOKING:|Booking Confirmed!/);
+ }finally{Object.assign(globalThis,{window:oldWindow,document:oldDocument});}
+});
+
+test('connected original reservation calendar uses actual slots and price rather than the static September fixture',async()=>{
+ const {default:Reservation}=await import('../webapp/screens/ReservationScreen');
+ const html=renderToStaticMarkup(React.createElement(Reservation,{venueId:'real-offering',navigate(){},live:{slots:[{id:'real-slot',startsAt:'2027-01-18T10:00:00Z',remaining:3}],selectedSlot:'real-slot',selectSlot(){},guests:1,setGuests(){},price:'₦0.00',status:null,onContinue(){}}}));
+ assert.match(html,/January 2027 18/);assert.match(html,/Number of guests/);assert.match(html,/₦0.00/);assert.doesNotMatch(html,/40,000/);assert.match(html,/<option value="0" selected="">Jan<\/option>/);assert.match(html,/<option selected="">2027<\/option>/);
+});

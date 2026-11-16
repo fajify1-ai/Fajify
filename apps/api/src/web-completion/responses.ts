@@ -52,6 +52,9 @@ export class WebCartQuote {
  @ApiProperty({type:String}) id!:string;
  @ApiProperty({type:String}) name!:string;
  @ApiProperty({type:String}) branch_id!:string;
+ @ApiProperty({type:String}) branch_name!:string;
+ @ApiProperty({type:String}) business_name!:string;
+ @ApiProperty({type:()=>[WebMediaItem]}) media!:WebMediaItem[];
  @ApiProperty({type:String}) price_minor!:string;
  @ApiProperty({type:String}) currency!:string;
 }
@@ -66,6 +69,7 @@ export class WebCart {
  @ApiProperty({type:Boolean}) checkoutEnabled!:boolean;
 }
 export class WebHostedEvent {
+ @ApiProperty({type:Number,required:false}) accepted_guests?:number;
  @ApiProperty({type:Boolean,required:false}) is_owner?:boolean;
  @ApiProperty({type:String}) id!:string;
  @ApiProperty({type:String}) name!:string;
@@ -188,4 +192,13 @@ export class WebPackageOptions {
  @ApiProperty({type:Number}) minGuests!:number;
  @ApiProperty({type:Number}) maxGuests!:number;
  @ApiProperty({type:()=>[WebPackageAddon]}) addOns!:WebPackageAddon[];
+}
+
+export class WebEventAvailability {
+ @ApiProperty({type:Number}) capacity!:number;
+ @ApiProperty({type:Number}) issued!:number;
+ @ApiProperty({type:Number}) held!:number;
+ @ApiProperty({type:Number}) remaining!:number;
+ @ApiProperty({type:String,format:'date-time'}) startsAt!:string;
+ @ApiProperty({type:String,format:'date-time'}) endsAt!:string;
 }

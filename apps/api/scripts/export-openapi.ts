@@ -164,11 +164,24 @@ async function run(){
   }
   const snapshot=resolve(__dirname,'../../../packages/api_contracts/openapi.json');
   const previous=JSON.parse(readFileSync(snapshot,'utf8')) as typeof doc;
+  // Permit only the reviewed additive onboarding request body; retain all legacy operations.
+  const onboarding=JSON.parse(JSON.stringify(doc.paths['/api/v1/business/onboarding']));
+  delete onboarding.post.requestBody;
+  const oldOnboarding=JSON.parse(JSON.stringify(previous.paths['/api/v1/business/onboarding']));delete oldOnboarding.post.requestBody;
+  if(!isDeepStrictEqual(onboarding,oldOnboarding))throw new Error('Legacy onboarding operation changed');
   for(const [path,operation] of Object.entries(previous.paths))
-   if(!path.startsWith('/api/auth/faji/')&&!path.startsWith('/api/v1/auth/')&&!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!WEB_COMPLETION_PATHS.includes(path)&&!isDeepStrictEqual(doc.paths[path],operation))
+   if(path!=='/api/v1/business/onboarding'&&!path.startsWith('/api/auth/faji/')&&!path.startsWith('/api/v1/auth/')&&!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!WEB_COMPLETION_PATHS.includes(path)&&!isDeepStrictEqual(doc.paths[path],operation))
     throw new Error('Existing identity/merchant contract changed: '+path);
-  for(const [name,schema] of Object.entries(previous.components?.schemas??{}))
-   if(!name.startsWith('Web')&&!isDeepStrictEqual(doc.components?.schemas?.[name],schema))throw new Error('Existing schema changed: '+name);
+  for(const [name,schema] of Object.entries(previous.components?.schemas??{})){
+   if(name==='WishlistView'){
+    const current=JSON.parse(JSON.stringify(doc.components?.schemas?.[name]));
+    if(current.properties?.media?.type!=='array'||current.properties.media.items?.$ref!=='#/components/schemas/PublicMediaView')throw new Error('Wishlist media contract is not concrete');
+    delete current.properties.media;
+    current.required=current.required.filter((field:string)=>field!=='media');
+    const old=JSON.parse(JSON.stringify(schema));delete old.properties.media;old.required=old.required.filter((field:string)=>field!=='media');
+    if(!isDeepStrictEqual(current,old))throw new Error('Legacy wishlist fields changed');
+   }else if(!name.startsWith('Web')&&!isDeepStrictEqual(doc.components?.schemas?.[name],schema))throw new Error('Existing schema changed: '+name);
+  }
   writeFileSync(resolve(__dirname,'../../../packages/api_contracts/openapi.json'),JSON.stringify(doc,null,2)+"\n");
  }finally{await app.close();}
 }

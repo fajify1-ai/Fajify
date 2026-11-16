@@ -1,5 +1,6 @@
 import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 import {IsIn, IsInt, IsOptional, IsString, IsUUID, Length, Matches, Max, Min} from 'class-validator';
+import {PublicMediaView} from './marketplace.dto';
 import {OfferingView} from './customer.dto';
 
 export class ProfileInput {
@@ -36,6 +37,7 @@ export class PrivateReviewPage {
  @ApiProperty({type:Number,nullable:true}) nextOffset!:number|null;
 }
 export class WishlistView extends OfferingView {
+ @ApiProperty({type:()=>[PublicMediaView]}) media!:PublicMediaView[];
  @ApiProperty({type:String,format:'date-time'}) savedAt!:string;
 }
 export class WishlistPage {

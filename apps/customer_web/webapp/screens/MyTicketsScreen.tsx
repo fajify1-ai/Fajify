@@ -1,3 +1,4 @@
+import type {ReactNode} from 'react'
 import { useState, useEffect } from 'react'
 import type { NavigateFn } from '../App'
 import BottomNav from '../components/BottomNav'
@@ -5,7 +6,8 @@ import { useDarkMode } from '../store/darkMode'
 import { QRCodeSVG } from 'qrcode.react'
 import { useBookings } from '../store/bookings'
 
-type Props = { navigate: NavigateFn }
+export type HistoryCard={id:string;name:string;venue:string;date:string;image?:string;price:string;status:string;type:string;group:TabT;reference:string;qrToken?:string;actions?:ReactNode};
+type Props = { navigate: NavigateFn; liveItems?:HistoryCard[]; status?:ReactNode; pagination?:ReactNode }
 type TabT = 'Upcoming' | 'Orders' | 'Completed' | 'Cancelled'
 
 const RED = '#FA3F38'
@@ -108,10 +110,10 @@ function VenueMapSVG({ dark }: { dark: boolean }) {
   )
 }
 
-export default function MyTicketsScreen({ navigate }: Props) {
+export default function MyTicketsScreen({ navigate, liveItems, status, pagination }: Props) {
   const [tab, setTab] = useState<TabT>('Upcoming')
   const liveBookings = useBookings()
-  const [viewTicket, setViewTicket] = useState<typeof tickets.Upcoming[0] | null>(null)
+  const [viewTicket, setViewTicket] = useState<typeof tickets.Upcoming[0] | HistoryCard | null>(null)
   const [viewOrder, setViewOrder] = useState<typeof tickets.Orders[0] | null>(null)
   const [showMap, setShowMap] = useState(false)
   const [riderProgress, setRiderProgress] = useState(0.35)
@@ -121,7 +123,7 @@ export default function MyTicketsScreen({ navigate }: Props) {
   const bg      = dark ? '#0F0F0F' : '#F8F8F8'
   const surface = dark ? '#1C1C1C' : '#FFFFFF'
   const ink     = dark ? '#F0F0F0' : '#1F1F1F'
-  const muted   = dark ? '#888' : '#777477'
+  const muted   = liveItems ? (dark ? '#AAA' : '#666') : (dark ? '#888' : '#777477')
   const border  = dark ? '#2A2A2A' : '#E8E8E8'
   const cardBg  = dark ? '#1A1A1A' : '#FAFAFA'
 
@@ -138,6 +140,7 @@ export default function MyTicketsScreen({ navigate }: Props) {
   }
 
   const statusStyle: Record<string, { bg: string; text: string }> = {
+    confirmed:{bg:'#f0fdf4',text:'#146C37'},issued:{bg:'#f0fdf4',text:'#146C37'},checked_in:{bg:'#f0fdf4',text:'#146C37'},held:{bg:'#fff7ed',text:'#8C5200'},expired:{bg:'#f3f3f3',text:'#666'},cancelled:{bg:'#fef2f2',text:'#B42318'},completed:{bg:'#f3f3f3',text:'#666'},redeemed:{bg:'#f3f3f3',text:'#666'},revoked:{bg:'#fef2f2',text:'#B42318'},
     Upcoming:    { bg: dark ? '#0a2a14' : '#f0fdf4', text: '#16a34a' },
     Completed:   { bg: dark ? '#2A2A2A' : '#F3F3F3', text: muted },
     Cancelled:   { bg: dark ? '#2a0a0a' : '#fef2f2', text: '#ef4444' },
@@ -163,14 +166,14 @@ export default function MyTicketsScreen({ navigate }: Props) {
     location: b.location ? { lat: 0, lng: 0, name: b.location.name, address: b.location.address } : undefined,
   }))
   const staticTab = tickets[tab] ?? []
-  const allTickets = [...liveAsTickets.filter(ticket => tab === 'Orders' ? ticket.type === 'food' : ticket.type !== 'food' && ticket.status === tab), ...staticTab]
+  const allTickets = liveItems ? liveItems.filter(item=>item.group===tab) : [...liveAsTickets.filter(ticket => tab === 'Orders' ? ticket.type === 'food' : ticket.type !== 'food' && ticket.status === tab), ...staticTab]
 
   // ── Full-screen ticket view ───────────────────────────────────────────────
   if (viewTicket) {
-    const t = viewTicket
-    const qrVal = `FAJI:${t.id}:${t.date}`
+    const t = liveItems?.find(item=>item.id===viewTicket.id)??viewTicket
+    const qrVal = 'reference' in t ? t.qrToken : `FAJI:${t.id}:${t.date}`
     return (
-      <div className="min-h-screen w-full md:pl-24" style={{ background: bg, fontFamily: 'var(--font-ui)' }}>
+      <div data-original-screen={liveItems!==undefined?true:undefined} className="min-h-screen w-full md:pl-24" style={{ background: bg, fontFamily: 'var(--font-ui)' }}>
         {/* Header */}
         <div className="sticky top-0 z-10 mx-auto flex max-w-5xl items-center justify-between px-5 pt-12 pb-4 md:px-10 md:pt-8" style={{ background: bg }}>
           <button onClick={() => setViewTicket(null)} className="flex items-center gap-2 text-[14px] font-semibold" style={{ color: ink }}>
@@ -185,7 +188,7 @@ export default function MyTicketsScreen({ navigate }: Props) {
           <div className="rounded-3xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.12)]" style={{ background: surface }}>
             {/* Image header */}
             <div className="relative h-[170px]">
-              <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+              {t.image ? <img src={t.image} alt={t.name} className="w-full h-full object-cover"/> : <div className="h-full w-full bg-[#333]"/>}
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%)' }} />
               <div className="absolute bottom-4 left-4 right-4">
                 <p className="text-white font-black text-[20px] leading-tight">{t.name}</p>
@@ -206,7 +209,7 @@ export default function MyTicketsScreen({ navigate }: Props) {
                 ['Date & Time', t.date],
                 ['Venue', t.venue],
                 ['Amount', t.price],
-                ['Ref', `FJ-${t.id.toUpperCase()}-2025`],
+                ['Ref', 'reference' in t ? t.reference : `FJ-${t.id.toUpperCase()}-2025`],
                 ['Type', t.type?.toUpperCase() ?? 'BOOKING'],
               ].map(([label, val]) => (
                 <div key={label}>
@@ -225,13 +228,14 @@ export default function MyTicketsScreen({ navigate }: Props) {
             {/* QR */}
             <div className="flex flex-col items-center py-6">
               <div className="rounded-2xl p-4" style={{ background: '#fff', boxShadow: `0 0 0 3px ${RED}20` }}>
-                <QRCodeSVG value={qrVal} size={140} fgColor="#1A1A1A" />
+                <>{qrVal ? <QRCodeSVG value={qrVal} size={140} fgColor="#1A1A1A"/> : <p>No server-issued QR is available for this record.</p>}</>
               </div>
-              <p className="text-[11px] font-mono mt-3" style={{ color: muted }}>FJ-{t.id.toUpperCase()}-2025</p>
-              <p className="text-[11px] mt-1" style={{ color: muted }}>Show this QR at the entrance</p>
+              <p className="text-[11px] font-mono mt-3" style={{ color: muted }}>{'reference' in t ? t.reference : `FJ-${t.id.toUpperCase()}-2025`}</p>
+              <p className="text-[11px] mt-1" style={{ color: muted }}>{qrVal ? 'Show this QR at the entrance' : 'A hold or order is not an admission ticket.'}</p>
             </div>
           </div>
 
+          {'actions' in t && <div className="connected-adapter">{t.actions}</div>}
           {/* Navigation map */}
           {'location' in t && t.location && (
             <div className="mt-4 rounded-3xl overflow-hidden" style={{ background: surface, border: `1px solid ${border}` }}>
@@ -254,7 +258,7 @@ export default function MyTicketsScreen({ navigate }: Props) {
                   <div className="w-3 h-3 rounded-full" style={{ background: RED }} />
                   <span className="text-[11px]" style={{ color: muted }}>{'name' in t.location ? t.location.name : 'Venue'}</span>
                 </div>
-                <span className="ml-auto text-[11px] font-bold" style={{ color: RED }}>~12 min drive</span>
+                <span className="ml-auto text-[11px] font-bold" style={{ color: liveItems ? '#C82924' : RED }}>~12 min drive</span>
               </div>
             </div>
           )}
@@ -275,7 +279,7 @@ export default function MyTicketsScreen({ navigate }: Props) {
     const isDelivered = o.status === 'Delivered'
 
     return (
-      <div className="min-h-screen w-full md:pl-24" style={{ background: bg, fontFamily: 'var(--font-ui)' }}>
+      <div data-original-screen={liveItems!==undefined?true:undefined} className="min-h-screen w-full md:pl-24" style={{ background: bg, fontFamily: 'var(--font-ui)' }}>
         <div className="sticky top-0 z-10 mx-auto flex max-w-6xl items-center justify-between px-5 pt-12 pb-4 md:px-10 md:pt-8" style={{ background: bg }}>
           <button onClick={() => { setViewOrder(null); if (isDelivered) showToast('Order delivered! Enjoy your meal 🎉') }}
             className="flex items-center gap-2 text-[14px] font-semibold" style={{ color: ink }}>
@@ -295,7 +299,7 @@ export default function MyTicketsScreen({ navigate }: Props) {
                 <p className="text-[11px]" style={{ color: muted }}>{o.venue}</p>
                 <p className="text-[11px]" style={{ color: muted }}>{o.date}</p>
               </div>
-              <p className="text-[15px] font-black shrink-0" style={{ color: RED }}>{o.price}</p>
+              <p className="text-[15px] font-black shrink-0" style={{ color: liveItems ? '#C82924' : RED }}>{o.price}</p>
             </div>
             {'items' in o && o.items && (
               <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${border}` }}>
@@ -375,7 +379,7 @@ export default function MyTicketsScreen({ navigate }: Props) {
 
   // ── Main list view ────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen w-full pb-24 md:pl-24" style={{ background: bg, fontFamily: 'var(--font-ui)' }}>
+    <div data-original-screen={liveItems!==undefined?true:undefined} className="min-h-screen w-full pb-24 md:pl-24" style={{ background: bg, fontFamily: 'var(--font-ui)' }}>
       {/* Toast */}
       {toast && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 rounded-2xl px-5 py-3 shadow-xl text-[13px] font-bold text-white max-w-[360px] w-[90%] text-center"
@@ -406,7 +410,7 @@ export default function MyTicketsScreen({ navigate }: Props) {
           const isOrder = ticket.type === 'food'
           return (
             <div key={ticket.id} className="rounded-[18px] overflow-hidden flex min-h-[116px]" style={{ background: surface, border: `1px solid ${border}` }}>
-              <img src={ticket.image} alt={ticket.name} className="w-[96px] shrink-0 object-cover md:w-[180px]" />
+              {ticket.image ? <img src={ticket.image} alt={ticket.name} className="w-[96px] shrink-0 object-cover md:w-[180px]"/> : <div className="w-[96px] shrink-0 grid place-items-center md:w-[180px]" aria-hidden="true">🎟️</div>}
               <div className="p-3 flex-1 min-w-0 md:p-5">
                 <div className="flex justify-between items-start mb-1 gap-2">
                   <p className="text-[14px] font-bold leading-tight flex-1 truncate md:text-[17px]" style={{ color: ink }}>{ticket.name}</p>
@@ -417,18 +421,18 @@ export default function MyTicketsScreen({ navigate }: Props) {
                 <p className="text-[11px] truncate" style={{ color: muted }}>{ticket.venue}</p>
                 <p className="text-[11px]" style={{ color: muted }}>{ticket.date}</p>
                 <div className="flex justify-between items-center mt-2">
-                  <span className="text-[13px] font-black" style={{ color: RED }}>{ticket.price}</span>
+                  <span className="text-[13px] font-black" style={{ color: liveItems ? '#C82924' : RED }}>{ticket.price}</span>
                   {isOrder ? (
-                    <button onClick={() => setViewOrder(ticket as typeof tickets.Orders[0])}
+                    <button onClick={() => {if(liveItems)setViewTicket(ticket as HistoryCard);else setViewOrder(ticket as typeof tickets.Orders[0]);}}
                       className="text-[11px] font-bold px-3 py-1 rounded-full"
-                      style={{ background: dark ? '#2A1010' : '#FFF0F0', color: RED }}>
-                      Track Order →
+                      style={{ background: dark ? '#2A1010' : '#FFF0F0', color: liveItems ? '#C82924' : RED }}>
+                      {liveItems ? 'Order details →' : 'Track Order →'}
                     </button>
-                  ) : ticket.status === 'Upcoming' ? (
-                    <button onClick={() => setViewTicket(ticket as typeof tickets.Upcoming[0])}
+                  ) : (liveItems || ticket.status === 'Upcoming') ? (
+                    <button onClick={() => setViewTicket(ticket as typeof tickets.Upcoming[0] | HistoryCard)}
                       className="text-[11px] font-bold px-3 py-1 rounded-full"
-                      style={{ background: dark ? '#2A1010' : '#FFF0F0', color: RED }}>
-                      View Ticket →
+                      style={{ background: dark ? '#2A1010' : '#FFF0F0', color: liveItems ? '#C82924' : RED }}>
+                      {liveItems ? 'View details →' : 'View Ticket →'}
                     </button>
                   ) : null}
                 </div>
@@ -450,11 +454,12 @@ export default function MyTicketsScreen({ navigate }: Props) {
           <p className="text-[12px] flex-1 leading-relaxed" style={{ color: dark ? '#CCA0A0' : '#4B4749' }}>Need help with a ticket or order?</p>
           <button onClick={() => navigate({ name: 'help' })}
             className="px-4 py-2 rounded-full text-[12px] font-bold text-white ml-3 shrink-0"
-            style={{ background: RED }}>Get Help</button>
+            style={{ background: liveItems ? '#D92D27' : RED }}>Get Help</button>
         </div>
       </div>
 
-      <BottomNav active="dashboard" navigate={navigate} />
+      {pagination}
+      <BottomNav highContrast={liveItems!==undefined} active="dashboard" navigate={navigate} />
     </div>
   )
 }

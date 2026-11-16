@@ -568,7 +568,7 @@ export default function BusinessOnboardingScreen({ onComplete, onBack, connected
 
         <div className="rounded-[18px] p-4" style={{ background: AMBER + '10', border: `1px solid ${AMBER}30` }}>
           <p className="text-[12px] font-medium leading-relaxed" style={{ color: s.ink }}>
-            {connected ? 'Submitting sends your business name for approval. Contact, location and service details above are saved privately in your onboarding draft. No verification or approval is implied.' : 'Local preview only. Submitting opens the merchant demo without sending an application or email.'}
+            {connected ? 'Submitting sends your business, contact, service and location details for authorized review. Later draft edits do not change the submitted application. No verification or approval is implied.' : 'Local preview only. Submitting opens the merchant demo without sending an application or email.'}
           </p>
         </div>
       </div>

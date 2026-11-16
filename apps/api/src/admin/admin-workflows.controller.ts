@@ -1,3 +1,4 @@
+import {WebApplicationReviewDetail} from '../web-completion/application-response';
 import {Body,Controller,Get,Header,HttpCode,Inject,Param,ParseUUIDPipe,Post,Query,Req,UseGuards} from '@nestjs/common';
 import {ApiBearerAuth,ApiBody,ApiCreatedResponse,ApiOkResponse,ApiParam,ApiQuery,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
@@ -23,6 +24,9 @@ export class AdminGovernanceController {
  @Get('approvals') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminPagedResult})
  applications(@Query(validated(PageQuery)) q:PageQuery){return this.service.applications(q);}
+ @Get('approvals/:id') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
+ @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @ApiOkResponse({type:WebApplicationReviewDetail})
+ application(@Param('id',new ParseUUIDPipe()) id:string){return this.service.application(id);}
  @Get('reviews') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminPagedResult})
  reviews(@Query(validated(PageQuery)) q:PageQuery){return this.service.reviews(q);}

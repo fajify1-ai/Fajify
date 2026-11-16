@@ -1,5 +1,7 @@
 # Unified application implementation — review checkpoints
 
+**Latest: paused at user request.** See [the saved implementation checkpoint and exact remaining verification](UNIFIED_PAUSED_CHECKPOINT.md). Later work is intentionally marked WIP; older verification below is historical.
+
 **2026-11-16 connected continuation:** [Implementation, screen status, evidence and remaining gates](UNIFIED_CONTINUATION_CHECKPOINT.md). This supersedes older outstanding-work statements for the recovered draft/receipt/reporting contracts and PR #30 reconciliation. Web and Flutter consolidation remain unaccepted.
 
 This is application-code progress on **[draft PR #31](https://github.com/fajify1-ai/Fajify/pull/31)**, not completed consolidation or release approval. Main baseline: `98e0e0f1b23bebadbfcf3149716645154e5d746f`. PR #31's remote head was verified as `48468970d73bd9eabe76241801ea5d654ee7c6d2` before edits. PR #28 and PR #30 were not merged, overwritten or closed. No Azure, deployment, DNS/TLS, Android identity or signing changes were made.

@@ -1,11 +1,11 @@
 .connected { --red:#FA3F38; --ink:#1a1a1a; --surface:#fff; --canvas:#f8f8f8; color:var(--ink); background:var(--canvas); min-height:100vh; }
-.connected header { background:white; padding:20px clamp(20px,4vw,64px); display:flex; gap:16px; align-items:center; justify-content:space-between; border-bottom:1px solid #eee; }
-.connected h1 {font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-.035em;line-height:1.15;}
-.connected h2 {font-size:20px;font-weight:750;margin-bottom:16px;}
-.connected main,.connected .content {max-width:1280px;margin:auto;padding:32px clamp(20px,4vw,48px) 120px;}
-.connected p {line-height:1.6;} .connected label {display:grid;gap:8px;font-size:14px;font-weight:600;}
-.connected input,.connected select,.connected textarea {background:white;border:1px solid #ddd;border-radius:14px;padding:12px 14px;color:#1a1a1a;min-width:0;max-width:100%;}
-.connected form {display:grid;gap:18px;} .connected button,.connected a {touch-action:manipulation;}
+.connected header:not(:where([data-original-screen],[data-original-screen] *)) { background:white; padding:20px clamp(20px,4vw,64px); display:flex; gap:16px; align-items:center; justify-content:space-between; border-bottom:1px solid #eee; }
+.connected h1:not(:where([data-original-screen],[data-original-screen] *)) {font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-.035em;line-height:1.15;}
+.connected h2:not(:where([data-original-screen],[data-original-screen] *)) {font-size:20px;font-weight:750;margin-bottom:16px;}
+.connected main:not(:where([data-original-screen],[data-original-screen] *)),.connected .content {max-width:1280px;margin:auto;padding:32px clamp(20px,4vw,48px) 120px;}
+.connected p:not(:where([data-original-screen],[data-original-screen] *)) {line-height:1.6;} .connected label:not(:where([data-original-screen],[data-original-screen] *)) {display:grid;gap:8px;font-size:14px;font-weight:600;}
+.connected input:not(:where([data-original-screen],[data-original-screen] *)),.connected select:not(:where([data-original-screen],[data-original-screen] *)),.connected textarea:not(:where([data-original-screen],[data-original-screen] *)) {background:white;border:1px solid #ddd;border-radius:14px;padding:12px 14px;color:#1a1a1a;min-width:0;max-width:100%;}
+.connected form:not(:where([data-original-screen],[data-original-screen] *)) {display:grid;gap:18px;} .connected button,.connected a {touch-action:manipulation;}
 .faji-primary,.faji-outline {display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:16px;padding:12px 20px;font-size:14px;font-weight:700;min-height:44px;text-decoration:none;}
 .faji-primary {background:#D92D27;color:white;} .faji-outline {background:white;border:1px solid #e6e6e6;color:#333;} .connected button:disabled,.auth-design button:disabled,.faji-primary:disabled,.faji-outline:disabled {opacity:.5;cursor:not-allowed;}
 .connection-state {padding:40px 24px;background:white;border-radius:22px;margin:20px auto;max-width:800px;text-align:center;display:grid;gap:16px;justify-items:center;}
@@ -19,3 +19,6 @@
 
 .connection-state a.faji-primary{color:#fff;text-decoration:none;}
 .demo-layout{min-height:100vh;display:grid}.demo-art{display:none}.demo-layout>.connection-state{width:100%;align-content:center;margin:0;max-width:none}.demo-layout .faji-card{width:100%;max-width:480px}.demo-art img{width:100%;height:100%;object-fit:cover;opacity:.65}.demo-root .demo-art{position:relative;background:#171717}.demo-art p{position:absolute;bottom:48px;left:40px;right:40px;color:white;font-size:42px;font-weight:800;line-height:1.1}@media(min-width:1024px){.demo-layout{grid-template-columns:1fr 1fr}.demo-art{display:block}.demo-layout>.connection-state{padding:40px}}
+
+/* Original feature layouts keep their own typography and geometry. API control slots opt in explicitly. */
+.connected-adapter{color:#1a1a1a}.connected-adapter label{display:grid;gap:8px;font-size:14px;font-weight:600}.connected-adapter input,.connected-adapter select,.connected-adapter textarea{background:white;border:1px solid #ddd;border-radius:14px;padding:12px 14px;color:#1a1a1a;min-width:0;max-width:100%}.connected-adapter form{display:grid;gap:18px}.connected-adapter p{line-height:1.6}

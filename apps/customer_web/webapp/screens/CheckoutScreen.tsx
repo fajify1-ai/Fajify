@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, type ReactNode } from 'react'
 import type { NavigateFn } from '../App'
 import { useDarkMode } from '../store/darkMode'
 import CalendarSheet, { type VenueTimeType } from '../components/CalendarSheet'
@@ -7,7 +7,7 @@ import QRTicket from '../components/QRTicket'
 import { addBooking } from '../store/bookings'
 import SuccessOverlay from '../components/SuccessOverlay'
 
-type Props = { navigate: NavigateFn; venueId: string; bookingDate?: string; bookingTime?: string; onRide?:()=>void }
+type Props = { navigate: NavigateFn; venueId: string; bookingDate?: string; bookingTime?: string; onRide?:()=>void; connected?:{venue:VenueCheckout;guests:number;onEdit:()=>void;onBack?:()=>void;onPay:()=>void;busy:boolean;canPay:boolean;payment:ReactNode;status:ReactNode;actionLabel:string;confirmed?:boolean} }
 
 const VENUE_TIME_MAP: Record<string, VenueTimeType> = {
   v1: 'restaurant', v2: 'beach', v3: 'cinema', v4: 'park',
@@ -73,11 +73,11 @@ const SAVED_CARDS = [
   { id: 'mc1984',   type: 'mc',     last4: '1984', holder: 'Ada Okonkwo',    expiry: '03/26', color: ['#2D1B69', '#11998E'] },
 ]
 
-type VenueCheckout = {
+export type VenueCheckout = {
   name: string
   location: string
   image: string
-  rating: number
+  rating?: number
   inclusions: { icon: string; label: string }[]
   date: string
   time: string
@@ -296,7 +296,7 @@ const VENUE_MENU: Record<string, MenuItem[]> = {
   ],
 }
 
-export default function CheckoutScreen({ navigate, venueId, bookingDate, bookingTime, onRide }: Props) {
+export default function CheckoutScreen({ navigate, venueId, bookingDate, bookingTime, onRide, connected }: Props) {
   const { dark } = useDarkMode()
   const [payMethod, setPayMethod] = useState('')
   const [bookingReference, setBookingReference] = useState('')
@@ -309,7 +309,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
   const [selectedDate, setSelectedDate] = useState<string | undefined>(bookingDate)
   const [selectedTime, setSelectedTime] = useState<string | undefined>(bookingTime)
   const [guests, setGuests] = useState(() => {
-    const n = parseInt((VENUE_DATA[venueId] ?? FALLBACK).guests)
+    const n = connected?.guests ?? parseInt((VENUE_DATA[venueId] ?? FALLBACK).guests)
     return isNaN(n) ? 2 : n
   })
 
@@ -318,6 +318,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
   const [paid, setPaid] = useState(false)
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false)
   const [showSuccessToast, setShowSuccessToast] = useState(false)
+  useEffect(()=>{if(connected?.confirmed)setShowSuccessOverlay(true);},[connected?.confirmed])
   const [showTicketTransport, setShowTicketTransport] = useState(false)
   const [tState, setTState] = useState<TState>('prompt')
   const [tProvider, setTProvider] = useState<'uber' | 'bolt'>('uber')
@@ -345,13 +346,13 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
   const bg       = dark ? '#0F0F0F' : '#F8F8F8'
   const surface  = dark ? '#1C1C1C' : '#FFFFFF'
   const ink      = dark ? '#F0F0F0' : '#1A1A1A'
-  const muted    = dark ? '#888' : '#888888'
+  const muted    = connected ? (dark ? '#AAA' : '#666') : (dark ? '#888' : '#888888')
   const border   = dark ? '#2A2A2A' : '#EEEEEE'
   const inputBg  = dark ? '#252525' : '#F5F5F5'
   const lightRed = dark ? '#2A1010' : '#FFF5F5'
   const lightRedBorder = dark ? '#4A2020' : '#FFD6D4'
 
-  const v = VENUE_DATA[venueId] ?? FALLBACK
+  const v = connected?.venue ?? VENUE_DATA[venueId] ?? FALLBACK
   const transportCost = tState === 'confirmed' ? selectedCar.price : 0
   const total = v.basePrice - v.discount + transportCost + basketTotal
 
@@ -359,6 +360,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
   const displayTime = selectedTime ?? v.time
 
   const goBack = () => {
+    if(connected){connected.onBack?.();return;}
     if (venueId.startsWith('plan') || venueId.startsWith('p')) navigate({ name: 'browsePlans' })
     else if (venueId === 'dominos') navigate({ name: 'deliveryCart', venueId })
     else navigate({ name: 'restaurant', id: venueId })
@@ -366,8 +368,8 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
 
   return (
     <>
-      <p role="note" className="px-5 py-2 text-center text-xs" style={{background:"#FFF1F0",color:"#902621"}}>Interactive demo · No payment, order or ride is submitted</p>
-    <div className="min-h-screen max-w-[430px] mx-auto font-[family-name:var(--font-ui)]" style={{ background: bg }}>
+      <p role="note" className="px-5 py-2 text-center text-xs" style={{background:"#FFF1F0",color:"#902621"}}>{connected ? 'Live booking · Only server-confirmed results count as reservations or payments' : 'Interactive demo · No payment, order or ride is submitted'}</p>
+    <div data-original-screen={connected?true:undefined} className="min-h-screen max-w-[430px] mx-auto font-[family-name:var(--font-ui)]" style={{ background: bg }}>
       {/* Header */}
       <div className="flex items-center sticky top-0 z-10 px-5 pt-14 pb-4" style={{ background: surface, borderBottom: `1px solid ${border}` }}>
         <button aria-label="Go back" onClick={goBack}
@@ -382,7 +384,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
       <div className="overflow-y-auto pb-32 [scrollbar-width:none]">
         {/* Venue image */}
         <div className="mx-5 mt-5 rounded-[20px] overflow-hidden">
-          <img src={v.image} alt={v.name} className="w-full h-[180px] object-cover" />
+          {v.image ? <img src={v.image} alt={v.name} className="w-full h-[180px] object-cover" /> : <div className="h-[180px] grid place-items-center" style={{color:ink}}>Image not published</div>}
         </div>
 
         {/* Venue name + rating */}
@@ -392,11 +394,11 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
             <div className="flex items-center gap-1">
               {[1,2,3,4,5].map(s => (
                 <svg key={s} width="13" height="13" viewBox="0 0 24 24"
-                  fill={s <= Math.round(v.rating) ? '#FFC107' : '#E0E0E0'} stroke="none">
+                  fill={s <= Math.round(v.rating??0) ? '#FFC107' : '#E0E0E0'} stroke="none">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
               ))}
-              <span className="text-[13px] font-semibold ml-1" style={{ color: ink }}>{v.rating}</span>
+              <span className="text-[13px] font-semibold ml-1" style={{ color: ink }}>{v.rating??(connected ? 'Unrated' : '')}</span>
             </div>
           </div>
           <div className="flex items-center gap-1 mt-1">
@@ -447,13 +449,13 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-bold truncate" style={{ color: ink }}>{item.name}</p>
                       <p className="text-[11px] truncate" style={{ color: muted }}>{item.desc}</p>
-                      <p className="text-[13px] font-black mt-0.5" style={{ color: RED }}>{formatPrice(item.price)}</p>
+                      <p className="text-[13px] font-black mt-0.5" style={{ color: connected ? '#C82924' : RED }}>{formatPrice(item.price)}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       {qty > 0 && (
                         <button onClick={() => removeItem(item.id)}
                           className="h-7 w-7 rounded-full border-2 flex items-center justify-center font-bold text-[16px]"
-                          style={{ borderColor: RED, color: RED }}>−</button>
+                          style={{ borderColor: RED, color: connected ? '#C82924' : RED }}>−</button>
                       )}
                       <button onClick={() => addItem(item.id)}
                         className="h-7 w-7 rounded-full flex items-center justify-center font-bold text-[16px] text-white"
@@ -495,23 +497,23 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setGuests(g => Math.max(1, g - 1))}
+                aria-label="Decrease guests" onClick={() => connected ? connected.onEdit() : setGuests(g => Math.max(1, g - 1))}
                 className="h-7 w-7 rounded-full border-2 flex items-center justify-center text-[16px] font-bold"
                 style={{ borderColor: guests > 1 ? RED : border, color: guests > 1 ? RED : muted }}>
                 −
               </button>
               <span className="text-[15px] font-black w-5 text-center" style={{ color: ink }}>{guests}</span>
               <button
-                onClick={() => setGuests(g => Math.min(20, g + 1))}
+                aria-label="Increase guests" onClick={() => connected ? connected.onEdit() : setGuests(g => Math.min(20, g + 1))}
                 className="h-7 w-7 rounded-full border-2 flex items-center justify-center text-[16px] font-bold"
-                style={{ borderColor: RED, color: RED }}>
+                style={{ borderColor: RED, color: connected ? '#C82924' : RED }}>
                 +
               </button>
             </div>
           </div>
 
           <div className="flex justify-end">
-            <button onClick={() => setCalOpen(true)} className="flex items-center gap-1.5 text-[13px] font-bold" style={{ color: RED }}>
+            <button onClick={() => connected ? connected.onEdit() : setCalOpen(true)} className="flex items-center gap-1.5 text-[13px] font-bold" style={{ color: connected ? '#C82924' : RED }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={RED} strokeWidth="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               Edit date & time
             </button>
@@ -546,11 +548,12 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
             )}
             <div className="border-t border-dashed mt-1 pt-2 flex justify-between text-[15px] font-black" style={{ borderColor: border }}>
               <span style={{ color: ink }}>Total</span>
-              <span style={{ color: RED }}>{formatPrice(total)}</span>
+              <span style={{ color: connected ? '#C82924' : RED }}>{formatPrice(total)}</span>
             </div>
           </div>
         </div>
 
+        {connected ? <section className="mx-5 mt-4 rounded-[18px] p-4" style={{background:surface,border:`1px solid ${border}`}}><h2>Faji Ride</h2><p>Coming Soon</p></section> : <>
         {/* ── TRANSPORTATION ─────────────────────────────────────── */}
 
         {/* Prompt banner */}
@@ -660,7 +663,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
                   style={{ background: dark ? '#141414' : '#F8F8F8', border: `1px solid ${border}` }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={RED} strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <p className="text-[12px] font-semibold flex-1" style={{ color: ink }}>{SAVED_ADDR}</p>
-                  <button onClick={() => setTAddrMode('new')} className="text-[11px] font-bold shrink-0" style={{ color: RED }}>Change</button>
+                  <button onClick={() => setTAddrMode('new')} className="text-[11px] font-bold shrink-0" style={{ color: connected ? '#C82924' : RED }}>Change</button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 rounded-[12px] px-3 py-2.5"
@@ -760,13 +763,15 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
                 </div>
               </div>
               <button onClick={() => onRide?onRide():setTState('configuring')}
-                className="text-[12px] font-bold shrink-0 ml-2" style={{ color: RED }}>
+                className="text-[12px] font-bold shrink-0 ml-2" style={{ color: connected ? '#C82924' : RED }}>
                 Edit
               </button>
             </div>
           </div>
         )}
 
+        </>}
+        {connected ? <div className="mx-5 mt-4 rounded-[20px] p-5" style={{background:surface,border:`1px solid ${border}`}}><h2>Payment Method</h2>{connected.payment}{connected.status}</div> : <>
         {/* Payment */}
         <div className="mx-5 mt-4 rounded-[20px] overflow-hidden" style={{ background: surface, border: `1px solid ${border}` }}>
           <p className="text-[15px] font-black px-5 pt-5 pb-4" style={{ color: ink }}>Payment Method</p>
@@ -921,7 +926,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
                       {(row.label === 'Account Number' || row.label === 'Reference') && (
                         <button onClick={() => { navigator.clipboard?.writeText(row.val); setCopiedRef(true); setTimeout(() => setCopiedRef(false), 2000) }}
                           className="text-[10px] font-black rounded-full px-2 py-0.5"
-                          style={{ background: RED + '18', color: RED }}>
+                          style={{ background: RED + '18', color: connected ? '#C82924' : RED }}>
                           {copiedRef && row.label === 'Reference' ? 'Copied!' : 'Copy'}
                         </button>
                       )}
@@ -974,7 +979,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
                     <div key={bank} className="rounded-[10px] px-3 py-2.5"
                       style={{ background: dark ? '#1A1A1A' : '#FFF', border: `1px solid ${border}` }}>
                       <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: muted }}>{bank}</p>
-                      <p className="text-[11px] font-black" style={{ color: RED }}>{code}</p>
+                      <p className="text-[11px] font-black" style={{ color: connected ? '#C82924' : RED }}>{code}</p>
                     </div>
                   ))}
                 </div>
@@ -982,19 +987,21 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
             )}
           </div>
         </div>
+        </>}
       </div>
 
       {/* Book CTA */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 pb-8 pt-4"
         style={{ background: surface, borderTop: `1px solid ${border}` }}>
-        {!payMethod && (
+        {!connected && !payMethod && (
           <p className="text-center text-[11px] font-semibold mb-2" style={{ color: muted }}>
             Select a payment method above to continue
           </p>
         )}
         <button
-          disabled={!payMethod}
+          disabled={connected ? connected.busy||!connected.canPay : !payMethod}
           onClick={() => {
+            if(connected){connected.onPay();return;}
             const bookingRef = `FJ-BOOK-${venueId.toUpperCase()}-${Date.now().toString(36).toUpperCase()}`
             setBookingReference(bookingRef)
             addBooking({
@@ -1017,12 +1024,12 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
             setShowSuccessOverlay(true)
           }}
           className="w-full flex items-center justify-between rounded-[16px] px-6 py-4 text-white transition-opacity"
-          style={{ background: payMethod ? RED : (dark ? '#333' : '#CCC'), opacity: payMethod ? 1 : 0.6, cursor: payMethod ? 'pointer' : 'not-allowed' }}>
+          style={{ background: connected ? '#D92D27' : payMethod ? RED : (dark ? '#333' : '#CCC'), opacity: connected ? 1 : payMethod ? 1 : 0.6, cursor: connected ? 'pointer' : payMethod ? 'pointer' : 'not-allowed' }}>
           <div className="flex items-center gap-2">
-            {!payMethod && (
+            {!connected && !payMethod && (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
             )}
-            <span className="text-[16px] font-black">Book Reservation</span>
+            <span className="text-[16px] font-black">{connected ? connected.busy ? 'Working…' : connected.actionLabel : 'Book Reservation'}</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="text-[16px] font-black">{formatPrice(total)}</span>
@@ -1043,7 +1050,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
       <SuccessOverlay
         title="Booking Confirmed!"
         subtitle={`Your table at ${v.name} is booked`}
-        onDone={() => { setShowSuccessOverlay(false); setPaid(true); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 3500) }}
+        onDone={() => { setShowSuccessOverlay(false); if(connected)return;setPaid(true); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 3500) }}
       />
     )}
 
@@ -1097,7 +1104,7 @@ export default function CheckoutScreen({ navigate, venueId, bookingDate, booking
                   <p className="text-[14px] font-black" style={{ color: dark ? '#F0F0F0' : '#1A1A1A' }}>{car.label}</p>
                   <p className="text-[11px]" style={{ color: dark ? '#888' : '#888' }}>{car.sub}</p>
                 </div>
-                <p className="text-[14px] font-black shrink-0" style={{ color: RED }}>₦{car.price.toLocaleString('en-NG')}</p>
+                <p className="text-[14px] font-black shrink-0" style={{ color: connected ? '#C82924' : RED }}>₦{car.price.toLocaleString('en-NG')}</p>
               </button>
             ))}
           </div>

@@ -6,3 +6,17 @@
 [data-connected-auth] [class*="text-[#FA3F38]"]{color:#C82924}
 [data-connected-auth] [class*="bg-[#FA3F38]"]{background-color:#D92D27}
 [data-connected-auth] [class*="text-[#999]"],[data-connected-auth] [class*="text-[#777477]"]{color:#6B686B}
+
+/* The original reservation uses a semantic header; shared workspace chrome must not restyle it. */
+.connected main.original-reservation{max-width:430px;padding:48px 20px 112px}
+.connected .original-reservation>header{display:block;padding:0;background:transparent;border:0}
+
+.connected main.original-create-event{max-width:430px;padding:48px 20px 40px}
+.connected .original-create-event>header{display:block;padding:0;background:transparent;border:0}
+
+/* Connected original calendar controls retain their red surfaces with AA text contrast. */
+.connected .original-reservation [class*="bg-[#ff4741]"],.connected .original-create-event [class*="bg-[#ff4741]"]{background-color:#D92D27}
+.connected .original-reservation [class*="text-[#797477]"],.connected .original-create-event [class*="text-[#797477]"]{color:#666}
+.connected .original-create-event [class*="text-[#ff4741]"]{color:#C82924}
+
+@media(min-width:768px){.connected main.original-reservation,.connected main.original-create-event{max-width:680px}}

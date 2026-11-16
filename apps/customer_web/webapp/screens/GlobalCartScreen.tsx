@@ -1,11 +1,11 @@
 import { addBooking } from '../store/bookings'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { NavigateFn } from '../App'
 import { useDarkMode } from '../store/darkMode'
 import { useCart } from '../store/cart'
 import SuccessOverlay from '../components/SuccessOverlay'
 
-type Props = { navigate: NavigateFn }
+type Props = { navigate: NavigateFn; connected?:{cart:ReturnType<typeof useCart>;busy:boolean;status:ReactNode;payment:ReactNode} }
 
 const RED = '#FA3F38'
 
@@ -18,9 +18,10 @@ const SAVED_CARDS = [
   { id: 'mc1984',  last4: '1984', holder: 'Ada Okonkwo', expiry: '03/26', colors: ['#2D1B69', '#11998E'] as [string,string] },
 ]
 
-export default function GlobalCartScreen({ navigate }: Props) {
+export default function GlobalCartScreen({ navigate, connected }: Props) {
   const { dark } = useDarkMode()
-  const cart = useCart()
+  const localCart = useCart()
+  const cart = connected?.cart??localCart
   const [payMethod, setPayMethod] = useState('')
   const [showSuccess, setShowSuccess] = useState(false)
   const [pendingNav, setPendingNav] = useState<(() => void) | null>(null)
@@ -30,7 +31,7 @@ export default function GlobalCartScreen({ navigate }: Props) {
   const bg      = dark ? '#0F0F0F' : '#F8F8F8'
   const surface = dark ? '#1C1C1C' : '#FFFFFF'
   const ink     = dark ? '#F0F0F0' : '#1A1A1A'
-  const muted   = dark ? '#888' : '#888'
+  const muted   = connected ? (dark?'#AAA':'#666') : (dark?'#888':'#888')
   const border  = dark ? '#2A2A2A' : '#EEEEEE'
   const inputBg = dark ? '#252525' : '#F5F5F5'
 
@@ -41,13 +42,13 @@ export default function GlobalCartScreen({ navigate }: Props) {
     return acc
   }, {})
 
-  const serviceCharge = cart.totalPrice > 0 ? cart.items.every(item => item.venueId === 'dominos') ? 500 : Math.round(cart.totalPrice * 0.05) : 0
+  const serviceCharge = connected ? 0 : cart.totalPrice > 0 ? cart.items.every(item => item.venueId === 'dominos') ? 500 : Math.round(cart.totalPrice * 0.05) : 0
   const grandTotal = cart.totalPrice + serviceCharge
 
   return (
     <>
-    <div className="min-h-screen max-w-[430px] mx-auto font-[family-name:var(--font-ui)]" style={{ background: bg }}>
-      <p role="note" className="text-xs text-center p-2">Demo checkout · No payment is submitted</p>
+    <div data-original-screen={!!connected?true:undefined} className="min-h-screen max-w-[430px] mx-auto font-[family-name:var(--font-ui)]" style={{ background: bg }}>
+      <p role="note" className="text-xs text-center p-2">{connected?'Saved cart · combined checkout unavailable':'Demo checkout · No payment is submitted'}</p>
       {/* Header */}
       <div className="flex items-center sticky top-0 z-10 px-5 pt-14 pb-4" style={{ background: surface, borderBottom: `1px solid ${border}` }}>
         <button aria-label="Back to discovery" onClick={() => navigate({ name: 'home' })}
@@ -64,6 +65,7 @@ export default function GlobalCartScreen({ navigate }: Props) {
         <div className="w-10" />
       </div>
 
+      {connected?.status}
       {cart.totalQty === 0 ? (
         /* Empty state */
         <div className="flex flex-col items-center justify-center px-8 pt-32">
@@ -90,11 +92,11 @@ export default function GlobalCartScreen({ navigate }: Props) {
                 {/* Venue header */}
                 <div className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: `1px solid ${border}` }}>
                   <div className="h-11 w-11 rounded-[12px] overflow-hidden shrink-0">
-                    <img src={venue.venueImage} alt={venue.venueName} className="h-full w-full object-cover" />
+                    {venue.venueImage&&<img src={venue.venueImage} alt={venue.venueName} className="h-full w-full object-cover"/>}
                   </div>
                   <div className="flex-1">
                     <p className="text-[14px] font-black" style={{ color: ink }}>{venue.venueName}</p>
-                    <p className="text-[12px]" style={{ color: muted }}>{venueItems.length} item{venueItems.length !== 1 ? 's' : ''} · {formatPrice(venueTotal)}</p>
+                    <p className="text-[12px]" style={{ color: muted }}>{venueItems.length} item{venueItems.length !== 1 ? 's' : ''} · {connected&&venueId==='unavailable'?'Unavailable':formatPrice(venueTotal)}</p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => navigate({ name: 'restaurant', id: venueId })}
@@ -102,7 +104,7 @@ export default function GlobalCartScreen({ navigate }: Props) {
                       style={{ background: dark ? '#2A2A2A' : '#F5F5F5', color: ink }}>
                       Add more
                     </button>
-                    <button onClick={() => cart.clearVenue(venueId)}
+                    <button aria-label={`Remove items from ${venue.venueName}`} disabled={connected?.busy} onClick={() => cart.clearVenue(venueId)}
                       className="h-7 w-7 flex items-center justify-center rounded-full"
                       style={{ background: dark ? '#2A1010' : '#FFF0F0' }}>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={RED} strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -115,18 +117,18 @@ export default function GlobalCartScreen({ navigate }: Props) {
                   {venueItems.map(item => (
                     <div key={item.key} className="flex items-center gap-3 px-4 py-3">
                       <div className="h-[56px] w-[56px] rounded-[10px] overflow-hidden shrink-0">
-                        <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                        {item.image&&<img src={item.image} alt={item.name} className="h-full w-full object-cover"/>}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-bold truncate" style={{ color: ink }}>{item.name}</p>
-                        <p className="text-[13px] font-black mt-0.5" style={{ color: RED }}>{formatPrice(item.price)}</p>
+                        <p className="text-[13px] font-black mt-0.5" style={{ color: connected?'#C82924':RED }}>{connected&&item.venueId==='unavailable'?'Unavailable':formatPrice(item.price)}</p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => cart.removeItem(item.key)}
+                        <button aria-label={`Decrease ${item.name} quantity`} disabled={connected?.busy} onClick={() => cart.removeItem(item.key)}
                           className="h-7 w-7 rounded-full border-2 flex items-center justify-center font-bold text-[16px]"
-                          style={{ borderColor: RED, color: RED }}>−</button>
+                          style={{ borderColor: RED, color: connected?'#C82924':RED }}>−</button>
                         <span className="w-5 text-center text-[14px] font-black" style={{ color: ink }}>{item.qty}</span>
-                        <button onClick={() => cart.addItem({ venueId: item.venueId, venueName: item.venueName, venueImage: item.venueImage, itemId: item.itemId, name: item.name, price: item.price, image: item.image })}
+                        <button aria-label={`Increase ${item.name} quantity`} disabled={connected?.busy} onClick={() => cart.addItem({ venueId: item.venueId, venueName: item.venueName, venueImage: item.venueImage, itemId: item.itemId, name: item.name, price: item.price, image: item.image })}
                           className="h-7 w-7 rounded-full flex items-center justify-center font-bold text-[16px] text-white"
                           style={{ background: RED }}>+</button>
                       </div>
@@ -163,15 +165,16 @@ export default function GlobalCartScreen({ navigate }: Props) {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={RED} strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                 <span className="text-[13px] font-semibold" style={{ color: muted }}>Have a promo code?</span>
               </div>
-              <span className="text-[12px] font-bold" style={{ color: RED }}>Apply ›</span>
+              <span className="text-[12px] font-bold" style={{ color: connected?'#C82924':RED }}>Apply ›</span>
             </button>
+            {connected&&promoOpen&&<p>Automatic discounts are unavailable. Read merchant offer terms before ordering.</p>}
             {promoOpen && (
               <div className="flex gap-2 mt-2">
-                <input value={promoCode} onChange={e => setPromoCode(e.target.value)}
+                <input aria-label="Promo code" disabled={!!connected} value={promoCode} onChange={e => setPromoCode(e.target.value)}
                   placeholder="Enter promo code"
                   className="flex-1 rounded-xl border px-4 py-3 text-[13px] outline-none"
                   style={{ background: inputBg, borderColor: border, color: ink }} />
-                <button className="rounded-xl px-5 py-3 text-[12px] font-bold text-white" style={{ background: RED }}>Apply</button>
+                <button disabled={!!connected} className="rounded-xl px-5 py-3 text-[12px] font-bold text-white" style={{ background: RED }}>Apply</button>
               </div>
             )}
           </div>
@@ -185,21 +188,22 @@ export default function GlobalCartScreen({ navigate }: Props) {
                 return (
                   <div key={venueId} className="flex justify-between text-[13px]">
                     <span style={{ color: muted }}>{venueItems[0].venueName}</span>
-                    <span style={{ color: ink }}>{formatPrice(venueTotal)}</span>
+                    <span style={{ color: ink }}>{connected&&venueId==='unavailable'?'Unavailable':formatPrice(venueTotal)}</span>
                   </div>
                 )
               })}
               <div className="flex justify-between text-[13px]">
-                <span style={{ color: muted }}>{cart.items.every(item => item.venueId === 'dominos') ? 'Delivery fee' : 'Service charge (5%)'}</span>
+                <span style={{ color: muted }}>{connected ? 'No checkout fees quoted' : cart.items.every(item => item.venueId === 'dominos') ? 'Delivery fee' : 'Service charge (5%)'}</span>
                 <span style={{ color: ink }}>{formatPrice(serviceCharge)}</span>
               </div>
               <div className="border-t pt-2 mt-1 flex justify-between text-[15px] font-black" style={{ borderColor: border }}>
                 <span style={{ color: ink }}>Total</span>
-                <span style={{ color: RED }}>{formatPrice(grandTotal)}</span>
+                <span style={{ color: connected?'#C82924':RED }}>{formatPrice(grandTotal)}</span>
               </div>
             </div>
           </div>
 
+          {connected ? <section className="mx-5 mt-4 rounded-[20px] p-5" style={{background:surface,border:`1px solid ${border}`}}><h2>Payment Method</h2>{connected.payment}</section> : <>
           {/* Payment */}
           <div className="mx-5 mt-4 rounded-[20px] overflow-hidden" style={{ background: surface, border: `1px solid ${border}` }}>
             <p className="text-[15px] font-black px-5 pt-5 pb-4" style={{ color: ink }}>Payment Method</p>
@@ -246,6 +250,7 @@ export default function GlobalCartScreen({ navigate }: Props) {
               </button>
             </div>
           </div>
+          </>}
         </div>
       )}
 
@@ -253,12 +258,13 @@ export default function GlobalCartScreen({ navigate }: Props) {
       {cart.totalQty > 0 && (
         <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-5 pb-8 pt-3"
           style={{ background: surface, borderTop: `1px solid ${border}` }}>
-          {!payMethod && (
+          {!connected&&!payMethod && (
             <p className="text-center text-[11px] mb-2" style={{ color: muted }}>Select a payment method to continue</p>
           )}
           <button
-            disabled={!payMethod}
+            disabled={!!connected||!payMethod}
             onClick={() => {
+              if(connected)return;
               const firstVenueId = Object.keys(groups)[0] ?? ''
               const firstItem = cart.items.find(i => i.venueId === firstVenueId)
               const navArgs = {
@@ -279,7 +285,7 @@ export default function GlobalCartScreen({ navigate }: Props) {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
               <span>{cart.totalQty} item{cart.totalQty !== 1 ? 's' : ''}</span>
             </div>
-            <span>Place Order · {formatPrice(grandTotal)}</span>
+            <span>{connected ? 'Cart checkout unavailable' : 'Place Order'} · {formatPrice(grandTotal)}</span>
           </button>
         </div>
       )}

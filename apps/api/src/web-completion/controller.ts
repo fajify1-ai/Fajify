@@ -16,6 +16,7 @@ export class WebCustomerController {
  @Header('Cache-Control','no-store') @Get('cart') @Views.journeyResponse(Views.WebCart) async cart(@Req()r:AuthRequest){return {data:await this.service.cart(r.identity.subject)};}
  @Put('cart') @ApiBody({type:CartInput}) @Views.journeyResponse(Views.WebCart) async setCart(@Req()r:AuthRequest,@Body(validated(CartInput))input:CartInput){return {data:await this.service.saveCart(r.identity.subject,input)};}
  @Header('Cache-Control','no-store') @Get('events') @pagination() @Views.journeyResponse(Views.WebHostedEvents) async events(@Req()r:AuthRequest,@Query(validated(PageQuery))page:PageQuery){return {data:await this.service.events(r.identity.subject,page)};}
+ @Header('Cache-Control','no-store') @Get('events/:id') @Views.journeyResponse(Views.WebHostedEvent) async eventDetail(@Req()r:AuthRequest,@Param('id',ParseUUIDPipe)id:string){return {data:await this.service.event(r.identity.subject,id)};}
  @HttpCode(200) @Post('events') @ApiBody({type:HostedEventInput}) @Views.journeyResponse(Views.WebHostedEvent) async event(@Req()r:AuthRequest,@Body(validated(HostedEventInput))input:HostedEventInput){return {data:await this.service.createEvent(r.identity.subject,input)};}
  @HttpCode(200) @Post('events/:id/invitations') @Views.journeyResponse(Views.WebInvitation) async invite(@Req()r:AuthRequest,@Param('id',ParseUUIDPipe)id:string){return {data:await this.service.invite(r.identity.subject,id)};}
  @HttpCode(200) @Post('invitations/preview') @ApiBody({type:InvitationAcceptance}) @Views.journeyResponse(Views.WebHostedEvent) async preview(@Req()r:AuthRequest,@Body(validated(InvitationAcceptance))input:InvitationAcceptance){return {data:await this.service.previewInvite(r.identity.subject,input.token)};}
@@ -49,4 +50,10 @@ export class WebMerchantController {
  @HttpCode(200) @Post('support/:id/messages') @ApiBody({type:MerchantMessageInput}) @Views.journeyResponse(Views.WebSupportMessages) async reply(@Req()r:AuthRequest,@Param('businessId',ParseUUIDPipe)b:string,@Param('id',ParseUUIDPipe)id:string,@Body(validated(MerchantMessageInput))input:MerchantMessageInput){return {data:await this.service.thread(r.identity.subject,b,id,input.message)};}
  @Header('Cache-Control','no-store') @Get('promotions') @pagination() @Views.journeyResponse(Views.WebPromotions) async promotions(@Req()r:AuthRequest,@Param('businessId',ParseUUIDPipe)b:string,@Query(validated(PageQuery))page:PageQuery){await this.service.scope(r.identity.subject,b);return {data:await this.service.promotions(b,page)};}
  @HttpCode(200) @Post('promotions') @ApiBody({type:PromotionInput}) @Views.journeyResponse(Views.WebPromotion) async promotion(@Req()r:AuthRequest,@Param('businessId',ParseUUIDPipe)b:string,@Body(validated(PromotionInput))input:PromotionInput){return {data:await this.service.createPromotion(r.identity.subject,b,input)};}
+}
+
+@ApiTags('web-discovery') @Controller({path:'discovery/events',version:'1'})
+export class WebEventDiscoveryController {
+ constructor(@Inject(WebCompletionService)private readonly service:WebCompletionService){}
+ @Header('Cache-Control','no-store') @Get(':id/availability') @Views.journeyResponse(Views.WebEventAvailability) availability(@Param('id',ParseUUIDPipe)id:string){return this.service.eventAvailability(id).then(data=>({data}));}
 }

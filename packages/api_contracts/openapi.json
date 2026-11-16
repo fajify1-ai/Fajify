@@ -199,6 +199,16 @@
       "post": {
         "operationId": "BusinessApprovalController_apply_v1",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyInput"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -2929,6 +2939,40 @@
         ]
       }
     },
+    "/api/v1/customer/events/{id}": {
+      "get": {
+        "operationId": "WebCustomerController_eventDetail_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebHostedEvent"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "web-customer-journeys"
+        ]
+      }
+    },
     "/api/v1/customer/events/{id}/invitations": {
       "post": {
         "operationId": "WebCustomerController_invite_v1",
@@ -3849,6 +3893,35 @@
         ],
         "tags": [
           "web-onboarding"
+        ]
+      }
+    },
+    "/api/v1/discovery/events/{id}/availability": {
+      "get": {
+        "operationId": "WebEventDiscoveryController_availability_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/WebEventAvailability"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "web-discovery"
         ]
       }
     },
@@ -8679,6 +8752,42 @@
         ]
       }
     },
+    "/api/v1/admin/governance/approvals/{id}": {
+      "get": {
+        "operationId": "AdminGovernanceController_application_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebApplicationReviewDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "admin-governance"
+        ]
+      }
+    },
     "/api/v1/admin/governance/reviews": {
       "get": {
         "operationId": "AdminGovernanceController_reviews_v1",
@@ -9755,6 +9864,24 @@
         },
         "required": [
           "password"
+        ]
+      },
+      "ApplyInput": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "draftRevision": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Revision of the complete saved eight-step application. Legacy name-only applications remain supported."
+          }
+        },
+        "required": [
+          "displayName"
         ]
       },
       "BranchInput": {
@@ -11383,6 +11510,12 @@
           "currency": {
             "type": "string"
           },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicMediaView"
+            }
+          },
           "savedAt": {
             "type": "string",
             "format": "date-time"
@@ -11400,6 +11533,7 @@
           "category",
           "priceMinor",
           "currency",
+          "media",
           "savedAt"
         ]
       },
@@ -11756,6 +11890,29 @@
           "quantity"
         ]
       },
+      "WebMediaItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "position": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "alt",
+          "position"
+        ]
+      },
       "WebCartQuote": {
         "type": "object",
         "properties": {
@@ -11768,6 +11925,18 @@
           "branch_id": {
             "type": "string"
           },
+          "branch_name": {
+            "type": "string"
+          },
+          "business_name": {
+            "type": "string"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WebMediaItem"
+            }
+          },
           "price_minor": {
             "type": "string"
           },
@@ -11779,6 +11948,9 @@
           "id",
           "name",
           "branch_id",
+          "branch_name",
+          "business_name",
+          "media",
           "price_minor",
           "currency"
         ]
@@ -11851,6 +12023,9 @@
       "WebHostedEvent": {
         "type": "object",
         "properties": {
+          "accepted_guests": {
+            "type": "number"
+          },
           "is_owner": {
             "type": "boolean"
           },
@@ -12149,29 +12324,6 @@
           "public_phone",
           "latitude",
           "longitude"
-        ]
-      },
-      "WebMediaItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          },
-          "alt": {
-            "type": "string"
-          },
-          "position": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "id",
-          "url",
-          "alt",
-          "position"
         ]
       },
       "WebMedia": {
@@ -12680,6 +12832,39 @@
           "name",
           "mime",
           "base64"
+        ]
+      },
+      "WebEventAvailability": {
+        "type": "object",
+        "properties": {
+          "capacity": {
+            "type": "number"
+          },
+          "issued": {
+            "type": "number"
+          },
+          "held": {
+            "type": "number"
+          },
+          "remaining": {
+            "type": "number"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "capacity",
+          "issued",
+          "held",
+          "remaining",
+          "startsAt",
+          "endsAt"
         ]
       },
       "PaymentStatusResponse": {
@@ -14140,6 +14325,151 @@
         "required": [
           "items",
           "nextOffset"
+        ]
+      },
+      "WebApplicationContact": {
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fullName",
+          "email",
+          "phone"
+        ]
+      },
+      "WebApplicationBusiness": {
+        "type": "object",
+        "properties": {
+          "registrationNumber": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "registrationNumber",
+          "address"
+        ]
+      },
+      "WebApplicationLocation": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "landmark": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "area",
+          "landmark"
+        ]
+      },
+      "WebApplicationSnapshot": {
+        "type": "object",
+        "properties": {
+          "businessName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scale": {
+            "type": "string"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/WebApplicationContact"
+          },
+          "business": {
+            "$ref": "#/components/schemas/WebApplicationBusiness"
+          },
+          "location": {
+            "$ref": "#/components/schemas/WebApplicationLocation"
+          },
+          "verificationStatus": {
+            "type": "string",
+            "enum": [
+              "not_reviewed"
+            ]
+          }
+        },
+        "required": [
+          "businessName",
+          "category",
+          "services",
+          "scale",
+          "contact",
+          "business",
+          "location",
+          "verificationStatus"
+        ]
+      },
+      "WebApplicationReviewDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "application": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WebApplicationSnapshot"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "status",
+          "createdAt",
+          "submittedAt",
+          "application"
         ]
       },
       "AdminModerateInput": {

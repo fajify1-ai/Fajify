@@ -1,0 +1,63 @@
+Applied migration 0001_foundation.sql
+Applied migration 0002_identity_authorization.sql
+Applied migration 0003_identity_audit_rate_index.sql
+Applied migration 0004_identity_session_revocation.sql
+Applied migration 0005_business_onboarding.sql
+Applied migration 0006_m3_business_operations.sql
+Applied migration 0007_m3_branch_hours.sql
+Applied migration 0008_m3_event_packages.sql
+Applied migration 0009_m3_operation_idempotency.sql
+Applied migration 0010_m4_customer_workflows.sql
+Applied migration 0011_m4_marketplace_accounts.sql
+Applied migration 0011_m5_payment_foundation.sql
+Applied migration 0012_m5_receipt_evidence.sql
+Applied migration 0013_m5_order_intents.sql
+Applied migration 0014_m5_financial_lifecycle.sql
+Applied migration 0015_m6_customer_planning.sql
+Applied migration 0016_m6_spatial_feedback.sql
+Applied migration 0017_m6_package_capacity.sql
+Applied migration 0018_m6_attributes_evaluation.sql
+Applied migration 0019_m6_component_integrity.sql
+Applied migration 0020_m6_plan_hold_attribution.sql
+Applied migration 0021_m6_conversion_integrity.sql
+Applied migration 0022_m6_evaluation_immutability.sql
+Applied migration 0023_m8_admin_operations.sql
+Applied migration 0090_ride_dispatch.sql
+Applied migration 0091_ride_quotes.sql
+Applied migration 0092_ride_operations.sql
+Applied migration 0093_ride_incident_dedup.sql
+Applied migration 0094_ride_finance_links.sql
+Applied migration 0095_ride_evidence_integrity.sql
+Applied migration 0096_ride_tariffs.sql
+Applied migration 0097_ride_payout_reversals.sql
+Applied migration 0098_ride_tariff_integrity.sql
+Applied migration 0099_ride_document_evidence.sql
+Applied migration 0100_ride_required_documents.sql
+Applied migration 0101_ride_quote_integrity.sql
+Applied migration 0102_m8_booking_ride_links.sql
+Applied migration 0103_customer_registration.sql
+Applied migration 0104_better_auth.sql
+Applied migration 0105_auth_claims_and_factors.sql
+Applied migration 0106_privileged_scope_closure.sql
+Applied migration 0107_password_session_revocation.sql
+Applied migration 0108_retire_prelaunch_identity_claims.sql
+Applied migration 0109_web_completion.sql
+Applied migration 0110_merchant_support_queue.sql
+Applied migration 0111_business_application_submissions.sql
+✔ onboarding drafts persist privately, reject stale revisions and credentials, recover only own applications (4205.602728ms)
+✔ verification uploads are encrypted, bounded and owner-only; upload never changes approval (52.482046ms)
+✔ merchant reports, support, offers and notifications enforce current approved business scope (176.964502ms)
+✔ cart revisions and hosted invitations stay private, one-use and capacity bounded (143.382398ms)
+✔ real receipts require owned verified capture and immutable receipt/journal evidence (73.901094ms)
+✔ new journey lists paginate, cap requests and do not expose foreign customer data (62.678111ms)
+✔ merchant support reuses the operations queue without a customer-route access backdoor after revocation (45.808753ms)
+✔ complete merchant submissions are immutable, retry-safe and visible only to a fresh scoped Admin reviewer (351.064381ms)
+✔ saved wishlist and cart return published media and branch names without exposing another customer cart (169.531481ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6593.852704

@@ -1,0 +1,16 @@
+'use client';
+import type {ReactNode} from 'react';
+import MyTicketsScreen,{type HistoryCard} from '../webapp/screens/MyTicketsScreen';
+import type {NavigateFn} from '../webapp/App';
+import {State,More,usePages,Action,platform,money} from '@faji/web-ui/client';
+import type {Schema} from '@faji/web-ui/types';
+export default function History({navigate,payment,review}:{navigate:NavigateFn;payment:(hold:Schema<'M5HoldResponse'>)=>ReactNode;review:(resource:string)=>ReactNode}){
+ const reservations=usePages<Schema<'ReservationPage'>>('customer/reservations'),orders=usePages<Schema<'OrderPage'>>('customer/orders'),holds=usePages<Schema<'M5HoldPage'>>('customer/paid-holds'),tickets=usePages<Schema<'M5TicketPage'>>('customer/tickets');
+ const items:HistoryCard[]=[
+  ...(reservations.data?.items??[]).filter(row=>!holds.data?.items.some(hold=>hold.reservationId===row.id)).map(row=>({id:row.id,name:`Reservation · ${row.guests} guests`,venue:`Branch ${row.branchId}`,date:`Created ${new Date(row.createdAt).toLocaleString()}`,price:'See reservation record',status:row.status,type:'reservation',group:row.status==='completed'?'Completed' as const:row.status==='cancelled'?'Cancelled' as const:'Upcoming' as const,reference:row.id,actions:<>{row.status==='confirmed'&&<Action label="Cancel reservation" run={()=>platform(`customer/reservations/${row.id}/cancellation`,{})} onSuccess={reservations.reload}/ >}{row.status==='completed'&&review(`reservations/${row.id}`)}</>})),
+  ...(orders.data?.items??[]).map(row=>({id:row.id,name:'Order',venue:`Branch ${row.branchId}`,date:`Created ${new Date(row.createdAt).toLocaleString()}`,price:money(row.totalMinor,row.currency),status:row.status,type:'food',group:'Orders' as const,reference:row.id,actions:<>{row.status==='fulfilled'&&review(`orders/${row.id}`)}<p>Courier and dispatch tracking: Coming Soon.</p></>})),
+  ...(holds.data?.items??[]).map(row=>({id:row.id,name:row.kind==='ticket'?'Event ticket hold':'Reservation hold',venue:`Branch ${row.branchId}`,date:`Created ${new Date(row.createdAt).toLocaleString()}`,price:row.amountMinor?money(row.amountMinor,row.currency):'View server payment status',status:row.status,type:'hold',group:['expired','cancelled','late'].includes(row.status)?'Cancelled' as const:'Upcoming' as const,reference:row.id,actions:payment(row)})),
+  ...(tickets.data?.items??[]).map(row=>({id:row.id,name:'Event ticket',venue:`Event ${row.eventId}`,date:new Date(row.startsAt).toLocaleString(),price:'See payment receipt',status:row.status,type:'ticket',group:row.status==='redeemed'?'Completed' as const:row.status==='revoked'?'Cancelled' as const:'Upcoming' as const,reference:row.id,qrToken:row.status==='issued'?row.qrToken:undefined})),
+ ];
+ return <MyTicketsScreen navigate={navigate} liveItems={items} status={<><button className="faji-outline" onClick={()=>{reservations.reload();orders.reload();holds.reload();tickets.reload();}}>Refresh bookings & tickets</button><State loading={reservations.loading||orders.loading||holds.loading||tickets.loading} error={reservations.error||orders.error||holds.error||tickets.error} retry={()=>{reservations.reload();orders.reload();holds.reload();tickets.reload();}}/></>} pagination={<><More resource={reservations}/><More resource={orders}/><More resource={holds}/><More resource={tickets}/></>}/>;
+}

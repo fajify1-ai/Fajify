@@ -1,7 +1,7 @@
 import {AdminScopeGuard,RequireAdminScope} from '../admin/admin-scope.guard';
 import {Body,Controller,Get,Param,Post,Req,UseGuards,Inject} from '@nestjs/common';
-import {ApiBearerAuth,ApiTags} from '@nestjs/swagger';
-import {IsIn,IsString,Length} from 'class-validator';
+import {ApiBearerAuth,ApiTags,ApiBody,ApiProperty,ApiPropertyOptional} from '@nestjs/swagger';
+import {IsIn,IsString,Length,IsOptional,IsInt,Min} from 'class-validator';
 import {IdentityGuard} from './identity.guard';
 import {AccountGuard} from './account.guard';
 import {PrivilegedGuard} from './privileged.guard';
@@ -10,7 +10,7 @@ import {BusinessApprovalService} from './business-approval.service';
 import {ResourceGuard,RequireResource} from './resource.guard';
 import type {VerifiedIdentity} from './identity.types';
 
-class ApplyInput {@IsString() @Length(2,120) displayName!:string;}
+class ApplyInput {@ApiProperty({type:String,minLength:2,maxLength:120}) @IsString() @Length(2,120) displayName!:string; @ApiPropertyOptional({type:Number,minimum:1,description:'Revision of the complete saved eight-step application. Legacy name-only applications remain supported.'}) @IsOptional() @IsInt() @Min(1) draftRevision?:number;}
 class ReviewInput {@IsIn(['approved','rejected']) decision!:'approved'|'rejected';}
 
 @ApiTags('business-onboarding')
@@ -19,9 +19,10 @@ class ReviewInput {@IsIn(['approved','rejected']) decision!:'approved'|'rejected
 export class BusinessApprovalController{
  constructor(@Inject(BusinessApprovalService) private readonly business:BusinessApprovalService){}
  @Post()
+ @ApiBody({type:ApplyInput})
  @UseGuards(IdentityGuard,AccountGuard)
  apply(@Req() req:{identity:VerifiedIdentity},@Body() body:ApplyInput){
-  return this.business.apply(req.identity.subject,body.displayName);
+  return this.business.apply(req.identity.subject,body.displayName,body.draftRevision);
  }
  @Get(':id')
  @UseGuards(IdentityGuard,AccountGuard)

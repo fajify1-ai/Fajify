@@ -30,7 +30,8 @@ export class CustomerAccountService {
  }
  async wishlist(subject:string,input:PageQuery){
   const result=await this.pool.query(`SELECT i.id,i.business_id AS "businessId",i.branch_id AS "branchId",m.display_name AS "businessName",
-   b.name AS "branchName",b.address,i.name,i.description,i.kind AS category,i.price_minor::text AS "priceMinor",i.currency,w.created_at AS "savedAt"
+   b.name AS "branchName",b.address,i.name,i.description,i.kind AS category,i.price_minor::text AS "priceMinor",i.currency,w.created_at AS "savedAt",
+   COALESCE((SELECT json_agg(json_build_object('id',p.id,'url',p.url,'alt',p.alt,'position',p.position) ORDER BY p.position) FROM business_public_media p WHERE p.catalogue_id=i.id),'[]'::json) AS media
    FROM customer_wishlist w JOIN business_catalogue i ON i.id=w.catalogue_id JOIN business_branches b ON b.id=i.branch_id AND b.business_id=i.business_id
    JOIN business_onboarding m ON m.id=i.business_id WHERE w.customer_subject=$1 AND i.active AND i.published AND b.active AND m.status='approved'
    ORDER BY w.created_at DESC,w.catalogue_id DESC LIMIT $2 OFFSET $3`,[subject,input.limit+1,input.offset]);return page(result.rows,input);

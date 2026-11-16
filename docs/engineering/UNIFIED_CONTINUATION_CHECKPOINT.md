@@ -1,5 +1,7 @@
 # Unified application connected continuation
 
+**Latest: paused at user request.** See [the saved implementation checkpoint and exact remaining verification](UNIFIED_PAUSED_CHECKPOINT.md). Later work is intentionally marked WIP; older verification below is historical.
+
 Date: 2026-11-16. Branch: `integration/unified-application-preservation`, draft PR #31. This is an implementation checkpoint, **not consolidation acceptance**.
 
 ## Preserved sources and reconciliation
