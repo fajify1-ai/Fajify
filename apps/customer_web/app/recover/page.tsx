@@ -1,2 +1,1 @@
-import {AuthForm} from '@faji/web-auth/form';
-export default function Page(){return <AuthForm mode="recover"/>;}
+export {default} from '../../unified/DeferredDelivery';

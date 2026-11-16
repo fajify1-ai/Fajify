@@ -1,0 +1,1 @@
+PASS Customer: planning navigation, registration/session, profile persistence, support creation, bookings navigation, API isolation, required forms, responsive screenshots, security page, no page errors.

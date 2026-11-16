@@ -1,0 +1,1015 @@
+[
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/app/business_app.dart",
+    "sha": "039058ed77f8cddc9ef680df71b8405e8a8dee57",
+    "widgets": [
+      "BusinessApp",
+      "BusinessShell"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": [
+      "AnimatedBuilder"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/faji_business.dart",
+    "sha": "aba3e822bbeeb063a6ce7ffb3007d6406ae23631",
+    "widgets": [],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/features/account.dart",
+    "sha": "3a88b90a3c96401d9f53f8c6e5c91317bf61f6bf",
+    "widgets": [
+      "WelcomePage",
+      "LoginPage",
+      "IdentityHandoffPage",
+      "BusinessSetupPage",
+      "EarningsPage",
+      "ProfilePage",
+      "ScanPage",
+      "NotificationsPage"
+    ],
+    "surfaces": [
+      "WelcomePage",
+      "LoginPage",
+      "IdentityHandoffPage",
+      "BusinessSetupPage",
+      "EarningsPage",
+      "ProfilePage",
+      "ScanPage",
+      "NotificationsPage"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/features/dashboard.dart",
+    "sha": "6f3f42085c69f744bfe1f61059d439f4b8a712bd",
+    "widgets": [
+      "DashboardPage",
+      "_Metric",
+      "_QuickAction",
+      "ReservationTile",
+      "RevenueChart"
+    ],
+    "surfaces": [
+      "DashboardPage"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/features/menu.dart",
+    "sha": "165d5fa0e90a0efef5b28861875ac49d62446f13",
+    "widgets": [
+      "MenuThumbnail",
+      "MenuPage",
+      "MenuFormPage"
+    ],
+    "surfaces": [
+      "MenuPage",
+      "MenuFormPage"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/features/orders.dart",
+    "sha": "006ec2d18a254b12e91401a17e40f6dd3815b590",
+    "widgets": [
+      "OrdersPage",
+      "OrderCard",
+      "OrderDetailPage"
+    ],
+    "surfaces": [
+      "OrdersPage",
+      "OrderDetailPage"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/features/reservations.dart",
+    "sha": "f0cd9ab31e6aae250e80cdffd71935cc8d871d6f",
+    "widgets": [
+      "ReservationsPage",
+      "ReservationDetailPage"
+    ],
+    "surfaces": [
+      "ReservationsPage",
+      "ReservationDetailPage"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/features/services_page.dart",
+    "sha": "8cedf8a26529ef97c201773130710b4d217f3b06",
+    "widgets": [
+      "ServicesPage",
+      "_ServiceMetric"
+    ],
+    "surfaces": [
+      "ServicesPage"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/main.dart",
+    "sha": "73f9d1c0a0c66751bbfdf07ec2f19734b3b37a00",
+    "widgets": [],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/business_mobile/lib/shared/business_ui.dart",
+    "sha": "caa8dd6e022e5375e3e1e8f4d5c5722cf4dadd5d",
+    "widgets": [
+      "Panel",
+      "PageBody",
+      "StatusPill",
+      "SectionHeading",
+      "DataGate"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/application/auth_controller.dart",
+    "sha": "e5c68db374ddf2e3c3331b6f37180c83a223475e",
+    "widgets": [],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/auth_scope.dart",
+    "sha": "c96383f5a69bfcd0544041e8886bb5da288cba2f",
+    "widgets": [],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/customer_access_gate.dart",
+    "sha": "9bacedde1af946957e4a68252c71655e2f672d43",
+    "widgets": [
+      "CustomerAccessGate"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/customer_auth_navigation.dart",
+    "sha": "247f994be2b36cee37d2261754319254b87168c8",
+    "widgets": [],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/business_login_screen.dart",
+    "sha": "29e4b3117e091e979c96200204be39cb2f1fa992",
+    "widgets": [
+      "BusinessLoginScreen",
+      "_ChoiceButton"
+    ],
+    "surfaces": [
+      "BusinessLoginScreen"
+    ],
+    "assets": [
+      "assets/images/faji-logo-transparent.png"
+    ],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/forgot_password_screen.dart",
+    "sha": "a6eaadef7938b3190d232456bce0aba7edb7036d",
+    "widgets": [
+      "ForgotPasswordScreen"
+    ],
+    "surfaces": [
+      "ForgotPasswordScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/ride_login_screen.dart",
+    "sha": "1624a0ff4167e8edb6f4495ae793808c1d54a170",
+    "widgets": [
+      "RideLoginScreen"
+    ],
+    "surfaces": [
+      "RideLoginScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/user_auth_screen.dart",
+    "sha": "4f7e7af43f1d53298f4467767af2891bbf4ebb81",
+    "widgets": [
+      "UserAuthScreen",
+      "_AuthSheet",
+      "_SignInFields",
+      "_RegisterFields",
+      "_Label",
+      "_SecondFactorDialog"
+    ],
+    "surfaces": [
+      "UserAuthScreen",
+      "_AuthSheet",
+      "_SecondFactorDialog"
+    ],
+    "assets": [],
+    "animations": [
+      "AnimationController",
+      "AnimatedBuilder",
+      "AnimatedSwitcher",
+      "FadeTransition",
+      "SlideTransition"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/user_home_screen.dart",
+    "sha": "d28eb6a60daaf5685b1eb57a7a724f3f08284739",
+    "widgets": [
+      "UserHomeScreen",
+      "_EmptySearchState"
+    ],
+    "surfaces": [
+      "UserHomeScreen"
+    ],
+    "assets": [],
+    "animations": [
+      "AnimatedBuilder"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/user_login_screen.dart",
+    "sha": "e25c72f09be0ed3eaf4fa65f0ae389e8e9e26ed1",
+    "widgets": [
+      "UserLoginScreen",
+      "PlaceholderLoginScreen"
+    ],
+    "surfaces": [
+      "UserLoginScreen",
+      "PlaceholderLoginScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_divider.dart",
+    "sha": "40da187d947a83ad08f8c1caee5eb030012c5a40",
+    "widgets": [
+      "AuthDivider"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_error_message.dart",
+    "sha": "56d8268041569a9c05e3ec1e27f49774a0558904",
+    "widgets": [
+      "AuthErrorMessage"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_form_layout.dart",
+    "sha": "c4f2b0025f14b421f3a034178b243419dd22ab9f",
+    "widgets": [
+      "AuthFormLayout"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_loading_indicator.dart",
+    "sha": "6d739c69398b7a390047634a9df35325d43db580",
+    "widgets": [
+      "AuthLoadingIndicator"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_primary_button.dart",
+    "sha": "40027585fcac15bdb7b355da0f07a8684a14a701",
+    "widgets": [
+      "AuthPrimaryButton"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_segmented_control.dart",
+    "sha": "7a5464542ae5de50a2de2c0425bb737b0c3dad2d",
+    "widgets": [
+      "AuthSegmentedControl",
+      "_Tab"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_status_view.dart",
+    "sha": "24a4c28c9fbca3d734ee533e7af27e961030422e",
+    "widgets": [
+      "AuthStatusView"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/faji_auth_text_field.dart",
+    "sha": "43d942ed37ab5a968f5fced1ad49678f33c17f84",
+    "widgets": [
+      "FajiAuthTextField"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/google_auth_button.dart",
+    "sha": "a46c5e24121144a2e18fc017b473066ace0eef0d",
+    "widgets": [
+      "GoogleAuthButton"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/registration_legal_acknowledgement.dart",
+    "sha": "fdd9db3f912a3b19d1d4ba01a689dccba4eaca3d",
+    "widgets": [
+      "RegistrationLegalAcknowledgement",
+      "_LegalLink"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/add_payment_card_screen.dart",
+    "sha": "e46605b5f1cd265c2cc1721e93883ac39d0abfc4",
+    "widgets": [
+      "AddPaymentCardScreen"
+    ],
+    "surfaces": [
+      "AddPaymentCardScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/booking_confirmation_screen.dart",
+    "sha": "003211f6f679594b84c303651d82cf5ed0306875",
+    "widgets": [
+      "BookingConfirmationScreen"
+    ],
+    "surfaces": [
+      "BookingConfirmationScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/booking_reservation_screen.dart",
+    "sha": "bf14f9d77ffd74de5907754f224bbf2da26fece5",
+    "widgets": [
+      "BookingReservationScreen",
+      "_BackButton",
+      "_PlanHero",
+      "_IncludedCard",
+      "_FeatureTile",
+      "_BookingDetailsCard",
+      "_Detail",
+      "_CircleAction",
+      "_PriceBreakdown",
+      "_PriceRow",
+      "_RideAddon",
+      "_RideButton",
+      "_PaymentMethods",
+      "_PaymentRow",
+      "_SectionCard",
+      "_BottomBookBar"
+    ],
+    "surfaces": [
+      "BookingReservationScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/booking_ticket_screen.dart",
+    "sha": "ee13aec33c8d7ba8e743b87756ebbdb185dd2805",
+    "widgets": [
+      "BookingTicketScreen",
+      "_TicketRow"
+    ],
+    "surfaces": [
+      "BookingTicketScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/booking_time_placeholder_screen.dart",
+    "sha": "e0c540c1865a21d6159af1f1b99f76a99b8d8a03",
+    "widgets": [
+      "BookingReviewPlaceholderScreen"
+    ],
+    "surfaces": [
+      "BookingReviewPlaceholderScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/widgets/booking_date_sheet.dart",
+    "sha": "9e644a79dc935157eb4f3ea3034c3d8c938a4af8",
+    "widgets": [
+      "BookingDateSheet",
+      "_CalendarGrid",
+      "_SheetIconButton"
+    ],
+    "surfaces": [
+      "BookingDateSheet"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/widgets/booking_qr_code.dart",
+    "sha": "d80ede87a40b5f3b810bfdd0dc196dbde76cb73d",
+    "widgets": [
+      "BookingQrCode"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/widgets/booking_time_sheet.dart",
+    "sha": "360d571ef7d8803503675499692219c15bdf8897",
+    "widgets": [
+      "BookingTimeSheet",
+      "_TimeOption"
+    ],
+    "surfaces": [
+      "BookingTimeSheet"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/screens/plan_for_me_step_one_screen.dart",
+    "sha": "f3168ad46f983bf56e8c830d49b6ddb24d8c4685",
+    "widgets": [
+      "PlanForMeStepOneScreen",
+      "_BackButton",
+      "_ProgressIndicator",
+      "_PlanTypeCard",
+      "PlanForMeStepTwoPlaceholderScreen",
+      "_PeopleCounterPanel",
+      "_CounterButton",
+      "_PeopleRangeChip",
+      "PlanForMeStepThreeScreen",
+      "_LocationCard",
+      "PlanForMeStepFourScreen",
+      "_BudgetCard",
+      "PlanForMeStepFiveScreen",
+      "_SectionLabel",
+      "_DateOptionCard",
+      "_TimeSelector",
+      "_TimeRangeCard",
+      "PlanForMeStepSixScreen",
+      "_VibeCard",
+      "_LegacyPlanResultsScreen"
+    ],
+    "surfaces": [
+      "PlanForMeStepOneScreen",
+      "PlanForMeStepTwoPlaceholderScreen",
+      "PlanForMeStepThreeScreen",
+      "PlanForMeStepFourScreen",
+      "PlanForMeStepFiveScreen",
+      "PlanForMeStepSixScreen",
+      "_LegacyPlanResultsScreen"
+    ],
+    "assets": [],
+    "animations": [
+      "AnimatedSwitcher",
+      "FadeTransition",
+      "ScaleTransition",
+      "AnimatedContainer"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/screens/temporary_home_destinations.dart",
+    "sha": "8bfec5d9d724632e41680c247a22d8bb70ed0078",
+    "widgets": [
+      "WishlistScreen",
+      "_WishlistContent",
+      "_WishlistError",
+      "_WishlistEmptyState",
+      "_WishlistCard",
+      "_WishlistImageFallback",
+      "BookingsScreen",
+      "_TicketTabs",
+      "_EmptyBookings",
+      "_TicketCard",
+      "_StatusPill",
+      "_HelpCard",
+      "ProfileScreen",
+      "PlanForMeScreen",
+      "BrowsePlansScreen",
+      "_TemporaryScreen"
+    ],
+    "surfaces": [
+      "WishlistScreen",
+      "BookingsScreen",
+      "ProfileScreen",
+      "PlanForMeScreen",
+      "BrowsePlansScreen",
+      "_TemporaryScreen"
+    ],
+    "assets": [],
+    "animations": [
+      "AnimatedBuilder"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/floating_home_nav.dart",
+    "sha": "b471ddc0f24159ff05f667a2238714d24d834ed1",
+    "widgets": [
+      "FloatingHomeNav",
+      "_QuickAction",
+      "_NavigationBar"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": [
+      "AnimationController",
+      "AnimatedBuilder"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/home_category_filter.dart",
+    "sha": "d9fd8960a4b03fa457c8ad753791d225563b4344",
+    "widgets": [
+      "HomeCategoryFilter"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/home_filter_sheet.dart",
+    "sha": "fe5e22ca40ebbea0920147203adb448523a0b355",
+    "widgets": [
+      "HomeFilterSheet",
+      "_ChoicePill"
+    ],
+    "surfaces": [
+      "HomeFilterSheet"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/home_header.dart",
+    "sha": "b2e248a131dae9b1651e5a966bc8c8cd30014ece",
+    "widgets": [
+      "HomeHeader",
+      "_ProfileAvatar",
+      "_InitialsAvatar",
+      "_NotificationButton"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": [
+      "AnimatedSwitcher"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/home_search_bar.dart",
+    "sha": "87503e534388b4e60559f42e6db0bc430dd0bcc9",
+    "widgets": [
+      "HomeSearchBar"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/promo_banner_carousel.dart",
+    "sha": "41cccef77215f1965a1da0dd3ebb8fca7469cb70",
+    "widgets": [
+      "PromoBannerCarousel",
+      "_PromoSlide"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": [
+      "AnimatedContainer"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/venue_card.dart",
+    "sha": "fdde835fda1493fc15f7dd5922374b12071ae274",
+    "widgets": [
+      "VenueCard",
+      "_BusinessImage",
+      "_ImageFallback",
+      "_LightPill",
+      "_StatusPill",
+      "_Metric"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": [
+      "AnimationController",
+      "ScaleTransition"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/whats_on_card.dart",
+    "sha": "e1ff4c03b5915b4d04d23c19c0441ccc6a3afb28",
+    "widgets": [
+      "WhatsOnCard",
+      "_CategoryPill"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": [
+      "AnimationController",
+      "ScaleTransition"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/whats_on_section.dart",
+    "sha": "75c656700a388af8ce5ef9db00935c176b6b7483",
+    "widgets": [
+      "WhatsOnSection"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/legal/presentation/legal_document_screen.dart",
+    "sha": "dc2d9e6abee1a43c4a008d6fcd7bf77e7a8f6fa7",
+    "widgets": [
+      "TermsOfServiceScreen",
+      "PrivacyPolicyScreen",
+      "LegalDocumentScreen"
+    ],
+    "surfaces": [
+      "TermsOfServiceScreen",
+      "PrivacyPolicyScreen",
+      "LegalDocumentScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/legal/presentation/legal_links_card.dart",
+    "sha": "47c9a7f15fdf04bc42a4477c3ac86f9fb4e2c60e",
+    "widgets": [
+      "LegalLinksCard"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/legal/presentation/legal_routes.dart",
+    "sha": "c68711099fcb0155a5e3e857b9ab8a704f2f747b",
+    "widgets": [],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/onboarding/presentation/screens/role_selection_screen.dart",
+    "sha": "5c1bd1357f828970977b81ebb200a72d9d9f6f89",
+    "widgets": [
+      "RoleSelectionScreen",
+      "_TopDecoration",
+      "_FajiWordmark",
+      "_IntroContent",
+      "_DotPattern",
+      "_BottomSheet"
+    ],
+    "surfaces": [
+      "RoleSelectionScreen",
+      "_BottomSheet"
+    ],
+    "assets": [],
+    "animations": [
+      "AnimationController",
+      "FadeTransition",
+      "SlideTransition",
+      "ScaleTransition"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/onboarding/presentation/screens/splash_screen.dart",
+    "sha": "1b50ca2a31c9252515068f49ab2e51c1fcc103aa",
+    "widgets": [
+      "SplashScreen",
+      "_SplashBlob"
+    ],
+    "surfaces": [
+      "SplashScreen"
+    ],
+    "assets": [
+      "assets/images/faji-logo-transparent.png"
+    ],
+    "animations": [
+      "AnimationController",
+      "AnimatedBuilder"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/onboarding/presentation/widgets/animated_primary_login_button.dart",
+    "sha": "6ab6eb27be36ac5e4e7753fff1e88d18ae86d0b8",
+    "widgets": [
+      "AnimatedPrimaryLoginButton"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/onboarding/presentation/widgets/faji_role_card.dart",
+    "sha": "ad5ad0a9d4466e33d1d209a730b29756072c4d6c",
+    "widgets": [
+      "FajiRoleCard"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/plans/presentation/screens/plan_booking_screen.dart",
+    "sha": "7553fb707a9752de32d1a13c4139f5fadf6022c7",
+    "widgets": [
+      "PlanBookingScreen"
+    ],
+    "surfaces": [
+      "PlanBookingScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/plans/presentation/screens/plan_results_screen.dart",
+    "sha": "7caf490ab3b64f385bbace1742295b4022cfc7f8",
+    "widgets": [
+      "PlanResultsScreen",
+      "_ResultsContent",
+      "_PreferenceChips",
+      "_PreferenceChip",
+      "_ResultSection",
+      "_EmptyResults"
+    ],
+    "surfaces": [
+      "PlanResultsScreen"
+    ],
+    "assets": [],
+    "animations": [
+      "AnimatedBuilder"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/features/plans/presentation/widgets/recommendation_card.dart",
+    "sha": "586b9bcda8fc00cce5a0c49baefa5de8be335643",
+    "widgets": [
+      "RecommendationCard",
+      "_PlanImage"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "apps/customer_mobile/lib/main.dart",
+    "sha": "d2ae550ad5030523f02a4e3d1af0ee23e9be63b0",
+    "widgets": [
+      "FajiApp"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": [
+      "PageRouteBuilder",
+      "FadeTransition"
+    ]
+  },
+  {
+    "ref": "main",
+    "path": "packages/flutter_core/lib/auth_screen.dart",
+    "sha": "0d2e0dfefe0e76dab576b6f5b8ea535a5546e257",
+    "widgets": [
+      "FajiAuthScreen"
+    ],
+    "surfaces": [
+      "FajiAuthScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "packages/flutter_core/lib/better_auth.dart",
+    "sha": "037d8d3c3fa4bd251ac6e26e372a5491544a3651",
+    "widgets": [],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "packages/flutter_core/lib/faji_flutter_core.dart",
+    "sha": "e09d670b43209329608d35bd86b99b3c018ee115",
+    "widgets": [],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "main",
+    "path": "packages/flutter_core/lib/security_screen.dart",
+    "sha": "3f94716f69500df85ff8b98731b7e61ea9bb5f3f",
+    "widgets": [
+      "FajiSecurityScreen"
+    ],
+    "surfaces": [
+      "FajiSecurityScreen"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "phase-three-completion",
+    "path": "apps/business_mobile/lib/features/operations.dart",
+    "sha": "c211d2f8794b766bece9f52878dab09beb3af2e7",
+    "widgets": [
+      "OperationsPage",
+      "_BranchDialog",
+      "_HourRow",
+      "_AvailabilityDialog",
+      "_InfoNotice"
+    ],
+    "surfaces": [
+      "OperationsPage",
+      "_BranchDialog",
+      "_AvailabilityDialog"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "phase-three-completion",
+    "path": "apps/business_mobile/lib/features/staff.dart",
+    "sha": "34f92f756027efe7e5f3b8ed8d38abc3de1ffaf1",
+    "widgets": [
+      "StaffPage",
+      "_GrantDialog",
+      "_StaffNotice"
+    ],
+    "surfaces": [
+      "StaffPage",
+      "_GrantDialog"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "feature/phase3-milestone3",
+    "path": "apps/business_mobile/lib/features/operations.dart",
+    "sha": "c211d2f8794b766bece9f52878dab09beb3af2e7",
+    "widgets": [
+      "OperationsPage",
+      "_BranchDialog",
+      "_HourRow",
+      "_AvailabilityDialog",
+      "_InfoNotice"
+    ],
+    "surfaces": [
+      "OperationsPage",
+      "_BranchDialog",
+      "_AvailabilityDialog"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "feature/phase3-milestone3",
+    "path": "apps/business_mobile/lib/features/staff.dart",
+    "sha": "34f92f756027efe7e5f3b8ed8d38abc3de1ffaf1",
+    "widgets": [
+      "StaffPage",
+      "_GrantDialog",
+      "_StaffNotice"
+    ],
+    "surfaces": [
+      "StaffPage",
+      "_GrantDialog"
+    ],
+    "assets": [],
+    "animations": []
+  },
+  {
+    "ref": "fix/business-live-workspace",
+    "path": "apps/business_mobile/lib/features/live_workspace.dart",
+    "sha": "bd527f89227ce3d76466884258a5ed822640e012",
+    "widgets": [
+      "LiveWorkspace"
+    ],
+    "surfaces": [],
+    "assets": [],
+    "animations": []
+  }
+]

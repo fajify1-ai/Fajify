@@ -1,0 +1,100 @@
+[
+  {
+    "screen": "business-nested-onboarding-step-2-390",
+    "beforeSize": [
+      390,
+      955
+    ],
+    "afterSize": [
+      390,
+      955
+    ],
+    "pixelIdentical": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0
+  },
+  {
+    "screen": "business-nested-onboarding-step-5-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "pixelIdentical": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0
+  },
+  {
+    "screen": "business-nested-onboarding-step-7-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "pixelIdentical": false,
+    "pixelsDifferentExact": 5,
+    "pixelsDifferentAbove8": 0
+  },
+  {
+    "screen": "business-nested-onboarding-step-8-390",
+    "beforeSize": [
+      390,
+      1116
+    ],
+    "afterSize": [
+      390,
+      1116
+    ],
+    "pixelIdentical": false,
+    "pixelsDifferentExact": 7,
+    "pixelsDifferentAbove8": 0
+  },
+  {
+    "screen": "business-nested-settings-390-390",
+    "beforeSize": [
+      390,
+      964
+    ],
+    "afterSize": [
+      390,
+      964
+    ],
+    "pixelIdentical": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0
+  },
+  {
+    "screen": "business-nested-settings-768-390",
+    "beforeSize": [
+      390,
+      964
+    ],
+    "afterSize": [
+      390,
+      964
+    ],
+    "pixelIdentical": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0
+  },
+  {
+    "screen": "customer-home-390",
+    "beforeSize": [
+      390,
+      4805
+    ],
+    "afterSize": [
+      390,
+      4805
+    ],
+    "pixelIdentical": false,
+    "pixelsDifferentExact": 34,
+    "pixelsDifferentAbove8": 0
+  }
+]

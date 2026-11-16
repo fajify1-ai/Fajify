@@ -1,0 +1,14 @@
+✔ optional MFA: enrollment, challenge, recovery, step-up and revocation (2301.329364ms)
+✔ phone OTP is verified, single-use, rate limited, cannot bypass MFA or admin step-up (450.297509ms)
+✔ verified phone recovery expires, is single-use, revokes sessions and preserves enrolled MFA (656.830273ms)
+✔ legacy administrative mutations require password step-up and an operator scope (311.023036ms)
+✔ credential changes revoke sessions atomically and rotate the authenticated session (361.865773ms)
+✔ pre-launch Better Auth has no account-claim endpoint or dormant claim privileges (4.886161ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5856.157549

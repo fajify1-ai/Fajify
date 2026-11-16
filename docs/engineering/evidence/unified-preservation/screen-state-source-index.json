@@ -1,0 +1,5022 @@
+[
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/data/sample_data.dart",
+    "sha256": "9804235d9b7704e800424696df44b6ad117ddacfc4fefbb6e401d6882fc1a10a",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/main.dart",
+    "sha256": "d6f63047a2032c292302f816353704712344e339fb9c53f404665d402dc01540",
+    "widgets": [
+      "FajifyBootstrap"
+    ],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/models/venue.dart",
+    "sha256": "f462a82666be02f9fa776572ecb350d8d81f571b032b9b47ac061fb54cf541a9",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/screens/app_shell.dart",
+    "sha256": "c6ff1d4c11515eba6da8a32639349377005d3fbe4af876444d62bf925a9cc45b",
+    "widgets": [
+      "AppShell"
+    ],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/screens/bookings_screen.dart",
+    "sha256": "0c78cba5c5b80e64f408ce9630dffd9dfb54ce0f415c945edf4818dcbdd4e232",
+    "widgets": [
+      "BookingsScreen"
+    ],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/screens/home_screen.dart",
+    "sha256": "64158cf70cfda1ec469cbcf5fe95af4ddacff0e7e0d32ca4d87565f232452653",
+    "widgets": [
+      "HomeScreen",
+      "_CategoryChip",
+      "_PromoCard",
+      "_EmptySearch"
+    ],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/screens/profile_screen.dart",
+    "sha256": "5d81b885b6dd6fca51e366be6915de9348f92bed4b09b55559f2574f66759081",
+    "widgets": [
+      "ProfileScreen"
+    ],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/screens/saved_screen.dart",
+    "sha256": "12c0988b36618218b5d65477af717e371ebb5a7892a69e1c063de588e9f70be5",
+    "widgets": [
+      "SavedScreen"
+    ],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/screens/venue_detail_screen.dart",
+    "sha256": "159a2c8cd49b43f9035aad498318944e3e5ca13af0cb98c967bcc8b247cdc302",
+    "widgets": [
+      "VenueDetailScreen",
+      "_InfoPill",
+      "_HealthRow",
+      "_ReservationSheet"
+    ],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/state/app_state.dart",
+    "sha256": "f86a08cb64d63334b31b523c96fb2ca130fee94c0904f0f864e1db9c70efc77b",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/theme/app_theme.dart",
+    "sha256": "38b76a145245b3bfc8fbb832088ec7f883110fedbed46340de75adb15e53f438",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/widgets/fajify_logo.dart",
+    "sha256": "87c1b1d6bcbf8ff5b4617faafe2492ce736f779f74becfc440ddf0f5273ae194",
+    "widgets": [
+      "FajifyLogo"
+    ],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "flutter_app/lib/widgets/venue_card.dart",
+    "sha256": "38082cde822ac7a6c1a3bfa18ed4ec2cc084f902390830d7afea1b9525b2ab84",
+    "widgets": [
+      "VenueCard",
+      "_Badge",
+      "_ScoreRing"
+    ],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/BrowsePlansScreen.tsx",
+    "sha256": "b2317812010bfdd864094f1c0819f8ac30704f0a200f93dc24980615c94da6d6",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 84,
+        "expression": "const [activeBudget, setActiveBudget] = useState('Under \u20a6100k')"
+      },
+      {
+        "line": 85,
+        "expression": "const [guests,   setGuests]   = useState<Record<string, string>>({})"
+      },
+      {
+        "line": 86,
+        "expression": "const [calOpen,  setCalOpen]  = useState(false)"
+      },
+      {
+        "line": 87,
+        "expression": "const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/BusinessOnboardingScreen.tsx",
+    "sha256": "b406b5f6b68a102b8e74c9caa75fc9231bdf7361f6b997a8e9f126acf0c746e6",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useRef } from 'react'"
+      },
+      {
+        "line": 168,
+        "expression": "const [step, setStep] = useState(1)"
+      },
+      {
+        "line": 170,
+        "expression": "const [category,    setCategory]    = useState('')"
+      },
+      {
+        "line": 171,
+        "expression": "const [services,    setServices]    = useState<string[]>([])"
+      },
+      {
+        "line": 172,
+        "expression": "const [scale,       setScale]       = useState('')"
+      },
+      {
+        "line": 173,
+        "expression": "const [fullName,    setFullName]    = useState('')"
+      },
+      {
+        "line": 174,
+        "expression": "const [email,       setEmail]       = useState('')"
+      },
+      {
+        "line": 175,
+        "expression": "const [phone,       setPhone]       = useState('')"
+      },
+      {
+        "line": 176,
+        "expression": "const [bizName,     setBizName]     = useState('')"
+      },
+      {
+        "line": 177,
+        "expression": "const [regNum,      setRegNum]      = useState('')"
+      },
+      {
+        "line": 178,
+        "expression": "const [bizAddr,     setBizAddr]     = useState('')"
+      },
+      {
+        "line": 179,
+        "expression": "const [idType,      setIdType]      = useState('')"
+      },
+      {
+        "line": 180,
+        "expression": "const [idUploaded,  setIdUploaded]  = useState(false)"
+      },
+      {
+        "line": 181,
+        "expression": "const [faceScanned, setFaceScanned] = useState(false)"
+      },
+      {
+        "line": 182,
+        "expression": "const [city,        setCity]        = useState('Lagos')"
+      },
+      {
+        "line": 183,
+        "expression": "const [lga,         setLga]         = useState('')"
+      },
+      {
+        "line": 184,
+        "expression": "const [landmark,    setLandmark]    = useState('')"
+      },
+      {
+        "line": 203,
+        "expression": "if (step === 1) return !!category"
+      },
+      {
+        "line": 204,
+        "expression": "if (step === 2) return services.length > 0"
+      },
+      {
+        "line": 205,
+        "expression": "if (step === 3) return !!scale"
+      },
+      {
+        "line": 206,
+        "expression": "if (step === 4) return !!(fullName.trim() && email.trim() && phone.trim())"
+      },
+      {
+        "line": 207,
+        "expression": "if (step === 5) return !!(bizName.trim() && bizAddr.trim())"
+      },
+      {
+        "line": 208,
+        "expression": "if (step === 6) return !!(idType && idUploaded && faceScanned)"
+      },
+      {
+        "line": 209,
+        "expression": "if (step === 7) return !!lga.trim()"
+      },
+      {
+        "line": 225,
+        "expression": "if (step === 1) return wrap("
+      },
+      {
+        "line": 252,
+        "expression": "if (step === 2) return wrap("
+      },
+      {
+        "line": 291,
+        "expression": "if (step === 3) return wrap("
+      },
+      {
+        "line": 327,
+        "expression": "if (step === 4) return wrap("
+      },
+      {
+        "line": 350,
+        "expression": "if (step === 5) return wrap("
+      },
+      {
+        "line": 385,
+        "expression": "if (step === 6) return wrap("
+      },
+      {
+        "line": 482,
+        "expression": "if (step === 7) return wrap("
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/BusinessSignInScreen.tsx",
+    "sha256": "67a44e58ff06b00e2bb8e003964daac6a5171d07c729cabbbb427705f3c12cde",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 11,
+        "expression": "const [email, setEmail] = useState(\"\")"
+      },
+      {
+        "line": 12,
+        "expression": "const [password, setPassword] = useState(\"\")"
+      },
+      {
+        "line": 13,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/CartScreen.tsx",
+    "sha256": "85541ade58727bac6a81769d3f0fd12734996690991ab962f350e5ee34195c5c",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 25,
+        "expression": "const [addonQty, setAddonQty] = useState<Record<string, number>>({})"
+      },
+      {
+        "line": 26,
+        "expression": "const [promoOpen, setPromoOpen] = useState(false)"
+      },
+      {
+        "line": 27,
+        "expression": "const [promoCode, setPromoCode] = useState('')"
+      },
+      {
+        "line": 29,
+        "expression": "const [transportChoice, setTransportChoice] = useState<null | boolean>(null)"
+      },
+      {
+        "line": 30,
+        "expression": "const [pickup, setPickup] = useState('Lekki phase 1, Lagos')"
+      },
+      {
+        "line": 31,
+        "expression": "const [editPickup, setEditPickup] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/CheckoutScreen.tsx",
+    "sha256": "eb1e16c79cb6b190477fa7fad8cc0b910eeb2fbd311b6025715bed2f59301756",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useRef } from 'react'"
+      },
+      {
+        "line": 301,
+        "expression": "const [payMethod, setPayMethod] = useState('')"
+      },
+      {
+        "line": 302,
+        "expression": "const [cardNumber, setCardNumber] = useState('')"
+      },
+      {
+        "line": 303,
+        "expression": "const [expiry, setExpiry] = useState('')"
+      },
+      {
+        "line": 304,
+        "expression": "const [cvc, setCvc] = useState('')"
+      },
+      {
+        "line": 305,
+        "expression": "const [cardName, setCardName] = useState('')"
+      },
+      {
+        "line": 306,
+        "expression": "const [copiedRef, setCopiedRef] = useState(false)"
+      },
+      {
+        "line": 307,
+        "expression": "const [calOpen, setCalOpen] = useState(false)"
+      },
+      {
+        "line": 308,
+        "expression": "const [selectedDate, setSelectedDate] = useState<string | undefined>(bookingDate)"
+      },
+      {
+        "line": 309,
+        "expression": "const [selectedTime, setSelectedTime] = useState<string | undefined>(bookingTime)"
+      },
+      {
+        "line": 310,
+        "expression": "const [guests, setGuests] = useState(() => {"
+      },
+      {
+        "line": 317,
+        "expression": "const [paid, setPaid] = useState(false)"
+      },
+      {
+        "line": 318,
+        "expression": "const [showSuccessOverlay, setShowSuccessOverlay] = useState(false)"
+      },
+      {
+        "line": 319,
+        "expression": "const [showSuccessToast, setShowSuccessToast] = useState(false)"
+      },
+      {
+        "line": 320,
+        "expression": "const [showTicketTransport, setShowTicketTransport] = useState(false)"
+      },
+      {
+        "line": 321,
+        "expression": "const [tState, setTState] = useState<TState>('prompt')"
+      },
+      {
+        "line": 322,
+        "expression": "const [tProvider, setTProvider] = useState<'uber' | 'bolt'>('uber')"
+      },
+      {
+        "line": 323,
+        "expression": "const [tAddrMode, setTAddrMode] = useState<'saved' | 'new'>('saved')"
+      },
+      {
+        "line": 324,
+        "expression": "const [tNewAddr, setTNewAddr]   = useState('')"
+      },
+      {
+        "line": 325,
+        "expression": "const [tCar, setTCar] = useState<'economy' | 'comfort' | 'premium' | 'premium-van'>('comfort')"
+      },
+      {
+        "line": 326,
+        "expression": "const [basket, setBasket] = useState<Record<string, number>>({})"
+      },
+      {
+        "line": 651,
+        "expression": "{mode === 'saved' ? 'Saved Address' : 'New Address'}"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/ConfirmationScreen.tsx",
+    "sha256": "9e52e7b681602803d138f551fca345a614961ed460f7bce195daecebb819a773",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 16,
+        "expression": "const [copied, setCopied] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/CreateEventScreen.tsx",
+    "sha256": "89f3f4b34c06fccb1052f75612c117e09478216d27f643de520378ee4b12a261",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 12,
+        "expression": "const [guestCount, setGuestCount] = useState('2 people')"
+      },
+      {
+        "line": 13,
+        "expression": "const [date, setDate] = useState('9')"
+      },
+      {
+        "line": 14,
+        "expression": "const [time, setTime] = useState('06:00 PM')"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/CustomerAuthScreen.tsx",
+    "sha256": "c3fd313115ba47ebf16bb415039e008a78939ac391fd0fe963d899ed3cff13cd",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 13,
+        "expression": "const [mode, setMode] = useState<AuthMode>(initialMode)"
+      },
+      {
+        "line": 14,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      },
+      {
+        "line": 15,
+        "expression": "const [form, setForm] = useState({"
+      },
+      {
+        "line": 57,
+        "expression": "{mode === \"signin\" ? \"Welcome back\" : \"Create your account\"}"
+      },
+      {
+        "line": 60,
+        "expression": "{mode === \"signin\""
+      },
+      {
+        "line": 73,
+        "expression": "{mode === \"register\" && ("
+      },
+      {
+        "line": 96,
+        "expression": "{mode === \"register\" && ("
+      },
+      {
+        "line": 116,
+        "expression": "placeholder={mode === \"register\" ? \"Create a password\" : \"Enter your password\"}"
+      },
+      {
+        "line": 125,
+        "expression": "{mode === \"signin\" && ("
+      },
+      {
+        "line": 136,
+        "expression": "{mode === \"signin\" ? \"Sign in\" : \"Create account\"}"
+      },
+      {
+        "line": 141,
+        "expression": "{mode === \"signin\" ? \"New to fajify?\" : \"Already have an account?\"}"
+      },
+      {
+        "line": 143,
+        "expression": "onClick={() => setMode(mode === \"signin\" ? \"register\" : \"signin\")}"
+      },
+      {
+        "line": 146,
+        "expression": "{mode === \"signin\" ? \"Create an account\" : \"Sign in\"}"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/DashboardScreen.tsx",
+    "sha256": "92d78fa22b13c624911d688f06731feec34f92beaffc1a52a0b6b8dd517a7b92",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/DeliveryCartScreen.tsx",
+    "sha256": "93735ce7ff7abbc60b6c4d1b13ccfdde7bd1a4e5655da17a8d4ea1ce573e7851",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 40,
+        "expression": "const [items, setItems] = useState<CartItem[]>(INITIAL_ITEMS)"
+      },
+      {
+        "line": 41,
+        "expression": "const [promoOpen, setPromoOpen] = useState(false)"
+      },
+      {
+        "line": 42,
+        "expression": "const [promoCode, setPromoCode] = useState('')"
+      },
+      {
+        "line": 43,
+        "expression": "const [suggestions, setSuggestions] = useState<Record<string, boolean>>({})"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/DeliveryRestaurantScreen.tsx",
+    "sha256": "0835b34381474f8d332d4bb1faaba97c5ec076280e5e4d778b29c8de3721dca8",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 77,
+        "expression": "const [activeCategory, setActiveCategory] = useState('All')"
+      },
+      {
+        "line": 78,
+        "expression": "const [cart, setCart] = useState<Record<string, number>>({})"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/EventDetailScreen.tsx",
+    "sha256": "13d81b8a76703ba75e72e188293079e1726d339d01f128285fc69fedd5e08d60",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 10,
+        "expression": "const [joined, setJoined] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/FajiRideScreen.tsx",
+    "sha256": "629d79e3d770004825140fd5757970acddb1756dd5004b2c56f66f1903891dbf",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect, useRef } from \"react\""
+      },
+      {
+        "line": 51,
+        "expression": "const [t, setT] = useState(0)"
+      },
+      {
+        "line": 309,
+        "expression": "type Tab = \"home\" | \"trips\" | \"earnings\" | \"profile\""
+      },
+      {
+        "line": 470,
+        "expression": "const [showRidePicker, setShowRidePicker] = useState(false)"
+      },
+      {
+        "line": 471,
+        "expression": "const [activeDriver, setActiveDriver] = useState(DRIVER_ACCOUNTS[0])"
+      },
+      {
+        "line": 472,
+        "expression": "const [tab, setTab] = useState<Tab>(\"home\")"
+      },
+      {
+        "line": 473,
+        "expression": "const [serviceMode, setServiceMode] = useState<ServiceMode>(\"ride\")"
+      },
+      {
+        "line": 474,
+        "expression": "const [onlineByDriver, setOnlineByDriver] = useState<Record<string, boolean>>("
+      },
+      {
+        "line": 486,
+        "expression": "const [req, setReq] = useState<null | typeof TRIPS[0]>(null)"
+      },
+      {
+        "line": 487,
+        "expression": "const [deliveryReq, setDeliveryReq] = useState<null | typeof DELIVERIES[0]>("
+      },
+      {
+        "line": 490,
+        "expression": "const [scannerOpen, setScannerOpen] = useState(false)"
+      },
+      {
+        "line": 491,
+        "expression": "const [healthOpen, setHealthOpen] = useState(false)"
+      },
+      {
+        "line": 492,
+        "expression": "const [cashOutOpen, setCashOutOpen] = useState(false)"
+      },
+      {
+        "line": 493,
+        "expression": "const [cashOutSubmitted, setCashOutSubmitted] = useState(false)"
+      },
+      {
+        "line": 494,
+        "expression": "const [cashOutMode, setCashOutMode] = useState<\"all\" | \"custom\">(\"all\")"
+      },
+      {
+        "line": 495,
+        "expression": "const [customCashOutAmount, setCustomCashOutAmount] = useState(\"\")"
+      },
+      {
+        "line": 496,
+        "expression": "const [lastCashOut, setLastCashOut] = useState<{"
+      },
+      {
+        "line": 501,
+        "expression": "useState<Record<string, Record<ServiceMode, number>>>("
+      },
+      {
+        "line": 512,
+        "expression": "const [profileSheet, setProfileSheet] = useState<ProfileSheet>(null)"
+      },
+      {
+        "line": 513,
+        "expression": "const [selectedTrip, setSelectedTrip] = useState<typeof TRIPS[0] | null>(null)"
+      },
+      {
+        "line": 514,
+        "expression": "const [notifRead, setNotifRead] = useState<Record<string, boolean>>({})"
+      },
+      {
+        "line": 515,
+        "expression": "const [notificationsExpanded, setNotificationsExpanded] = useState(false)"
+      },
+      {
+        "line": 516,
+        "expression": "const [activityFilter, setActivityFilter] = useState(\"all\")"
+      },
+      {
+        "line": 518,
+        "expression": "useState<Record<string, typeof DEFAULT_DRIVER_SETTINGS>>("
+      },
+      {
+        "line": 2261,
+        "expression": "{tab === \"home\""
+      },
+      {
+        "line": 2263,
+        "expression": ": tab === \"trips\""
+      },
+      {
+        "line": 2267,
+        "expression": ": tab === \"earnings\""
+      },
+      {
+        "line": 2272,
+        "expression": "{tab === \"home\""
+      },
+      {
+        "line": 2276,
+        "expression": ": tab === \"trips\""
+      },
+      {
+        "line": 2282,
+        "expression": ": tab === \"earnings\""
+      },
+      {
+        "line": 2288,
+        "expression": "{tab === \"home\" && renderHome()}"
+      },
+      {
+        "line": 2289,
+        "expression": "{tab === \"trips\" && renderTrips()}"
+      },
+      {
+        "line": 2290,
+        "expression": "{tab === \"earnings\" && renderEarnings()}"
+      },
+      {
+        "line": 2291,
+        "expression": "{tab === \"profile\" && renderProfile()}"
+      },
+      {
+        "line": 2772,
+        "expression": "const active = tab === item.id"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/GlobalCartScreen.tsx",
+    "sha256": "c1b2bba2cc98416712153e8c0d0c573c158a8cae0d1a64a136d0404448ae0df8",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 23,
+        "expression": "const [payMethod, setPayMethod] = useState('')"
+      },
+      {
+        "line": 24,
+        "expression": "const [showSuccess, setShowSuccess] = useState(false)"
+      },
+      {
+        "line": 25,
+        "expression": "const [pendingNav, setPendingNav] = useState<(() => void) | null>(null)"
+      },
+      {
+        "line": 26,
+        "expression": "const [promoOpen, setPromoOpen] = useState(false)"
+      },
+      {
+        "line": 27,
+        "expression": "const [promoCode, setPromoCode] = useState('')"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/HelpScreen.tsx",
+    "sha256": "e0949a458c9831619e1409e1fbd1b5848d8b451afb3c9dd365283e9b7ba754ea",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/HomeScreen.tsx",
+    "sha256": "6e9d08ccb0105f4aceb9eb1134877b91ad759e8227bd775fbe58fb35e4450f76",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 112,
+        "expression": "const [locs, setLocs] = useState<string[]>([])"
+      },
+      {
+        "line": 113,
+        "expression": "const [budget, setBudget] = useState('')"
+      },
+      {
+        "line": 114,
+        "expression": "const [rating, setRating] = useState('Any')"
+      },
+      {
+        "line": 219,
+        "expression": "const [active, setActive] = useState(0)"
+      },
+      {
+        "line": 220,
+        "expression": "const [animating, setAnimating] = useState(false)"
+      },
+      {
+        "line": 291,
+        "expression": "const [activeCategory, setActiveCategory] = useState('All')"
+      },
+      {
+        "line": 292,
+        "expression": "const [search, setSearch] = useState('')"
+      },
+      {
+        "line": 293,
+        "expression": "const [filterOpen, setFilterOpen] = useState(false)"
+      },
+      {
+        "line": 294,
+        "expression": "const [fabOpen, setFabOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/InviteFriendsScreen.tsx",
+    "sha256": "8aff9579dc8207f0a5375602b8cd20f1ed605aecac69f7d88dd86bae38b1596c",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 9,
+        "expression": "const [copied, setCopied] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/LandingScreen.tsx",
+    "sha256": "e289ed3b42b2db2993371a04b7b908277c95f213fa920e6f0287c957cae6b0d9",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 68,
+        "expression": "const [query, setQuery] = useState(\"\")"
+      },
+      {
+        "line": 102,
+        "expression": "const [menuOpen, setMenuOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/MyTicketsScreen.tsx",
+    "sha256": "350d6681f36de59e765e071fe2113169bf9719115cbc3eb9fa4fba189765cdb0",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect } from 'react'"
+      },
+      {
+        "line": 9,
+        "expression": "type TabT = 'Upcoming' | 'Orders' | 'Completed' | 'Cancelled'"
+      },
+      {
+        "line": 112,
+        "expression": "const [tab, setTab] = useState<TabT>('Upcoming')"
+      },
+      {
+        "line": 114,
+        "expression": "const [viewTicket, setViewTicket] = useState<typeof tickets.Upcoming[0] | null>(null)"
+      },
+      {
+        "line": 115,
+        "expression": "const [viewOrder, setViewOrder] = useState<typeof tickets.Orders[0] | null>(null)"
+      },
+      {
+        "line": 116,
+        "expression": "const [showMap, setShowMap] = useState(false)"
+      },
+      {
+        "line": 117,
+        "expression": "const [riderProgress, setRiderProgress] = useState(0.35)"
+      },
+      {
+        "line": 118,
+        "expression": "const [toast, setToast] = useState('')"
+      },
+      {
+        "line": 166,
+        "expression": "const allTickets = tab === 'Upcoming'"
+      },
+      {
+        "line": 397,
+        "expression": "borderBottom: tab === t ? `2.5px solid ${RED}` : '2.5px solid transparent',"
+      },
+      {
+        "line": 398,
+        "expression": "fontSize: 11, fontWeight: 700, color: tab === t ? RED : muted, cursor: 'pointer',"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/NotificationsScreen.tsx",
+    "sha256": "9665075c9cd9e528a900afce0695c0590316abeaebf719ce84b33fb416e2a6a9",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/OffersScreen.tsx",
+    "sha256": "7ab4eb537767fc697c62b9cafcf43d434c968fb052a5309cbea41f721dfa5305",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 17,
+        "expression": "const [copied, setCopied] = useState<string | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/OnboardingScreen.tsx",
+    "sha256": "9f807b1db28db9f7268e52c58aa5a54012526850a2c88ce68f87d69353bcf3e2",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/OrderTrackingScreen.tsx",
+    "sha256": "d601cd92d3c605f3c517a39472a2d314d5aee00196b4cc8a744864d92a5a6032",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 111,
+        "expression": "const [step, setStep] = useState(0)"
+      },
+      {
+        "line": 112,
+        "expression": "const [riderT, setRiderT] = useState(0)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/PlanForMeScreen.tsx",
+    "sha256": "099c55f0bccc7fc4c8b1b06f6600494fb9672ee6f1121dec0e1d28940c65f676",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 185,
+        "expression": "const [loved, setLoved] = useState(false)"
+      },
+      {
+        "line": 242,
+        "expression": "const [step, setStep] = useState(1)"
+      },
+      {
+        "line": 246,
+        "expression": "const [occasion, setOccasion] = useState('')"
+      },
+      {
+        "line": 247,
+        "expression": "const [guestCount, setGuestCount] = useState(6)"
+      },
+      {
+        "line": 248,
+        "expression": "const [guestChip, setGuestChip] = useState('')"
+      },
+      {
+        "line": 249,
+        "expression": "const [location, setLocation] = useState('')"
+      },
+      {
+        "line": 250,
+        "expression": "const [showLocationSearch, setShowLocationSearch] = useState(false)"
+      },
+      {
+        "line": 251,
+        "expression": "const [locationQuery, setLocationQuery] = useState('')"
+      },
+      {
+        "line": 252,
+        "expression": "const [budget, setBudget] = useState('')"
+      },
+      {
+        "line": 253,
+        "expression": "const [budgetFlex, setBudgetFlex] = useState(false)"
+      },
+      {
+        "line": 254,
+        "expression": "const [dateChoice, setDateChoice] = useState('')"
+      },
+      {
+        "line": 255,
+        "expression": "const [timeChoice, setTimeChoice] = useState('Evening')"
+      },
+      {
+        "line": 256,
+        "expression": "const [vibes, setVibes] = useState<string[]>([])"
+      },
+      {
+        "line": 257,
+        "expression": "const [calOpen, setCalOpen] = useState(false)"
+      },
+      {
+        "line": 258,
+        "expression": "const [bookingCalOpen, setBookingCalOpen] = useState(false)"
+      },
+      {
+        "line": 259,
+        "expression": "const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)"
+      },
+      {
+        "line": 262,
+        "expression": "if (step === 1) navigate({ name: 'home' })"
+      },
+      {
+        "line": 274,
+        "expression": "if (step === 7) {"
+      },
+      {
+        "line": 376,
+        "expression": "{step === 1 && ("
+      },
+      {
+        "line": 397,
+        "expression": "{step === 2 && ("
+      },
+      {
+        "line": 446,
+        "expression": "{step === 3 && ("
+      },
+      {
+        "line": 498,
+        "expression": "{step === 4 && ("
+      },
+      {
+        "line": 529,
+        "expression": "{step === 5 && ("
+      },
+      {
+        "line": 595,
+        "expression": "{step === 6 && ("
+      },
+      {
+        "line": 624,
+        "expression": "(step === 1 && !occasion) ||"
+      },
+      {
+        "line": 625,
+        "expression": "(step === 3 && !location) ||"
+      },
+      {
+        "line": 626,
+        "expression": "(step === 4 && !budget && !budgetFlex) ||"
+      },
+      {
+        "line": 627,
+        "expression": "(step === 5 && !dateChoice)"
+      },
+      {
+        "line": 631,
+        "expression": "{step === 6 && ("
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/PortalSelectScreen.tsx",
+    "sha256": "5d103f81c60e7dd634d8aa664f33aae095206ed8e1d6a11b36cec294f3c7520c",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 141,
+        "expression": "const [tab, setTab] = useState<'in' | 'up'>('in')"
+      },
+      {
+        "line": 143,
+        "expression": "const [siEmail, setSiEmail]         = useState('')"
+      },
+      {
+        "line": 144,
+        "expression": "const [siPass, setSiPass]           = useState('')"
+      },
+      {
+        "line": 145,
+        "expression": "const [showSiPass, setShowSiPass]   = useState(false)"
+      },
+      {
+        "line": 147,
+        "expression": "const [fullName, setFullName]       = useState('')"
+      },
+      {
+        "line": 148,
+        "expression": "const [username, setUsername]       = useState('')"
+      },
+      {
+        "line": 149,
+        "expression": "const [regEmail, setRegEmail]       = useState('')"
+      },
+      {
+        "line": 150,
+        "expression": "const [phone, setPhone]             = useState('')"
+      },
+      {
+        "line": 151,
+        "expression": "const [dob, setDob]                 = useState('')"
+      },
+      {
+        "line": 152,
+        "expression": "const [address, setAddress]         = useState('')"
+      },
+      {
+        "line": 153,
+        "expression": "const [regPass, setRegPass]         = useState('')"
+      },
+      {
+        "line": 154,
+        "expression": "const [confirmPass, setConfirmPass] = useState('')"
+      },
+      {
+        "line": 155,
+        "expression": "const [showRegPass, setShowRegPass] = useState(false)"
+      },
+      {
+        "line": 156,
+        "expression": "const [showConfPass, setShowConfPass] = useState(false)"
+      },
+      {
+        "line": 157,
+        "expression": "const [agreed, setAgreed]           = useState(false)"
+      },
+      {
+        "line": 174,
+        "expression": "{tab === 'in' ? 'Welcome back' : 'Create your account'}"
+      },
+      {
+        "line": 189,
+        "expression": "style={{ background: tab === v ? S : 'transparent', color: tab === v ? RED : M,"
+      },
+      {
+        "line": 190,
+        "expression": "boxShadow: tab === v ? '0 1px 4px rgba(0,0,0,.09)' : 'none' }}>"
+      },
+      {
+        "line": 198,
+        "expression": "{tab === 'in' ? ("
+      },
+      {
+        "line": 296,
+        "expression": "const [mode, setMode] = useState<'choose' | 'signin'>('choose')"
+      },
+      {
+        "line": 297,
+        "expression": "const [email, setEmail]   = useState('')"
+      },
+      {
+        "line": 298,
+        "expression": "const [pass, setPass]     = useState('')"
+      },
+      {
+        "line": 299,
+        "expression": "const [showPass, setShowPass] = useState(false)"
+      },
+      {
+        "line": 318,
+        "expression": "{mode === 'signin' && ("
+      },
+      {
+        "line": 329,
+        "expression": "{mode === 'choose' ? sub : 'Sign In'}"
+      },
+      {
+        "line": 340,
+        "expression": "{mode === 'choose' ? ("
+      },
+      {
+        "line": 413,
+        "expression": "const [sheet, setSheet] = useState<'user' | 'business' | 'ride' | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/ProfileScreen.tsx",
+    "sha256": "5c34b450e91d8738993b54322cafb71c1e47b706aa136be9eda4231d3a8af6d4",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/ReservationScreen.tsx",
+    "sha256": "2de9af2b13b01f84824494cf68d041c42b69c393859ff5363dd05c08a4c7f189",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 9,
+        "expression": "const [guests, setGuests] = useState('2 people')"
+      },
+      {
+        "line": 10,
+        "expression": "const [selectedDate, setSelectedDate] = useState(9)"
+      },
+      {
+        "line": 11,
+        "expression": "const [selectedTime, setSelectedTime] = useState('06:00 PM')"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/RestaurantScreen.tsx",
+    "sha256": "eeb730d2d6b79f8bb9ef7a4895ae741f65b423c7e8a5ea4be895bb6db1d04927",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 268,
+        "expression": "const [heroIdx, setHeroIdx] = useState(0)"
+      },
+      {
+        "line": 272,
+        "expression": "const [activeCategory, setActiveCategory] = useState('All')"
+      },
+      {
+        "line": 273,
+        "expression": "const [calOpen, setCalOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/RideOnboardingScreen.tsx",
+    "sha256": "7a1dc89031b808f9759c2e5ffe8efe987d7e52562cc32ffc11ab311b5a1a2e5c",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useRef } from 'react'"
+      },
+      {
+        "line": 146,
+        "expression": "const [step, setStep] = useState(1)"
+      },
+      {
+        "line": 149,
+        "expression": "const [fullName, setFullName]   = useState('')"
+      },
+      {
+        "line": 150,
+        "expression": "const [email, setEmail]         = useState('')"
+      },
+      {
+        "line": 151,
+        "expression": "const [phone, setPhone]         = useState('')"
+      },
+      {
+        "line": 152,
+        "expression": "const [dob, setDob]             = useState('')"
+      },
+      {
+        "line": 153,
+        "expression": "const [gender, setGender]       = useState('')"
+      },
+      {
+        "line": 154,
+        "expression": "const [homeAddr, setHomeAddr]   = useState('')"
+      },
+      {
+        "line": 157,
+        "expression": "const [licenseNo, setLicenseNo]   = useState('')"
+      },
+      {
+        "line": 158,
+        "expression": "const [licenseState, setLicenseState] = useState('')"
+      },
+      {
+        "line": 159,
+        "expression": "const [licenseExpiry, setLicenseExpiry] = useState('')"
+      },
+      {
+        "line": 160,
+        "expression": "const [licenseUploaded, setLicenseUploaded] = useState(false)"
+      },
+      {
+        "line": 163,
+        "expression": "const [vehicleType, setVehicleType] = useState('')"
+      },
+      {
+        "line": 164,
+        "expression": "const [vMake, setVMake]           = useState('')"
+      },
+      {
+        "line": 165,
+        "expression": "const [vModel, setVModel]         = useState('')"
+      },
+      {
+        "line": 166,
+        "expression": "const [vYear, setVYear]           = useState('')"
+      },
+      {
+        "line": 167,
+        "expression": "const [vColor, setVColor]         = useState('')"
+      },
+      {
+        "line": 168,
+        "expression": "const [vPlate, setVPlate]         = useState('')"
+      },
+      {
+        "line": 171,
+        "expression": "const [bankName, setBankName]     = useState('')"
+      },
+      {
+        "line": 172,
+        "expression": "const [accountNo, setAccountNo]   = useState('')"
+      },
+      {
+        "line": 173,
+        "expression": "const [accountName, setAccountName] = useState('')"
+      },
+      {
+        "line": 174,
+        "expression": "const [bvn, setBvn]               = useState('')"
+      },
+      {
+        "line": 177,
+        "expression": "const [nin, setNin]               = useState('')"
+      },
+      {
+        "line": 178,
+        "expression": "const [ninUploaded, setNinUploaded] = useState(false)"
+      },
+      {
+        "line": 179,
+        "expression": "const [faceScanned, setFaceScanned] = useState(false)"
+      },
+      {
+        "line": 195,
+        "expression": "if (step === 1) return !!(fullName.trim() && email.trim() && phone.trim() && dob && gender && homeAddr.trim())"
+      },
+      {
+        "line": 196,
+        "expression": "if (step === 2) return !!(licenseNo.trim() && licenseState && licenseExpiry && licenseUploaded)"
+      },
+      {
+        "line": 197,
+        "expression": "if (step === 3) return !!(vehicleType && vMake.trim() && vModel.trim() && vYear && vColor.trim() && vPlate.trim())"
+      },
+      {
+        "line": 198,
+        "expression": "if (step === 4) return !!(bankName && accountNo.trim().length >= 10 && accountName.trim() && bvn.trim().length >= 11)"
+      },
+      {
+        "line": 199,
+        "expression": "if (step === 5) return !!(nin.trim().length >= 11 && ninUploaded && faceScanned)"
+      },
+      {
+        "line": 242,
+        "expression": "if (step === 1) return wrap("
+      },
+      {
+        "line": 286,
+        "expression": "if (step === 2) return wrap("
+      },
+      {
+        "line": 330,
+        "expression": "if (step === 3) return wrap("
+      },
+      {
+        "line": 376,
+        "expression": "if (step === 4) return wrap("
+      },
+      {
+        "line": 418,
+        "expression": "if (step === 5) return wrap("
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/RideSignInScreen.tsx",
+    "sha256": "701c5920090caeaefe25f66c9954a440c0dca40b7faff746753ffd371702d57c",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 10,
+        "expression": "const [email, setEmail] = useState(\"\")"
+      },
+      {
+        "line": 11,
+        "expression": "const [password, setPassword] = useState(\"\")"
+      },
+      {
+        "line": 12,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/SettingsScreen.tsx",
+    "sha256": "9f8941987e9574bab67e4c7573be5db9dd30a849aa6b33cfc950847559df35a3",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 48,
+        "expression": "const [notifications, setNotifications] = useState(true)"
+      },
+      {
+        "line": 49,
+        "expression": "const [locationServices, setLocationServices] = useState(true)"
+      },
+      {
+        "line": 50,
+        "expression": "const [emailUpdates, setEmailUpdates] = useState(false)"
+      },
+      {
+        "line": 51,
+        "expression": "const [language, setLanguage] = useState('English')"
+      },
+      {
+        "line": 52,
+        "expression": "const [currency, setCurrency] = useState('NGN \u20a6')"
+      },
+      {
+        "line": 53,
+        "expression": "const [picker, setPicker] = useState<'language' | 'currency' | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/TransportationScreen.tsx",
+    "sha256": "b9c1cea8e4f582e452a70ceb375c6b349058442d1cadc0ce4e487d545b3fdab5",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 80,
+        "expression": "const [provider,      setProvider]      = useState<ProviderId>('uber')"
+      },
+      {
+        "line": 81,
+        "expression": "const [carId,         setCarId]         = useState<CarId>('comfort')"
+      },
+      {
+        "line": 82,
+        "expression": "const [addrMode,      setAddrMode]      = useState<'saved' | 'new'>('saved')"
+      },
+      {
+        "line": 83,
+        "expression": "const [selectedSaved, setSelectedSaved] = useState('s1')"
+      },
+      {
+        "line": 84,
+        "expression": "const [newAddr,       setNewAddr]       = useState('')"
+      },
+      {
+        "line": 85,
+        "expression": "const [pickupDate,    setPickupDate]    = useState(false)"
+      },
+      {
+        "line": 86,
+        "expression": "const [dateAddr,      setDateAddr]      = useState('')"
+      },
+      {
+        "line": 87,
+        "expression": "const [wantTransport, setWantTransport] = useState<boolean | null>(null)"
+      },
+      {
+        "line": 222,
+        "expression": "{mode === 'saved' ? 'Saved Address' : 'New Address'}"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/VendorDashboardScreen.tsx",
+    "sha256": "e23bdf8612a283252ffc71005d560823ae27e56fac2dad9d55a54b347eba5076",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useRef, type ReactElement } from \"react\""
+      },
+      {
+        "line": 1194,
+        "expression": "type TabId = \"overview\" | \"tab2\" | \"tab3\" | \"tab4\" | \"services\""
+      },
+      {
+        "line": 1199,
+        "expression": "const [showPicker, setShowPicker] = useState(false)"
+      },
+      {
+        "line": 1200,
+        "expression": "const [biz, setBiz] = useState<Biz>(BUSINESSES[0])"
+      },
+      {
+        "line": 1201,
+        "expression": "const [tab, setTab] = useState<TabId>(\"overview\")"
+      },
+      {
+        "line": 1202,
+        "expression": "const [bizPickerOpen, setBizPickerOpen] = useState(false)"
+      },
+      {
+        "line": 1203,
+        "expression": "const [scannerOpen, setScannerOpen] = useState(false)"
+      },
+      {
+        "line": 1204,
+        "expression": "const [healthOpen, setHealthOpen] = useState(false)"
+      },
+      {
+        "line": 1205,
+        "expression": "const [settingsOpen, setSettingsOpen] = useState(false)"
+      },
+      {
+        "line": 1206,
+        "expression": "const [settingDetail, setSettingDetail] = useState<string | null>(null)"
+      },
+      {
+        "line": 1208,
+        "expression": "const [settingsScreen, setSettingsScreen] = useState<\"main\" | string | null>("
+      },
+      {
+        "line": 1211,
+        "expression": "const [payoutConfirmed, setPayoutConfirmed] = useState(false)"
+      },
+      {
+        "line": 1213,
+        "expression": "useState<\"idle\" | \"review\" | \"submitted\">(\"idle\")"
+      },
+      {
+        "line": 1214,
+        "expression": "const [payoutScreenOpen, setPayoutScreenOpen] = useState(false)"
+      },
+      {
+        "line": 1215,
+        "expression": "const [bankDetails, setBankDetails] = useState({"
+      },
+      {
+        "line": 1220,
+        "expression": "const [bankSaved, setBankSaved] = useState(true)"
+      },
+      {
+        "line": 1221,
+        "expression": "const [payoutMode, setPayoutMode] = useState<\"all\" | \"custom\">(\"all\")"
+      },
+      {
+        "line": 1222,
+        "expression": "const [customPayoutAmount, setCustomPayoutAmount] = useState(\"100000\")"
+      },
+      {
+        "line": 1223,
+        "expression": "const [businessMedia, setBusinessMedia] = useState<Record<string, {"
+      },
+      {
+        "line": 1227,
+        "expression": "const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)"
+      },
+      {
+        "line": 1228,
+        "expression": "const [cancelOrderOpen, setCancelOrderOpen] = useState(false)"
+      },
+      {
+        "line": 1229,
+        "expression": "const [cancelReason, setCancelReason] = useState(\"Item unavailable\")"
+      },
+      {
+        "line": 1230,
+        "expression": "const [hoursEdited, setHoursEdited] = useState<Record<string, boolean>>({})"
+      },
+      {
+        "line": 1231,
+        "expression": "const [profileFields, setProfileFields] = useState({"
+      },
+      {
+        "line": 1240,
+        "expression": "const [contactFields, setContactFields] = useState({"
+      },
+      {
+        "line": 1246,
+        "expression": "const [profileSaved, setProfileSaved] = useState(false)"
+      },
+      {
+        "line": 1247,
+        "expression": "const [contactSaved, setContactSaved] = useState(false)"
+      },
+      {
+        "line": 1248,
+        "expression": "const [staffStatuses, setStaffStatuses] = useState<Record<string, boolean>>({"
+      },
+      {
+        "line": 1254,
+        "expression": "const [deletedPhotos, setDeletedPhotos] = useState<number[]>([])"
+      },
+      {
+        "line": 1255,
+        "expression": "const [photoAdded, setPhotoAdded] = useState(false)"
+      },
+      {
+        "line": 1256,
+        "expression": "const [addItemOpen, setAddItemOpen] = useState(false)"
+      },
+      {
+        "line": 1257,
+        "expression": "const [newItemName, setNewItemName] = useState(\"\")"
+      },
+      {
+        "line": 1258,
+        "expression": "const [newItemPrice, setNewItemPrice] = useState(\"\")"
+      },
+      {
+        "line": 1259,
+        "expression": "const [newItemCat, setNewItemCat] = useState(\"\")"
+      },
+      {
+        "line": 1260,
+        "expression": "const [newItemImg, setNewItemImg] = useState(\"\")"
+      },
+      {
+        "line": 1261,
+        "expression": "const [newCategoryName, setNewCategoryName] = useState(\"\")"
+      },
+      {
+        "line": 1262,
+        "expression": "const [creatingCategory, setCreatingCategory] = useState(false)"
+      },
+      {
+        "line": 1264,
+        "expression": "useState<Record<string, string[]>>({})"
+      },
+      {
+        "line": 1266,
+        "expression": "useState<Record<string, Product[]>>({})"
+      },
+      {
+        "line": 1271,
+        "expression": "useState<Record<string, string>>({})"
+      },
+      {
+        "line": 1272,
+        "expression": "const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>({})"
+      },
+      {
+        "line": 1273,
+        "expression": "const [productAvail, setProductAvail] = useState<Record<string, boolean>>({})"
+      },
+      {
+        "line": 1274,
+        "expression": "const [bookingFilter, setBookingFilter] = useState(\"all\")"
+      },
+      {
+        "line": 1275,
+        "expression": "const [orderFilter, setOrderFilter] = useState(\"active\")"
+      },
+      {
+        "line": 1276,
+        "expression": "const [reservationView, setReservationView] = useState<\"calendar\" | \"list\">("
+      },
+      {
+        "line": 1279,
+        "expression": "const [reservationMonth, setReservationMonth] = useState(7)"
+      },
+      {
+        "line": 1281,
+        "expression": "useState(\"2026-08-30\")"
+      },
+      {
+        "line": 1283,
+        "expression": "useState(false)"
+      },
+      {
+        "line": 1284,
+        "expression": "const [cancelBookingId, setCancelBookingId] = useState<string | null>(null)"
+      },
+      {
+        "line": 1285,
+        "expression": "const [bookingCancelReason, setBookingCancelReason] = useState("
+      },
+      {
+        "line": 1289,
+        "expression": "useState<Record<string, string>>({})"
+      },
+      {
+        "line": 1291,
+        "expression": "useState<Record<string, Record<string, boolean>>>("
+      },
+      {
+        "line": 1389,
+        "expression": "((id === \"reservations\" && tab === \"tab2\") ||"
+      },
+      {
+        "line": 1390,
+        "expression": "(id === \"ordering\" && tab === \"tab3\"))"
+      },
+      {
+        "line": 2347,
+        "expression": "{view === \"calendar\" ? \"Calendar\" : \"All reservations\"}"
+      },
+      {
+        "line": 5364,
+        "expression": "{tab === \"overview\""
+      },
+      {
+        "line": 5366,
+        "expression": ": tab === \"services\""
+      },
+      {
+        "line": 5371,
+        "expression": "{tab === \"overview\""
+      },
+      {
+        "line": 5373,
+        "expression": ": tab === \"tab2\""
+      },
+      {
+        "line": 5375,
+        "expression": ": tab === \"tab3\""
+      },
+      {
+        "line": 5377,
+        "expression": ": tab === \"tab4\""
+      },
+      {
+        "line": 5384,
+        "expression": "{tab === \"overview\" && renderOverview()}"
+      },
+      {
+        "line": 5385,
+        "expression": "{tab === \"tab2\" && renderTab2()}"
+      },
+      {
+        "line": 5386,
+        "expression": "{tab === \"tab3\" && renderTab3()}"
+      },
+      {
+        "line": 5387,
+        "expression": "{tab === \"tab4\" && renderTab4()}"
+      },
+      {
+        "line": 5388,
+        "expression": "{tab === \"services\" && renderServices()}"
+      },
+      {
+        "line": 5978,
+        "expression": "const active = tab === id"
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/VendorOnboardingScreen.tsx",
+    "sha256": "6e5ab1e2e0a0f0312444c4a626d5f93b7d0a36dfa1af4af12ef7fdbc7c18fda2",
+    "widgets": [],
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 43,
+        "expression": "const [step, setStep] = useState(0)"
+      },
+      {
+        "line": 44,
+        "expression": "const [submitted, setSubmitted] = useState(false)"
+      },
+      {
+        "line": 47,
+        "expression": "const [firstName, setFirstName] = useState('')"
+      },
+      {
+        "line": 48,
+        "expression": "const [lastName, setLastName]   = useState('')"
+      },
+      {
+        "line": 49,
+        "expression": "const [email, setEmail]         = useState('')"
+      },
+      {
+        "line": 50,
+        "expression": "const [password, setPassword]   = useState('')"
+      },
+      {
+        "line": 51,
+        "expression": "const [showPass, setShowPass]   = useState(false)"
+      },
+      {
+        "line": 54,
+        "expression": "const [bizName, setBizName]     = useState('')"
+      },
+      {
+        "line": 55,
+        "expression": "const [category, setCategory]   = useState('')"
+      },
+      {
+        "line": 56,
+        "expression": "const [tagline, setTagline]     = useState('')"
+      },
+      {
+        "line": 59,
+        "expression": "const [address, setAddress]     = useState('')"
+      },
+      {
+        "line": 60,
+        "expression": "const [city, setCity]           = useState('')"
+      },
+      {
+        "line": 61,
+        "expression": "const [phone, setPhone]         = useState('')"
+      },
+      {
+        "line": 62,
+        "expression": "const [website, setWebsite]     = useState('')"
+      },
+      {
+        "line": 65,
+        "expression": "const [daysOpen, setDaysOpen]   = useState<Record<string, boolean>>({ Mon: true, Tue: true, Wed: true, Thu: true, Fri: true, Sat: true, Sun: false })"
+      },
+      {
+        "line": 66,
+        "expression": "const [openTime, setOpenTime]   = useState('10:00')"
+      },
+      {
+        "line": 67,
+        "expression": "const [closeTime, setCloseTime] = useState('22:00')"
+      },
+      {
+        "line": 70,
+        "expression": "const [coverPicked, setCoverPicked] = useState(false)"
+      },
+      {
+        "line": 71,
+        "expression": "const [galCount, setGalCount]       = useState(0)"
+      },
+      {
+        "line": 74,
+        "expression": "const [amenities, setAmenities] = useState<Set<string>>(new Set(['WiFi', 'Parking']))"
+      },
+      {
+        "line": 75,
+        "expression": "const [bizDesc, setBizDesc]     = useState('')"
+      },
+      {
+        "line": 76,
+        "expression": "const [avgBudget, setAvgBudget] = useState('')"
+      },
+      {
+        "line": 79,
+        "expression": "const [packages, setPackages] = useState(["
+      },
+      {
+        "line": 162,
+        "expression": "{step === 0 && ("
+      },
+      {
+        "line": 197,
+        "expression": "{step === 1 && ("
+      },
+      {
+        "line": 232,
+        "expression": "{step === 2 && ("
+      },
+      {
+        "line": 260,
+        "expression": "{step === 3 && ("
+      },
+      {
+        "line": 309,
+        "expression": "{step === 4 && ("
+      },
+      {
+        "line": 369,
+        "expression": "{step === 5 && ("
+      },
+      {
+        "line": 419,
+        "expression": "{step === 6 && ("
+      },
+      {
+        "line": 478,
+        "expression": "{step === 7 && ("
+      }
+    ]
+  },
+  {
+    "source": "figma-zip",
+    "path": "src/screens/WishlistScreen.tsx",
+    "sha256": "d1cd5a0aa29856afc1f22eb350e5bdfd538b4c9ffda922e7197a6dfc4fe0379f",
+    "widgets": [],
+    "states": []
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/app/page.tsx",
+    "sha256": "f4ad1250a8c45f0ef5f9fc283af45dc935d09021b543350263246746dada50e7",
+    "states": []
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/App.tsx",
+    "sha256": "df731276ad6e44168f55b46d11eb0cd84bcfd62e127fd85c607384d276b3a99b",
+    "states": [
+      {
+        "line": 3,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 64,
+        "expression": "const [screen, setScreen] = useState<Screen>({ name: 'home' })"
+      },
+      {
+        "line": 65,
+        "expression": "const [mode, setMode] = useState<AppMode>('landing')"
+      },
+      {
+        "line": 66,
+        "expression": "const [pendingScreen, setPendingScreen] = useState<Screen | null>(null)"
+      },
+      {
+        "line": 67,
+        "expression": "const [authReturnMode, setAuthReturnMode] = useState<'landing' | 'customer'>('landing')"
+      },
+      {
+        "line": 68,
+        "expression": "const [customerAuthMode, setCustomerAuthMode] = useState<'signin' | 'register'>('signin')"
+      },
+      {
+        "line": 103,
+        "expression": "if (mode === 'landing') {"
+      },
+      {
+        "line": 117,
+        "expression": "if (mode === 'customer-auth') {"
+      },
+      {
+        "line": 130,
+        "expression": "if (mode === 'business-signin') {"
+      },
+      {
+        "line": 139,
+        "expression": "if (mode === 'ride-signin') {"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/BrowsePlansScreen.tsx",
+    "sha256": "5fb4355d0bfc87a1badd9c959d224a82e3c46123df341f0d421c749094f61fba",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 84,
+        "expression": "const [activeBudget, setActiveBudget] = useState('Under \u20a6100k')"
+      },
+      {
+        "line": 85,
+        "expression": "const [guests,   setGuests]   = useState<Record<string, string>>({})"
+      },
+      {
+        "line": 86,
+        "expression": "const [calOpen,  setCalOpen]  = useState(false)"
+      },
+      {
+        "line": 87,
+        "expression": "const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/BusinessSignInScreen.tsx",
+    "sha256": "eb86378b3b734d95b35fae3463d0784edc45017f3675573826792a79d9d15162",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 11,
+        "expression": "const [email, setEmail] = useState(\"\")"
+      },
+      {
+        "line": 12,
+        "expression": "const [password, setPassword] = useState(\"\")"
+      },
+      {
+        "line": 13,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/CartScreen.tsx",
+    "sha256": "fcf1f1e3cebf54bd129ed9e017c7edd2e1130836310968873a0d0c142feb1aca",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 25,
+        "expression": "const [addonQty, setAddonQty] = useState<Record<string, number>>({})"
+      },
+      {
+        "line": 26,
+        "expression": "const [promoOpen, setPromoOpen] = useState(false)"
+      },
+      {
+        "line": 27,
+        "expression": "const [promoCode, setPromoCode] = useState('')"
+      },
+      {
+        "line": 29,
+        "expression": "const [transportChoice, setTransportChoice] = useState<null | boolean>(null)"
+      },
+      {
+        "line": 30,
+        "expression": "const [pickup, setPickup] = useState('Lekki phase 1, Lagos')"
+      },
+      {
+        "line": 31,
+        "expression": "const [editPickup, setEditPickup] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/CheckoutScreen.tsx",
+    "sha256": "bcb636122b3a8f890b1017672c1e82c422319643735a95221451cae8062a8abd",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useRef } from 'react'"
+      },
+      {
+        "line": 301,
+        "expression": "const [payMethod, setPayMethod] = useState('')"
+      },
+      {
+        "line": 302,
+        "expression": "const [bookingReference, setBookingReference] = useState('')"
+      },
+      {
+        "line": 303,
+        "expression": "const [cardNumber, setCardNumber] = useState('')"
+      },
+      {
+        "line": 304,
+        "expression": "const [expiry, setExpiry] = useState('')"
+      },
+      {
+        "line": 305,
+        "expression": "const [cvc, setCvc] = useState('')"
+      },
+      {
+        "line": 306,
+        "expression": "const [cardName, setCardName] = useState('')"
+      },
+      {
+        "line": 307,
+        "expression": "const [copiedRef, setCopiedRef] = useState(false)"
+      },
+      {
+        "line": 308,
+        "expression": "const [calOpen, setCalOpen] = useState(false)"
+      },
+      {
+        "line": 309,
+        "expression": "const [selectedDate, setSelectedDate] = useState<string | undefined>(bookingDate)"
+      },
+      {
+        "line": 310,
+        "expression": "const [selectedTime, setSelectedTime] = useState<string | undefined>(bookingTime)"
+      },
+      {
+        "line": 311,
+        "expression": "const [guests, setGuests] = useState(() => {"
+      },
+      {
+        "line": 318,
+        "expression": "const [paid, setPaid] = useState(false)"
+      },
+      {
+        "line": 319,
+        "expression": "const [showSuccessOverlay, setShowSuccessOverlay] = useState(false)"
+      },
+      {
+        "line": 320,
+        "expression": "const [showSuccessToast, setShowSuccessToast] = useState(false)"
+      },
+      {
+        "line": 321,
+        "expression": "const [showTicketTransport, setShowTicketTransport] = useState(false)"
+      },
+      {
+        "line": 322,
+        "expression": "const [tState, setTState] = useState<TState>('prompt')"
+      },
+      {
+        "line": 323,
+        "expression": "const [tProvider, setTProvider] = useState<'uber' | 'bolt'>('uber')"
+      },
+      {
+        "line": 324,
+        "expression": "const [tAddrMode, setTAddrMode] = useState<'saved' | 'new'>('saved')"
+      },
+      {
+        "line": 325,
+        "expression": "const [tNewAddr, setTNewAddr]   = useState('')"
+      },
+      {
+        "line": 326,
+        "expression": "const [tCar, setTCar] = useState<'economy' | 'comfort' | 'premium' | 'premium-van'>('comfort')"
+      },
+      {
+        "line": 327,
+        "expression": "const [basket, setBasket] = useState<Record<string, number>>({})"
+      },
+      {
+        "line": 653,
+        "expression": "{mode === 'saved' ? 'Saved Address' : 'New Address'}"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/ConfirmationScreen.tsx",
+    "sha256": "2f3a5143af2a693d4c307d25d51c35580f855272891cb5037bb2d88994d337c9",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 16,
+        "expression": "const [copied, setCopied] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/CreateEventScreen.tsx",
+    "sha256": "0a23cfbdc55cdcb43b9da7989305d0c7c18b66bdd508425fa970052a706a2b5f",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 13,
+        "expression": "const [guestCount, setGuestCount] = useState('2 people')"
+      },
+      {
+        "line": 14,
+        "expression": "const [date, setDate] = useState('9')"
+      },
+      {
+        "line": 15,
+        "expression": "const [time, setTime] = useState('06:00 PM')"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/CustomerAuthScreen.tsx",
+    "sha256": "fa3376ebcfb6b195d6e09a00d18a03de39a9872e2444bd2af6fe8a0e39f8cff6",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 13,
+        "expression": "const [mode, setMode] = useState<AuthMode>(initialMode)"
+      },
+      {
+        "line": 14,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      },
+      {
+        "line": 15,
+        "expression": "const [form, setForm] = useState({"
+      },
+      {
+        "line": 58,
+        "expression": "{mode === \"signin\" ? \"Welcome back\" : \"Create your account\"}"
+      },
+      {
+        "line": 61,
+        "expression": "{mode === \"signin\""
+      },
+      {
+        "line": 74,
+        "expression": "{mode === \"register\" && ("
+      },
+      {
+        "line": 97,
+        "expression": "{mode === \"register\" && ("
+      },
+      {
+        "line": 117,
+        "expression": "placeholder={mode === \"register\" ? \"Create a password\" : \"Enter your password\"}"
+      },
+      {
+        "line": 126,
+        "expression": "{mode === \"signin\" && ("
+      },
+      {
+        "line": 137,
+        "expression": "{mode === \"signin\" ? \"Sign in\" : \"Create account\"}"
+      },
+      {
+        "line": 142,
+        "expression": "{mode === \"signin\" ? \"New to fajify?\" : \"Already have an account?\"}"
+      },
+      {
+        "line": 144,
+        "expression": "onClick={() => setMode(mode === \"signin\" ? \"register\" : \"signin\")}"
+      },
+      {
+        "line": 147,
+        "expression": "{mode === \"signin\" ? \"Create an account\" : \"Sign in\"}"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/DeliveryCartScreen.tsx",
+    "sha256": "aedb7995d1572e9906e8d4d99cb13272fae1e67858c81945dc6841cb9b991f44",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 43,
+        "expression": "const [promoOpen, setPromoOpen] = useState(false)"
+      },
+      {
+        "line": 44,
+        "expression": "const [promoCode, setPromoCode] = useState('')"
+      },
+      {
+        "line": 45,
+        "expression": "const [suggestions, setSuggestions] = useState<Record<string, boolean>>({})"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/DeliveryRestaurantScreen.tsx",
+    "sha256": "54f41c7dd8e188edc5ebdf9f6a43494a3901ef90cc72111e5529ed6f6c27934f",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 78,
+        "expression": "const [activeCategory, setActiveCategory] = useState('All')"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/EventDetailScreen.tsx",
+    "sha256": "03ae5ebf52efb65323e6266b946e629e05154f8ed93dc218212f19d09834c450",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 13,
+        "expression": "const [messageOpen, setMessageOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/GlobalCartScreen.tsx",
+    "sha256": "31a4ad5b476b25ebbfaca6f400bae1d78f63b5898c486d5977a15c5a9ded44f9",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 24,
+        "expression": "const [payMethod, setPayMethod] = useState('')"
+      },
+      {
+        "line": 25,
+        "expression": "const [showSuccess, setShowSuccess] = useState(false)"
+      },
+      {
+        "line": 26,
+        "expression": "const [pendingNav, setPendingNav] = useState<(() => void) | null>(null)"
+      },
+      {
+        "line": 27,
+        "expression": "const [promoOpen, setPromoOpen] = useState(false)"
+      },
+      {
+        "line": 28,
+        "expression": "const [promoCode, setPromoCode] = useState('')"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/HelpScreen.tsx",
+    "sha256": "cb7ffd84b28d71130057221055ae88a77a4f623862ca704c9d276ac0d6097aa5",
+    "states": []
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/HomeScreen.tsx",
+    "sha256": "5ff0324a464b63fed50330639a50925f89a763f9138f1ba4b3d1600cdd7fe85d",
+    "states": [
+      {
+        "line": 3,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 114,
+        "expression": "const [locs, setLocs] = useState<string[]>([])"
+      },
+      {
+        "line": 115,
+        "expression": "const [budget, setBudget] = useState('')"
+      },
+      {
+        "line": 116,
+        "expression": "const [rating, setRating] = useState('Any')"
+      },
+      {
+        "line": 221,
+        "expression": "const [active, setActive] = useState(0)"
+      },
+      {
+        "line": 222,
+        "expression": "const [animating, setAnimating] = useState(false)"
+      },
+      {
+        "line": 293,
+        "expression": "const [activeCategory, setActiveCategory] = useState('All')"
+      },
+      {
+        "line": 294,
+        "expression": "const [search, setSearch] = useState(initialSearch)"
+      },
+      {
+        "line": 295,
+        "expression": "const [filterOpen, setFilterOpen] = useState(false)"
+      },
+      {
+        "line": 296,
+        "expression": "const [fabOpen, setFabOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/InviteFriendsScreen.tsx",
+    "sha256": "a4bd4b6d4aae1cc2da57b94b0a08e3517c3341281f269b0d55e66dc5fa84f5a2",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 9,
+        "expression": "const [copied, setCopied] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/LandingScreen.tsx",
+    "sha256": "111785b916d91f3dedd8fb588db296b4a949719a39a4c420e9c0350613e4d557",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 69,
+        "expression": "const [query, setQuery] = useState(\"\")"
+      },
+      {
+        "line": 103,
+        "expression": "const [menuOpen, setMenuOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/MyTicketsScreen.tsx",
+    "sha256": "4cd4b25f0aec92e6cd78b21560fe152e42b1181e1f179642e694fa203e2ccd93",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect } from 'react'"
+      },
+      {
+        "line": 9,
+        "expression": "type TabT = 'Upcoming' | 'Orders' | 'Completed' | 'Cancelled'"
+      },
+      {
+        "line": 112,
+        "expression": "const [tab, setTab] = useState<TabT>('Upcoming')"
+      },
+      {
+        "line": 114,
+        "expression": "const [viewTicket, setViewTicket] = useState<typeof tickets.Upcoming[0] | null>(null)"
+      },
+      {
+        "line": 115,
+        "expression": "const [viewOrder, setViewOrder] = useState<typeof tickets.Orders[0] | null>(null)"
+      },
+      {
+        "line": 116,
+        "expression": "const [showMap, setShowMap] = useState(false)"
+      },
+      {
+        "line": 117,
+        "expression": "const [riderProgress, setRiderProgress] = useState(0.35)"
+      },
+      {
+        "line": 118,
+        "expression": "const [toast, setToast] = useState('')"
+      },
+      {
+        "line": 166,
+        "expression": "const allTickets = [...liveAsTickets.filter(ticket => tab === 'Orders' ? ticket.type === 'food' : ticket.type !== 'food' && ticket.status === tab), ...staticTab]"
+      },
+      {
+        "line": 395,
+        "expression": "borderBottom: tab === t ? `2.5px solid ${RED}` : '2.5px solid transparent',"
+      },
+      {
+        "line": 396,
+        "expression": "fontSize: 11, fontWeight: 700, color: tab === t ? RED : muted, cursor: 'pointer',"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/NotificationsScreen.tsx",
+    "sha256": "1bf98f0d6b31ef4f37007bc3aa459e6ce7b3e9f498e6d6d18885941c0ec2b396",
+    "states": []
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/OffersScreen.tsx",
+    "sha256": "7ab4eb537767fc697c62b9cafcf43d434c968fb052a5309cbea41f721dfa5305",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 17,
+        "expression": "const [copied, setCopied] = useState<string | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/OnboardingScreen.tsx",
+    "sha256": "fea421ecd9b6377f8b632c631c4fa7cc9f24599b9de03ff8f1eecfe536ca12c5",
+    "states": []
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/OrderTrackingScreen.tsx",
+    "sha256": "f2add5646d76e7d2f43975e48157d081dd07161166c5d5d8d358deefc639c3b3",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 111,
+        "expression": "const [step, setStep] = useState(0)"
+      },
+      {
+        "line": 112,
+        "expression": "const [riderT, setRiderT] = useState(0)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/PlanForMeScreen.tsx",
+    "sha256": "6e526bb755827411a780539e7cf52dc09b6a686fe1b1bd92efea75cb54706381",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 185,
+        "expression": "const [loved, setLoved] = useState(false)"
+      },
+      {
+        "line": 242,
+        "expression": "const [step, setStep] = useState(1)"
+      },
+      {
+        "line": 246,
+        "expression": "const [occasion, setOccasion] = useState('')"
+      },
+      {
+        "line": 247,
+        "expression": "const [guestCount, setGuestCount] = useState(6)"
+      },
+      {
+        "line": 248,
+        "expression": "const [guestChip, setGuestChip] = useState('')"
+      },
+      {
+        "line": 249,
+        "expression": "const [location, setLocation] = useState('')"
+      },
+      {
+        "line": 250,
+        "expression": "const [showLocationSearch, setShowLocationSearch] = useState(false)"
+      },
+      {
+        "line": 251,
+        "expression": "const [locationQuery, setLocationQuery] = useState('')"
+      },
+      {
+        "line": 252,
+        "expression": "const [budget, setBudget] = useState('')"
+      },
+      {
+        "line": 253,
+        "expression": "const [budgetFlex, setBudgetFlex] = useState(false)"
+      },
+      {
+        "line": 254,
+        "expression": "const [dateChoice, setDateChoice] = useState('')"
+      },
+      {
+        "line": 255,
+        "expression": "const [timeChoice, setTimeChoice] = useState('Evening')"
+      },
+      {
+        "line": 256,
+        "expression": "const [vibes, setVibes] = useState<string[]>([])"
+      },
+      {
+        "line": 257,
+        "expression": "const [calOpen, setCalOpen] = useState(false)"
+      },
+      {
+        "line": 258,
+        "expression": "const [bookingCalOpen, setBookingCalOpen] = useState(false)"
+      },
+      {
+        "line": 259,
+        "expression": "const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)"
+      },
+      {
+        "line": 262,
+        "expression": "if (step === 1) navigate({ name: 'home' })"
+      },
+      {
+        "line": 274,
+        "expression": "if (step === 7) {"
+      },
+      {
+        "line": 376,
+        "expression": "{step === 1 && ("
+      },
+      {
+        "line": 397,
+        "expression": "{step === 2 && ("
+      },
+      {
+        "line": 446,
+        "expression": "{step === 3 && ("
+      },
+      {
+        "line": 498,
+        "expression": "{step === 4 && ("
+      },
+      {
+        "line": 529,
+        "expression": "{step === 5 && ("
+      },
+      {
+        "line": 595,
+        "expression": "{step === 6 && ("
+      },
+      {
+        "line": 624,
+        "expression": "(step === 1 && !occasion) ||"
+      },
+      {
+        "line": 625,
+        "expression": "(step === 3 && !location) ||"
+      },
+      {
+        "line": 626,
+        "expression": "(step === 4 && !budget && !budgetFlex) ||"
+      },
+      {
+        "line": 627,
+        "expression": "(step === 5 && !dateChoice)"
+      },
+      {
+        "line": 631,
+        "expression": "{step === 6 && ("
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/ProfileScreen.tsx",
+    "sha256": "37e063791581a2948e1518101433ca3fac68af73e502d9f2e901e83e89b95329",
+    "states": []
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/ReservationScreen.tsx",
+    "sha256": "2de9af2b13b01f84824494cf68d041c42b69c393859ff5363dd05c08a4c7f189",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 9,
+        "expression": "const [guests, setGuests] = useState('2 people')"
+      },
+      {
+        "line": 10,
+        "expression": "const [selectedDate, setSelectedDate] = useState(9)"
+      },
+      {
+        "line": 11,
+        "expression": "const [selectedTime, setSelectedTime] = useState('06:00 PM')"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/RestaurantScreen.tsx",
+    "sha256": "14befe4e4f78fdecb3ee62aeecea015f49ecc4a591e93c2bd2e69a06a6650883",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 268,
+        "expression": "const [heroIdx, setHeroIdx] = useState(0)"
+      },
+      {
+        "line": 272,
+        "expression": "const [activeCategory, setActiveCategory] = useState('All')"
+      },
+      {
+        "line": 273,
+        "expression": "const [calOpen, setCalOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/RideSignInScreen.tsx",
+    "sha256": "c372142d59c06e4aeca968a2a70a478c355bc46c8a106fa4ad07517714df985d",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 10,
+        "expression": "const [email, setEmail] = useState(\"\")"
+      },
+      {
+        "line": 11,
+        "expression": "const [password, setPassword] = useState(\"\")"
+      },
+      {
+        "line": 12,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/SettingsScreen.tsx",
+    "sha256": "ff368d490dd370eef88f38024d3627e76f722d91c10a5708057a173b39ee0d44",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 48,
+        "expression": "const [notifications, setNotifications] = useState(true)"
+      },
+      {
+        "line": 49,
+        "expression": "const [locationServices, setLocationServices] = useState(true)"
+      },
+      {
+        "line": 50,
+        "expression": "const [emailUpdates, setEmailUpdates] = useState(false)"
+      },
+      {
+        "line": 51,
+        "expression": "const [language, setLanguage] = useState('English')"
+      },
+      {
+        "line": 52,
+        "expression": "const [currency, setCurrency] = useState('NGN \u20a6')"
+      },
+      {
+        "line": 53,
+        "expression": "const [picker, setPicker] = useState<'language' | 'currency' | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/TransportationScreen.tsx",
+    "sha256": "bd35a4d7df87a2e2c5efe89db72557f8a0e0ff269a426dfd5d713c737fe2a7ff",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 81,
+        "expression": "const [provider,      setProvider]      = useState<ProviderId>('uber')"
+      },
+      {
+        "line": 82,
+        "expression": "const [carId,         setCarId]         = useState<CarId>('comfort')"
+      },
+      {
+        "line": 83,
+        "expression": "const [addrMode,      setAddrMode]      = useState<'saved' | 'new'>('saved')"
+      },
+      {
+        "line": 84,
+        "expression": "const [selectedSaved, setSelectedSaved] = useState('s1')"
+      },
+      {
+        "line": 85,
+        "expression": "const [newAddr,       setNewAddr]       = useState('')"
+      },
+      {
+        "line": 86,
+        "expression": "const [pickupDate,    setPickupDate]    = useState(false)"
+      },
+      {
+        "line": 87,
+        "expression": "const [dateAddr,      setDateAddr]      = useState('')"
+      },
+      {
+        "line": 88,
+        "expression": "const [wantTransport, setWantTransport] = useState<boolean | null>(null)"
+      },
+      {
+        "line": 228,
+        "expression": "{mode === 'saved' ? 'Saved Address' : 'New Address'}"
+      }
+    ]
+  },
+  {
+    "source": "ec3405f",
+    "path": "apps/customer_web/webapp/screens/WishlistScreen.tsx",
+    "sha256": "a36d56827224d7a41723725e09d253b4ece66bbb5259d12dfe28bfad1909bec0",
+    "states": []
+  },
+  {
+    "source": "b496c52",
+    "path": "apps/business_web/app/page.tsx",
+    "sha256": "5fb73088a65dee21696ee522a4466ba2eab4aa8fbd6fce40be0edd1d1f6529c5",
+    "states": []
+  },
+  {
+    "source": "b496c52",
+    "path": "apps/business_web/webapp/App.tsx",
+    "sha256": "6f4f1621404aac4b4eec836420ac59334f809c7d0f55feb9ddcd7fe6e19938b3",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 8,
+        "expression": "type Mode = 'entry' | 'signin' | 'onboarding' | 'dashboard'"
+      },
+      {
+        "line": 10,
+        "expression": "const [mode, setMode] = useState<Mode>('entry')"
+      },
+      {
+        "line": 14,
+        "expression": "{mode === 'entry' ? <main className=\"business-entry min-h-screen grid lg:grid-cols-2 bg-white\">"
+      },
+      {
+        "line": 23,
+        "expression": "{mode === 'signin' ? <BusinessSignInScreen onBack={() => navigate('entry')} onSignIn={() => navigate('dashboard')} onRegister={() => navigate('onboarding')} /> : null}"
+      },
+      {
+        "line": 24,
+        "expression": "{mode === 'onboarding' ? <BusinessOnboardingScreen onBack={() => navigate('entry')} onComplete={() => navigate('dashboard')} /> : null}"
+      },
+      {
+        "line": 25,
+        "expression": "{mode === 'dashboard' ? <VendorDashboardScreen onExit={() => navigate('entry')} /> : null}"
+      }
+    ]
+  },
+  {
+    "source": "b496c52",
+    "path": "apps/business_web/webapp/screens/BusinessOnboardingScreen.tsx",
+    "sha256": "1e10779a0e9e332e5dc03972b018edefced2a912f4289616993d7bfa12f6bf8e",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useRef } from 'react'"
+      },
+      {
+        "line": 168,
+        "expression": "const [step, setStep] = useState(1)"
+      },
+      {
+        "line": 170,
+        "expression": "const [category,    setCategory]    = useState('')"
+      },
+      {
+        "line": 171,
+        "expression": "const [services,    setServices]    = useState<string[]>([])"
+      },
+      {
+        "line": 172,
+        "expression": "const [scale,       setScale]       = useState('')"
+      },
+      {
+        "line": 173,
+        "expression": "const [fullName,    setFullName]    = useState('')"
+      },
+      {
+        "line": 174,
+        "expression": "const [email,       setEmail]       = useState('')"
+      },
+      {
+        "line": 175,
+        "expression": "const [phone,       setPhone]       = useState('')"
+      },
+      {
+        "line": 176,
+        "expression": "const [bizName,     setBizName]     = useState('')"
+      },
+      {
+        "line": 177,
+        "expression": "const [regNum,      setRegNum]      = useState('')"
+      },
+      {
+        "line": 178,
+        "expression": "const [bizAddr,     setBizAddr]     = useState('')"
+      },
+      {
+        "line": 179,
+        "expression": "const [idType,      setIdType]      = useState('')"
+      },
+      {
+        "line": 180,
+        "expression": "const [idUploaded,  setIdUploaded]  = useState(false)"
+      },
+      {
+        "line": 181,
+        "expression": "const [faceScanned, setFaceScanned] = useState(false)"
+      },
+      {
+        "line": 182,
+        "expression": "const [city,        setCity]        = useState('Lagos')"
+      },
+      {
+        "line": 183,
+        "expression": "const [lga,         setLga]         = useState('')"
+      },
+      {
+        "line": 184,
+        "expression": "const [landmark,    setLandmark]    = useState('')"
+      },
+      {
+        "line": 203,
+        "expression": "if (step === 1) return !!category"
+      },
+      {
+        "line": 204,
+        "expression": "if (step === 2) return services.length > 0"
+      },
+      {
+        "line": 205,
+        "expression": "if (step === 3) return !!scale"
+      },
+      {
+        "line": 206,
+        "expression": "if (step === 4) return !!(fullName.trim() && email.trim() && phone.trim())"
+      },
+      {
+        "line": 207,
+        "expression": "if (step === 5) return !!(bizName.trim() && bizAddr.trim())"
+      },
+      {
+        "line": 208,
+        "expression": "if (step === 6) return !!(idType && idUploaded && faceScanned)"
+      },
+      {
+        "line": 209,
+        "expression": "if (step === 7) return !!lga.trim()"
+      },
+      {
+        "line": 225,
+        "expression": "if (step === 1) return wrap("
+      },
+      {
+        "line": 252,
+        "expression": "if (step === 2) return wrap("
+      },
+      {
+        "line": 291,
+        "expression": "if (step === 3) return wrap("
+      },
+      {
+        "line": 327,
+        "expression": "if (step === 4) return wrap("
+      },
+      {
+        "line": 350,
+        "expression": "if (step === 5) return wrap("
+      },
+      {
+        "line": 385,
+        "expression": "if (step === 6) return wrap("
+      },
+      {
+        "line": 482,
+        "expression": "if (step === 7) return wrap("
+      }
+    ]
+  },
+  {
+    "source": "b496c52",
+    "path": "apps/business_web/webapp/screens/BusinessSignInScreen.tsx",
+    "sha256": "4b03902945d0117c75d97dcbb4bf68b1e45d8c90a95b99f47561399229d90200",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 11,
+        "expression": "const [recoveryPreview, setRecoveryPreview] = useState(false)"
+      },
+      {
+        "line": 12,
+        "expression": "const [email, setEmail] = useState(\"\")"
+      },
+      {
+        "line": 13,
+        "expression": "const [password, setPassword] = useState(\"\")"
+      },
+      {
+        "line": 14,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "b496c52",
+    "path": "apps/business_web/webapp/screens/VendorDashboardScreen.tsx",
+    "sha256": "7464bd9f416ce94a239916363ad6cfd4389ec3262ffe39efe1328ddbeb105e55",
+    "states": [
+      {
+        "line": 3,
+        "expression": "import { useState, useRef, type ReactElement } from \"react\""
+      },
+      {
+        "line": 1196,
+        "expression": "type TabId = \"overview\" | \"tab2\" | \"tab3\" | \"tab4\" | \"services\""
+      },
+      {
+        "line": 1201,
+        "expression": "const [supportMessage, setSupportMessage] = useState('')"
+      },
+      {
+        "line": 1202,
+        "expression": "const [staffInviteOpen, setStaffInviteOpen] = useState(false)"
+      },
+      {
+        "line": 1203,
+        "expression": "const [inviteName, setInviteName] = useState('')"
+      },
+      {
+        "line": 1204,
+        "expression": "const [inviteRole, setInviteRole] = useState('Floor Staff')"
+      },
+      {
+        "line": 1205,
+        "expression": "const [invitedStaff, setInvitedStaff] = useState<Record<string, { name: string; role: string }[]>>({})"
+      },
+      {
+        "line": 1206,
+        "expression": "const [checkedIn, setCheckedIn] = useState<Record<string, boolean>>({})"
+      },
+      {
+        "line": 1207,
+        "expression": "const [showPicker, setShowPicker] = useState(false)"
+      },
+      {
+        "line": 1208,
+        "expression": "const [biz, setBiz] = useState<Biz>(BUSINESSES[0])"
+      },
+      {
+        "line": 1209,
+        "expression": "const [tab, setTab] = useState<TabId>(\"overview\")"
+      },
+      {
+        "line": 1210,
+        "expression": "const [bizPickerOpen, setBizPickerOpen] = useState(false)"
+      },
+      {
+        "line": 1211,
+        "expression": "const [scannerOpen, setScannerOpen] = useState(false)"
+      },
+      {
+        "line": 1212,
+        "expression": "const [healthOpen, setHealthOpen] = useState(false)"
+      },
+      {
+        "line": 1213,
+        "expression": "const [settingsOpen, setSettingsOpen] = useState(false)"
+      },
+      {
+        "line": 1214,
+        "expression": "const [settingDetail, setSettingDetail] = useState<string | null>(null)"
+      },
+      {
+        "line": 1216,
+        "expression": "const [settingsScreen, setSettingsScreen] = useState<\"main\" | string | null>("
+      },
+      {
+        "line": 1219,
+        "expression": "const [payoutConfirmed, setPayoutConfirmed] = useState(false)"
+      },
+      {
+        "line": 1221,
+        "expression": "useState<\"idle\" | \"review\" | \"submitted\">(\"idle\")"
+      },
+      {
+        "line": 1222,
+        "expression": "const [payoutScreenOpen, setPayoutScreenOpen] = useState(false)"
+      },
+      {
+        "line": 1228,
+        "expression": "const [bankSaved, setBankSaved] = useState(true)"
+      },
+      {
+        "line": 1229,
+        "expression": "const [payoutMode, setPayoutMode] = useState<\"all\" | \"custom\">(\"all\")"
+      },
+      {
+        "line": 1230,
+        "expression": "const [customPayoutAmount, setCustomPayoutAmount] = useState(\"100000\")"
+      },
+      {
+        "line": 1231,
+        "expression": "const [businessMedia, setBusinessMedia] = useState<Record<string, {"
+      },
+      {
+        "line": 1235,
+        "expression": "const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)"
+      },
+      {
+        "line": 1236,
+        "expression": "const [cancelOrderOpen, setCancelOrderOpen] = useState(false)"
+      },
+      {
+        "line": 1237,
+        "expression": "const [cancelReason, setCancelReason] = useState(\"Item unavailable\")"
+      },
+      {
+        "line": 1238,
+        "expression": "const [hoursEdited, setHoursEdited] = useState<Record<string, boolean>>({})"
+      },
+      {
+        "line": 1254,
+        "expression": "const [profileSaved, setProfileSaved] = useState(false)"
+      },
+      {
+        "line": 1255,
+        "expression": "const [contactSaved, setContactSaved] = useState(false)"
+      },
+      {
+        "line": 1256,
+        "expression": "const [staffStatuses, setStaffStatuses] = useState<Record<string, boolean>>({"
+      },
+      {
+        "line": 1262,
+        "expression": "const [deletedPhotos, setDeletedPhotos] = useState<number[]>([])"
+      },
+      {
+        "line": 1263,
+        "expression": "const [photoAdded, setPhotoAdded] = useState(false)"
+      },
+      {
+        "line": 1264,
+        "expression": "const [addItemOpen, setAddItemOpen] = useState(false)"
+      },
+      {
+        "line": 1265,
+        "expression": "const [newItemName, setNewItemName] = useState(\"\")"
+      },
+      {
+        "line": 1266,
+        "expression": "const [newItemPrice, setNewItemPrice] = useState(\"\")"
+      },
+      {
+        "line": 1267,
+        "expression": "const [newItemCat, setNewItemCat] = useState(\"\")"
+      },
+      {
+        "line": 1268,
+        "expression": "const [newItemImg, setNewItemImg] = useState(\"\")"
+      },
+      {
+        "line": 1269,
+        "expression": "const [newCategoryName, setNewCategoryName] = useState(\"\")"
+      },
+      {
+        "line": 1270,
+        "expression": "const [creatingCategory, setCreatingCategory] = useState(false)"
+      },
+      {
+        "line": 1272,
+        "expression": "useState<Record<string, string[]>>({})"
+      },
+      {
+        "line": 1274,
+        "expression": "useState<Record<string, Product[]>>({})"
+      },
+      {
+        "line": 1279,
+        "expression": "useState<Record<string, string>>({})"
+      },
+      {
+        "line": 1280,
+        "expression": "const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>({})"
+      },
+      {
+        "line": 1281,
+        "expression": "const [productAvail, setProductAvail] = useState<Record<string, boolean>>({})"
+      },
+      {
+        "line": 1282,
+        "expression": "const [bookingFilter, setBookingFilter] = useState(\"all\")"
+      },
+      {
+        "line": 1283,
+        "expression": "const [orderFilter, setOrderFilter] = useState(\"active\")"
+      },
+      {
+        "line": 1284,
+        "expression": "const [reservationView, setReservationView] = useState<\"calendar\" | \"list\">("
+      },
+      {
+        "line": 1287,
+        "expression": "const [reservationMonth, setReservationMonth] = useState(7)"
+      },
+      {
+        "line": 1289,
+        "expression": "useState(\"2026-08-30\")"
+      },
+      {
+        "line": 1291,
+        "expression": "useState(false)"
+      },
+      {
+        "line": 1292,
+        "expression": "const [cancelBookingId, setCancelBookingId] = useState<string | null>(null)"
+      },
+      {
+        "line": 1293,
+        "expression": "const [bookingCancelReason, setBookingCancelReason] = useState("
+      },
+      {
+        "line": 1297,
+        "expression": "useState<Record<string, string>>({})"
+      },
+      {
+        "line": 1299,
+        "expression": "useState<Record<string, Record<string, boolean>>>("
+      },
+      {
+        "line": 1400,
+        "expression": "((id === \"reservations\" && tab === \"tab2\") ||"
+      },
+      {
+        "line": 1401,
+        "expression": "(id === \"ordering\" && tab === \"tab3\"))"
+      },
+      {
+        "line": 2358,
+        "expression": "{view === \"calendar\" ? \"Calendar\" : \"All reservations\"}"
+      },
+      {
+        "line": 5388,
+        "expression": "{tab === \"overview\""
+      },
+      {
+        "line": 5390,
+        "expression": ": tab === \"services\""
+      },
+      {
+        "line": 5395,
+        "expression": "{tab === \"overview\""
+      },
+      {
+        "line": 5397,
+        "expression": ": tab === \"tab2\""
+      },
+      {
+        "line": 5399,
+        "expression": ": tab === \"tab3\""
+      },
+      {
+        "line": 5401,
+        "expression": ": tab === \"tab4\""
+      },
+      {
+        "line": 5408,
+        "expression": "{tab === \"overview\" && renderOverview()}"
+      },
+      {
+        "line": 5409,
+        "expression": "{tab === \"tab2\" && renderTab2()}"
+      },
+      {
+        "line": 5410,
+        "expression": "{tab === \"tab3\" && renderTab3()}"
+      },
+      {
+        "line": 5411,
+        "expression": "{tab === \"tab4\" && renderTab4()}"
+      },
+      {
+        "line": 5412,
+        "expression": "{tab === \"services\" && renderServices()}"
+      },
+      {
+        "line": 6001,
+        "expression": "const active = tab === id"
+      }
+    ]
+  },
+  {
+    "source": "b496c52",
+    "path": "apps/customer_web/app/page.tsx",
+    "sha256": "f10b927169f99a55f5a23b249bec8c3820eca0efa7ac1cbaf69ca05941aa29d7",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/access-denied/page.tsx",
+    "sha256": "f73dc36d631af28d4dd9e90f667ecb19ee74df15105bd1895dbe55275f3de61a",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/account-security/page.tsx",
+    "sha256": "bddd7a3dbc6a55eed2711c096a43f0c24ce245a887997e5be40fece35417a3da",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/dashboard/page.tsx",
+    "sha256": "ca3de0bb1b537b6540b29e71fa08d9670f969db2bbf56b5b9516106cccd7742b",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/login/page.tsx",
+    "sha256": "e08daeb0567f5c0c3e544342e8a7a8bbce3e1dc335e756a1772e4cd3c71d6cc7",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/page.tsx",
+    "sha256": "3da4e88e445439e21ad5376a2b7b16a90da341aa2e573c1f3e57c0a44d37ce6e",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/phone-login/page.tsx",
+    "sha256": "f36ddd9dc9f5d7c6cb4921267d0e5801591d47078d546a5cf7d646418fe42514",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/phone-recovery/page.tsx",
+    "sha256": "79fe202b6d3c82a0e4237dd5c440248fff218b7db28a8b5f1f5a7836c9b3bd6c",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/recover/page.tsx",
+    "sha256": "f1969ea65f667064aab1c8141606b31fc2354580fef75941c9d595e8607cb451",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/register/page.tsx",
+    "sha256": "8b59e7e8c22763757092b994d3e0265de084588044831aa4184be951fec062ad",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/app/reset-password/page.tsx",
+    "sha256": "24527af86a69eca443b1867d45348d66ae64fb745fafb97026c1b63cb4d9a6ea",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/connected/AuthPage.tsx",
+    "sha256": "1368a7cd08d45d96e5292552d84a97f13bd5822de6863c3e76b6197190fa810e",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/connected/Client.tsx",
+    "sha256": "b2680b232dba532ae08119556d24dee47a0a106f13f29a59d65a23828869b369",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import {useState} from 'react';"
+      },
+      {
+        "line": 12,
+        "expression": "type Tab='Home'|'Reservations'|'Orders'|'Menu'|'Services'|'Settings'|'Finance'|'Branches'|'Profile'|'Staff'|'Hours'|'Packages'|'Reports'|'Notifications'|'Support'|'QR';"
+      },
+      {
+        "line": 16,
+        "expression": "const [businessId,setBusinessId]=useState(memberships[0]?.resourceId??''),[branchId,setBranchId]=useState(''),[tab,setTab]=useState<Tab>('Home'),[application,setApplication]=useState(''),[applicationStatus,setApplicationStatus]=useState(''),[register,setRegister]=useState(false),[message,setMessage]=useState(''),[submitting,setSubmitting]=useState(false);"
+      },
+      {
+        "line": 26,
+        "expression": "const [requestError,setRequestError]=useState('');"
+      },
+      {
+        "line": 33,
+        "expression": "<nav className=\"merchant-nav\" aria-label=\"Merchant navigation\">{(['Home','Reservations','Orders','Menu','Services'] as Tab[]).map(value=><button key={value} aria-current={tab===value?'page':undefined} onClick={()=>chooseTab(value)}><NavIcon id={value==='Home'?'overview':value==='Reservations'?'tab2':value==='Orders'?'tab3':value==='Menu'?'tab4':'services'} active={tab===value} color={tab===value?'#D92D27':'#777'}/>{value}</button>)}</nav>"
+      },
+      {
+        "line": 34,
+        "expression": "<h1 className=\"mb-6\">{tab==='Home'?'Dashboard':tab}</h1>"
+      },
+      {
+        "line": 35,
+        "expression": "{tab==='Home'?<Overview overview={overview} finance={finance} slots={slots} reservations={reservations} orders={orders} onTab={chooseTab}/>:null}"
+      },
+      {
+        "line": 36,
+        "expression": "{tab==='Reservations'||tab==='Orders'?<section className=\"faji-stack\"><State loading={tab==='Reservations'?reservations.loading:orders.loading} error={tab==='Reservations'?reservations.error:orders.error} empty={(tab==='Reservations'?reservations.data:orders.data)?.length===0} retry={tab==='Reservations'?reservations.reload:orders.reload}>{(tab==='Reservations'?reservations.data:orders.data)?.map(value=><article className=\"faji-card\" key={value.id}><h2>{value.id}</h2><p>Status: {value.status}</p><p>{value.customer_subject} {value.guests?`\u00b7 ${value.guests} guests`:''}</p>{value.total_minor&&<p className=\"faji-price\">{money(value.total_minor,value.currency)}</p>}<div className=\"flex flex-wrap gap-3 mt-4\">{(tab==='Reservations'?(({confirmed:['checked_in','cancelled'],checked_in:['completed']} as Record<string,string[]>)[value.status??'']??[]):(({placed:['accepted','cancelled'],accepted:['preparing','cancelled'],preparing:['ready','cancelled'],ready:['fulfilled','cancelled']} as Record<string,string[]>)[value.status??'']??[])).map(status=><Action key={status} label={status.replaceAll('_',' ')} disabled={value.status===status||value.status==='cancelled'||value.status==='fulfilled'||value.status==='completed'} run={()=>platform(`${branch}/${tab==='Reservations'?'reservations':'orders'}/${value.id}/status`,{status},'PATCH')} onSuccess={tab==='Reservations'?reservations.reload:orders.reload}/>)}</div></article>)}</State>{tab==='Reservations'&&canManage?<SlotEditor branch={branch} items={catalogue.data??[]} refresh={slots.reload}/>:null}</section>:null}"
+      },
+      {
+        "line": 37,
+        "expression": "{tab==='Menu'?<><State loading={catalogue.loading} error={catalogue.error} empty={catalogue.data?.length===0} retry={catalogue.reload}><div className=\"faji-grid\">{catalogue.data?.map(item=><article className=\"faji-card\" key={item.id}><h2>{item.name}</h2><p>{item.kind}</p><p className=\"faji-price\">{money(item.price_minor??'0',item.currency)}</p>{canManage&&<details className=\"mt-4\"><summary>Edit item</summary><MutationForm title=\"Item details\" submit={async form=>{await platform(`${branch}/catalogue/${item.id}`,{name:String(form.get('name')),priceMinor:Math.round(Number(form.get('price'))*100)},'PATCH');catalogue.reload();}}><label>Item name<input name=\"name\" required minLength={2} maxLength={160} defaultValue={item.name}/></label><label>Item price (NGN)<input name=\"price\" type=\"number\" min={0} step=\"0.01\" required defaultValue={Number(item.price_minor??0)/100}/></label></MutationForm></details>}{canManage&&<Action label={item.published?'Unpublish':'Publish'} run={()=>platform(`${branch}/catalogue/${item.id}`,{published:!item.published},'PATCH')} onSuccess={catalogue.reload}/>}</article>)}</div></State>{canManage&&selectedBranch&&<CatalogueEditor branch={branch} refresh={catalogue.reload}/>}</>:null}"
+      },
+      {
+        "line": 38,
+        "expression": "{tab==='Services'?<div className=\"faji-grid\"><article className=\"faji-card\"><h2>Reservations</h2><p>Scheduled through catalogue availability.</p><button className=\"faji-primary\" onClick={()=>chooseTab('Reservations')}>Manage availability</button></article><article className=\"faji-card\"><h2>Experience packages & events</h2><button className=\"faji-primary\" onClick={()=>chooseTab('Packages')}>Configure experiences</button></article><article className=\"faji-card\"><h2>Ticket check-in</h2><button className=\"faji-primary\" onClick={()=>chooseTab('QR')}>Redeem server-issued ticket</button></article><ComingSoon title=\"Courier & dispatch\"/></div>:null}"
+      },
+      {
+        "line": 39,
+        "expression": "{tab==='Settings'?<div className=\"faji-card faji-stack\">{(['Profile','Branches','Staff','Hours','Finance','Packages','Notifications','Support','Reports'] as Tab[]).map(value=><button className=\"faji-outline\" key={value} onClick={()=>chooseTab(value)}>{value}</button>)}<a className=\"faji-outline\" href=\"/account-security\">Account security and optional MFA</a></div>:null}"
+      },
+      {
+        "line": 40,
+        "expression": "{tab==='Finance'?<FinanceView data={finance.data} error={finance.error} loading={finance.loading} refresh={finance.reload}/>:null}"
+      },
+      {
+        "line": 41,
+        "expression": "{tab==='Branches'?<><div className=\"faji-grid\">{branches.data?.map(value=><article className=\"faji-card\" key={value.id}><h2>{value.name}</h2><p>{value.address}</p><p>{value.active?'Active':'Inactive'}</p>{canManage&&<details className=\"mt-4\"><summary>Edit branch</summary><MutationForm title=\"Branch contact\" submit={async form=>{await platform(`${root}/branches/${value.id}`,{name:String(form.get('name')),contactEmail:String(form.get('email'))},'PATCH');branches.reload();}}><label>Branch display name<input name=\"name\" required minLength={2} maxLength={120} defaultValue={value.name}/></label><label>Branch contact email<input name=\"email\" type=\"email\" required defaultValue={value.contact_email}/></label></MutationForm></details>}{canManage&&<Action label={value.active?'Deactivate':'Activate'} run={()=>platform(`${root}/branches/${value.id}`,{active:!value.active},'PATCH')} onSuccess={branches.reload}/>}</article>)}</div>{canManage&&<BranchEditor root={root} refresh={branches.reload}/>}</>:null}"
+      },
+      {
+        "line": 42,
+        "expression": "{tab==='Profile'&&canManage?<PublicProfileEditor branch={branch}/>:null}"
+      },
+      {
+        "line": 43,
+        "expression": "{tab==='Staff'&&canManage?<StaffView root={root} branchId={selectedBranch} isOwner={isOwner}/>:null}"
+      },
+      {
+        "line": 44,
+        "expression": "{tab==='Hours'&&canManage?<HoursEditor branch={branch}/>:null}"
+      },
+      {
+        "line": 45,
+        "expression": "{tab==='Packages'&&canManage?<ExperienceEditor branch={branch} items={catalogue.data??[]}/>:null}"
+      },
+      {
+        "line": 46,
+        "expression": "{tab==='QR'?<TicketRedemption branch={branch}/>:null}"
+      },
+      {
+        "line": 53,
+        "expression": "const [busy,setBusy]=useState(false),[message,setMessage]=useState('');return <form className=\"faji-card mt-6\" onSubmit={async event=>{event.preventDefault();setBusy(true);setMessage('');const data=new FormData(event.currentTarget);try{await submit(data);setMessage('Saved by the server.');}catch(e){setMessage(e instanceof Error?e.message:'Unable to save.');}finally{setBusy(false);}}}><h2>{title}</h2>{children}<button className=\"faji-primary\" disabled={busy}>{busy?'Saving\u2026':'Save changes'}</button>{message&&<p role=\"status\">{message}</p>}</form>;"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/connected/NavIcon.tsx",
+    "sha256": "44e652150c86f1f1cee39c6224395748f401dd6f58c234da4b25fa4cf0b27208",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/connected/Overview.tsx",
+    "sha256": "9a99bf8d1b758e1d3e8454295415e0097a6095da9024e7ba0aa5fb87343af919",
+    "states": [
+      {
+        "line": 6,
+        "expression": "type Tab='Reservations'|'Orders'|'Menu'|'QR'|'Finance';"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/webapp/App.tsx",
+    "sha256": "6f4f1621404aac4b4eec836420ac59334f809c7d0f55feb9ddcd7fe6e19938b3",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 8,
+        "expression": "type Mode = 'entry' | 'signin' | 'onboarding' | 'dashboard'"
+      },
+      {
+        "line": 10,
+        "expression": "const [mode, setMode] = useState<Mode>('entry')"
+      },
+      {
+        "line": 14,
+        "expression": "{mode === 'entry' ? <main className=\"business-entry min-h-screen grid lg:grid-cols-2 bg-white\">"
+      },
+      {
+        "line": 23,
+        "expression": "{mode === 'signin' ? <BusinessSignInScreen onBack={() => navigate('entry')} onSignIn={() => navigate('dashboard')} onRegister={() => navigate('onboarding')} /> : null}"
+      },
+      {
+        "line": 24,
+        "expression": "{mode === 'onboarding' ? <BusinessOnboardingScreen onBack={() => navigate('entry')} onComplete={() => navigate('dashboard')} /> : null}"
+      },
+      {
+        "line": 25,
+        "expression": "{mode === 'dashboard' ? <VendorDashboardScreen onExit={() => navigate('entry')} /> : null}"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/webapp/screens/BusinessOnboardingScreen.tsx",
+    "sha256": "bfe6d3cc2c70c6775680b429e73f03bacf34d779df1e215ef70f8719f635cd31",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useRef } from 'react'"
+      },
+      {
+        "line": 168,
+        "expression": "const [step, setStep] = useState(1)"
+      },
+      {
+        "line": 170,
+        "expression": "const [category,    setCategory]    = useState('')"
+      },
+      {
+        "line": 171,
+        "expression": "const [services,    setServices]    = useState<string[]>([])"
+      },
+      {
+        "line": 172,
+        "expression": "const [scale,       setScale]       = useState('')"
+      },
+      {
+        "line": 173,
+        "expression": "const [fullName,    setFullName]    = useState('')"
+      },
+      {
+        "line": 174,
+        "expression": "const [email,       setEmail]       = useState('')"
+      },
+      {
+        "line": 175,
+        "expression": "const [phone,       setPhone]       = useState('')"
+      },
+      {
+        "line": 176,
+        "expression": "const [bizName,     setBizName]     = useState('')"
+      },
+      {
+        "line": 177,
+        "expression": "const [regNum,      setRegNum]      = useState('')"
+      },
+      {
+        "line": 178,
+        "expression": "const [bizAddr,     setBizAddr]     = useState('')"
+      },
+      {
+        "line": 179,
+        "expression": "const [idType,      setIdType]      = useState('')"
+      },
+      {
+        "line": 180,
+        "expression": "const [idUploaded,  setIdUploaded]  = useState(false)"
+      },
+      {
+        "line": 181,
+        "expression": "const [faceScanned, setFaceScanned] = useState(false)"
+      },
+      {
+        "line": 182,
+        "expression": "const [city,        setCity]        = useState('Lagos')"
+      },
+      {
+        "line": 183,
+        "expression": "const [lga,         setLga]         = useState('')"
+      },
+      {
+        "line": 184,
+        "expression": "const [landmark,    setLandmark]    = useState('')"
+      },
+      {
+        "line": 203,
+        "expression": "if (step === 1) return !!category"
+      },
+      {
+        "line": 204,
+        "expression": "if (step === 2) return services.length > 0"
+      },
+      {
+        "line": 205,
+        "expression": "if (step === 3) return !!scale"
+      },
+      {
+        "line": 206,
+        "expression": "if (step === 4) return !!(fullName.trim() && email.trim() && phone.trim())"
+      },
+      {
+        "line": 207,
+        "expression": "if (step === 5) return !!(bizName.trim() && bizAddr.trim())"
+      },
+      {
+        "line": 208,
+        "expression": "if (step === 6) return connected || !!(idType && idUploaded && faceScanned)"
+      },
+      {
+        "line": 209,
+        "expression": "if (step === 7) return !!lga.trim()"
+      },
+      {
+        "line": 225,
+        "expression": "if (step === 1) return wrap("
+      },
+      {
+        "line": 252,
+        "expression": "if (step === 2) return wrap("
+      },
+      {
+        "line": 291,
+        "expression": "if (step === 3) return wrap("
+      },
+      {
+        "line": 327,
+        "expression": "if (step === 4) return wrap("
+      },
+      {
+        "line": 350,
+        "expression": "if (step === 5) return wrap("
+      },
+      {
+        "line": 385,
+        "expression": "if (step === 6 && connected) return wrap(<div className=\"px-5 pb-40\"><h1 className=\"text-2xl font-bold mb-5\">Identity verification</h1><p>Identity document and selfie verification are not connected. Do not upload sensitive documents here.</p><p className=\"mt-4\">Only your business name will be submitted. Other details remain an unsent draft.</p><Cta label=\"Continue with application draft\" action={next} disabled={false} bg={s.bg}/></div>)"
+      },
+      {
+        "line": 386,
+        "expression": "if (step === 6) return wrap("
+      },
+      {
+        "line": 483,
+        "expression": "if (step === 7) return wrap("
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/webapp/screens/BusinessSignInScreen.tsx",
+    "sha256": "4b03902945d0117c75d97dcbb4bf68b1e45d8c90a95b99f47561399229d90200",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 11,
+        "expression": "const [recoveryPreview, setRecoveryPreview] = useState(false)"
+      },
+      {
+        "line": 12,
+        "expression": "const [email, setEmail] = useState(\"\")"
+      },
+      {
+        "line": 13,
+        "expression": "const [password, setPassword] = useState(\"\")"
+      },
+      {
+        "line": 14,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/business_web/webapp/screens/VendorDashboardScreen.tsx",
+    "sha256": "7464bd9f416ce94a239916363ad6cfd4389ec3262ffe39efe1328ddbeb105e55",
+    "states": [
+      {
+        "line": 3,
+        "expression": "import { useState, useRef, type ReactElement } from \"react\""
+      },
+      {
+        "line": 1196,
+        "expression": "type TabId = \"overview\" | \"tab2\" | \"tab3\" | \"tab4\" | \"services\""
+      },
+      {
+        "line": 1201,
+        "expression": "const [supportMessage, setSupportMessage] = useState('')"
+      },
+      {
+        "line": 1202,
+        "expression": "const [staffInviteOpen, setStaffInviteOpen] = useState(false)"
+      },
+      {
+        "line": 1203,
+        "expression": "const [inviteName, setInviteName] = useState('')"
+      },
+      {
+        "line": 1204,
+        "expression": "const [inviteRole, setInviteRole] = useState('Floor Staff')"
+      },
+      {
+        "line": 1205,
+        "expression": "const [invitedStaff, setInvitedStaff] = useState<Record<string, { name: string; role: string }[]>>({})"
+      },
+      {
+        "line": 1206,
+        "expression": "const [checkedIn, setCheckedIn] = useState<Record<string, boolean>>({})"
+      },
+      {
+        "line": 1207,
+        "expression": "const [showPicker, setShowPicker] = useState(false)"
+      },
+      {
+        "line": 1208,
+        "expression": "const [biz, setBiz] = useState<Biz>(BUSINESSES[0])"
+      },
+      {
+        "line": 1209,
+        "expression": "const [tab, setTab] = useState<TabId>(\"overview\")"
+      },
+      {
+        "line": 1210,
+        "expression": "const [bizPickerOpen, setBizPickerOpen] = useState(false)"
+      },
+      {
+        "line": 1211,
+        "expression": "const [scannerOpen, setScannerOpen] = useState(false)"
+      },
+      {
+        "line": 1212,
+        "expression": "const [healthOpen, setHealthOpen] = useState(false)"
+      },
+      {
+        "line": 1213,
+        "expression": "const [settingsOpen, setSettingsOpen] = useState(false)"
+      },
+      {
+        "line": 1214,
+        "expression": "const [settingDetail, setSettingDetail] = useState<string | null>(null)"
+      },
+      {
+        "line": 1216,
+        "expression": "const [settingsScreen, setSettingsScreen] = useState<\"main\" | string | null>("
+      },
+      {
+        "line": 1219,
+        "expression": "const [payoutConfirmed, setPayoutConfirmed] = useState(false)"
+      },
+      {
+        "line": 1221,
+        "expression": "useState<\"idle\" | \"review\" | \"submitted\">(\"idle\")"
+      },
+      {
+        "line": 1222,
+        "expression": "const [payoutScreenOpen, setPayoutScreenOpen] = useState(false)"
+      },
+      {
+        "line": 1228,
+        "expression": "const [bankSaved, setBankSaved] = useState(true)"
+      },
+      {
+        "line": 1229,
+        "expression": "const [payoutMode, setPayoutMode] = useState<\"all\" | \"custom\">(\"all\")"
+      },
+      {
+        "line": 1230,
+        "expression": "const [customPayoutAmount, setCustomPayoutAmount] = useState(\"100000\")"
+      },
+      {
+        "line": 1231,
+        "expression": "const [businessMedia, setBusinessMedia] = useState<Record<string, {"
+      },
+      {
+        "line": 1235,
+        "expression": "const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)"
+      },
+      {
+        "line": 1236,
+        "expression": "const [cancelOrderOpen, setCancelOrderOpen] = useState(false)"
+      },
+      {
+        "line": 1237,
+        "expression": "const [cancelReason, setCancelReason] = useState(\"Item unavailable\")"
+      },
+      {
+        "line": 1238,
+        "expression": "const [hoursEdited, setHoursEdited] = useState<Record<string, boolean>>({})"
+      },
+      {
+        "line": 1254,
+        "expression": "const [profileSaved, setProfileSaved] = useState(false)"
+      },
+      {
+        "line": 1255,
+        "expression": "const [contactSaved, setContactSaved] = useState(false)"
+      },
+      {
+        "line": 1256,
+        "expression": "const [staffStatuses, setStaffStatuses] = useState<Record<string, boolean>>({"
+      },
+      {
+        "line": 1262,
+        "expression": "const [deletedPhotos, setDeletedPhotos] = useState<number[]>([])"
+      },
+      {
+        "line": 1263,
+        "expression": "const [photoAdded, setPhotoAdded] = useState(false)"
+      },
+      {
+        "line": 1264,
+        "expression": "const [addItemOpen, setAddItemOpen] = useState(false)"
+      },
+      {
+        "line": 1265,
+        "expression": "const [newItemName, setNewItemName] = useState(\"\")"
+      },
+      {
+        "line": 1266,
+        "expression": "const [newItemPrice, setNewItemPrice] = useState(\"\")"
+      },
+      {
+        "line": 1267,
+        "expression": "const [newItemCat, setNewItemCat] = useState(\"\")"
+      },
+      {
+        "line": 1268,
+        "expression": "const [newItemImg, setNewItemImg] = useState(\"\")"
+      },
+      {
+        "line": 1269,
+        "expression": "const [newCategoryName, setNewCategoryName] = useState(\"\")"
+      },
+      {
+        "line": 1270,
+        "expression": "const [creatingCategory, setCreatingCategory] = useState(false)"
+      },
+      {
+        "line": 1272,
+        "expression": "useState<Record<string, string[]>>({})"
+      },
+      {
+        "line": 1274,
+        "expression": "useState<Record<string, Product[]>>({})"
+      },
+      {
+        "line": 1279,
+        "expression": "useState<Record<string, string>>({})"
+      },
+      {
+        "line": 1280,
+        "expression": "const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>({})"
+      },
+      {
+        "line": 1281,
+        "expression": "const [productAvail, setProductAvail] = useState<Record<string, boolean>>({})"
+      },
+      {
+        "line": 1282,
+        "expression": "const [bookingFilter, setBookingFilter] = useState(\"all\")"
+      },
+      {
+        "line": 1283,
+        "expression": "const [orderFilter, setOrderFilter] = useState(\"active\")"
+      },
+      {
+        "line": 1284,
+        "expression": "const [reservationView, setReservationView] = useState<\"calendar\" | \"list\">("
+      },
+      {
+        "line": 1287,
+        "expression": "const [reservationMonth, setReservationMonth] = useState(7)"
+      },
+      {
+        "line": 1289,
+        "expression": "useState(\"2026-08-30\")"
+      },
+      {
+        "line": 1291,
+        "expression": "useState(false)"
+      },
+      {
+        "line": 1292,
+        "expression": "const [cancelBookingId, setCancelBookingId] = useState<string | null>(null)"
+      },
+      {
+        "line": 1293,
+        "expression": "const [bookingCancelReason, setBookingCancelReason] = useState("
+      },
+      {
+        "line": 1297,
+        "expression": "useState<Record<string, string>>({})"
+      },
+      {
+        "line": 1299,
+        "expression": "useState<Record<string, Record<string, boolean>>>("
+      },
+      {
+        "line": 1400,
+        "expression": "((id === \"reservations\" && tab === \"tab2\") ||"
+      },
+      {
+        "line": 1401,
+        "expression": "(id === \"ordering\" && tab === \"tab3\"))"
+      },
+      {
+        "line": 2358,
+        "expression": "{view === \"calendar\" ? \"Calendar\" : \"All reservations\"}"
+      },
+      {
+        "line": 5388,
+        "expression": "{tab === \"overview\""
+      },
+      {
+        "line": 5390,
+        "expression": ": tab === \"services\""
+      },
+      {
+        "line": 5395,
+        "expression": "{tab === \"overview\""
+      },
+      {
+        "line": 5397,
+        "expression": ": tab === \"tab2\""
+      },
+      {
+        "line": 5399,
+        "expression": ": tab === \"tab3\""
+      },
+      {
+        "line": 5401,
+        "expression": ": tab === \"tab4\""
+      },
+      {
+        "line": 5408,
+        "expression": "{tab === \"overview\" && renderOverview()}"
+      },
+      {
+        "line": 5409,
+        "expression": "{tab === \"tab2\" && renderTab2()}"
+      },
+      {
+        "line": 5410,
+        "expression": "{tab === \"tab3\" && renderTab3()}"
+      },
+      {
+        "line": 5411,
+        "expression": "{tab === \"tab4\" && renderTab4()}"
+      },
+      {
+        "line": 5412,
+        "expression": "{tab === \"services\" && renderServices()}"
+      },
+      {
+        "line": 6001,
+        "expression": "const active = tab === id"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/access-denied/page.tsx",
+    "sha256": "f73dc36d631af28d4dd9e90f667ecb19ee74df15105bd1895dbe55275f3de61a",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/account-security/page.tsx",
+    "sha256": "bddd7a3dbc6a55eed2711c096a43f0c24ce245a887997e5be40fece35417a3da",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/business/page.tsx",
+    "sha256": "87ca11be327df6cf1a9cc399633d2e53eb74646a97dabbaa87ea624b8cbeedbb",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/dashboard/page.tsx",
+    "sha256": "923802c72706e71234207b3b402e325907ae19d90b81cdf925926cc8366b9836",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/login/page.tsx",
+    "sha256": "e08daeb0567f5c0c3e544342e8a7a8bbce3e1dc335e756a1772e4cd3c71d6cc7",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/page.tsx",
+    "sha256": "bee4024844c906aebd4b5d645bbadaf68bd77d0d219c548e39491b468c154d87",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/phone-login/page.tsx",
+    "sha256": "f36ddd9dc9f5d7c6cb4921267d0e5801591d47078d546a5cf7d646418fe42514",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/phone-recovery/page.tsx",
+    "sha256": "79fe202b6d3c82a0e4237dd5c440248fff218b7db28a8b5f1f5a7836c9b3bd6c",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/recover/page.tsx",
+    "sha256": "f1969ea65f667064aab1c8141606b31fc2354580fef75941c9d595e8607cb451",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/register/page.tsx",
+    "sha256": "8b59e7e8c22763757092b994d3e0265de084588044831aa4184be951fec062ad",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/app/reset-password/page.tsx",
+    "sha256": "24527af86a69eca443b1867d45348d66ae64fb745fafb97026c1b63cb4d9a6ea",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/connected/AuthPage.tsx",
+    "sha256": "78f0dbf59f19b4fb87caf47bfd4bc127d9ec39198e52a71a8fbe72fae032a8af",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/connected/Client.tsx",
+    "sha256": "2b8e65700aa535049cb9bf550928c23e01920f2042c29b0fc67b3762004d8ca9",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/connected/CustomerApp.tsx",
+    "sha256": "d9738045e8b79969fb3776c9df44b697e018a414a7116ce1c24d86875e07fba0",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useEffect, useState } from 'react';"
+      },
+      {
+        "line": 14,
+        "expression": "type View={name:string;id?:string};"
+      },
+      {
+        "line": 17,
+        "expression": "const [view,setView]=useState<View>(()=>{const parts=window.location.hash.slice(1).split('/');return {name:parts[0]||initial,id:parts[1]};});"
+      },
+      {
+        "line": 19,
+        "expression": "const [query,setQuery]=useState(''),[category,setCategory]=useState('All');"
+      },
+      {
+        "line": 57,
+        "expression": "const [slot,setSlot]=useState(''),[guests,setGuests]=useState(1),[guestName,setGuestName]=useState(''),[email,setEmail]=useState(''),[hold,setHold]=useState<Schema<'M5HoldResponse'>|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[order,setOrder]=useState<Schema<'OrderDetail'>|null>(null),[orderPayment,setOrderPayment]=useState(''),[reservation,setReservation]=useState<Schema<'ReservationView'>|null>(null),[key]=useState(requestKey);"
+      },
+      {
+        "line": 67,
+        "expression": "const [message,setMessage]=useState(''),[name,setName]=useState(''),[subject,setSubject]=useState(''),[body,setBody]=useState('');"
+      },
+      {
+        "line": 75,
+        "expression": "function Review({resource}:{resource:string}){const [body,setBody]=useState(''),[rating,setRating]=useState(5),[message,setMessage]=useState(''),[busy,setBusy]=useState(false);return <details className=\"mt-5\"><summary>Write or update a verified review</summary><form onSubmit={async event=>{event.preventDefault();setBusy(true);try{await platform(`customer/${resource}/review`,{rating,body},'PUT');setMessage('Review saved.');}catch(e){setMessage(e instanceof Error?e.message:'Review unavailable.');}finally{setBusy(false);}}}><label>Rating<input type=\"number\" min={1} max={5} required value={rating} onChange={event=>setRating(Number(event.target.value))}/></label><label>Your review<textarea required maxLength={2000} value={body} onChange={event=>setBody(event.target.value)}/></label><button disabled={busy} className=\"faji-outline\">Save review</button></form>{message&&<p role=\"status\">{message}</p>}</details>;}"
+      },
+      {
+        "line": 77,
+        "expression": "const refunds=useResource<Schema<'M5RefundPage'>>(`customer/payments/${paymentId}/refunds`);const [value,setValue]=useState(''),[reason,setReason]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[key,setKey]=useState(requestKey);"
+      },
+      {
+        "line": 82,
+        "expression": "function SupportThread({id}:{id:string}){const messages=useResource<Schema<'SupportMessagePage'>>(`customer/support/${id}/messages`);const [body,setBody]=useState(''),[error,setError]=useState('');return <div><State loading={messages.loading} error={messages.error}>{messages.data?.items.map(message=><p key={message.id}>{message.body}</p>)}</State><form onSubmit={async event=>{event.preventDefault();try{await platform(`customer/support/${id}/messages`,{requestKey:requestKey(),message:body});setBody('');messages.reload();}catch(e){setError(e instanceof Error?e.message:'Unable to send reply.');}}}><label>Reply<textarea required maxLength={4000} value={body} onChange={event=>setBody(event.target.value)}/></label><button className=\"faji-outline\">Send reply</button></form>{error&&<p role=\"alert\">{error}</p>}<Action label=\"Close case\" run={()=>platform(`customer/support/${id}/closure`,{},'PUT')}/></div>;}"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/App.tsx",
+    "sha256": "df731276ad6e44168f55b46d11eb0cd84bcfd62e127fd85c607384d276b3a99b",
+    "states": [
+      {
+        "line": 3,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 64,
+        "expression": "const [screen, setScreen] = useState<Screen>({ name: 'home' })"
+      },
+      {
+        "line": 65,
+        "expression": "const [mode, setMode] = useState<AppMode>('landing')"
+      },
+      {
+        "line": 66,
+        "expression": "const [pendingScreen, setPendingScreen] = useState<Screen | null>(null)"
+      },
+      {
+        "line": 67,
+        "expression": "const [authReturnMode, setAuthReturnMode] = useState<'landing' | 'customer'>('landing')"
+      },
+      {
+        "line": 68,
+        "expression": "const [customerAuthMode, setCustomerAuthMode] = useState<'signin' | 'register'>('signin')"
+      },
+      {
+        "line": 103,
+        "expression": "if (mode === 'landing') {"
+      },
+      {
+        "line": 117,
+        "expression": "if (mode === 'customer-auth') {"
+      },
+      {
+        "line": 130,
+        "expression": "if (mode === 'business-signin') {"
+      },
+      {
+        "line": 139,
+        "expression": "if (mode === 'ride-signin') {"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/BrowsePlansScreen.tsx",
+    "sha256": "57c14b9085234061779cd9f5b317bf20400dc589df38a0835ac52c74b487e548",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 84,
+        "expression": "const [activeBudget, setActiveBudget] = useState('Under \u20a6100k')"
+      },
+      {
+        "line": 85,
+        "expression": "const [guests,   setGuests]   = useState<Record<string, string>>({})"
+      },
+      {
+        "line": 86,
+        "expression": "const [calOpen,  setCalOpen]  = useState(false)"
+      },
+      {
+        "line": 87,
+        "expression": "const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/BusinessSignInScreen.tsx",
+    "sha256": "eb86378b3b734d95b35fae3463d0784edc45017f3675573826792a79d9d15162",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 11,
+        "expression": "const [email, setEmail] = useState(\"\")"
+      },
+      {
+        "line": 12,
+        "expression": "const [password, setPassword] = useState(\"\")"
+      },
+      {
+        "line": 13,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/CartScreen.tsx",
+    "sha256": "fcf1f1e3cebf54bd129ed9e017c7edd2e1130836310968873a0d0c142feb1aca",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 25,
+        "expression": "const [addonQty, setAddonQty] = useState<Record<string, number>>({})"
+      },
+      {
+        "line": 26,
+        "expression": "const [promoOpen, setPromoOpen] = useState(false)"
+      },
+      {
+        "line": 27,
+        "expression": "const [promoCode, setPromoCode] = useState('')"
+      },
+      {
+        "line": 29,
+        "expression": "const [transportChoice, setTransportChoice] = useState<null | boolean>(null)"
+      },
+      {
+        "line": 30,
+        "expression": "const [pickup, setPickup] = useState('Lekki phase 1, Lagos')"
+      },
+      {
+        "line": 31,
+        "expression": "const [editPickup, setEditPickup] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/CheckoutScreen.tsx",
+    "sha256": "bcb636122b3a8f890b1017672c1e82c422319643735a95221451cae8062a8abd",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useRef } from 'react'"
+      },
+      {
+        "line": 301,
+        "expression": "const [payMethod, setPayMethod] = useState('')"
+      },
+      {
+        "line": 302,
+        "expression": "const [bookingReference, setBookingReference] = useState('')"
+      },
+      {
+        "line": 303,
+        "expression": "const [cardNumber, setCardNumber] = useState('')"
+      },
+      {
+        "line": 304,
+        "expression": "const [expiry, setExpiry] = useState('')"
+      },
+      {
+        "line": 305,
+        "expression": "const [cvc, setCvc] = useState('')"
+      },
+      {
+        "line": 306,
+        "expression": "const [cardName, setCardName] = useState('')"
+      },
+      {
+        "line": 307,
+        "expression": "const [copiedRef, setCopiedRef] = useState(false)"
+      },
+      {
+        "line": 308,
+        "expression": "const [calOpen, setCalOpen] = useState(false)"
+      },
+      {
+        "line": 309,
+        "expression": "const [selectedDate, setSelectedDate] = useState<string | undefined>(bookingDate)"
+      },
+      {
+        "line": 310,
+        "expression": "const [selectedTime, setSelectedTime] = useState<string | undefined>(bookingTime)"
+      },
+      {
+        "line": 311,
+        "expression": "const [guests, setGuests] = useState(() => {"
+      },
+      {
+        "line": 318,
+        "expression": "const [paid, setPaid] = useState(false)"
+      },
+      {
+        "line": 319,
+        "expression": "const [showSuccessOverlay, setShowSuccessOverlay] = useState(false)"
+      },
+      {
+        "line": 320,
+        "expression": "const [showSuccessToast, setShowSuccessToast] = useState(false)"
+      },
+      {
+        "line": 321,
+        "expression": "const [showTicketTransport, setShowTicketTransport] = useState(false)"
+      },
+      {
+        "line": 322,
+        "expression": "const [tState, setTState] = useState<TState>('prompt')"
+      },
+      {
+        "line": 323,
+        "expression": "const [tProvider, setTProvider] = useState<'uber' | 'bolt'>('uber')"
+      },
+      {
+        "line": 324,
+        "expression": "const [tAddrMode, setTAddrMode] = useState<'saved' | 'new'>('saved')"
+      },
+      {
+        "line": 325,
+        "expression": "const [tNewAddr, setTNewAddr]   = useState('')"
+      },
+      {
+        "line": 326,
+        "expression": "const [tCar, setTCar] = useState<'economy' | 'comfort' | 'premium' | 'premium-van'>('comfort')"
+      },
+      {
+        "line": 327,
+        "expression": "const [basket, setBasket] = useState<Record<string, number>>({})"
+      },
+      {
+        "line": 653,
+        "expression": "{mode === 'saved' ? 'Saved Address' : 'New Address'}"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/ConfirmationScreen.tsx",
+    "sha256": "2f3a5143af2a693d4c307d25d51c35580f855272891cb5037bb2d88994d337c9",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 16,
+        "expression": "const [copied, setCopied] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/CreateEventScreen.tsx",
+    "sha256": "0a23cfbdc55cdcb43b9da7989305d0c7c18b66bdd508425fa970052a706a2b5f",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 13,
+        "expression": "const [guestCount, setGuestCount] = useState('2 people')"
+      },
+      {
+        "line": 14,
+        "expression": "const [date, setDate] = useState('9')"
+      },
+      {
+        "line": 15,
+        "expression": "const [time, setTime] = useState('06:00 PM')"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/CustomerAuthScreen.tsx",
+    "sha256": "fa3376ebcfb6b195d6e09a00d18a03de39a9872e2444bd2af6fe8a0e39f8cff6",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 13,
+        "expression": "const [mode, setMode] = useState<AuthMode>(initialMode)"
+      },
+      {
+        "line": 14,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      },
+      {
+        "line": 15,
+        "expression": "const [form, setForm] = useState({"
+      },
+      {
+        "line": 58,
+        "expression": "{mode === \"signin\" ? \"Welcome back\" : \"Create your account\"}"
+      },
+      {
+        "line": 61,
+        "expression": "{mode === \"signin\""
+      },
+      {
+        "line": 74,
+        "expression": "{mode === \"register\" && ("
+      },
+      {
+        "line": 97,
+        "expression": "{mode === \"register\" && ("
+      },
+      {
+        "line": 117,
+        "expression": "placeholder={mode === \"register\" ? \"Create a password\" : \"Enter your password\"}"
+      },
+      {
+        "line": 126,
+        "expression": "{mode === \"signin\" && ("
+      },
+      {
+        "line": 137,
+        "expression": "{mode === \"signin\" ? \"Sign in\" : \"Create account\"}"
+      },
+      {
+        "line": 142,
+        "expression": "{mode === \"signin\" ? \"New to fajify?\" : \"Already have an account?\"}"
+      },
+      {
+        "line": 144,
+        "expression": "onClick={() => setMode(mode === \"signin\" ? \"register\" : \"signin\")}"
+      },
+      {
+        "line": 147,
+        "expression": "{mode === \"signin\" ? \"Create an account\" : \"Sign in\"}"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/DeliveryCartScreen.tsx",
+    "sha256": "aedb7995d1572e9906e8d4d99cb13272fae1e67858c81945dc6841cb9b991f44",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 43,
+        "expression": "const [promoOpen, setPromoOpen] = useState(false)"
+      },
+      {
+        "line": 44,
+        "expression": "const [promoCode, setPromoCode] = useState('')"
+      },
+      {
+        "line": 45,
+        "expression": "const [suggestions, setSuggestions] = useState<Record<string, boolean>>({})"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/DeliveryRestaurantScreen.tsx",
+    "sha256": "54f41c7dd8e188edc5ebdf9f6a43494a3901ef90cc72111e5529ed6f6c27934f",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 78,
+        "expression": "const [activeCategory, setActiveCategory] = useState('All')"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/EventDetailScreen.tsx",
+    "sha256": "03ae5ebf52efb65323e6266b946e629e05154f8ed93dc218212f19d09834c450",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 13,
+        "expression": "const [messageOpen, setMessageOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/GlobalCartScreen.tsx",
+    "sha256": "31a4ad5b476b25ebbfaca6f400bae1d78f63b5898c486d5977a15c5a9ded44f9",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 24,
+        "expression": "const [payMethod, setPayMethod] = useState('')"
+      },
+      {
+        "line": 25,
+        "expression": "const [showSuccess, setShowSuccess] = useState(false)"
+      },
+      {
+        "line": 26,
+        "expression": "const [pendingNav, setPendingNav] = useState<(() => void) | null>(null)"
+      },
+      {
+        "line": 27,
+        "expression": "const [promoOpen, setPromoOpen] = useState(false)"
+      },
+      {
+        "line": 28,
+        "expression": "const [promoCode, setPromoCode] = useState('')"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/HelpScreen.tsx",
+    "sha256": "cb7ffd84b28d71130057221055ae88a77a4f623862ca704c9d276ac0d6097aa5",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/HomeScreen.tsx",
+    "sha256": "24b887a8e78d44a1d09df7facc3523ef419a6fa585c8dce95a220d0daea8efa2",
+    "states": [
+      {
+        "line": 3,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 114,
+        "expression": "const [locs, setLocs] = useState<string[]>([])"
+      },
+      {
+        "line": 115,
+        "expression": "const [budget, setBudget] = useState('')"
+      },
+      {
+        "line": 116,
+        "expression": "const [rating, setRating] = useState('Any')"
+      },
+      {
+        "line": 221,
+        "expression": "const [active, setActive] = useState(0)"
+      },
+      {
+        "line": 222,
+        "expression": "const [animating, setAnimating] = useState(false)"
+      },
+      {
+        "line": 293,
+        "expression": "const [activeCategory, setActiveCategory] = useState('All')"
+      },
+      {
+        "line": 294,
+        "expression": "const [search, setSearch] = useState(initialSearch)"
+      },
+      {
+        "line": 295,
+        "expression": "const [filterOpen, setFilterOpen] = useState(false)"
+      },
+      {
+        "line": 296,
+        "expression": "const [fabOpen, setFabOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/InviteFriendsScreen.tsx",
+    "sha256": "a4bd4b6d4aae1cc2da57b94b0a08e3517c3341281f269b0d55e66dc5fa84f5a2",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 9,
+        "expression": "const [copied, setCopied] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/LandingScreen.tsx",
+    "sha256": "b83d1db14bfed1e7766f5d95ddcfa039089b8a7f46468d99fee3d8c503d61f13",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 71,
+        "expression": "const [query, setQuery] = useState(\"\")"
+      },
+      {
+        "line": 105,
+        "expression": "const [menuOpen, setMenuOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/MyTicketsScreen.tsx",
+    "sha256": "4cd4b25f0aec92e6cd78b21560fe152e42b1181e1f179642e694fa203e2ccd93",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect } from 'react'"
+      },
+      {
+        "line": 9,
+        "expression": "type TabT = 'Upcoming' | 'Orders' | 'Completed' | 'Cancelled'"
+      },
+      {
+        "line": 112,
+        "expression": "const [tab, setTab] = useState<TabT>('Upcoming')"
+      },
+      {
+        "line": 114,
+        "expression": "const [viewTicket, setViewTicket] = useState<typeof tickets.Upcoming[0] | null>(null)"
+      },
+      {
+        "line": 115,
+        "expression": "const [viewOrder, setViewOrder] = useState<typeof tickets.Orders[0] | null>(null)"
+      },
+      {
+        "line": 116,
+        "expression": "const [showMap, setShowMap] = useState(false)"
+      },
+      {
+        "line": 117,
+        "expression": "const [riderProgress, setRiderProgress] = useState(0.35)"
+      },
+      {
+        "line": 118,
+        "expression": "const [toast, setToast] = useState('')"
+      },
+      {
+        "line": 166,
+        "expression": "const allTickets = [...liveAsTickets.filter(ticket => tab === 'Orders' ? ticket.type === 'food' : ticket.type !== 'food' && ticket.status === tab), ...staticTab]"
+      },
+      {
+        "line": 395,
+        "expression": "borderBottom: tab === t ? `2.5px solid ${RED}` : '2.5px solid transparent',"
+      },
+      {
+        "line": 396,
+        "expression": "fontSize: 11, fontWeight: 700, color: tab === t ? RED : muted, cursor: 'pointer',"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/NotificationsScreen.tsx",
+    "sha256": "1bf98f0d6b31ef4f37007bc3aa459e6ce7b3e9f498e6d6d18885941c0ec2b396",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/OffersScreen.tsx",
+    "sha256": "7ab4eb537767fc697c62b9cafcf43d434c968fb052a5309cbea41f721dfa5305",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 17,
+        "expression": "const [copied, setCopied] = useState<string | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/OnboardingScreen.tsx",
+    "sha256": "fea421ecd9b6377f8b632c631c4fa7cc9f24599b9de03ff8f1eecfe536ca12c5",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/OrderTrackingScreen.tsx",
+    "sha256": "f2add5646d76e7d2f43975e48157d081dd07161166c5d5d8d358deefc639c3b3",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 111,
+        "expression": "const [step, setStep] = useState(0)"
+      },
+      {
+        "line": 112,
+        "expression": "const [riderT, setRiderT] = useState(0)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/PlanForMeScreen.tsx",
+    "sha256": "120274c07fbf4939194b7e5540bfb91ef8efdcc8065426089bee5f452cba35cb",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 186,
+        "expression": "const [loved, setLoved] = useState(false)"
+      },
+      {
+        "line": 243,
+        "expression": "const [step, setStep] = useState(1)"
+      },
+      {
+        "line": 244,
+        "expression": "const [livePlans, setLivePlans] = useState<typeof PLANS>([])"
+      },
+      {
+        "line": 245,
+        "expression": "const [requestError, setRequestError] = useState('')"
+      },
+      {
+        "line": 246,
+        "expression": "const [busy, setBusy] = useState(false)"
+      },
+      {
+        "line": 250,
+        "expression": "const [occasion, setOccasion] = useState('')"
+      },
+      {
+        "line": 251,
+        "expression": "const [guestCount, setGuestCount] = useState(6)"
+      },
+      {
+        "line": 252,
+        "expression": "const [guestChip, setGuestChip] = useState('')"
+      },
+      {
+        "line": 253,
+        "expression": "const [location, setLocation] = useState('')"
+      },
+      {
+        "line": 254,
+        "expression": "const [showLocationSearch, setShowLocationSearch] = useState(false)"
+      },
+      {
+        "line": 255,
+        "expression": "const [locationQuery, setLocationQuery] = useState('')"
+      },
+      {
+        "line": 256,
+        "expression": "const [budget, setBudget] = useState('')"
+      },
+      {
+        "line": 257,
+        "expression": "const [budgetFlex, setBudgetFlex] = useState(false)"
+      },
+      {
+        "line": 258,
+        "expression": "const [dateChoice, setDateChoice] = useState('')"
+      },
+      {
+        "line": 259,
+        "expression": "const [timeChoice, setTimeChoice] = useState('Evening')"
+      },
+      {
+        "line": 260,
+        "expression": "const [vibes, setVibes] = useState<string[]>([])"
+      },
+      {
+        "line": 261,
+        "expression": "const [calOpen, setCalOpen] = useState(false)"
+      },
+      {
+        "line": 262,
+        "expression": "const [bookingCalOpen, setBookingCalOpen] = useState(false)"
+      },
+      {
+        "line": 263,
+        "expression": "const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)"
+      },
+      {
+        "line": 266,
+        "expression": "if (step === 1) navigate({ name: 'home' })"
+      },
+      {
+        "line": 278,
+        "expression": "if (step === 7) {"
+      },
+      {
+        "line": 381,
+        "expression": "{step === 1 && ("
+      },
+      {
+        "line": 402,
+        "expression": "{step === 2 && ("
+      },
+      {
+        "line": 451,
+        "expression": "{step === 3 && ("
+      },
+      {
+        "line": 503,
+        "expression": "{step === 4 && ("
+      },
+      {
+        "line": 534,
+        "expression": "{step === 5 && ("
+      },
+      {
+        "line": 600,
+        "expression": "{step === 6 && ("
+      },
+      {
+        "line": 630,
+        "expression": "(step === 1 && !occasion) ||"
+      },
+      {
+        "line": 631,
+        "expression": "(step === 3 && !location) ||"
+      },
+      {
+        "line": 632,
+        "expression": "(step === 4 && !budget && !budgetFlex) ||"
+      },
+      {
+        "line": 633,
+        "expression": "(step === 5 && !dateChoice)"
+      },
+      {
+        "line": 637,
+        "expression": "{step === 6 && ("
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/ProfileScreen.tsx",
+    "sha256": "37e063791581a2948e1518101433ca3fac68af73e502d9f2e901e83e89b95329",
+    "states": []
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/ReservationScreen.tsx",
+    "sha256": "2de9af2b13b01f84824494cf68d041c42b69c393859ff5363dd05c08a4c7f189",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 9,
+        "expression": "const [guests, setGuests] = useState('2 people')"
+      },
+      {
+        "line": 10,
+        "expression": "const [selectedDate, setSelectedDate] = useState(9)"
+      },
+      {
+        "line": 11,
+        "expression": "const [selectedTime, setSelectedTime] = useState('06:00 PM')"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/RestaurantScreen.tsx",
+    "sha256": "14befe4e4f78fdecb3ee62aeecea015f49ecc4a591e93c2bd2e69a06a6650883",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState, useEffect, useRef } from 'react'"
+      },
+      {
+        "line": 268,
+        "expression": "const [heroIdx, setHeroIdx] = useState(0)"
+      },
+      {
+        "line": 272,
+        "expression": "const [activeCategory, setActiveCategory] = useState('All')"
+      },
+      {
+        "line": 273,
+        "expression": "const [calOpen, setCalOpen] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/RideSignInScreen.tsx",
+    "sha256": "c372142d59c06e4aeca968a2a70a478c355bc46c8a106fa4ad07517714df985d",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from \"react\""
+      },
+      {
+        "line": 10,
+        "expression": "const [email, setEmail] = useState(\"\")"
+      },
+      {
+        "line": 11,
+        "expression": "const [password, setPassword] = useState(\"\")"
+      },
+      {
+        "line": 12,
+        "expression": "const [showPassword, setShowPassword] = useState(false)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/SettingsScreen.tsx",
+    "sha256": "ff368d490dd370eef88f38024d3627e76f722d91c10a5708057a173b39ee0d44",
+    "states": [
+      {
+        "line": 1,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 48,
+        "expression": "const [notifications, setNotifications] = useState(true)"
+      },
+      {
+        "line": 49,
+        "expression": "const [locationServices, setLocationServices] = useState(true)"
+      },
+      {
+        "line": 50,
+        "expression": "const [emailUpdates, setEmailUpdates] = useState(false)"
+      },
+      {
+        "line": 51,
+        "expression": "const [language, setLanguage] = useState('English')"
+      },
+      {
+        "line": 52,
+        "expression": "const [currency, setCurrency] = useState('NGN \u20a6')"
+      },
+      {
+        "line": 53,
+        "expression": "const [picker, setPicker] = useState<'language' | 'currency' | null>(null)"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/TransportationScreen.tsx",
+    "sha256": "bd35a4d7df87a2e2c5efe89db72557f8a0e0ff269a426dfd5d713c737fe2a7ff",
+    "states": [
+      {
+        "line": 2,
+        "expression": "import { useState } from 'react'"
+      },
+      {
+        "line": 81,
+        "expression": "const [provider,      setProvider]      = useState<ProviderId>('uber')"
+      },
+      {
+        "line": 82,
+        "expression": "const [carId,         setCarId]         = useState<CarId>('comfort')"
+      },
+      {
+        "line": 83,
+        "expression": "const [addrMode,      setAddrMode]      = useState<'saved' | 'new'>('saved')"
+      },
+      {
+        "line": 84,
+        "expression": "const [selectedSaved, setSelectedSaved] = useState('s1')"
+      },
+      {
+        "line": 85,
+        "expression": "const [newAddr,       setNewAddr]       = useState('')"
+      },
+      {
+        "line": 86,
+        "expression": "const [pickupDate,    setPickupDate]    = useState(false)"
+      },
+      {
+        "line": 87,
+        "expression": "const [dateAddr,      setDateAddr]      = useState('')"
+      },
+      {
+        "line": 88,
+        "expression": "const [wantTransport, setWantTransport] = useState<boolean | null>(null)"
+      },
+      {
+        "line": 228,
+        "expression": "{mode === 'saved' ? 'Saved Address' : 'New Address'}"
+      }
+    ]
+  },
+  {
+    "source": "321fead",
+    "path": "apps/customer_web/webapp/screens/WishlistScreen.tsx",
+    "sha256": "a36d56827224d7a41723725e09d253b4ece66bbb5259d12dfe28bfad1909bec0",
+    "states": []
+  }
+]

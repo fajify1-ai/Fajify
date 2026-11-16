@@ -1,0 +1,20 @@
+> @faji/customer-web@0.1.0 test /workspace/Fajify-unified/apps/customer_web
+> tsx --tsconfig test/tsconfig.json --test test/*.test.ts
+
+✔ registration and recovery render accessible required credentials without a demo bypass (13.48653ms)
+✔ restored real credential forms require credentials and keep fixture bypass outside real mode (18.490458ms)
+✔ deferred delivery renders no form and never claims a message was delivered (0.783222ms)
+✔ original credential adapter retains the existing optional MFA challenge (1.982351ms)
+✔ design review is inaccessible by default before rendering any fixture (45.636406ms)
+✔ delivery policy blocks reset and SMS transports while preserving password and TOTP auth (2.726435ms)
+✔ public Business entry reuses the original composition and opens real workspace actions (7.649299ms)
+✔ legacy Customer deep links remain on-origin and keep planning screens separate (2.071163ms)
+✔ shared security retains merchant navigation and disables delivery controls without removing authenticator MFA (1.522158ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1140.061318

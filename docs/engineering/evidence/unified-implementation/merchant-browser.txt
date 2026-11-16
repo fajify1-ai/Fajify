@@ -1,0 +1,3 @@
+PASS shared security returns to the authorized Business workspace
+PASS real approved merchant session, finance read, four operational tabs in unified host
+PASS second account cannot access first merchant data after shared-session logout/switch

@@ -1,0 +1,4 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {demoStart,demoTransition,demoReceipt} from '../demo-state';
+test('demo retries and receipts remain explicit ephemeral values with no network or domain writes',()=>{for(const kind of ['checkout','payout'] as const){const original=demoStart(kind);const pending=demoTransition(original,'start');assert.equal(pending.status,'pending');assert.equal(original.status,'ready');const failed=demoTransition(pending,'failure');const retried=demoTransition(failed,'start');assert.equal(retried.attempt,2);const success=demoTransition(retried,'success');assert.match(demoReceipt(success),/NOT A REAL TRANSACTION/);assert.equal(success.mode,'demo');assert.deepEqual(demoTransition(success,'reset'),original);assert.equal(demoTransition(original,'success').status,'ready');}});

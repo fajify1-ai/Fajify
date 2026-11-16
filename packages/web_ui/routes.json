@@ -1,0 +1,612 @@
+[
+  {
+    "path": "auth/me",
+    "method": "GET",
+    "audience": "both"
+  },
+  {
+    "path": "business/onboarding",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/{id}",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/{id}/workspace",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/catalogue",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/catalogue",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/availability",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/availability",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/reservations",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/reservations",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/reservations/{id}/status",
+    "method": "PATCH",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/orders",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/orders",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/orders/{id}/status",
+    "method": "PATCH",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/hours",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/hours",
+    "method": "PATCH",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/events/{itemId}",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/events/{itemId}",
+    "method": "PATCH",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/packages/{itemId}",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/packages/{itemId}",
+    "method": "PATCH",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/overview",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/staff",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/staff/grants",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/staff/revocations",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}",
+    "method": "PATCH",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/catalogue/{itemId}",
+    "method": "PATCH",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/availability/{slotId}",
+    "method": "PATCH",
+    "audience": "business"
+  },
+  {
+    "path": "discovery/offerings",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "discovery/offerings/{id}",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "discovery/offerings/{id}/availability",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/reservations",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/reservations",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/reservations/{id}",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/reservations/{id}/cancellation",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/orders",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/orders",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/orders/{id}",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/orders/{id}/cancellation",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "discovery/categories",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "discovery/venues",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "discovery/venues/{id}",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "discovery/venues/{id}/reviews",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "discovery/plans",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "discovery/plans/{id}/quote",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/public-profile",
+    "method": "PUT",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/public-profile",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/public-media",
+    "method": "PUT",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/packages/{id}/public-options",
+    "method": "PUT",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/packages/{id}/public-options",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "customer/profile",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/profile",
+    "method": "PATCH",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/wishlist",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/wishlist/{id}",
+    "method": "PUT",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/wishlist/{id}",
+    "method": "DELETE",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/orders/{id}/review",
+    "method": "PUT",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/reservations/{id}/review",
+    "method": "PUT",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/reviews",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/reviews/{id}",
+    "method": "DELETE",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/notifications",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/notifications/unread-count",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/notifications/{id}/read",
+    "method": "PUT",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/support",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/support",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/support/{id}",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/support/{id}/messages",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/support/{id}/messages",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/support/{id}/closure",
+    "method": "PUT",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/cart",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/cart",
+    "method": "PUT",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/events",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/events",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/events/{id}",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/events/{id}/invitations",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/invitations/preview",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/invitations/acceptance",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/promotions",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/payments/{id}/receipt",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/catalogue/{id}/media",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/reports",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/health",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/notifications",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/notifications/{id}/read",
+    "method": "PUT",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/support",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/support",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/support/{id}/messages",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/support/{id}/messages",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/promotions",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/promotions",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/draft/current",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/draft/current",
+    "method": "PUT",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/applications/mine",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/{id}/verification-documents",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/{id}/verification-documents",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/{id}/verification-documents/{documentId}",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "discovery/events/{id}/availability",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/payments/{id}",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/orders/{id}/payment-intent",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/paid-holds",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/paid-holds",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/paid-holds/{id}/cancellation",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/payments/{id}/checkout",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/orders/{id}/payment-retry",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/payments/{id}/recheck",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/payments/{id}/refunds",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/refunds",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/tickets",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "businesses/{businessId}/finance",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/events/{eventId}/inventory",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "businesses/{businessId}/branches/{branchId}/tickets/redemption",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "plans",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "plans",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "plans/{id}",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "plans/{id}",
+    "method": "PUT",
+    "audience": "customer"
+  },
+  {
+    "path": "plans/{id}/recommendations",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "plans/{id}/archive",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "plans/{id}/feedback",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "plans/{id}/feedback",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "plans/{id}/booking-holds",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/support-notifications",
+    "method": "GET",
+    "audience": "customer"
+  },
+  {
+    "path": "customer/support-notifications/{id}/read",
+    "method": "PUT",
+    "audience": "customer"
+  }
+]

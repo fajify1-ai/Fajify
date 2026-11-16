@@ -1,0 +1,2 @@
+> @faji/api@0.1.0 build /workspace/Fajify-unified/apps/api
+> nest build

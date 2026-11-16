@@ -12,6 +12,9 @@ const ownReview=`id,branch_id AS "branchId",reservation_id AS "reservationId",or
 const supportCase=`id,category,resource_id AS "resourceId",subject,status,created_at AS "createdAt",updated_at AS "updatedAt"`;
 const notification=`id,resource_type AS "resourceType",resource_id AS "resourceId",status,title,read_at AS "readAt",created_at AS "createdAt"`;
 
+// A former business member must not retain access through the customer support routes.
+const currentBusinessCase=`NOT EXISTS(SELECT 1 FROM web_merchant_support w WHERE w.customer_case_id=customer_support_cases.id) OR EXISTS(SELECT 1 FROM web_merchant_support w JOIN resource_memberships m ON m.resource_type='business' AND m.resource_id=w.business_id AND m.identity_subject=customer_support_cases.customer_subject AND m.active AND m.role IN ('owner','manager') JOIN business_onboarding b ON b.id=w.business_id AND b.status='approved' WHERE w.customer_case_id=customer_support_cases.id)`;
+
 @Injectable()
 export class CustomerAccountService {
  constructor(@Inject(DATABASE_POOL) private readonly pool:Pool,@Inject(CustomerService) private readonly customer:CustomerService){}
@@ -27,7 +30,8 @@ export class CustomerAccountService {
  }
  async wishlist(subject:string,input:PageQuery){
   const result=await this.pool.query(`SELECT i.id,i.business_id AS "businessId",i.branch_id AS "branchId",m.display_name AS "businessName",
-   b.name AS "branchName",b.address,i.name,i.description,i.kind AS category,i.price_minor::text AS "priceMinor",i.currency,w.created_at AS "savedAt"
+   b.name AS "branchName",b.address,i.name,i.description,i.kind AS category,i.price_minor::text AS "priceMinor",i.currency,w.created_at AS "savedAt",
+   COALESCE((SELECT json_agg(json_build_object('id',p.id,'url',p.url,'alt',p.alt,'position',p.position) ORDER BY p.position) FROM business_public_media p WHERE p.catalogue_id=i.id),'[]'::json) AS media
    FROM customer_wishlist w JOIN business_catalogue i ON i.id=w.catalogue_id JOIN business_branches b ON b.id=i.branch_id AND b.business_id=i.business_id
    JOIN business_onboarding m ON m.id=i.business_id WHERE w.customer_subject=$1 AND i.active AND i.published AND b.active AND m.status='approved'
    ORDER BY w.created_at DESC,w.catalogue_id DESC LIMIT $2 OFFSET $3`,[subject,input.limit+1,input.offset]);return page(result.rows,input);
@@ -81,10 +85,10 @@ export class CustomerAccountService {
   });
  }
  async support(subject:string,input:PageQuery){
-  const result=await this.pool.query(`SELECT ${supportCase} FROM customer_support_cases WHERE customer_subject=$1 ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`,[subject,input.limit+1,input.offset]);return page(result.rows,input);
+  const result=await this.pool.query(`SELECT ${supportCase} FROM customer_support_cases WHERE customer_subject=$1 AND (${currentBusinessCase}) ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`,[subject,input.limit+1,input.offset]);return page(result.rows,input);
  }
  private async ownedCase(c:Pool|PoolClient,subject:string,id:string,lock=false){
-  const result=await c.query(`SELECT ${supportCase} FROM customer_support_cases WHERE id=$1 AND customer_subject=$2${lock?' FOR UPDATE':''}`,[id,subject]);
+  const result=await c.query(`SELECT ${supportCase} FROM customer_support_cases WHERE id=$1 AND customer_subject=$2 AND (${currentBusinessCase})${lock?' FOR UPDATE':''}`,[id,subject]);
   if(!result.rowCount)throw new NotFoundException('Support case not found');return result.rows[0];
  }
  async supportDetail(subject:string,id:string){return this.ownedCase(this.pool,subject,id);}

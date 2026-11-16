@@ -1,0 +1,9 @@
+PASS legacy planning bookmark reaches the separate canonical Customer screen
+PASS immediate hash navigation during client startup restores Plan for Me
+PASS original registration screen → real Better Auth → Customer route
+PASS validated shared session resumes both roles without another credential prompt
+PASS shared session enters Business approval gate without merchant privilege
+PASS unauthorized merchant finance remains forbidden through unified bridge
+PASS an existing Customer starts Business onboarding without creating another identity
+PASS shared account security reachable; deferred delivery has no submitting form
+PASS real sign-out revokes session; Business returns to original sign-in

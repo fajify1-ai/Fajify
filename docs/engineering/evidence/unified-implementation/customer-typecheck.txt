@@ -1,0 +1,9 @@
+> @faji/customer-web@0.1.0 typecheck /workspace/Fajify-unified/apps/customer_web
+> tsc --noEmit
+
+test/unified.test.ts(53,72): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Object literal may only specify known properties, and 'deliveryDeferred' does not exist in type 'Attributes'.
+/workspace/Fajify-unified/apps/customer_web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @faji/customer-web@0.1.0 typecheck: `tsc --noEmit`
+Exit status 2

@@ -1,0 +1,2 @@
+PASS eight original steps, contact validation, failed-save retry, autosave, reload recovery, real pending application and recovery list
+PASS demo pending/failure/retry/success with zero platform/provider requests

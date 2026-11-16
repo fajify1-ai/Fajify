@@ -1,2 +1,5 @@
-import {AuthForm} from '@faji/web-auth/form';
-export default function Page(){return <AuthForm mode="register"/>;}
+import Authentication from '../../unified/Authentication';
+import {optionalIdentity} from '@faji/web-auth/server';
+import {redirect} from 'next/navigation';
+export const dynamic='force-dynamic';
+export default async function Page(){if(await optionalIdentity())redirect('/customer');return <Authentication register/>;}

@@ -1,0 +1,54 @@
+> @faji/customer-web@0.1.0 build /workspace/Fajify-unified/apps/customer_web
+> next build
+
+   ▲ Next.js 15.5.28
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 5.7s
+   Linting and checking validity of types ...
+
+ ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
+   Collecting page data ...
+   Generating static pages (0/15) ...
+   Generating static pages (3/15)
+   Generating static pages (7/15)
+   Generating static pages (11/15)
+ ✓ Generating static pages (15/15)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    4.58 kB         107 kB
+├ ○ /_not-found                            987 B         103 kB
+├ ○ /access-denied                          2 kB         117 kB
+├ ƒ /account-security                    2.93 kB         118 kB
+├ ƒ /api/auth/[...all]                     146 B         103 kB
+├ ƒ /api/platform/[...path]                146 B         103 kB
+├ ○ /business                            10.6 kB         113 kB
+├ ƒ /business/dashboard                  15.6 kB         130 kB
+├ ○ /business/demo-payout                1.82 kB         104 kB
+├ ƒ /business/login                        123 B         120 kB
+├ ○ /business/onboarding                   146 B         103 kB
+├ ƒ /business/register                     123 B         120 kB
+├ ○ /customer                            1.36 kB         104 kB
+├ ƒ /dashboard                           1.36 kB         104 kB
+├ ○ /demo-checkout                       1.82 kB         104 kB
+├ ƒ /design-review/[experience]          1.95 kB         104 kB
+├ ƒ /login                                 123 B         120 kB
+├ ○ /phone-login                           146 B         103 kB
+├ ○ /phone-recovery                        146 B         103 kB
+├ ƒ /receipts/[id]                        2.2 kB         105 kB
+├ ○ /recover                               146 B         103 kB
+├ ƒ /register                              123 B         120 kB
+├ ○ /reset-password                        146 B         103 kB
+└ ○ /ride                                1.84 kB         104 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/544-df4e483c14a48aa3.js       46.1 kB
+  ├ chunks/706b26c1-45d26846699181ad.js  54.2 kB
+  └ other shared chunks (total)          2.13 kB
+
+
+ƒ Middleware                             34.2 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

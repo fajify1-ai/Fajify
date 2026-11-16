@@ -1,0 +1,16 @@
+PASS original wishlist uses real saved products and published media after reload
+PASS original cart persists quantities across reload; unsupported combined checkout stays disabled
+PASS original calendar → original checkout → real server-confirmed reservation and original success animation
+PASS original booking history/detail shows owned records and never synthesizes admission QR
+locator.waitFor: Error: strict mode violation: getByText('Adapter merchant offer', { exact: true }) resolved to 2 elements:
+    1) <p>Adapter merchant offer</p> aka getByText('Adapter merchant offer').first()
+    2) <p>Adapter merchant offer</p> aka getByText('Adapter merchant offer').nth(1)
+
+Call log:
+[2m  - waiting for getByText('Adapter merchant offer', { exact: true }) to be visible[22m
+
+    at /workspace/Fajify-unified/apps/customer_web/test/connected-adapters.browser.cjs:28:172 {
+  log: [
+    "  - waiting for getByText('Adapter merchant offer', { exact: true }) to be visible"
+  ]
+}

@@ -1,0 +1,9 @@
+PASS responsive layouts and browser Back/Forward at 390/768/1440
+PASS date dialog Escape, booking date/time, ride pricing, checkout, QR ticket, bookings
+PASS discovery event → local event ticket
+PASS delivery selection → cart total → payment preview → order tracking
+PASS complete six-step planning → matching plans
+PASS customer ride booking → local booking record
+PASS browse plans and hangout creation entry points
+PASS profile utility navigation
+PASS visual authentication preview; zero runtime errors and zero external requests

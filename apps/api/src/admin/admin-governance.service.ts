@@ -16,6 +16,11 @@ export class AdminGovernanceService {
    "WHERE status='pending' ORDER BY created_at,id LIMIT $1 OFFSET $2",[q.limit+1,q.offset]);
   return page(r.rows,q);
  }
+ async application(id:string){
+  const result=await this.pool.query(`SELECT b.id,b.display_name AS "displayName",b.status,b.created_at AS "createdAt",s.snapshot AS application,s.submitted_at AS "submittedAt" FROM business_onboarding b LEFT JOIN web_business_submissions s ON s.application_id=b.id WHERE b.id=$1`,[id]);
+  if(!result.rows[0])throw new NotFoundException('Business application not found');
+  return result.rows[0];
+ }
  async reviews(q:PageQuery){
   const r=await this.pool.query(
    'SELECT id,business_id AS "businessId",branch_id AS "branchId",rating,body,moderation_status AS "moderationStatus",created_at AS "createdAt" '+

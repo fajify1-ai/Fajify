@@ -1,19 +1,33 @@
 import {BadRequestException,ConflictException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import {Pool} from 'pg';
+import {createHash} from 'node:crypto';
+import {applicationSnapshot} from '../web-completion/onboarding';
 import {DATABASE_POOL} from '../tokens';
 export type BusinessStatus='pending'|'approved'|'rejected';
 @Injectable()
 export class BusinessApprovalService {
  constructor(@Inject(DATABASE_POOL) private readonly pool:Pool){}
- async apply(subject:string,name:string){
+ async apply(subject:string,name:string,draftRevision?:number){
   if(!subject||subject.length>255||name.trim().length<2||name.trim().length>120)throw new BadRequestException('Invalid business application');
   const client=await this.pool.connect();
   try{
    await client.query('BEGIN');
    const state=await client.query('SELECT 1 FROM account_access WHERE identity_subject=$1',[subject]);
    if(state.rowCount!==1)throw new BadRequestException('Account enrollment required');
+   let submission:{snapshot:ReturnType<typeof applicationSnapshot>;hash:string}|undefined;
+   if(draftRevision!==undefined){
+    const draft=await client.query('SELECT revision,data FROM web_onboarding_drafts WHERE subject=$1 FOR UPDATE',[subject]);
+    if(!draft.rows[0]||draft.rows[0].revision!==draftRevision)throw new ConflictException('Draft changed. Reload before submitting.');
+    const snapshot=applicationSnapshot(draft.rows[0].data);
+    if(snapshot.businessName!==name.trim())throw new BadRequestException('Business name must match the saved application');
+    const hash=createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
+    const previous=await client.query('SELECT b.id,b.status FROM web_business_submissions s JOIN business_onboarding b ON b.id=s.application_id WHERE s.subject=$1 AND s.content_hash=$2',[subject,hash]);
+    if(previous.rows[0]){await client.query('COMMIT');return previous.rows[0];}
+    submission={snapshot,hash};
+   }
    const row=await client.query<{id:string,status:BusinessStatus}>(
     "INSERT INTO business_onboarding(applicant_subject,display_name) VALUES($1,$2) RETURNING id,status",[subject,name.trim()]);
+   if(submission)await client.query('INSERT INTO web_business_submissions(application_id,subject,draft_revision,content_hash,snapshot) VALUES($1,$2,$3,$4,$5)',[row.rows[0].id,subject,draftRevision,submission.hash,JSON.stringify(submission.snapshot)]);
    await client.query("INSERT INTO identity_security_events(actor_subject,event_type,details) VALUES($1,'business_applied',$2)",[subject,row.rows[0].id]);
    await client.query('COMMIT');
    return row.rows[0];

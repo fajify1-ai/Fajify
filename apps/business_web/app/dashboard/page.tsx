@@ -1,4 +1,5 @@
 export const dynamic='force-dynamic';
 import {requireIdentity} from '@faji/web-auth/server';
-import {SignOut} from '@faji/web-auth/form';
-export default async function Page(){const identity=await requireIdentity();if(!identity.roles.includes('merchant'))return <main><p>Access is pending approval.</p><a href="/account-security">Account security</a><SignOut/></main>;return <main><h1>Faji Business</h1><p>Signed in</p><a href="/account-security">Account security</a><SignOut/></main>;}
+import type {Identity} from '@faji/web-ui/types';
+import Client from '../../connected/Client';
+export default async function Page(){const identity=await requireIdentity();return <Client identity={identity as Identity}/>;}

@@ -1,1 +1,1 @@
-import {AuthForm} from "@faji/web-auth/form";export default function Page(){return <AuthForm mode="phone-reset"/>;}
+export {default} from '../../unified/DeferredDelivery';

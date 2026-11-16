@@ -1,0 +1,13 @@
+[
+  { route: '/', violations: [] },
+  { route: '/login', violations: [ 'color-contrast' ] },
+  { route: '/ride', violations: [] },
+  {
+    route: '/design-review/customer?screen=planForMe',
+    violations: [ 'color-contrast' ]
+  },
+  {
+    route: '/design-review/business?screen=onboarding',
+    violations: [ 'color-contrast' ]
+  }
+]

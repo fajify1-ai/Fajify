@@ -1,0 +1,14 @@
+.entry{min-height:100svh;position:relative;overflow:hidden;background:#fafafa;color:#202020;font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center;isolation:isolate}
+.decoration{position:absolute;right:0;top:0;width:39.5%;height:19%;min-height:150px;background:#ffeceb;border-bottom-left-radius:150px;z-index:-1}
+.wordmark{font-size:76px;font-weight:900;line-height:.9;letter-spacing:-6px;color:#ff3d38;margin-top:clamp(78px,13svh,140px);animation:appear .7s .1s both}
+.intro{text-align:center;margin:auto 20px;padding:70px 0 90px;animation:appear .7s .25s both}
+.intro h1{font-size:clamp(24px,4vw,34px);font-weight:800;letter-spacing:-.8px;line-height:1.2;margin:0 0 18px}.intro p{font-size:clamp(14px,2vw,18px);line-height:1.4;color:#73737a;margin:0}.intro>span{display:block;width:43px;height:4px;background:#ff3d38;border-radius:8px;margin:26px auto 0}
+.dots{position:absolute;left:10px;top:39%;width:40px;height:64px;background-image:radial-gradient(circle,#fac7c5 2.5px,transparent 3px);background-size:12px 13px}
+.sheet{width:100%;max-width:860px;background:#fff;border-radius:30px 30px 0 0;padding:26px 21px max(58px,env(safe-area-inset-bottom));box-sizing:border-box;animation:appear .7s .4s both}
+.customer{display:flex;align-items:center;gap:18px;width:100%;min-height:62px;padding:14px 24px;background:#ff3d38;border-radius:20px;box-shadow:0 12px 18px #e7493a30;color:#202020;font-size:17px;font-weight:750;text-decoration:none}.customer svg{width:24px;height:24px;flex-shrink:0}.customer>span:last-child{margin-left:auto;font-size:32px;line-height:1}
+.divider{display:flex;gap:16px;align-items:center;margin:20px 0 18px;font-size:14px;color:#73737a}.divider>span{height:1px;flex:1;background:#e8e8ea}.roles{display:grid;grid-template-columns:1fr 1fr;gap:13px}.roles a{border:1px solid #e8e8ea;border-radius:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:86px;text-decoration:none;color:#202020;font-weight:700;font-size:14px}.roles svg{color:#ff3d38;width:23px;height:23px}
+.entry a:focus-visible{outline:3px solid #202020;outline-offset:4px}.entry a{transition:transform .18s,box-shadow .18s}.entry a:hover{transform:translateY(-2px)}
+@keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:768px){.entry{min-height:100svh}.sheet{padding:30px 30px 65px}.intro{padding:80px 0}.wordmark{font-size:100px}.roles a{min-height:105px;font-size:17px}.customer{font-size:21px;min-height:76px}.dots{left:24px;width:48px}}
+@media(max-height:700px){.wordmark{margin-top:58px}.intro{padding:44px 0}.sheet{padding-bottom:28px}.intro h1{font-size:24px}.intro p{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.entry *{animation:none!important;transition:none!important}}

@@ -1,0 +1,15 @@
+✔ onboarding drafts persist privately, reject stale revisions and credentials, recover only own applications (3132.149344ms)
+✔ verification uploads are encrypted, bounded and owner-only; upload never changes approval (69.989598ms)
+✔ merchant reports, support, offers and notifications enforce current approved business scope (207.646678ms)
+✔ cart revisions and hosted invitations stay private, one-use and capacity bounded (112.229019ms)
+✔ real receipts require owned verified capture and immutable receipt/journal evidence (67.789761ms)
+✔ new journey lists paginate, cap requests and do not expose foreign customer data (47.156061ms)
+✔ merchant support reuses the operations queue without a customer-route access backdoor after revocation (55.364063ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5270.314296

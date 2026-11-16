@@ -1,0 +1,5 @@
+
+> @faji/business-web@0.1.0 test:webapp /workspace/Fajify-integration/apps/business_web
+> node test/connected.browser.mjs
+
+PASS Business: approved membership, dashboard/operational/settings navigation, responsive screenshots, API isolation and no page errors.

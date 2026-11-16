@@ -1,0 +1,938 @@
+[
+  {
+    "path": "apps/admin_web/app/access-denied/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/account-security/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/api/auth/[...all]/route.ts",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/dashboard/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/login/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/phone-login/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/phone-recovery/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/recover/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/register/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/admin_web/app/reset-password/page.tsx",
+    "kind": "Next route",
+    "scope": "Admin independent",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_mobile/lib/app/business_app.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "BusinessApp",
+      "BusinessShell"
+    ],
+    "sha256": "dc13f8dffb5062041ec09b9f0f96f9ca773c2b3cafbfb95abe90b2de868af4b6"
+  },
+  {
+    "path": "apps/business_mobile/lib/features/account.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "WelcomePage",
+      "LoginPage",
+      "IdentityHandoffPage",
+      "BusinessSetupPage",
+      "EarningsPage",
+      "ProfilePage",
+      "ScanPage",
+      "NotificationsPage"
+    ],
+    "sha256": "0c5e0cbe4af8ea5ffa6c89725fe9b82e4f3db30af732b8bd888aea34b48332c8"
+  },
+  {
+    "path": "apps/business_mobile/lib/features/dashboard.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "DashboardPage",
+      "_Metric",
+      "_QuickAction",
+      "ReservationTile",
+      "RevenueChart"
+    ],
+    "sha256": "fc8eed3065bda24e01b49e5366a1d201aed400cebebcd6af62c2ebd6d3337ae4"
+  },
+  {
+    "path": "apps/business_mobile/lib/features/menu.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "MenuThumbnail",
+      "MenuPage",
+      "MenuFormPage"
+    ],
+    "sha256": "a770dbd52ee7a8802511a7e7f660e34f58e8331dbe6360dbeb92c8f6e2c22bda"
+  },
+  {
+    "path": "apps/business_mobile/lib/features/orders.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "OrdersPage",
+      "OrderCard",
+      "OrderDetailPage"
+    ],
+    "sha256": "13b05d4ab6bab3f0389977bb8940cf5d75f548446d465ebb03ed9ad88f91e451"
+  },
+  {
+    "path": "apps/business_mobile/lib/features/reservations.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "ReservationsPage",
+      "ReservationDetailPage"
+    ],
+    "sha256": "751545c2521c92a79ba13553e4b494445cf21fb3c2cfe9bdf04539a1920b3a9e"
+  },
+  {
+    "path": "apps/business_mobile/lib/features/services_page.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "ServicesPage",
+      "_ServiceMetric"
+    ],
+    "sha256": "9cd57a8ef12e0617493ba08f55bba6611fda705e8d13e959a530901444000360"
+  },
+  {
+    "path": "apps/business_mobile/lib/shared/business_ui.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "Panel",
+      "PageBody",
+      "StatusPill",
+      "SectionHeading",
+      "DataGate"
+    ],
+    "sha256": "3d75c587f767470836019a42d89448d59b2230618fea86083012702c1b734ef3"
+  },
+  {
+    "path": "apps/business_web/app/access-denied/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/account-security/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/api/auth/[...all]/route.ts",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/dashboard/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/login/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/phone-login/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/phone-recovery/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/recover/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/register/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/business_web/app/reset-password/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_mobile/lib/core/widgets/service_unavailable_view.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "ServiceUnavailableView"
+    ],
+    "sha256": "67f1524a16452a043f0e6c6bf8c160afa7f56068c9c7f4d867d4e962c5f1fb8e"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/customer_access_gate.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "CustomerAccessGate"
+    ],
+    "sha256": "5a7b8de642a9d2f907e0cfa511d8dde7ff38d02672e7c945dd4647180a8963ab"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/business_login_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "BusinessLoginScreen",
+      "_ChoiceButton"
+    ],
+    "sha256": "2bd1d0ce16fb74ebe5ca9719c8569044cff2cbbec766a5ba94d8ccc321e36c79"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/forgot_password_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "ForgotPasswordScreen"
+    ],
+    "sha256": "dd20f7e60b0383dd9571f184fc03ce1210ce831d71f05cc9dc46af17d686d4c6"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/ride_login_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "RideLoginScreen"
+    ],
+    "sha256": "71973defaf72db44dc4bb29a8c2ab467c4d4e97bb8ee5a5066b45627fd030f1f"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/user_auth_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "UserAuthScreen",
+      "_AuthSheet",
+      "_SignInFields",
+      "_RegisterFields",
+      "_Label",
+      "_SecondFactorDialog"
+    ],
+    "sha256": "635b4c89231f7f8c13324571c9f5b54046b86aa9a16633c56131fb019451d8ae"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/user_home_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "UserHomeScreen",
+      "_EmptySearchState"
+    ],
+    "sha256": "c4e02c639d8b1b045bc767f690cb1caf2c03cd8029614d3b919529dea5b7bd57"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/screens/user_login_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "UserLoginScreen",
+      "PlaceholderLoginScreen"
+    ],
+    "sha256": "dfeb46b81f60e3f525a19d134205d8bea9b02a545c1f1d4c9c3129312cc67a5a"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_divider.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "AuthDivider"
+    ],
+    "sha256": "da71dfc9c90fa11bf3685bb174d34fe3a9c05f57ab0f8328a1d9900f665ea491"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_error_message.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "AuthErrorMessage"
+    ],
+    "sha256": "318d312568c91ab43eb79f39e4b72673c760f5c1d71476cd4cb8f5870495f374"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_form_layout.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "AuthFormLayout"
+    ],
+    "sha256": "8a33f31130b6f5650d2df5d982991a3fecf377f10d1e9aed30eff6948c66748f"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_loading_indicator.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "AuthLoadingIndicator"
+    ],
+    "sha256": "fcbabd8a07407d9c52891d07c1424dcec5008d9728bb886861cd3c5be64c6f6f"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_primary_button.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "AuthPrimaryButton"
+    ],
+    "sha256": "2bcd95f7e441291a295ed1f01ff2013e2195c711f5e72d4ba6db7fb4cd9e53f7"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_segmented_control.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "AuthSegmentedControl",
+      "_Tab"
+    ],
+    "sha256": "6ee2200835c226c4b50df8b9d7c834eb4c82b96add81629f6c91d755c61a2a17"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/auth_status_view.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "AuthStatusView"
+    ],
+    "sha256": "e16809a4ccbd4d020ff00811ff23ae35014a3f6c12099caa87e32925c72d7e2a"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/faji_auth_text_field.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "FajiAuthTextField"
+    ],
+    "sha256": "47dc57b2c82f02fc12eb78d12c3df088abfadac3d53de22eb6d64875934f8e21"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/google_auth_button.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "GoogleAuthButton"
+    ],
+    "sha256": "3c213ebd2384406f049a8eb13a39cb7d350a346c691700bf9e41f3b415f51e02"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/auth/presentation/widgets/registration_legal_acknowledgement.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "RegistrationLegalAcknowledgement",
+      "_LegalLink"
+    ],
+    "sha256": "a8184e6ce5cca7bb783e792f9916c8488097994fb434e06959ee52b7b34f3544"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/add_payment_card_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "AddPaymentCardScreen"
+    ],
+    "sha256": "e851ffc7d8499a24fcae0ec60271fb4de1c471a269c57cee324d3413a124a797"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/booking_confirmation_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "BookingConfirmationScreen"
+    ],
+    "sha256": "db138f4b70f2c2a15c34be1f356577b4e1b1381ce8c1241a12c88b0c2b7d864e"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/booking_reservation_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "BookingReservationScreen",
+      "_BackButton",
+      "_PlanHero",
+      "_IncludedCard",
+      "_FeatureTile",
+      "_BookingDetailsCard",
+      "_Detail",
+      "_CircleAction",
+      "_PriceBreakdown",
+      "_PriceRow",
+      "_RideAddon",
+      "_RideButton",
+      "_PaymentMethods",
+      "_PaymentRow",
+      "_SectionCard",
+      "_BottomBookBar"
+    ],
+    "sha256": "ca8587a8258ca8bd2ae38d33116b91241e704aa40f53e7f52c7288ee36ef33cd"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/booking_ticket_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "BookingTicketScreen",
+      "_TicketRow"
+    ],
+    "sha256": "0d4abbfbef884eaa7de39633eaec116bf47abfa279dc3fffb0fdb411432d7354"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/screens/booking_time_placeholder_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "BookingReviewPlaceholderScreen"
+    ],
+    "sha256": "5dc04978bf2b23acbe4277857d27b075e72af26bc70150ec26ce165e436b26a0"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/widgets/booking_date_sheet.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "BookingDateSheet",
+      "_CalendarGrid",
+      "_SheetIconButton"
+    ],
+    "sha256": "1e4b18305ae6f3b7123bcf45ac541e506fc14f721f510b536c82f3054092536c"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/widgets/booking_qr_code.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "BookingQrCode"
+    ],
+    "sha256": "693b9b4fd0ffb8e56cac98f4b68859ecf805126f27aeb1f11eddf5d6d7fbb2df"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/bookings/presentation/widgets/booking_time_sheet.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "BookingTimeSheet",
+      "_TimeOption"
+    ],
+    "sha256": "72a30d2677840c6ec8dd748b68e1551ca29f7ef916c5d601a4cb36f78a0b476c"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/screens/plan_for_me_step_one_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "PlanForMeStepOneScreen",
+      "_BackButton",
+      "_ProgressIndicator",
+      "_PlanTypeCard",
+      "PlanForMeStepTwoPlaceholderScreen",
+      "_PeopleCounterPanel",
+      "_CounterButton",
+      "_PeopleRangeChip",
+      "PlanForMeStepThreeScreen",
+      "_LocationCard",
+      "PlanForMeStepFourScreen",
+      "_BudgetCard",
+      "PlanForMeStepFiveScreen",
+      "_SectionLabel",
+      "_DateOptionCard",
+      "_TimeSelector",
+      "_TimeRangeCard",
+      "PlanForMeStepSixScreen",
+      "_VibeCard",
+      "_LegacyPlanResultsScreen"
+    ],
+    "sha256": "1ff1ef7441242d0feefaf1cf526e54fc9cdea816b5a5ba35d2a8909aaaa78b41"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/screens/temporary_home_destinations.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "WishlistScreen",
+      "_WishlistContent",
+      "_WishlistError",
+      "_WishlistEmptyState",
+      "_WishlistCard",
+      "_WishlistImageFallback",
+      "BookingsScreen",
+      "_TicketTabs",
+      "_EmptyBookings",
+      "_TicketCard",
+      "_StatusPill",
+      "_HelpCard",
+      "ProfileScreen",
+      "PlanForMeScreen",
+      "BrowsePlansScreen",
+      "_TemporaryScreen"
+    ],
+    "sha256": "88b66d651430da1b52db85aa1d81d54f3c1eaeb5e199b95a8aaf378c102b180e"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/floating_home_nav.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "FloatingHomeNav",
+      "_QuickAction",
+      "_NavigationBar"
+    ],
+    "sha256": "0b0d0d4461d81804026868a58f698c486be7466bb0dd795d8b8fcda1bb7612b3"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/home_category_filter.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "HomeCategoryFilter"
+    ],
+    "sha256": "c6e18f43291c0cade53c60381d023879ce451061b6f229b0837e9adc0c4d0093"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/home_filter_sheet.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "HomeFilterSheet",
+      "_ChoicePill"
+    ],
+    "sha256": "9b05f95b29be402e677d57b93fc9f5b2ffad08f7fa53bd2eb1c0ffe5d32452c8"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/home_header.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "HomeHeader",
+      "_ProfileAvatar",
+      "_InitialsAvatar",
+      "_NotificationButton"
+    ],
+    "sha256": "21c77f5228bc236540cb46024205e808861a4fd7e401e017d829d3267b62c472"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/home_search_bar.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "HomeSearchBar"
+    ],
+    "sha256": "51de6fef984ced4853f1d1c89e8d3189c1b10f12c3f51c25eb8863eae95675a7"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/promo_banner_carousel.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "PromoBannerCarousel",
+      "_PromoSlide"
+    ],
+    "sha256": "da9438cded7b63f50e4f17612c7ec2d6a79da2e084ade83d6aa3d962bb4d06ef"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/venue_card.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "VenueCard",
+      "_BusinessImage",
+      "_ImageFallback",
+      "_LightPill",
+      "_StatusPill",
+      "_Metric"
+    ],
+    "sha256": "9df32c055311b42d18167b23f4389a0799b5d8a082aa759377e4d51b05dccd55"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/whats_on_card.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "WhatsOnCard",
+      "_CategoryPill"
+    ],
+    "sha256": "3cb184c131ccc20d674ec4dd032322b2bfb21538d24f8ed40a6ef4c7de7ea43d"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/home/presentation/widgets/whats_on_section.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "WhatsOnSection"
+    ],
+    "sha256": "97a4609285080a11367da24e72312eb9539af64261ad2bad02e1a04200643699"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/legal/presentation/legal_document_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "TermsOfServiceScreen",
+      "PrivacyPolicyScreen",
+      "LegalDocumentScreen"
+    ],
+    "sha256": "a59f611cb18c9153655f78c1b76e5c9e34d051e2c0786c33b00b95fac8d86656"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/legal/presentation/legal_links_card.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "LegalLinksCard"
+    ],
+    "sha256": "e9b911a387d7a6144d5bcd12e8706ba90cbe944594953771d33b4629705e9541"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/onboarding/presentation/screens/role_selection_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "RoleSelectionScreen",
+      "_TopDecoration",
+      "_FajiWordmark",
+      "_IntroContent",
+      "_DotPattern",
+      "_BottomSheet"
+    ],
+    "sha256": "9399037d69d10f3ef119eb647ac5286057f73ed3146ecaf481dcd62e54aa8fc4"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/onboarding/presentation/screens/splash_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "SplashScreen",
+      "_SplashBlob"
+    ],
+    "sha256": "2909e359f87e8bfd91c05e942c2ebaeedee487f565f77696620132ea39a771ff"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/onboarding/presentation/widgets/animated_primary_login_button.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "AnimatedPrimaryLoginButton"
+    ],
+    "sha256": "21ce7ff355e55909674a4f2baa419db6497cfb8395e234e08a261651e3e22269"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/onboarding/presentation/widgets/faji_role_card.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "FajiRoleCard"
+    ],
+    "sha256": "d129a2bbd89d3a032dc1d38717ab9e98e4c60004290fd2f6b50b06e1750f4f68"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/plans/presentation/screens/plan_booking_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "PlanBookingScreen"
+    ],
+    "sha256": "6bf292e24ac6e1a8d7833c712e24954a96f1f6dc41032d15182a812240de63bf"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/plans/presentation/screens/plan_results_screen.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "PlanResultsScreen",
+      "_ResultsContent",
+      "_PreferenceChips",
+      "_PreferenceChip",
+      "_ResultSection",
+      "_EmptyResults"
+    ],
+    "sha256": "98f372a5de958d29f5342a3da8877dd25897527f25b0d0fe8ff2591807fca083"
+  },
+  {
+    "path": "apps/customer_mobile/lib/features/plans/presentation/widgets/recommendation_card.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "RecommendationCard",
+      "_PlanImage"
+    ],
+    "sha256": "2194391dea7d8781657a86fabcd26b5e1d3df67a221a162c662056c0363571f9"
+  },
+  {
+    "path": "apps/customer_mobile/lib/main.dart",
+    "kind": "Flutter widget module",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "FajiApp"
+    ],
+    "sha256": "29a5412b6beb8944c857de4ec8879fb8f99c075dcdc391fe5fb34de5a13dfbfa"
+  },
+  {
+    "path": "apps/customer_web/app/access-denied/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/account-security/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/api/auth/[...all]/route.ts",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/dashboard/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/login/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/phone-login/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/phone-recovery/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/recover/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/register/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/customer_web/app/reset-password/page.tsx",
+    "kind": "Next route",
+    "scope": "Customer/Business",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch/lib/main.dart",
+    "kind": "Flutter widget module",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+    "widgets": [
+      "FajiApp"
+    ],
+    "sha256": "2867b0ff62fe62b50a777553d00e167123d2c8aa39179601da9452456714b98e"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/access-denied/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/account-security/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/api/auth/[...all]/route.ts",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/dashboard/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/login/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/phone-login/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/phone-recovery/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/recover/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/register/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  },
+  {
+    "path": "apps/ride_dispatch_web/app/reset-password/page.tsx",
+    "kind": "Next route",
+    "scope": "Ride deferred; retain unexposed source",
+    "source": "98e0e0f1b23bebadbfcf3149716645154e5d746f"
+  }
+]

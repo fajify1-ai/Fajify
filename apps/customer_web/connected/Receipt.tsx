@@ -1,0 +1,5 @@
+'use client';
+import {Action,State,useResource,platform} from '@faji/web-ui/client';
+import type {Schema} from '@faji/web-ui/types';
+function ReceiptDownload({payment}:{payment:string}){return <Action label="Download verified receipt" run={async()=>{const receipt=(await platform<{data:{content:string;filename:string}}>(`customer/payments/${payment}/receipt`)).data;const url=URL.createObjectURL(new Blob([receipt.content],{type:'text/plain'}));const anchor=document.createElement('a');anchor.href=url;anchor.download=receipt.filename;anchor.click();URL.revokeObjectURL(url);}}/>;}
+export function ReceiptPage({payment}:{payment:string}){const receipt=useResource<{data:Schema<'WebReceipt'>}>(`customer/payments/${payment}/receipt`);return <main className="connected"><section className="connection-state"><h1>Payment receipt</h1><State loading={receipt.loading} error={receipt.error} retry={receipt.reload}>{receipt.data&&<><pre className="text-left whitespace-pre-wrap break-words">{receipt.data.data.content}</pre><ReceiptDownload payment={payment}/></>}</State><a className="faji-outline" href="/customer#myTickets">Back to bookings & payments</a></section></main>;}

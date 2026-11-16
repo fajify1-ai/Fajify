@@ -1,0 +1,12 @@
+> @faji/api@0.1.0 contracts /workspace/Fajify-unified/apps/api
+> node --import tsx scripts/export-openapi.ts
+
+
+> @faji/web-ui@0.1.0 generate:contracts /workspace/Fajify-unified/packages/web_ui
+> openapi-typescript ../api_contracts/openapi.json -o contracts.ts
+
+✨ openapi-typescript 7.13.0
+🚀 ../api_contracts/openapi.json → contracts.ts [212.4ms]
+
+> @faji/web-ui@0.1.0 generate:routes /workspace/Fajify-unified/packages/web_ui
+> node scripts/routes.mjs

@@ -1,0 +1,9 @@
+{
+  "state": "PAUSED AT USER REQUEST; work-in-progress, not final acceptance",
+  "base": "23a0219",
+  "finalFullVerification": "NOT RUN",
+  "browserRegression": "PARTIAL: wishlist/cart/reservation/history passed; promotions assertion failed on duplicate synthetic titles before gathering/invitation steps",
+  "native": "NOT RUN: Flutter and Android SDK unavailable",
+  "visual": "Legacy reference rechecks included; remaining low-level differences are NOT approved",
+  "sensitiveFixtures": "Private credentials and database URLs remain outside repository"
+}

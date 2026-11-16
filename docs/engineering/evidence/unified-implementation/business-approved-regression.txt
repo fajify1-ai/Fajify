@@ -1,0 +1,1 @@
+PASS Business: approved membership, dashboard/operational/settings navigation, responsive screenshots, API isolation and no page errors.

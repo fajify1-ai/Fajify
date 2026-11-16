@@ -1,0 +1,10 @@
+[
+  { route: '/', violations: [] },
+  { route: '/login', violations: [] },
+  { route: '/ride', violations: [] },
+  { route: '/customer#planForMe', violations: [] },
+  { route: '/demo-checkout', violations: [] },
+  { route: '/business/demo-payout', violations: [] },
+  { route: '/customer#notifications', violations: [] },
+  { route: '/business/dashboard#onboarding', violations: [] }
+]

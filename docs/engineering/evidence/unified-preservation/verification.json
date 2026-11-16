@@ -1,0 +1,26 @@
+{
+  "status": "inventory-checkpoint-incomplete",
+  "baseCommit": "98e0e0f1b23bebadbfcf3149716645154e5d746f",
+  "pr28Head": "321fead305a986562dae039f1f1a21bb02a4c43d",
+  "pr30Head": "69f63bbf2ea225049f3cd0ad829f1901dbf48b7b",
+  "applicationCodeChanged": false,
+  "beforeScreenshots": 192,
+  "widthCounts": {
+    "1440": 64,
+    "390": 64,
+    "768": 64
+  },
+  "afterScreenshots": 0,
+  "webOriginalFixtureWalkthroughs": "passed customer and business separately",
+  "native": "blocked: Flutter/Dart SDK unavailable",
+  "acceptance": "not passed",
+  "openGates": [
+    "complete nested-state baseline coverage",
+    "native baselines and Android SDK/build",
+    "reconcile original visuals with connected adapters",
+    "web consolidation and paired screenshots",
+    "shared sessions and role/merchant isolation",
+    "PR30 optional delivery reconciliation",
+    "backend and unified application acceptance tests"
+  ]
+}

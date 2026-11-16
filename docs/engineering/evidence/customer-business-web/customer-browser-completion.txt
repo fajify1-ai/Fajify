@@ -1,0 +1,5 @@
+
+> @faji/customer-web@0.1.0 test:webapp /workspace/Fajify-integration/apps/customer_web
+> node test/connected.browser.mjs
+
+PASS Customer: planning navigation, registration/session, profile persistence, support creation, bookings navigation, API isolation, required forms, responsive screenshots, security page, no page errors.

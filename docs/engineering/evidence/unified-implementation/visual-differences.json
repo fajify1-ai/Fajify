@@ -1,0 +1,2930 @@
+[
+  {
+    "screen": "business-dashboard-1440",
+    "beforeSize": [
+      1440,
+      1305
+    ],
+    "afterSize": [
+      1440,
+      1305
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-dashboard-390",
+    "beforeSize": [
+      390,
+      1835
+    ],
+    "afterSize": [
+      390,
+      1835
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-dashboard-768",
+    "beforeSize": [
+      768,
+      1970
+    ],
+    "afterSize": [
+      768,
+      1970
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-entry-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-entry-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-entry-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-business-health-mobile-1440",
+    "beforeSize": [
+      1440,
+      1305
+    ],
+    "afterSize": [
+      1440,
+      1305
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-business-health-mobile-390",
+    "beforeSize": [
+      390,
+      1835
+    ],
+    "afterSize": [
+      390,
+      1835
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-business-health-mobile-768",
+    "beforeSize": [
+      768,
+      1970
+    ],
+    "afterSize": [
+      768,
+      1970
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-entry-1440-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-entry-1440-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-entry-1440-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-entry-390-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-entry-390-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-entry-390-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-entry-768-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-entry-768-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-entry-768-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-menu-1440-1440",
+    "beforeSize": [
+      1440,
+      1349
+    ],
+    "afterSize": [
+      1440,
+      1349
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-menu-1440-390",
+    "beforeSize": [
+      390,
+      1137
+    ],
+    "afterSize": [
+      390,
+      1137
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-menu-1440-768",
+    "beforeSize": [
+      768,
+      1341
+    ],
+    "afterSize": [
+      768,
+      1341
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-menu-390-1440",
+    "beforeSize": [
+      1440,
+      1349
+    ],
+    "afterSize": [
+      1440,
+      1349
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-menu-390-390",
+    "beforeSize": [
+      390,
+      1137
+    ],
+    "afterSize": [
+      390,
+      1137
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-menu-390-768",
+    "beforeSize": [
+      768,
+      1341
+    ],
+    "afterSize": [
+      768,
+      1341
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-menu-768-1440",
+    "beforeSize": [
+      1440,
+      1349
+    ],
+    "afterSize": [
+      1440,
+      1349
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-menu-768-390",
+    "beforeSize": [
+      390,
+      1137
+    ],
+    "afterSize": [
+      390,
+      1137
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-menu-768-768",
+    "beforeSize": [
+      768,
+      1341
+    ],
+    "afterSize": [
+      768,
+      1341
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-1-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-1-390",
+    "beforeSize": [
+      390,
+      1035
+    ],
+    "afterSize": [
+      390,
+      1035
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-1-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-2-1440",
+    "beforeSize": [
+      1440,
+      937
+    ],
+    "afterSize": [
+      1440,
+      937
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-2-390",
+    "beforeSize": [
+      390,
+      955
+    ],
+    "afterSize": [
+      390,
+      955
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 33,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": false
+  },
+  {
+    "screen": "business-nested-onboarding-step-2-768",
+    "beforeSize": [
+      768,
+      937
+    ],
+    "afterSize": [
+      768,
+      937
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-3-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-3-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-3-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-4-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-4-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-4-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-5-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-5-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 26,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": false
+  },
+  {
+    "screen": "business-nested-onboarding-step-5-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-6-1440",
+    "beforeSize": [
+      1440,
+      1094
+    ],
+    "afterSize": [
+      1440,
+      1094
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-6-390",
+    "beforeSize": [
+      390,
+      1132
+    ],
+    "afterSize": [
+      390,
+      1132
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-6-768",
+    "beforeSize": [
+      768,
+      1094
+    ],
+    "afterSize": [
+      768,
+      1094
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-7-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 5,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": false
+  },
+  {
+    "screen": "business-nested-onboarding-step-7-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-7-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-8-1440",
+    "beforeSize": [
+      1440,
+      1061
+    ],
+    "afterSize": [
+      1440,
+      1061
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-onboarding-step-8-390",
+    "beforeSize": [
+      390,
+      1116
+    ],
+    "afterSize": [
+      390,
+      1116
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 7,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": false
+  },
+  {
+    "screen": "business-nested-onboarding-step-8-768",
+    "beforeSize": [
+      768,
+      1061
+    ],
+    "afterSize": [
+      768,
+      1061
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-orders-1440-1440",
+    "beforeSize": [
+      1440,
+      1302
+    ],
+    "afterSize": [
+      1440,
+      1302
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-orders-1440-390",
+    "beforeSize": [
+      390,
+      1074
+    ],
+    "afterSize": [
+      390,
+      1074
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-orders-1440-768",
+    "beforeSize": [
+      768,
+      1294
+    ],
+    "afterSize": [
+      768,
+      1294
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-orders-390-1440",
+    "beforeSize": [
+      1440,
+      1302
+    ],
+    "afterSize": [
+      1440,
+      1302
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-orders-390-390",
+    "beforeSize": [
+      390,
+      1074
+    ],
+    "afterSize": [
+      390,
+      1074
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-orders-390-768",
+    "beforeSize": [
+      768,
+      1294
+    ],
+    "afterSize": [
+      768,
+      1294
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-orders-768-1440",
+    "beforeSize": [
+      1440,
+      1302
+    ],
+    "afterSize": [
+      1440,
+      1302
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-orders-768-390",
+    "beforeSize": [
+      390,
+      1074
+    ],
+    "afterSize": [
+      390,
+      1074
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-orders-768-768",
+    "beforeSize": [
+      768,
+      1294
+    ],
+    "afterSize": [
+      768,
+      1294
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-overview-1440-1440",
+    "beforeSize": [
+      1440,
+      1305
+    ],
+    "afterSize": [
+      1440,
+      1305
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-overview-1440-390",
+    "beforeSize": [
+      390,
+      1835
+    ],
+    "afterSize": [
+      390,
+      1835
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-overview-1440-768",
+    "beforeSize": [
+      768,
+      1970
+    ],
+    "afterSize": [
+      768,
+      1970
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-overview-390-1440",
+    "beforeSize": [
+      1440,
+      1305
+    ],
+    "afterSize": [
+      1440,
+      1305
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-overview-390-390",
+    "beforeSize": [
+      390,
+      1835
+    ],
+    "afterSize": [
+      390,
+      1835
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-overview-390-768",
+    "beforeSize": [
+      768,
+      1970
+    ],
+    "afterSize": [
+      768,
+      1970
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-overview-768-1440",
+    "beforeSize": [
+      1440,
+      1305
+    ],
+    "afterSize": [
+      1440,
+      1305
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-overview-768-390",
+    "beforeSize": [
+      390,
+      1835
+    ],
+    "afterSize": [
+      390,
+      1835
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-overview-768-768",
+    "beforeSize": [
+      768,
+      1970
+    ],
+    "afterSize": [
+      768,
+      1970
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-payout-review-mobile-1440",
+    "beforeSize": [
+      1440,
+      946
+    ],
+    "afterSize": [
+      1440,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-payout-review-mobile-390",
+    "beforeSize": [
+      390,
+      964
+    ],
+    "afterSize": [
+      390,
+      964
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-payout-review-mobile-768",
+    "beforeSize": [
+      768,
+      946
+    ],
+    "afterSize": [
+      768,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-payout-simulation-mobile-1440",
+    "beforeSize": [
+      1440,
+      946
+    ],
+    "afterSize": [
+      1440,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-payout-simulation-mobile-390",
+    "beforeSize": [
+      390,
+      964
+    ],
+    "afterSize": [
+      390,
+      964
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-payout-simulation-mobile-768",
+    "beforeSize": [
+      768,
+      946
+    ],
+    "afterSize": [
+      768,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-qr-checkin-mobile-1440",
+    "beforeSize": [
+      1440,
+      1305
+    ],
+    "afterSize": [
+      1440,
+      1305
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-qr-checkin-mobile-390",
+    "beforeSize": [
+      390,
+      1835
+    ],
+    "afterSize": [
+      390,
+      1835
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-qr-checkin-mobile-768",
+    "beforeSize": [
+      768,
+      1970
+    ],
+    "afterSize": [
+      768,
+      1970
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-reservations-1440-1440",
+    "beforeSize": [
+      1440,
+      1840
+    ],
+    "afterSize": [
+      1440,
+      1840
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-reservations-1440-390",
+    "beforeSize": [
+      390,
+      1444
+    ],
+    "afterSize": [
+      390,
+      1444
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-reservations-1440-768",
+    "beforeSize": [
+      768,
+      1832
+    ],
+    "afterSize": [
+      768,
+      1832
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-reservations-390-1440",
+    "beforeSize": [
+      1440,
+      1840
+    ],
+    "afterSize": [
+      1440,
+      1840
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-reservations-390-390",
+    "beforeSize": [
+      390,
+      1444
+    ],
+    "afterSize": [
+      390,
+      1444
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-reservations-390-768",
+    "beforeSize": [
+      768,
+      1832
+    ],
+    "afterSize": [
+      768,
+      1832
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-reservations-768-1440",
+    "beforeSize": [
+      1440,
+      1840
+    ],
+    "afterSize": [
+      1440,
+      1840
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-reservations-768-390",
+    "beforeSize": [
+      390,
+      1444
+    ],
+    "afterSize": [
+      390,
+      1444
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-reservations-768-768",
+    "beforeSize": [
+      768,
+      1832
+    ],
+    "afterSize": [
+      768,
+      1832
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-services-1440-1440",
+    "beforeSize": [
+      1440,
+      2285
+    ],
+    "afterSize": [
+      1440,
+      2285
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-services-1440-390",
+    "beforeSize": [
+      390,
+      2241
+    ],
+    "afterSize": [
+      390,
+      2241
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-services-1440-768",
+    "beforeSize": [
+      768,
+      2281
+    ],
+    "afterSize": [
+      768,
+      2281
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-services-390-1440",
+    "beforeSize": [
+      1440,
+      2285
+    ],
+    "afterSize": [
+      1440,
+      2285
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-services-390-390",
+    "beforeSize": [
+      390,
+      2241
+    ],
+    "afterSize": [
+      390,
+      2241
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-services-390-768",
+    "beforeSize": [
+      768,
+      2281
+    ],
+    "afterSize": [
+      768,
+      2281
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-services-768-1440",
+    "beforeSize": [
+      1440,
+      2285
+    ],
+    "afterSize": [
+      1440,
+      2285
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-services-768-390",
+    "beforeSize": [
+      390,
+      2241
+    ],
+    "afterSize": [
+      390,
+      2241
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-services-768-768",
+    "beforeSize": [
+      768,
+      2281
+    ],
+    "afterSize": [
+      768,
+      2281
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-settings-1440-1440",
+    "beforeSize": [
+      1440,
+      946
+    ],
+    "afterSize": [
+      1440,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-settings-1440-390",
+    "beforeSize": [
+      390,
+      964
+    ],
+    "afterSize": [
+      390,
+      964
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-settings-1440-768",
+    "beforeSize": [
+      768,
+      946
+    ],
+    "afterSize": [
+      768,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-settings-390-1440",
+    "beforeSize": [
+      1440,
+      946
+    ],
+    "afterSize": [
+      1440,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-settings-390-390",
+    "beforeSize": [
+      390,
+      964
+    ],
+    "afterSize": [
+      390,
+      964
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 22,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": false
+  },
+  {
+    "screen": "business-nested-settings-390-768",
+    "beforeSize": [
+      768,
+      946
+    ],
+    "afterSize": [
+      768,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-settings-768-1440",
+    "beforeSize": [
+      1440,
+      946
+    ],
+    "afterSize": [
+      1440,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-settings-768-390",
+    "beforeSize": [
+      390,
+      964
+    ],
+    "afterSize": [
+      390,
+      964
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 22,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": false
+  },
+  {
+    "screen": "business-nested-settings-768-768",
+    "beforeSize": [
+      768,
+      946
+    ],
+    "afterSize": [
+      768,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-signin-1440-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-signin-1440-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-signin-1440-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-signin-390-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-signin-390-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-signin-390-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-signin-768-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-signin-768-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-signin-768-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-staff-mobile-1440",
+    "beforeSize": [
+      1440,
+      946
+    ],
+    "afterSize": [
+      1440,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-staff-mobile-390",
+    "beforeSize": [
+      390,
+      964
+    ],
+    "afterSize": [
+      390,
+      964
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-nested-staff-mobile-768",
+    "beforeSize": [
+      768,
+      946
+    ],
+    "afterSize": [
+      768,
+      946
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-onboarding-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-onboarding-390",
+    "beforeSize": [
+      390,
+      1035
+    ],
+    "afterSize": [
+      390,
+      1035
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-onboarding-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-signin-1440",
+    "beforeSize": [
+      1440,
+      934
+    ],
+    "afterSize": [
+      1440,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-signin-390",
+    "beforeSize": [
+      390,
+      952
+    ],
+    "afterSize": [
+      390,
+      952
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "business-signin-768",
+    "beforeSize": [
+      768,
+      934
+    ],
+    "afterSize": [
+      768,
+      934
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-auth-1440",
+    "beforeSize": [
+      1440,
+      900
+    ],
+    "afterSize": [
+      1440,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-auth-390",
+    "beforeSize": [
+      390,
+      900
+    ],
+    "afterSize": [
+      390,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-auth-768",
+    "beforeSize": [
+      768,
+      900
+    ],
+    "afterSize": [
+      768,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-browsePlans-1440",
+    "beforeSize": [
+      1440,
+      1191
+    ],
+    "afterSize": [
+      1440,
+      1191
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-browsePlans-390",
+    "beforeSize": [
+      390,
+      2896
+    ],
+    "afterSize": [
+      390,
+      2896
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-browsePlans-768",
+    "beforeSize": [
+      768,
+      1667
+    ],
+    "afterSize": [
+      768,
+      1667
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-checkout-1440",
+    "beforeSize": [
+      1440,
+      2364
+    ],
+    "afterSize": [
+      1440,
+      2364
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-checkout-390",
+    "beforeSize": [
+      390,
+      2378
+    ],
+    "afterSize": [
+      390,
+      2378
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-checkout-768",
+    "beforeSize": [
+      768,
+      2364
+    ],
+    "afterSize": [
+      768,
+      2364
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-confirmation-1440",
+    "beforeSize": [
+      1440,
+      1045
+    ],
+    "afterSize": [
+      1440,
+      1045
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-confirmation-390",
+    "beforeSize": [
+      390,
+      1066
+    ],
+    "afterSize": [
+      390,
+      1066
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-confirmation-768",
+    "beforeSize": [
+      768,
+      1045
+    ],
+    "afterSize": [
+      768,
+      1045
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-createEvent-1440",
+    "beforeSize": [
+      1440,
+      1296
+    ],
+    "afterSize": [
+      1440,
+      1296
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-createEvent-390",
+    "beforeSize": [
+      390,
+      1296
+    ],
+    "afterSize": [
+      390,
+      1296
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-createEvent-768",
+    "beforeSize": [
+      768,
+      1296
+    ],
+    "afterSize": [
+      768,
+      1296
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-globalCart-1440",
+    "beforeSize": [
+      1440,
+      900
+    ],
+    "afterSize": [
+      1440,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-globalCart-390",
+    "beforeSize": [
+      390,
+      900
+    ],
+    "afterSize": [
+      390,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-globalCart-768",
+    "beforeSize": [
+      768,
+      900
+    ],
+    "afterSize": [
+      768,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-help-1440",
+    "beforeSize": [
+      1440,
+      911
+    ],
+    "afterSize": [
+      1440,
+      911
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-help-390",
+    "beforeSize": [
+      390,
+      1291
+    ],
+    "afterSize": [
+      390,
+      1291
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-help-768",
+    "beforeSize": [
+      768,
+      998
+    ],
+    "afterSize": [
+      768,
+      998
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-home-1440",
+    "beforeSize": [
+      1440,
+      2021
+    ],
+    "afterSize": [
+      1440,
+      2021
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-home-390",
+    "beforeSize": [
+      390,
+      4805
+    ],
+    "afterSize": [
+      390,
+      4805
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 12,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": false
+  },
+  {
+    "screen": "customer-home-768",
+    "beforeSize": [
+      768,
+      2996
+    ],
+    "afterSize": [
+      768,
+      2996
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-inviteFriends-1440",
+    "beforeSize": [
+      1440,
+      1078
+    ],
+    "afterSize": [
+      1440,
+      1078
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-inviteFriends-390",
+    "beforeSize": [
+      390,
+      1102
+    ],
+    "afterSize": [
+      390,
+      1102
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-inviteFriends-768",
+    "beforeSize": [
+      768,
+      1078
+    ],
+    "afterSize": [
+      768,
+      1078
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-landing-1440",
+    "beforeSize": [
+      1440,
+      2988
+    ],
+    "afterSize": [
+      1440,
+      2988
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-landing-390",
+    "beforeSize": [
+      390,
+      5468
+    ],
+    "afterSize": [
+      390,
+      5468
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-landing-768",
+    "beforeSize": [
+      768,
+      4179
+    ],
+    "afterSize": [
+      768,
+      4179
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-myTickets-1440",
+    "beforeSize": [
+      1440,
+      901
+    ],
+    "afterSize": [
+      1440,
+      901
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-myTickets-390",
+    "beforeSize": [
+      390,
+      900
+    ],
+    "afterSize": [
+      390,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-myTickets-768",
+    "beforeSize": [
+      768,
+      901
+    ],
+    "afterSize": [
+      768,
+      901
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-notifications-1440",
+    "beforeSize": [
+      1440,
+      1219
+    ],
+    "afterSize": [
+      1440,
+      1219
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-notifications-390",
+    "beforeSize": [
+      390,
+      1366
+    ],
+    "afterSize": [
+      390,
+      1366
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-notifications-768",
+    "beforeSize": [
+      768,
+      1254
+    ],
+    "afterSize": [
+      768,
+      1254
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-offers-1440",
+    "beforeSize": [
+      1440,
+      900
+    ],
+    "afterSize": [
+      1440,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-offers-390",
+    "beforeSize": [
+      390,
+      1452
+    ],
+    "afterSize": [
+      390,
+      1452
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-offers-768",
+    "beforeSize": [
+      768,
+      914
+    ],
+    "afterSize": [
+      768,
+      914
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-onboarding-1440",
+    "beforeSize": [
+      1440,
+      900
+    ],
+    "afterSize": [
+      1440,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-onboarding-390",
+    "beforeSize": [
+      390,
+      900
+    ],
+    "afterSize": [
+      390,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-onboarding-768",
+    "beforeSize": [
+      768,
+      900
+    ],
+    "afterSize": [
+      768,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-planForMe-1440",
+    "beforeSize": [
+      1440,
+      900
+    ],
+    "afterSize": [
+      1440,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-planForMe-390",
+    "beforeSize": [
+      390,
+      900
+    ],
+    "afterSize": [
+      390,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-planForMe-768",
+    "beforeSize": [
+      768,
+      900
+    ],
+    "afterSize": [
+      768,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-profile-1440",
+    "beforeSize": [
+      1440,
+      1125
+    ],
+    "afterSize": [
+      1440,
+      1125
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-profile-390",
+    "beforeSize": [
+      390,
+      1149
+    ],
+    "afterSize": [
+      390,
+      1149
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-profile-768",
+    "beforeSize": [
+      768,
+      1125
+    ],
+    "afterSize": [
+      768,
+      1125
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-reservation-1440",
+    "beforeSize": [
+      1440,
+      1406
+    ],
+    "afterSize": [
+      1440,
+      1406
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-reservation-390",
+    "beforeSize": [
+      390,
+      1406
+    ],
+    "afterSize": [
+      390,
+      1406
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-reservation-768",
+    "beforeSize": [
+      768,
+      1406
+    ],
+    "afterSize": [
+      768,
+      1406
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-restaurant-1440",
+    "beforeSize": [
+      1440,
+      1329
+    ],
+    "afterSize": [
+      1440,
+      1329
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-restaurant-390",
+    "beforeSize": [
+      390,
+      1773
+    ],
+    "afterSize": [
+      390,
+      1773
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-restaurant-768",
+    "beforeSize": [
+      768,
+      1541
+    ],
+    "afterSize": [
+      768,
+      1541
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-settings-1440",
+    "beforeSize": [
+      1440,
+      951
+    ],
+    "afterSize": [
+      1440,
+      951
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-settings-390",
+    "beforeSize": [
+      390,
+      1493
+    ],
+    "afterSize": [
+      390,
+      1493
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-settings-768",
+    "beforeSize": [
+      768,
+      962
+    ],
+    "afterSize": [
+      768,
+      962
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-wishlist-1440",
+    "beforeSize": [
+      1440,
+      900
+    ],
+    "afterSize": [
+      1440,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-wishlist-390",
+    "beforeSize": [
+      390,
+      900
+    ],
+    "afterSize": [
+      390,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  },
+  {
+    "screen": "customer-wishlist-768",
+    "beforeSize": [
+      768,
+      900
+    ],
+    "afterSize": [
+      768,
+      900
+    ],
+    "sameDimensions": true,
+    "pixelsDifferentExact": 0,
+    "pixelsDifferentAbove8": 0,
+    "differenceRatioAbove8": 0.0,
+    "pixelIdentical": true
+  }
+]
