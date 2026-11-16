@@ -1,0 +1,29 @@
+✔ unapproved identity denied then privileges remain scoped to verified resource (131.076808ms)
+✔ suspension sets revocation cutoff and audit trail exists (8.860031ms)
+✔ real PostgreSQL suspension immediately denies an already-verified bearer at the HTTP API boundary (150.811219ms)
+✔ revoked signed session stays denied across independent service instances (27.678179ms)
+✔ privileged request budget is enforced across concurrent service instances (69.331443ms)
+✔ business application stays pending, approval creates only its own scoped ownership (47.116844ms)
+✔ actual Business workspace HTTP route rejects pending, rejected, foreign and suspended identities (95.33181ms)
+✔ approved /auth/me business memberships enforce real PostgreSQL identity, approval, revocation and account/profile suspension (409.184485ms)
+✔ public discovery excludes unpublished, disabled and unapproved data (212.112728ms)
+✔ concurrent customer reservations share merchant capacity; repeated cancellation releases it once (100.446899ms)
+✔ simultaneous identical retries create one reservation and one outbox event (47.031116ms)
+✔ paid service confirmation, past slot and revoked session fail without consuming capacity (57.715631ms)
+✔ orders snapshot exact server totals, reject foreign products and stale pricing, and enter merchant inbox (109.8918ms)
+✔ venue configuration enforces merchant authority and supports indexed geographic discovery (133.908938ms)
+✔ Browse Plans obeys currency, guest/date/budget filters and quotes exact add-on prices without writes (55.672956ms)
+✔ private profile and wishlist are scoped, retry-safe and respect publication revocation (32.712903ms)
+✔ reviews require completed owned experiences and cannot reset moderator suppression (71.428474ms)
+✔ merchant/customer transitions generate private, deduplicated in-app notifications (25.968053ms)
+✔ support cases enforce ownership, replay keys, message limits and closed-state transitions (55.015921ms)
+✔ customer data tables and helper functions do not grant access to PUBLIC (6.237739ms)
+✔ two API instances share one atomic write budget (200.839067ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5015.252508

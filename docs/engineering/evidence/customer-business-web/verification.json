@@ -1,0 +1,263 @@
+{
+  "recordedAt": "2026-11-16T10:57:58.367523+00:00",
+  "base": "813ff1d25eff8eebb1063a0bca3aeb74a129fc41",
+  "branch": "integration/customer-business-web-completion",
+  "status": "review-build-with-documented-incomplete-features",
+  "productionReady": false,
+  "nodeTests": [
+    {
+      "name": "customer auth component",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "business auth component",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "auth proxy",
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "name": "platform proxy",
+      "passed": 4,
+      "failed": 0
+    },
+    {
+      "name": "Better Auth cookie/native/recovery lifecycle",
+      "passed": 1,
+      "failed": 0
+    },
+    {
+      "name": "optional MFA/phone/step-up/security",
+      "passed": 6,
+      "failed": 0
+    },
+    {
+      "name": "customer marketplace/authorization/business memberships",
+      "passed": 21,
+      "failed": 0
+    },
+    {
+      "name": "payment lifecycle and ledger",
+      "passed": 15,
+      "failed": 0
+    },
+    {
+      "name": "planning/PostGIS/package capacity",
+      "passed": 9,
+      "failed": 0
+    }
+  ],
+  "totalPassingNodeTests": 63,
+  "webChecks": {
+    "customer": [
+      "ESLint",
+      "TypeScript",
+      "Next production build"
+    ],
+    "business": [
+      "ESLint",
+      "TypeScript",
+      "Next production build"
+    ],
+    "knownBuildAdvisory": "Next-specific ESLint plugin is absent; ESLint itself passes."
+  },
+  "browser": {
+    "engine": "Chromium / Playwright",
+    "viewports": [
+      390,
+      768,
+      1440
+    ],
+    "backend": "local disposable PostgreSQL16/PostGIS and real Nest/Better Auth",
+    "customer": [
+      "real signup and cookie session",
+      "profile update persisted and read back",
+      "support case created",
+      "Plan for Me/Browse Plans navigation",
+      "six-step planning POST with honest no-match result",
+      "real free reservation from merchant-published availability",
+      "bookings/account/security navigation",
+      "logout and protected dashboard redirect",
+      "deferred/foreign API paths blocked",
+      "unserved design-preview is 404",
+      "no page errors"
+    ],
+    "business": [
+      "real signup and eight-step application",
+      "pending application has no approved membership",
+      "approved fixture owner creates branch/catalogue/availability",
+      "publishes free service for customer booking",
+      "dashboard/reservation/order/menu/service/settings navigation",
+      "logout and protected dashboard redirect",
+      "foreign/Admin API paths blocked",
+      "unserved design-preview is 404",
+      "no page errors"
+    ]
+  },
+  "accessibility": {
+    "engine": "axe-core via @axe-core/playwright",
+    "tags": [
+      "wcag2a",
+      "wcag2aa",
+      "wcag21aa"
+    ],
+    "scope": [
+      {
+        "page": "customer",
+        "violations": 0
+      },
+      {
+        "page": "business",
+        "violations": 0
+      },
+      {
+        "page": "planner",
+        "violations": 0
+      },
+      {
+        "page": "business-dashboard",
+        "violations": 0
+      },
+      {
+        "page": "business-onboarding",
+        "violations": 0
+      }
+    ],
+    "fullConformanceClaim": false
+  },
+  "payments": "Provider calls in database tests were isolated synthetic transports. No live provider payment or payout was verified.",
+  "excluded": [
+    "Azure/deployment",
+    "main merge",
+    "Admin implementation",
+    "mobile changes",
+    "new Rider/Dispatch integration"
+  ],
+  "sourceSha256": {
+    "apps/customer_web/app/access-denied/page.tsx": "f73dc36d631af28d4dd9e90f667ecb19ee74df15105bd1895dbe55275f3de61a",
+    "apps/customer_web/app/account-security/page.tsx": "bddd7a3dbc6a55eed2711c096a43f0c24ce245a887997e5be40fece35417a3da",
+    "apps/customer_web/app/api/auth/[...all]/route.ts": "dcc50ce593e57836ffb83e952c483027f0d1c23ffb21fdbf506d5e7d78e9a58a",
+    "apps/customer_web/app/api/platform/[...path]/route.ts": "5a2925521b30cba044361626db5f821b313944533ce8d7cbd02f9b889489277d",
+    "apps/customer_web/app/business/page.tsx": "87ca11be327df6cf1a9cc399633d2e53eb74646a97dabbaa87ea624b8cbeedbb",
+    "apps/customer_web/app/dashboard/page.tsx": "923802c72706e71234207b3b402e325907ae19d90b81cdf925926cc8366b9836",
+    "apps/customer_web/app/error.tsx": "e6ad81ac47d7a00986c074b56b8895169e0ee4446707c91d1d0dced295266a54",
+    "apps/customer_web/app/layout.tsx": "1ed1c9c767af212dbd3fd41209f4719f5573e6ff80b6363f2f8f0136e512506a",
+    "apps/customer_web/app/loading.tsx": "fe67b51baea0900f0f663ce0273259ba7f99689297492c355f180f96ebb1db8d",
+    "apps/customer_web/app/login/page.tsx": "e08daeb0567f5c0c3e544342e8a7a8bbce3e1dc335e756a1772e4cd3c71d6cc7",
+    "apps/customer_web/app/page.tsx": "bee4024844c906aebd4b5d645bbadaf68bd77d0d219c548e39491b468c154d87",
+    "apps/customer_web/app/phone-login/page.tsx": "f36ddd9dc9f5d7c6cb4921267d0e5801591d47078d546a5cf7d646418fe42514",
+    "apps/customer_web/app/phone-recovery/page.tsx": "79fe202b6d3c82a0e4237dd5c440248fff218b7db28a8b5f1f5a7836c9b3bd6c",
+    "apps/customer_web/app/recover/page.tsx": "f1969ea65f667064aab1c8141606b31fc2354580fef75941c9d595e8607cb451",
+    "apps/customer_web/app/register/page.tsx": "8b59e7e8c22763757092b994d3e0265de084588044831aa4184be951fec062ad",
+    "apps/customer_web/app/reset-password/page.tsx": "24527af86a69eca443b1867d45348d66ae64fb745fafb97026c1b63cb4d9a6ea",
+    "apps/customer_web/connected/AuthPage.tsx": "78f0dbf59f19b4fb87caf47bfd4bc127d9ec39198e52a71a8fbe72fae032a8af",
+    "apps/customer_web/connected/Client.tsx": "2b8e65700aa535049cb9bf550928c23e01920f2042c29b0fc67b3762004d8ca9",
+    "apps/customer_web/connected/CustomerApp.tsx": "d9738045e8b79969fb3776c9df44b697e018a414a7116ce1c24d86875e07fba0",
+    "apps/customer_web/connected/styles.css": "e2d8eeaed766281bcb055f5d792cb781cdbe46f8c300a386a9aa734966dcf017",
+    "apps/customer_web/webapp/App.tsx": "df731276ad6e44168f55b46d11eb0cd84bcfd62e127fd85c607384d276b3a99b",
+    "apps/customer_web/webapp/Client.tsx": "93ece19ffb031ed905b4bdab57930f240d6104d7fea0e158d5df37307978c67c",
+    "apps/customer_web/webapp/asset-manifest.json": "5f042faf60d4af6f620b7a330c5b19d6f892cffde8d10e09f488c81964396a0a",
+    "apps/customer_web/webapp/asset-substitutions.json": "81e2fa98607454902a87cff237cf7e91caaf6d9b39fa603df88c98aab71b3256",
+    "apps/customer_web/webapp/components/BottomNav.tsx": "78bd23fcd5968964a620b6279528e64338d19097a81fb2673e15f357a2760964",
+    "apps/customer_web/webapp/components/CalendarSheet.tsx": "0764179036e7d46b1f0728c8b7ceee333a2a8bdda130b67c8fa96da3936ddb21",
+    "apps/customer_web/webapp/components/FajifyLogo.tsx": "64ef1f4676c5b4cc53c4f84e08fab67a2e37cb1c8d433b99f7cae5350f6c6376",
+    "apps/customer_web/webapp/components/Icons.tsx": "7c6b978478b09d261775dced46c7cdb17bdac65501ed881de88c78a5eda19b31",
+    "apps/customer_web/webapp/components/QRTicket.tsx": "8acde85b41bda226bbc155e3926187f79d8cc8b2a49d61a8049cdf0a5caae580",
+    "apps/customer_web/webapp/components/SuccessOverlay.tsx": "414b320dc97468900d524c7e8714e1ce26182b41aba22c8bed71e2dd699f4e99",
+    "apps/customer_web/webapp/components/VehicleIllustration.tsx": "6fb1175b0530eb261ddbf90ed672b69dbb1647dbf634054239582f5345490630",
+    "apps/customer_web/webapp/components/VehicleIllustrations.tsx": "d2fcaafb80d843888131a9cc04814b2d75c03f9cb27c93eef4b69e3334bc3657",
+    "apps/customer_web/webapp/components/useDialogFocus.ts": "c93406ac3c38ded0344ba63c4779ec2650d7b6fa703c30ad3042475915326c48",
+    "apps/customer_web/webapp/data.ts": "420ebc8474cefedb8dd5f6bd0600a624f3882b363d1210fa3a55f5098fa63b3a",
+    "apps/customer_web/webapp/screens/BrowsePlansScreen.tsx": "57c14b9085234061779cd9f5b317bf20400dc589df38a0835ac52c74b487e548",
+    "apps/customer_web/webapp/screens/BusinessSignInScreen.tsx": "eb86378b3b734d95b35fae3463d0784edc45017f3675573826792a79d9d15162",
+    "apps/customer_web/webapp/screens/CartScreen.tsx": "fcf1f1e3cebf54bd129ed9e017c7edd2e1130836310968873a0d0c142feb1aca",
+    "apps/customer_web/webapp/screens/CheckoutScreen.tsx": "bcb636122b3a8f890b1017672c1e82c422319643735a95221451cae8062a8abd",
+    "apps/customer_web/webapp/screens/ConfirmationScreen.tsx": "2f3a5143af2a693d4c307d25d51c35580f855272891cb5037bb2d88994d337c9",
+    "apps/customer_web/webapp/screens/CreateEventScreen.tsx": "0a23cfbdc55cdcb43b9da7989305d0c7c18b66bdd508425fa970052a706a2b5f",
+    "apps/customer_web/webapp/screens/CustomerAuthScreen.tsx": "fa3376ebcfb6b195d6e09a00d18a03de39a9872e2444bd2af6fe8a0e39f8cff6",
+    "apps/customer_web/webapp/screens/DeliveryCartScreen.tsx": "aedb7995d1572e9906e8d4d99cb13272fae1e67858c81945dc6841cb9b991f44",
+    "apps/customer_web/webapp/screens/DeliveryRestaurantScreen.tsx": "54f41c7dd8e188edc5ebdf9f6a43494a3901ef90cc72111e5529ed6f6c27934f",
+    "apps/customer_web/webapp/screens/EventDetailScreen.tsx": "03ae5ebf52efb65323e6266b946e629e05154f8ed93dc218212f19d09834c450",
+    "apps/customer_web/webapp/screens/GlobalCartScreen.tsx": "31a4ad5b476b25ebbfaca6f400bae1d78f63b5898c486d5977a15c5a9ded44f9",
+    "apps/customer_web/webapp/screens/HelpScreen.tsx": "cb7ffd84b28d71130057221055ae88a77a4f623862ca704c9d276ac0d6097aa5",
+    "apps/customer_web/webapp/screens/HomeScreen.tsx": "24b887a8e78d44a1d09df7facc3523ef419a6fa585c8dce95a220d0daea8efa2",
+    "apps/customer_web/webapp/screens/InviteFriendsScreen.tsx": "a4bd4b6d4aae1cc2da57b94b0a08e3517c3341281f269b0d55e66dc5fa84f5a2",
+    "apps/customer_web/webapp/screens/LandingScreen.tsx": "b83d1db14bfed1e7766f5d95ddcfa039089b8a7f46468d99fee3d8c503d61f13",
+    "apps/customer_web/webapp/screens/MyTicketsScreen.tsx": "4cd4b25f0aec92e6cd78b21560fe152e42b1181e1f179642e694fa203e2ccd93",
+    "apps/customer_web/webapp/screens/NotificationsScreen.tsx": "1bf98f0d6b31ef4f37007bc3aa459e6ce7b3e9f498e6d6d18885941c0ec2b396",
+    "apps/customer_web/webapp/screens/OffersScreen.tsx": "7ab4eb537767fc697c62b9cafcf43d434c968fb052a5309cbea41f721dfa5305",
+    "apps/customer_web/webapp/screens/OnboardingScreen.tsx": "fea421ecd9b6377f8b632c631c4fa7cc9f24599b9de03ff8f1eecfe536ca12c5",
+    "apps/customer_web/webapp/screens/OrderTrackingScreen.tsx": "f2add5646d76e7d2f43975e48157d081dd07161166c5d5d8d358deefc639c3b3",
+    "apps/customer_web/webapp/screens/PlanForMeScreen.tsx": "120274c07fbf4939194b7e5540bfb91ef8efdcc8065426089bee5f452cba35cb",
+    "apps/customer_web/webapp/screens/ProfileScreen.tsx": "37e063791581a2948e1518101433ca3fac68af73e502d9f2e901e83e89b95329",
+    "apps/customer_web/webapp/screens/ReservationScreen.tsx": "2de9af2b13b01f84824494cf68d041c42b69c393859ff5363dd05c08a4c7f189",
+    "apps/customer_web/webapp/screens/RestaurantScreen.tsx": "14befe4e4f78fdecb3ee62aeecea015f49ecc4a591e93c2bd2e69a06a6650883",
+    "apps/customer_web/webapp/screens/RideSignInScreen.tsx": "c372142d59c06e4aeca968a2a70a478c355bc46c8a106fa4ad07517714df985d",
+    "apps/customer_web/webapp/screens/SettingsScreen.tsx": "ff368d490dd370eef88f38024d3627e76f722d91c10a5708057a173b39ee0d44",
+    "apps/customer_web/webapp/screens/TransportationScreen.tsx": "bd35a4d7df87a2e2c5efe89db72557f8a0e0ff269a426dfd5d713c737fe2a7ff",
+    "apps/customer_web/webapp/screens/WishlistScreen.tsx": "a36d56827224d7a41723725e09d253b4ece66bbb5259d12dfe28bfad1909bec0",
+    "apps/customer_web/webapp/store/bookings.ts": "0bc8c00d1d40eb7550ffb70a812ef39f9be0078f2c2ea542d2b536851080a983",
+    "apps/customer_web/webapp/store/cart.ts": "f5ac8e2ac9fdaaa46fdb70bb935df3988ff6bea56cec84d4347fc7d3d32bd8ba",
+    "apps/customer_web/webapp/store/darkMode.ts": "8d8538d3166185c25afeef194e83e6dbbab92c64007e9816dc93ec011073644e",
+    "apps/customer_web/webapp/store/saved.ts": "102e2218d9db09a8767f38ad99bfc93351c0a5880a901be049e2344b76e447dc",
+    "apps/customer_web/webapp/styles.css": "a6d7096e3f7f15f96592f9961b48af6cb21b032293d292bc909ad0a843b03b43",
+    "apps/business_web/app/access-denied/page.tsx": "f73dc36d631af28d4dd9e90f667ecb19ee74df15105bd1895dbe55275f3de61a",
+    "apps/business_web/app/account-security/page.tsx": "bddd7a3dbc6a55eed2711c096a43f0c24ce245a887997e5be40fece35417a3da",
+    "apps/business_web/app/api/auth/[...all]/route.ts": "dcc50ce593e57836ffb83e952c483027f0d1c23ffb21fdbf506d5e7d78e9a58a",
+    "apps/business_web/app/api/platform/[...path]/route.ts": "3021314c61a79a9f99c587ef4c80f23555faa57082ae3e4e2d783aad7caadc48",
+    "apps/business_web/app/dashboard/page.tsx": "ca3de0bb1b537b6540b29e71fa08d9670f969db2bbf56b5b9516106cccd7742b",
+    "apps/business_web/app/error.tsx": "e6ad81ac47d7a00986c074b56b8895169e0ee4446707c91d1d0dced295266a54",
+    "apps/business_web/app/layout.tsx": "029b5b15f22e24a5f35a9ea92e0804b61a7cd2078b29d0744a819019883437ac",
+    "apps/business_web/app/loading.tsx": "fe67b51baea0900f0f663ce0273259ba7f99689297492c355f180f96ebb1db8d",
+    "apps/business_web/app/login/page.tsx": "e08daeb0567f5c0c3e544342e8a7a8bbce3e1dc335e756a1772e4cd3c71d6cc7",
+    "apps/business_web/app/page.tsx": "3da4e88e445439e21ad5376a2b7b16a90da341aa2e573c1f3e57c0a44d37ce6e",
+    "apps/business_web/app/phone-login/page.tsx": "f36ddd9dc9f5d7c6cb4921267d0e5801591d47078d546a5cf7d646418fe42514",
+    "apps/business_web/app/phone-recovery/page.tsx": "79fe202b6d3c82a0e4237dd5c440248fff218b7db28a8b5f1f5a7836c9b3bd6c",
+    "apps/business_web/app/recover/page.tsx": "f1969ea65f667064aab1c8141606b31fc2354580fef75941c9d595e8607cb451",
+    "apps/business_web/app/register/page.tsx": "8b59e7e8c22763757092b994d3e0265de084588044831aa4184be951fec062ad",
+    "apps/business_web/app/reset-password/page.tsx": "24527af86a69eca443b1867d45348d66ae64fb745fafb97026c1b63cb4d9a6ea",
+    "apps/business_web/connected/AuthPage.tsx": "1368a7cd08d45d96e5292552d84a97f13bd5822de6863c3e76b6197190fa810e",
+    "apps/business_web/connected/Client.tsx": "b2680b232dba532ae08119556d24dee47a0a106f13f29a59d65a23828869b369",
+    "apps/business_web/connected/NavIcon.tsx": "44e652150c86f1f1cee39c6224395748f401dd6f58c234da4b25fa4cf0b27208",
+    "apps/business_web/connected/Overview.tsx": "9a99bf8d1b758e1d3e8454295415e0097a6095da9024e7ba0aa5fb87343af919",
+    "apps/business_web/connected/styles.css": "7e574c9bbf6c49ac291f1a849b797d960ed346225634d5cad5338b61eb1c6e0d",
+    "apps/business_web/webapp/App.tsx": "6f4f1621404aac4b4eec836420ac59334f809c7d0f55feb9ddcd7fe6e19938b3",
+    "apps/business_web/webapp/Client.tsx": "4009b0e5c8d6623a8b76a8c48f575c18ea43ecb30242f2562abf10b9e5e5297a",
+    "apps/business_web/webapp/asset-manifest.json": "c2f5b3ae2786f8392a13cb1804bd8f256a9dae0ceb72538b12c559c312c083fe",
+    "apps/business_web/webapp/asset-substitutions.json": "e8bcebf3b8ecbd6ad410f9450ff1089ad768b1e16165c35fcf9d251086f57a1e",
+    "apps/business_web/webapp/businessHealth.ts": "a75ba77e4d1ca82d36bcdc887b8228fb59686773a0e9fba2c5591199092ed039",
+    "apps/business_web/webapp/components/FajifyLogo.tsx": "64ef1f4676c5b4cc53c4f84e08fab67a2e37cb1c8d433b99f7cae5350f6c6376",
+    "apps/business_web/webapp/components/QRScanner.tsx": "d212df168f220d19e6a64c6569640fc6ff26e8160c48208501b882fdde0fbf9e",
+    "apps/business_web/webapp/components/useDialogFocus.ts": "c93406ac3c38ded0344ba63c4779ec2650d7b6fa703c30ad3042475915326c48",
+    "apps/business_web/webapp/font-manifest.json": "b6480cfcf18ec5f2f1d66f067e11db22fe4465e60287df1c49a74563ec6dc89f",
+    "apps/business_web/webapp/screens/BusinessOnboardingScreen.tsx": "bfe6d3cc2c70c6775680b429e73f03bacf34d779df1e215ef70f8719f635cd31",
+    "apps/business_web/webapp/screens/BusinessSignInScreen.tsx": "4b03902945d0117c75d97dcbb4bf68b1e45d8c90a95b99f47561399229d90200",
+    "apps/business_web/webapp/screens/VendorDashboardScreen.tsx": "7464bd9f416ce94a239916363ad6cfd4389ec3262ffe39efe1328ddbeb105e55",
+    "apps/business_web/webapp/store/darkMode.ts": "8d8538d3166185c25afeef194e83e6dbbab92c64007e9816dc93ec011073644e",
+    "apps/business_web/webapp/store/useBusinessState.ts": "530ffd82d79499b84c7eb3b2d8d18a964e7e167bbfd5d58594533f8e3ef88863",
+    "apps/business_web/webapp/styles.css": "d5aeb9cb5bf4dd59f19b8a7a2fd834ee0f07fa5d6eb2b7756b503030516cc372",
+    "packages/web_ui/client.tsx": "07188af0c756f3dc1ac83f90a60ce142cc0abee568e486a3fbbebdf73af26ce2",
+    "packages/web_ui/contracts.ts": "0cd9e45cfea5a508c607a03054557e889cff907705291594c4a59363ee2d0d55",
+    "packages/web_ui/package.json": "e01ac8b41c3545ea0e4f86e0b558ccf2c900531ab37609fb0c015a73b1ace38c",
+    "packages/web_ui/routes.json": "e1788208f7614a46a129f9c1eddf90f0e625b68f3c45584caa4429eb995fcae2",
+    "packages/web_ui/scripts/routes.mjs": "61204164a2c4bfa4f38a4d8110ee151214bd89d1578f7a77e8eb356aa3407ed4",
+    "packages/web_ui/server.ts": "372cb5523a7ca01210cd6825dc1927843b9e2f9a410756d0374a791e6adb3609",
+    "packages/web_ui/styles.css": "ed05dca140d3f44eec636b8504d112c7608f2f6a4024d7f9fd2bd683110a9ec4",
+    "packages/web_ui/test/proxy.test.ts": "ecec5df07a1ab2680d96038165b8b0ab26796703fb24da3e0d6a879ba7331a03",
+    "packages/web_ui/types.ts": "cc4484c5f396b30450e5e4835aa0441e5174657203891d5f2441015075c9e4cd",
+    "packages/web_auth/client.ts": "0ff416ff427ce50adc2efced40ab0374062ec565e67eee42dbb790c8502276bc",
+    "packages/web_auth/config.ts": "fc161eaf433b42b149aaef6a1b5381d5655800fbc2e24da5a33ca0c49b3f6ecf",
+    "packages/web_auth/form.tsx": "b44c169cd515cb617764fb2d1724e0eada1cbdba287a7d2adb607e7583808a0f",
+    "packages/web_auth/package.json": "2e86315d744e9f22e047f76d347b7d07e6baf0cf1b479b897a23f62f1c847fb9",
+    "packages/web_auth/proxy.ts": "bcf82324f46270031e78075f6c1bb6fea1adda5965c9894ffb709b8eeba3a7c6",
+    "packages/web_auth/security.tsx": "0f8c7241d39addde43fdad9563fb56ed5c62f43d78fec4c909c45b69b9022895",
+    "packages/web_auth/server.ts": "6455bee080e64ccc18f72d94b688d64b72dbffef29dc297ab8ecae391d6b0fa2",
+    "packages/web_auth/test/proxy.test.ts": "0315607d80fce0951e780e0d9e997930c2ee64e4e981928e915245c56e7d2e2b"
+  },
+  "implementationCommit": "2f466eee171fac6abfaa5dfcc2e5b25ecb20e7a3",
+  "pullRequest": "https://github.com/fajify1-ai/Fajify/pull/28"
+}

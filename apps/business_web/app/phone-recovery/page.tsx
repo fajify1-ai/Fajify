@@ -1,1 +1,2 @@
-import {AuthForm} from "@faji/web-auth/form";export default function Page(){return <AuthForm mode="phone-reset"/>;}
+import {AuthPage} from '../../connected/AuthPage';
+export default function Page(){return <AuthPage mode="phone-reset"/>;}

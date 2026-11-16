@@ -1,0 +1,32 @@
+[
+  {
+    "app": "customer",
+    "url": "https://localhost:3440/login",
+    "violations": [],
+    "passes": 23
+  },
+  {
+    "app": "business",
+    "url": "https://localhost:3443/login",
+    "violations": [],
+    "passes": 23
+  },
+  {
+    "app": "planner",
+    "url": "https://localhost:3440/#planForMe",
+    "violations": [],
+    "passes": 18
+  },
+  {
+    "app": "business-dashboard",
+    "url": "https://localhost:3443/dashboard",
+    "violations": [],
+    "passes": 21
+  },
+  {
+    "app": "business-onboarding",
+    "url": "https://localhost:3443/dashboard",
+    "violations": [],
+    "passes": 14
+  }
+]
