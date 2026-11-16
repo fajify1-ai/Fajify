@@ -83,7 +83,7 @@ Key code: `apps/api/src/auth/better-auth.service.ts`, `security.controller.ts`, 
 
 ## Migration readiness and rollout
 
-**Disposable rehearsal PASS; real-user migration NOT READY / NOT AUTHORIZED.** Follow [IDENTITY_MIGRATION_RUNBOOK.md](../operations/IDENTITY_MIGRATION_RUNBOOK.md). Registration stays closed during reconciliation. Independently review legacy subjects, collisions, role inventory and suspensions; verify ownership through a supervised process, never an email match. Claim preparation is owner-only and currently intentionally restricted to disposable targets.
+**Disposable rehearsal PASS; real-user migration NOT READY / NOT AUTHORIZED.** Follow [superseding pre-launch decision](BETTER_AUTH_MERGE_READINESS.md). Registration stays closed during reconciliation. Independently review legacy subjects, collisions, role inventory and suspensions; verify ownership through a supervised process, never an email match. Claim preparation is owner-only and currently intentionally restricted to disposable targets.
 
 Before any real cutover: obtain separate authorization and a reviewed execution change, rehearse with an approved sanitized inventory, approve secure claim delivery and expiry/reissue operations, escrow the corresponding auth secret separately, restore/verify a backup, define a write-freeze window and reconcile post-snapshot bookings/transactions. A code rollback alone does not recover the old identity system after new claims/writes. Restore into a different database and verify domain references; never overwrite newer business data blindly.
 
