@@ -5,6 +5,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import CustomerAuthScreen from '../webapp/screens/CustomerAuthScreen';
 import BusinessSignInScreen from '../../business_web/webapp/screens/BusinessSignInScreen';
 import {AuthForm} from '@faji/web-auth/form';
+import BusinessEntry from '@faji/business-web/webapp/components/BusinessEntry';
 import DeferredDelivery from '../unified/DeferredDelivery';
 Object.assign(globalThis,{React});
 test('restored real credential forms require credentials and keep fixture bypass outside real mode',()=>{
@@ -32,4 +33,10 @@ test('delivery policy blocks reset and SMS transports while preserving password 
  const {requiresDeferredDelivery}=await import('../unified/delivery-policy');
  for(const path of ['request-password-reset','reset-password','phone-number/send-otp','phone-number/verify','two-factor/send-otp','verify-email'])assert.equal(requiresDeferredDelivery('/api/auth/'+path),true,path);
  for(const path of ['sign-in/email','sign-up/email','sign-out','get-session','two-factor/verify-totp','two-factor/verify-backup-code','faji/step-up'])assert.equal(requiresDeferredDelivery('/api/auth/'+path),false,path);
+});
+
+
+test('public Business entry reuses the original composition and opens real workspace actions',()=>{
+ const html=renderToStaticMarkup(React.createElement(BusinessEntry,{preview:false,onSignIn(){},onRegister(){},onExplore(){}}));
+ assert.match(html,/Your operation/);assert.match(html,/d2aaaff55cdcccab.jpg/);assert.match(html,/Business workspace/);assert.doesNotMatch(html,/Explore merchant demo/);
 });
