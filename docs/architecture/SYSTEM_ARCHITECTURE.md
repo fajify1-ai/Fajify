@@ -41,18 +41,20 @@ The source specification explicitly permits alternatives for payment gateway, em
 
 ## 3. Application topology
 ```text
-Flutter: Customer | Business | Ride & Dispatch (native Android/iOS)
-Next.js: Customer Web | Admin Web | Business Web | Ride & Dispatch Web
-                       \                           /
-                        versioned REST / WebSockets
-                                 |
-                     NestJS API (modular monolith)
-                       |        |         |
-                  Better Auth  Redis     Background workers (BullMQ)
-                       |        |         |
-                 Faji PostgreSQL + PostGIS
-                                         |
-                               S3 / maps / payments / email / push
+Native apps (Flutter/Dart)             Web apps (Next.js/React/TypeScript)
+Customer | Business | Ride/Dispatch    Customer | Business | Ride/Dispatch | Admin
+                 \                      /
+                  \   HTTPS / WebSockets
+                   \        /
+                  NestJS modular monolith
+                     |             |
+          Better Auth (embedded)   Domain APIs + authorization
+                     \             /
+                    Faji PostgreSQL + PostGIS
+                          |
+                Redis / BullMQ workers
+                          |
+             Storage / Maps / Payments / Email / Push
 ```
 Better Auth authentication records and Faji application data share the application PostgreSQL database, with clear schema ownership. Profiles, memberships and domain records remain Faji-owned; use stable internal identity references.
 
