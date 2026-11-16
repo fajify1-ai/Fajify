@@ -13,4 +13,3 @@ branch refs/heads/integration/customer-business-web-completion
 worktree /workspace/Fajify-unified
 HEAD 98e0e0f1b23bebadbfcf3149716645154e5d746f
 branch refs/heads/integration/unified-application-preservation
-
