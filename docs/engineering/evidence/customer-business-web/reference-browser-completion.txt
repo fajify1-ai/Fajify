@@ -1,0 +1,1 @@
+PASS export comparison screenshots captured from scratch Vite runners outside repository.

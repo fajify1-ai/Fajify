@@ -1,0 +1,146 @@
+export const restaurants = [
+  {
+    id: 'r1',
+    name: 'Maison Sable',
+    cuisine: 'Modern French',
+    neighborhood: 'Le Marais',
+    rating: 4.8,
+    reviews: 312,
+    capacity: 60,
+    currentGuests: 38,
+    priceRange: '$$$$',
+    image: '/reference/a1d67823c1440731.jpg',
+    thumbImage: '/reference/69f04e03f7f54ebb.jpg',
+    tags: ['Romantic', 'Tasting menu', 'Wine bar'],
+    description: 'Refined French cuisine in a candlelit stone-walled dining room. Chef Élodie Martin brings her Lyonnaise roots to a ever-changing seasonal tasting menu.',
+    hours: 'Tue–Sun, 6pm – 11pm',
+    address: '14 Rue des Rosiers, Paris 4e',
+    phone: '+33 1 42 77 14 08',
+    menu: [
+      { category: 'Starters', items: [
+        { name: 'Foie Gras Torchon', desc: 'Sauternes gel, brioche, fig compote', price: 28 },
+        { name: 'Burrata & Heirloom Tomato', desc: 'Aged balsamic, basil oil, sea salt', price: 18 },
+        { name: 'Scallop Crudo', desc: 'Yuzu, radish, micro herbs', price: 22 },
+      ]},
+      { category: 'Mains', items: [
+        { name: 'Duck Confit', desc: 'Lentils du Puy, orange jus, crispy skin', price: 42 },
+        { name: 'Sole Meunière', desc: 'Brown butter, capers, lemon, haricots verts', price: 46 },
+        { name: 'Wagyu Bavette', desc: 'Bone marrow butter, frites, béarnaise', price: 58 },
+      ]},
+      { category: 'Desserts', items: [
+        { name: 'Île Flottante', desc: 'Praline, salted caramel, vanilla crème', price: 14 },
+        { name: 'Tarte Tatin', desc: 'Crème fraîche, Calvados caramel', price: 12 },
+      ]},
+    ],
+  },
+  {
+    id: 'r2',
+    name: 'Ōkina Ramen',
+    cuisine: 'Japanese',
+    neighborhood: 'Shoreditch',
+    rating: 4.6,
+    reviews: 547,
+    capacity: 45,
+    currentGuests: 41,
+    priceRange: '$$',
+    image: '/reference/b21ea8787c63f4af.jpg',
+    thumbImage: '/reference/53a7e65632d4f5b6.jpg',
+    tags: ['Lively', 'Counter seating', 'Late night'],
+    description: 'Tonkotsu broth simmered 18 hours, served in a narrow, steam-filled space that feels lifted straight from Fukuoka. Almost always a queue — worth it.',
+    hours: 'Daily, 12pm – 2am',
+    address: '7 Bethnal Green Road, London E1',
+    phone: '+44 20 7739 0811',
+    menu: [
+      { category: 'Ramen', items: [
+        { name: 'Tonkotsu Classic', desc: 'Pork belly chashu, soft egg, nori, bamboo', price: 16 },
+        { name: 'Spicy Miso', desc: 'Ground pork, corn, butter, chilli oil', price: 17 },
+        { name: 'Shoyu Tori', desc: 'Chicken broth, yuzu kosho, menma', price: 15 },
+      ]},
+      { category: 'Sides', items: [
+        { name: 'Gyoza (6pc)', desc: 'Pork & cabbage, ponzu dip', price: 9 },
+        { name: 'Karaage', desc: 'Double-fried chicken, kewpie mayo', price: 11 },
+        { name: 'Extra Chashu', desc: '3 slices braised pork belly', price: 6 },
+      ]},
+    ],
+  },
+  {
+    id: 'r3',
+    name: 'Alma Verde',
+    cuisine: 'Contemporary Mexican',
+    neighborhood: 'Condesa',
+    rating: 4.7,
+    reviews: 289,
+    capacity: 80,
+    currentGuests: 24,
+    priceRange: '$$$',
+    image: '/reference/4811c631944d7df0.jpg',
+    thumbImage: '/reference/33c13c9bade83a81.jpg',
+    tags: ['Garden terrace', 'Mezcal bar', 'Group-friendly'],
+    description: 'Chef Camila Reyes reimagines ancestral Mexican flavors through a modern lens. Sit on the lush terrace with a smoky mezcal in hand.',
+    hours: 'Wed–Mon, 1pm – 12am',
+    address: 'Calle Ámsterdam 125, Condesa, CDMX',
+    phone: '+52 55 5211 4400',
+    menu: [
+      { category: 'Para Compartir', items: [
+        { name: 'Guacamole Clásico', desc: 'Serrano, lime, cilantro, totopos', price: 12 },
+        { name: 'Tlayuda Oaxaqueña', desc: 'Black bean, tasajo, quesillo, asiento', price: 18 },
+        { name: 'Ceviche Veracruzano', desc: 'Shrimp, tomato, olives, jalapeño, tostadas', price: 16 },
+      ]},
+      { category: 'Platos Fuertes', items: [
+        { name: 'Mole Negro', desc: 'Duck leg confit, sesame, chocolate, rice', price: 32 },
+        { name: 'Camarones al Ajillo', desc: 'Prawns, guajillo butter, grilled corn', price: 28 },
+        { name: 'Birria de Res', desc: 'Braised short rib, consommé, tortillas', price: 34 },
+      ]},
+    ],
+  },
+]
+
+export const upcomingEvents = [
+  {
+    id: 'e1',
+    title: "Friday Jazz & Tapas Night",
+    restaurantId: 'r1',
+    restaurantName: 'Maison Sable',
+    date: 'Fri 8 Aug, 8pm',
+    guests: 14,
+    maxGuests: 20,
+    ticketPrice: 35,
+    image: '/reference/0d2dd0d1594a9d13.jpg',
+    host: 'Sophie L.',
+    hostAvatar: '/reference/467b6b06e1735885.jpg',
+    description: 'An intimate Friday evening of live jazz with a curated tapas menu. 20 spots only — grab yours before they go.',
+    attendees: [
+      '/reference/9b7b4c048eadadfb.jpg',
+      '/reference/9fc3e122a09abe95.jpg',
+      '/reference/eeb345f74b9f2a0d.jpg',
+      '/reference/9db30681a14bc0e2.jpg',
+    ],
+  },
+  {
+    id: 'e2',
+    title: "Ramen Crawl — Shoreditch",
+    restaurantId: 'r2',
+    restaurantName: 'Ōkina Ramen',
+    date: 'Sat 9 Aug, 7pm',
+    guests: 8,
+    maxGuests: 12,
+    ticketPrice: 0,
+    image: '/reference/6e7ff50db771dfba.jpg',
+    host: 'Marcus T.',
+    hostAvatar: '/reference/654304bae64905bb.jpg',
+    description: "A casual ramen crawl starting at Ōkina then hitting two more spots. No tickets needed — just show up hungry.",
+    attendees: [
+      '/reference/467b6b06e1735885.jpg',
+      '/reference/9fc3e122a09abe95.jpg',
+      '/reference/eeb345f74b9f2a0d.jpg',
+    ],
+  },
+]
+
+upcomingEvents.push(
+  { ...upcomingEvents[0], id: 'bb2', title: 'Art Lagos Festival', restaurantId: 'v4', restaurantName: 'Balmoral Convention Centre', date: 'This weekend · 10:00AM', ticketPrice: 0, description: 'Discover art, music and culture in Lagos. A local preview of the festival experience.' },
+  { ...upcomingEvents[1], id: 'bb6', title: 'Ilashe Beach Party', restaurantId: 'v8', restaurantName: 'Ilashe Beach Resort', date: 'Tomorrow · 6:00PM', ticketPrice: 15000, description: 'Spend the evening by the ocean with music, food and friends.' },
+)
+
+export const getRestaurant = (id: string) => restaurants.find(r => r.id === id)
+export const getEvent = (id: string) => upcomingEvents.find(e => e.id === id)

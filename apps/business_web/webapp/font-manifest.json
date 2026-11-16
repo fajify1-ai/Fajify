@@ -1,0 +1,134 @@
+[
+  {
+    "family": "Inter",
+    "weight": "400",
+    "source": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+    "local": "/reference/a699af1dea30b799.ttf"
+  },
+  {
+    "family": "Inter",
+    "weight": "700",
+    "source": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+    "local": "/reference/6f49e1b28bce7339.ttf"
+  },
+  {
+    "family": "Montserrat",
+    "weight": "400",
+    "source": "https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Ew-.ttf",
+    "local": "/reference/96cf68ad83894061.ttf"
+  },
+  {
+    "family": "Montserrat",
+    "weight": "500",
+    "source": "https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtZ6Ew-.ttf",
+    "local": "/reference/efae703531c89eeb.ttf"
+  },
+  {
+    "family": "Montserrat",
+    "weight": "600",
+    "source": "https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCu170w-.ttf",
+    "local": "/reference/bcc2c8b38b3be4ef.ttf"
+  },
+  {
+    "family": "Montserrat",
+    "weight": "700",
+    "source": "https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-.ttf",
+    "local": "/reference/b6b3e4f2bbe4463d.ttf"
+  },
+  {
+    "family": "Montserrat",
+    "weight": "800",
+    "source": "https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCvr70w-.ttf",
+    "local": "/reference/b931b96dad931f35.ttf"
+  },
+  {
+    "family": "Montserrat",
+    "weight": "900",
+    "source": "https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCvC70w-.ttf",
+    "local": "/reference/0463e08122fee338.ttf"
+  },
+  {
+    "family": "Montserrat Alternates",
+    "weight": "700",
+    "source": "https://fonts.gstatic.com/s/montserratalternates/v18/mFTiWacfw6zH4dthXcyms1lPpC8I_b0juU0xUIL1AA.ttf",
+    "local": "/reference/8264e8a757bc9492.ttf"
+  },
+  {
+    "family": "Nunito",
+    "weight": "900",
+    "source": "https://fonts.gstatic.com/s/nunito/v32/XRXI3I6Li01BKofiOc5wtlZ2di8HDBImRTM.ttf",
+    "local": "/reference/4f6fb361835e2fe2.ttf"
+  },
+  {
+    "family": "Outfit",
+    "weight": "300",
+    "source": "https://fonts.gstatic.com/s/outfit/v15/QGYyz_MVcBeNP4NjuGObqx1XmO1I4W61C4E.ttf",
+    "local": "/reference/a182bc91a92ce5f7.ttf"
+  },
+  {
+    "family": "Outfit",
+    "weight": "400",
+    "source": "https://fonts.gstatic.com/s/outfit/v15/QGYyz_MVcBeNP4NjuGObqx1XmO1I4TC1C4E.ttf",
+    "local": "/reference/3f704e45d6b67e8d.ttf"
+  },
+  {
+    "family": "Outfit",
+    "weight": "500",
+    "source": "https://fonts.gstatic.com/s/outfit/v15/QGYyz_MVcBeNP4NjuGObqx1XmO1I4QK1C4E.ttf",
+    "local": "/reference/05b877abde46f807.ttf"
+  },
+  {
+    "family": "Outfit",
+    "weight": "600",
+    "source": "https://fonts.gstatic.com/s/outfit/v15/QGYyz_MVcBeNP4NjuGObqx1XmO1I4e6yC4E.ttf",
+    "local": "/reference/f168ede1842dac92.ttf"
+  },
+  {
+    "family": "Outfit",
+    "weight": "700",
+    "source": "https://fonts.gstatic.com/s/outfit/v15/QGYyz_MVcBeNP4NjuGObqx1XmO1I4deyC4E.ttf",
+    "local": "/reference/7ed5c1c49c73b965.ttf"
+  },
+  {
+    "family": "Playfair Display",
+    "weight": "400",
+    "source": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.ttf",
+    "local": "/reference/5ae86d38cfa3525e.ttf"
+  },
+  {
+    "family": "Playfair Display",
+    "weight": "600",
+    "source": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKebukDQ.ttf",
+    "local": "/reference/c67a6241b1e0d6ae.ttf"
+  },
+  {
+    "family": "Playfair Display",
+    "weight": "700",
+    "source": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiukDQ.ttf",
+    "local": "/reference/8a70c7995340f54c.ttf"
+  },
+  {
+    "family": "Roboto",
+    "weight": "400",
+    "source": "https://fonts.gstatic.com/s/roboto/v51/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWubEbWmT.ttf",
+    "local": "/reference/d8dc5a5f3c90f50e.ttf"
+  },
+  {
+    "family": "Roboto",
+    "weight": "500",
+    "source": "https://fonts.gstatic.com/s/roboto/v51/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWub2bWmT.ttf",
+    "local": "/reference/c14c6f78e26d1c8e.ttf"
+  },
+  {
+    "family": "Roboto",
+    "weight": "600",
+    "source": "https://fonts.gstatic.com/s/roboto/v51/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWuYaammT.ttf",
+    "local": "/reference/1732806670364de1.ttf"
+  },
+  {
+    "family": "Roboto",
+    "weight": "700",
+    "source": "https://fonts.gstatic.com/s/roboto/v51/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWuYjammT.ttf",
+    "local": "/reference/17dbcf71ea4dcfbb.ttf"
+  }
+]
