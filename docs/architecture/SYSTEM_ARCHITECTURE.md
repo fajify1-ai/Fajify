@@ -1,5 +1,5 @@
 # Faji — System Architecture
-**Classification:** Engineering specification | **Baseline:** v1.0 | **Status:** Established architecture
+**Classification:** Engineering specification | **Baseline:** v1.1 | **Status:** Approved target architecture; implementation migration pending
 
 ## 1. Product and application boundaries
 Faji is a unified lifestyle, hospitality, entertainment, commerce, and mobility platform with four operational domains:
@@ -16,13 +16,13 @@ The architecture supports Android, iOS and web. The backend is a **NestJS modula
 | Customer, Business, Ride & Dispatch mobile | Flutter / Dart | Android and iOS clients |
 | Customer public website | Next.js / React / TypeScript | SEO, browsing, booking, commerce, accounts |
 | Administration website | Next.js / React / TypeScript | Platform governance and operations |
-| Business web | Flutter Web | Authenticated merchant operations |
-| Dispatcher web (where needed) | Flutter Web | Dispatcher workflows |
+| Business web | Next.js / React / TypeScript | Authenticated merchant operations |
+| Dispatcher web (where needed) | Next.js / React / TypeScript | Dispatcher workflows |
 | Backend | NestJS / Node.js / TypeScript | Domain APIs, authorization and orchestration |
 | Primary relational data | PostgreSQL | Authoritative state and transactions |
 | Spatial data | PostGIS | Nearby venues, coverage and driver proximity |
 | Data access | Drizzle ORM + PostgreSQL SQL | Typed queries, migrations, advanced SQL |
-| Authentication | Keycloak / OAuth 2.0 / OpenID Connect | Identity, sessions, MFA |
+| Authentication | Better Auth (application-hosted, PostgreSQL-backed) | Identity, sessions, MFA |
 | Caching and coordination | Redis | Cache, rate limits, ephemeral ride location |
 | Background processing | BullMQ | Retryable jobs, notifications, reconciliation |
 | Real time | NestJS WebSockets | Trip, order, booking and dispatch events |
@@ -41,27 +41,30 @@ The source specification explicitly permits alternatives for payment gateway, em
 
 ## 3. Application topology
 ```text
-Flutter: Customer | Business | Ride & Dispatch     Next.js: Customer Web | Admin Web
-                       \                           /
-                        versioned REST / WebSockets
-                                 |
-                     NestJS API (modular monolith)
-                       |        |         |
-                    Keycloak  Redis     Background workers (BullMQ)
-                       |        |         |
-           Identity PostgreSQL  |      PostgreSQL + PostGIS
-                                         |
-                               S3 / maps / payments / email / push
+Native apps (Flutter/Dart)             Web apps (Next.js/React/TypeScript)
+Customer | Business | Ride/Dispatch    Customer | Business | Ride/Dispatch | Admin
+                 \                      /
+                  \   HTTPS / WebSockets
+                   \        /
+                  NestJS modular monolith
+                     |             |
+          Better Auth (embedded)   Domain APIs + authorization
+                     \             /
+                    Faji PostgreSQL + PostGIS
+                          |
+                Redis / BullMQ workers
+                          |
+             Storage / Maps / Payments / Email / Push
 ```
-Identity and application data are isolated logically: Keycloak owns credentials and identity-provider records; Faji PostgreSQL owns profiles, memberships, business records, bookings, ride operations and finances. Application records reference the immutable Keycloak subject identifier.
+Better Auth authentication records and Faji application data share the application PostgreSQL database, with clear schema ownership. Profiles, memberships and domain records remain Faji-owned; use stable internal identity references.
 
 ## 4. Identity and authorization
-- Flutter uses OIDC Authorization Code + PKCE through secure system-browser authentication and platform-appropriate token storage.
-- Next.js uses server-side OIDC sessions and secure HttpOnly cookies.
-- NestJS validates signed access tokens (issuer, audience, key, expiry, claims); all resource-scoped permissions are enforced on the server.
-- One identity may be a customer, business owner/staff, driver, dispatcher or administrator.
-- Authorization additionally checks business/branch membership, driver approval, dispatcher area, suspension, ownership and admin scope; a UI route or Keycloak role alone is insufficient.
-- Administrative access requires stronger authentication controls and audit logging.
+- Better Auth is embedded within the Faji backend/application, primarily integrated with NestJS; it is not an externally hosted identity provider.
+- Registration, login, password recovery, phone OTP, logout and session management take place entirely within each Faji web or native mobile app. No system browser, third-party login page or browser-based OIDC redirect is used.
+- Better Auth stores authentication identities, credentials and sessions in Faji PostgreSQL; protect secrets and credentials using approved secure mechanisms. The precise NestJS adapter and client session transport require implementation review.
+- NestJS validates authenticated sessions/tokens and enforces all resource-scoped permissions on the server, including memberships, business/branch scope, driver approval, dispatcher area, suspensions and administrator scopes.
+- One account can be customer, business staff/owner, driver, dispatcher and administrator simultaneously. UI guards are convenience only, not authorization.
+- MFA is optional for end users; privileged operations require risk-appropriate step-up and audit controls without assuming universal mandatory enrollment.
 
 ## 5. Backend module ownership
 The application exposes bounded modules for: identity integration, users, organizations/branches, merchant verification, catalogue, discovery, experience planning, availability, reservations, events, ticketing, orders, payments, ledger, settlements, ride operations, dispatch, location, notifications, reviews, promotions, support, administration, audit and reporting.
@@ -69,7 +72,7 @@ The application exposes bounded modules for: identity integration, users, organi
 Rules:
 - Each domain owns validation, state transitions, persistence and its public application service.
 - Other domains integrate through approved module interfaces/events, not uncontrolled direct table mutations.
-- API namespace: `/api/v1/{users,businesses,venues,catalogue,experiences,plans,availability,reservations,events,tickets,orders,payments,settlements,drivers,rides,dispatch,notifications,reviews,support,admin}`. Authentication protocol endpoints can be Keycloak-hosted.
+- API namespace: `/api/v1/{users,businesses,venues,catalogue,experiences,plans,availability,reservations,events,tickets,orders,payments,settlements,drivers,rides,dispatch,notifications,reviews,support,admin}`. Authentication endpoints are application-hosted through Better Auth.
 - Publish OpenAPI definitions and use centrally maintained/generated typed clients.
 - Background jobs are retryable and idempotent; use a transactional outbox for atomic coordination with database writes.
 - Every write operation validates caller scope, input, and legal state transition.
@@ -103,4 +106,4 @@ Database standards: UUID public IDs; explicit FK/unique/check constraints; trans
 WebSocket events are authenticated and scoped; clients reconnect, de-duplicate, recover from gaps and query authoritative state. Driver location updates require consent, staleness checks, safety/incident workflows and real-device background GPS tests. Private verification documents use scoped short-lived signed URLs, upload validation and access auditing. Send email, FCM/APNs push and persistent in-app notifications asynchronously; respect consent for marketing messages.
 
 ## 9. Deployment and operational controls
-Isolated development, staging and production resources; no uncontrolled production data in staging. Independently deploy customer web, admin web, Flutter applications, NestJS API, workers, Keycloak, managed PostgreSQL, Redis, object storage and monitoring. Keycloak's database is isolated from Faji's application database. Container deployments use managed secrets, TLS, health checks, logs, alerts and rollback procedures. Schema changes are reviewed and deployed compatibly; application replacement must not delete persistent data.
+Isolated development, staging and production resources; no uncontrolled production data in staging. Deploy the four Next.js web applications, native Flutter applications, NestJS API with embedded Better Auth, workers, managed Faji PostgreSQL/PostGIS, Redis, object storage and monitoring. No separate identity server or identity database is required. Container deployments use managed secrets, TLS, health checks, logs, alerts and rollback procedures. Schema changes are reviewed and deployed compatibly; application replacement must not delete persistent data.

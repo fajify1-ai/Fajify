@@ -1,3 +1,5 @@
+> **Historical implementation reference — superseded for future work (2026-11-16).** The approved architecture uses application-hosted Better Auth with Faji PostgreSQL and fully in-app authentication (no Keycloak, hosted login or browser-based OIDC redirects). All web applications use Next.js/React/TypeScript; Flutter is native Android/iOS only. Preserve historical evidence below, but follow [the current architecture decision](../architecture/AUTH_AND_WEB_MIGRATION_DECISION.md) for new work.
+
 # Live Keycloak runtime — isolated discovery/import smoke
 
 Run `FAJI_KEYCLOAK_HOME=/absolute/path/to/keycloak-26.x bash tooling/run-d1-m2-keycloak-disposable.sh` after extracting an official Keycloak 26 distribution. Requires PostgreSQL 16 installed; no Docker. The distribution is copied into a temporary directory, Java heap capped, and a private PostgreSQL identity-only cluster is created on loopback with random credentials. A strict exit trap stops services and removes the test directory. It uses no persistent Fajify database.
