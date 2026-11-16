@@ -16,6 +16,7 @@ export class RideDocumentStorage {
   */
  presignUpload(driverId:string,kind:'licence'|'identification'|'insurance'|'vehicle_registration',
      contentType:string):{key:string;uploadUrl:string;method:'PUT';headers:Record<string,string>;expiresInSeconds:number}{
+  if(process.env.FAJI_RIDE_STORAGE_ENABLED==='false')throw new ServiceUnavailableException('Ride document storage is disabled');
   const endpoint=process.env.S3_ENDPOINT,bucket=process.env.S3_BUCKET,
    access=process.env.FAJI_S3_ACCESS_KEY_ID,secret=process.env.FAJI_S3_SECRET_ACCESS_KEY,
    region=process.env.FAJI_S3_REGION??'us-east-1';
@@ -57,6 +58,7 @@ export class RideDocumentStorage {
    headers:{'Content-Type':contentType},expiresInSeconds:300};
  }
  async verify(key:string,transport:typeof fetch=fetch):Promise<{etag:string;bytes:number;contentType:string;versionId:string|null}>{
+  if(process.env.FAJI_RIDE_STORAGE_ENABLED==='false')throw new ServiceUnavailableException('Ride document storage is disabled');
   const endpoint=process.env.S3_ENDPOINT,bucket=process.env.S3_BUCKET;
   const access=process.env.FAJI_S3_ACCESS_KEY_ID,secret=process.env.FAJI_S3_SECRET_ACCESS_KEY;
   const region=process.env.FAJI_S3_REGION??'us-east-1';
