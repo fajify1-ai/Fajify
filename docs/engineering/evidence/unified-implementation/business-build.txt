@@ -1,4 +1,3 @@
-
 > @faji/business-web@0.1.0 build /workspace/Fajify-unified/apps/business_web
 > next build
 
@@ -11,9 +10,9 @@
  ⚠ The Next.js plugin was not detected in your ESLint configuration. See https://nextjs.org/docs/app/api-reference/config/eslint#migrating-existing-config
    Collecting page data ...
    Generating static pages (0/11) ...
-   Generating static pages (2/11) 
-   Generating static pages (5/11) 
-   Generating static pages (8/11) 
+   Generating static pages (2/11)
+   Generating static pages (5/11)
+   Generating static pages (8/11)
  ✓ Generating static pages (11/11)
    Finalizing page optimization ...
    Collecting build traces ...
@@ -40,4 +39,3 @@ Route (app)                                 Size  First Load JS
 
 ○  (Static)   prerendered as static content
 ƒ  (Dynamic)  server-rendered on demand
-

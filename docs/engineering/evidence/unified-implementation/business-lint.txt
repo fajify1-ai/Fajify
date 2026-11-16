@@ -1,4 +1,2 @@
-
 > @faji/business-web@0.1.0 lint /workspace/Fajify-unified/apps/business_web
 > eslint app components lib connected --max-warnings=0
-

@@ -1,4 +1,2 @@
-
 > @faji/customer-web@0.1.0 lint /workspace/Fajify-unified/apps/customer_web
 > eslint app components lib connected unified middleware.ts --max-warnings=0
-
