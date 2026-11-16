@@ -4,6 +4,7 @@ import 'package:faji_business/faji_business.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/faji_colors.dart';
+import '../auth_scope.dart';
 
 /// Business starts with a choice; selecting either action never signs in.
 class BusinessLoginScreen extends StatefulWidget {
@@ -23,7 +24,12 @@ class _BusinessLoginScreenState extends State<BusinessLoginScreen> {
       return BusinessApp(
         embedded: true,
         initialLocation: destination,
-        onExit: () => Navigator.of(context).pop(),
+        onExit: () async {
+          final auth = context.getInheritedWidgetOfExactType<AuthScope>()?.notifier;
+          if (auth != null) await auth.restore();
+          if (!mounted) return;
+          Navigator.of(context).pop();
+        },
       );
     }
     return Scaffold(
