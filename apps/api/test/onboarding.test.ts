@@ -13,7 +13,7 @@ test('enrollment requires verified identity and uses the signed subject, never s
  const saved:string[]=[];
  const verifier:IdentityVerifier={verifyAccessToken:async(token)=>{
   if(token!=='verified.jwt.token')throw Error('invalid bearer');
-  return {subject:'keycloak-immutable-id',issuer:'https://issuer.test',audience:['faji-api'],
+  return {subject:'better-auth-immutable-id',issuer:'https://issuer.test',audience:['faji-api'],
    expiresAt:1900000000,issuedAt:1800000000,roles:['customer']};
  }};
  const module=await Test.createTestingModule({controllers:[OnboardingController],providers:[
@@ -33,6 +33,6 @@ test('enrollment requires verified identity and uses the signed subject, never s
     .set('Authorization','Bearer verified.jwt.token').send({subject:'attacker'});
   assert.equal(good.status,201);
   assert.equal(good.body.status,'pending_approval');
-  assert.deepEqual(saved,['keycloak-immutable-id']);
+  assert.deepEqual(saved,['better-auth-immutable-id']);
  }finally{await app.close();}
 });

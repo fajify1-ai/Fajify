@@ -57,7 +57,7 @@ test('HTTP scoped business endpoint blocks cross-tenant access and revoked membe
   assert.equal((await get(tenantA)).status,403,'revoked membership must immediately stop access');
   memberships.add(tenantA);
   revoked=true;
-  assert.equal((await get(tenantA)).status,403,'revoked Keycloak session cannot use a retained membership');
+  assert.equal((await get(tenantA)).status,403,'revoked Better Auth session cannot use a retained membership');
   revoked=false;suspended=true;
   assert.equal((await get(tenantA)).status,403,'suspended account cannot use a retained membership');
  }finally{await app.close();}

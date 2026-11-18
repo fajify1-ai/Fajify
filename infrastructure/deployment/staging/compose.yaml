@@ -69,10 +69,10 @@ services:
       FAJI_DB_USER: faji_runtime
       FAJI_DB_NAME: fajify_staging_local
       FAJI_DB_PASSWORD_SECRET: db_runtime_password
-      BETTER_AUTH_URL: https://api.faji.test:8443
-      FAJI_WEB_ORIGINS: https://customer.faji.test:8443,https://admin.faji.test:8443,https://business.faji.test:8443,https://dispatch.faji.test:8443
+      BETTER_AUTH_URL: https://api.fajify.com
+      FAJI_WEB_ORIGINS: https://preview.fajify.com
       FAJI_TRUSTED_PROXY_CIDRS: 172.30.88.0/24
-      FAJI_REGISTRATION_ENABLED: 'false'
+      FAJI_REGISTRATION_ENABLED: 'true'
       S3_ENDPOINT: ${S3_ENDPOINT:?configure private staging object store}
       S3_BUCKET: ${S3_BUCKET:?configure private staging bucket}
       AUTH_EMAIL_FROM: Faji Staging <auth@faji.test>
@@ -103,7 +103,7 @@ services:
         WEB_APP: customer_web
     environment:
       FAJI_API_URL: http://api:3001
-      FAJI_WEB_ORIGIN: https://customer.faji.test:8443
+      FAJI_WEB_ORIGIN: https://preview.fajify.com
       FAJI_ALLOW_INTERNAL_HTTP: 'true'
       FAJI_TRUSTED_INGRESS: 'true'
     networks:
@@ -141,7 +141,7 @@ services:
         WEB_APP: business_web
     environment:
       FAJI_API_URL: http://api:3001
-      FAJI_WEB_ORIGIN: https://business.faji.test:8443
+      FAJI_WEB_ORIGIN: https://preview.fajify.com
       FAJI_ALLOW_INTERNAL_HTTP: 'true'
       FAJI_TRUSTED_INGRESS: 'true'
     networks:

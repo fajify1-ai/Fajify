@@ -45,7 +45,7 @@ test('invalid JWT denied before account lookup',async()=>{
  assert.equal((await run({suspended:false,revokedAfter:null},false)).status,401);
 });
 
-test('revoking current signed Keycloak session blocks reuse of the bearer',async()=>{
+test('revoking the current signed Better Auth session blocks reuse of the bearer',async()=>{
  const identity={...verified,sessionId:'signed-sid-1'};
  let revoked=false;
  const access={state:async()=>({suspended:false,revokedAfter:null}),sessionRevoked:async()=>revoked,

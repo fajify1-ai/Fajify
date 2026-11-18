@@ -79,7 +79,7 @@ test('real PostgreSQL suspension immediately denies an already-verified bearer a
  await access.provisionSubject(liveSubject);
  await access.setSuspended(actor,liveSubject,false);
  // Authentication signature verification is substituted here; the separately
- // accepted Keycloak lifecycle gate covers actual signed-token exchange.
+ // accepted Better Auth lifecycle gate covers actual signed-session exchange.
  const issuedAt=Math.floor(Date.now()/1000)-120;
  const identity={subject:liveSubject,issuer:'https://test.example/realms/faji',
   audience:['faji-api'],issuedAt,expiresAt:issuedAt+300,roles:['customer']};
