@@ -18,9 +18,11 @@ test('Better Auth: native bearer and web cookie lifecycle, recovery and authoriz
  assert.ok(url,'Set FAJI_AUTH_TEST_DATABASE_URL to a fresh disposable database');
  assert.match(new URL(url).pathname,/^\/fajify_auth_test/);
  const pool=new Pool({connectionString:url});
+ process.env.NODE_ENV='test';
  process.env.BETTER_AUTH_SECRET='disposable-auth-test-secret-over-thirty-two-characters';
  process.env.BETTER_AUTH_URL='http://localhost:3001';
- process.env.FAJI_WEB_ORIGINS='http://localhost:3000';
+ process.env.FAJI_WEB_ORIGINS='http://localhost:3000/';
+ process.env.FAJI_REGISTRATION_ENABLED='true';
  process.env.SMTP_URL='smtp://127.0.0.1:11025';
  // Authentication fixture intentionally does not install unrelated PostGIS domain tables.
  await pool.query(`CREATE TABLE user_profiles(id uuid DEFAULT gen_random_uuid(),identity_subject varchar(255) UNIQUE, display_name varchar(120),phone_number varchar(32),date_of_birth date,home_address varchar(500),terms_accepted_at timestamptz, suspended boolean DEFAULT false);
@@ -39,8 +41,14 @@ test('Better Auth: native bearer and web cookie lifecycle, recovery and authoriz
  const http=app.getHttpServer();const password='correct-horse-disposable-123';const email='auth-test@example.test';
  const auth=(token:string)=>({'Authorization':`Bearer ${token}`});
  try{
-  const created=await request(http).post('/api/auth/sign-up/email').send({name:'Auth Test',email,password,roles:['platform-admin'],username:'auth_test',phoneNumber:'+2348012345678',dateOfBirth:'1998-02-01',homeAddress:'Test address',termsAccepted:true});
+  const registration={name:'Auth Test',email,password,roles:['platform-admin'],username:'auth_test',phoneNumber:'+2348012345678',dateOfBirth:'1998-02-01',homeAddress:'Test address',termsAccepted:true};
+  const created=await request(http).post('/api/auth/sign-up/email').set('Origin','http://localhost:3000').send(registration);
   assert.equal(created.status,200,JSON.stringify(created.body));
+  const duplicate=await request(http).post('/api/auth/sign-up/email').set('Origin','http://localhost:3000').send(registration);
+  assert.ok(duplicate.status>=400,'duplicate email must not create another account');
+  const invalid=await request(http).post('/api/auth/sign-up/email').set('Origin','http://localhost:3000').send({...registration,email:'invalid'});
+  assert.ok(invalid.status>=400,'invalid registration data must be rejected');
+  assert.equal((await pool.query('SELECT count(*)::int AS count FROM auth_user WHERE email=$1',[email])).rows[0].count,1);
   const token=created.body.token;assert.equal(typeof token,'string');
   const cookies=created.headers['set-cookie'];assert.ok(cookies);
   assert.match(String(cookies),/HttpOnly/i);assert.match(String(cookies),/SameSite=Lax/i);
@@ -68,10 +76,15 @@ test('Better Auth: native bearer and web cookie lifecycle, recovery and authoriz
   assert.equal(reset.status,200,JSON.stringify(reset.body));
   assert.equal((await request(http).get('/api/v1/auth/me').set(auth(token))).status,401,'reset revokes prior sessions');
   assert.notEqual((await request(http).post('/api/auth/reset-password').send({token:resetToken,newPassword:password})).status,200,'reset token is single use');
-  const login=await request(http).post('/api/auth/sign-in/email').send({email,password:nextPassword});
+  const login=await request(http).post('/api/auth/sign-in/email').set('Origin','http://localhost:3000').send({email,password:nextPassword});
   assert.equal(login.status,200,JSON.stringify(login.body));
+  const loginCookies=login.headers['set-cookie'];
+  assert.ok(loginCookies,'successful login must establish a browser session cookie');
+  const browserCookie=(Array.isArray(loginCookies)?loginCookies:[loginCookies]).map(cookie=>cookie.split(';')[0]).join('; ');
+  assert.equal((await request(http).get('/api/v1/auth/me').set('Cookie',browserCookie)).status,200,'browser session persists across requests');
   const nextToken=login.body.token;
-  assert.equal((await request(http).post('/api/auth/sign-out').set(auth(nextToken)).send({})).status,200);
+  assert.equal((await request(http).post('/api/auth/sign-out').set('Origin','http://localhost:3000').set('Cookie',browserCookie).send({})).status,200);
+  assert.equal((await request(http).get('/api/v1/auth/me').set('Cookie',browserCookie)).status,401,'logout revokes browser session');
   assert.equal((await request(http).get('/api/v1/auth/me').set(auth(nextToken))).status,401,'logout revokes native token');
   const another=await request(http).post('/api/auth/sign-in/email').send({email,password:nextPassword});
   await pool.query("UPDATE auth_session SET expires_at=now()-interval '1 second'");

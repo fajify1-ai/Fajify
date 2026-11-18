@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {IdentityGuard} from '../src/auth/identity.guard';
+import {normalizeAuthenticationOrigin,normalizeAuthenticationOrigins} from '../src/auth/auth-origins';
 import type {IdentityVerifier} from '../src/auth/identity.types';
 import {Test} from '@nestjs/testing';
 import {IdentityModule} from '../src/auth/identity.module';
@@ -30,4 +31,31 @@ test('verified subject passes through dependency-injected verifier',async()=>{
  const context={switchToHttp:()=>({getRequest:()=>request})} as any;
  assert.equal(await new IdentityGuard(verifier).canActivate(context),true);
  assert.equal(request.identity,identity);
+});
+test('Better Auth canonicalizes explicit HTTPS origins and trailing slashes',()=>{
+ assert.equal(normalizeAuthenticationOrigin('https://api.fajify.com/'),'https://api.fajify.com');
+ assert.deepEqual(normalizeAuthenticationOrigins('https://preview.fajify.com/, https://preview.fajify.com'),
+  ['https://preview.fajify.com']);
+});
+test('Better Auth rejects missing, wildcard, credentialed, queried, or path-based origins',()=>{
+ for(const value of ['', '*', 'https://user:pass@preview.fajify.com', 'https://preview.fajify.com/path',
+  'https://preview.fajify.com?next=evil', 'https://preview.fajify.com#fragment']){
+  assert.throws(()=>normalizeAuthenticationOrigin(value));
+ }
+ assert.throws(()=>normalizeAuthenticationOrigins('https://preview.fajify.com,'));
+});
+test('cookie-authenticated API mutations accept the canonical origin from a trailing-slash allowlist only',async()=>{
+ const previous=process.env.FAJI_WEB_ORIGINS;
+ process.env.FAJI_WEB_ORIGINS='https://preview.fajify.com/';
+ const identity={subject:'customer-subject',issuer:'https://api.fajify.com',audience:['faji-api'],expiresAt:9999999999,issuedAt:1700000000,roles:['customer']};
+ const verifier:IdentityVerifier={verifyAccessToken:async()=>identity,verifyHeaders:async()=>identity};
+ const request={method:'POST',headers:{origin:'https://preview.fajify.com',cookie:'better-auth.session_token=opaque'},identity:undefined as unknown};
+ const context={switchToHttp:()=>({getRequest:()=>request})} as any;
+ try{
+  assert.equal(await new IdentityGuard(verifier).canActivate(context),true);
+  request.headers.origin='https://api.fajify.com';
+  await assert.rejects(new IdentityGuard(verifier).canActivate(context),{status:401});
+ }finally{
+  if(previous===undefined)delete process.env.FAJI_WEB_ORIGINS;else process.env.FAJI_WEB_ORIGINS=previous;
+ }
 });

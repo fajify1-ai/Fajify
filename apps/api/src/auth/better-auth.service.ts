@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import {z} from 'zod';
 import {createHash} from 'node:crypto';
 import {trustedProxies,requestIp} from './request-ip';
+import {normalizeAuthenticationOrigin,normalizeAuthenticationOrigins} from './auth-origins';
 import {DATABASE_POOL} from '../tokens';
 import * as schema from './auth.schema';
 import type {IdentityVerifier, VerifiedIdentity} from './identity.types';
@@ -14,16 +15,17 @@ const load = new Function('specifier','return import(specifier)') as <T>(specifi
 @Injectable()
 export class BetterAuthService implements IdentityVerifier, OnModuleInit {
  private proxies=trustedProxies();
+ private baseURL!:string;
  private auth!: ReturnType<typeof import('better-auth')['betterAuth']>;
  private handler!: (req:IncomingMessage,res:ServerResponse)=>Promise<void>;
  constructor(@Inject(DATABASE_POOL) private readonly pool:Pool){}
  async onModuleInit(){
   const secret=process.env.BETTER_AUTH_SECRET;
-  const baseURL=process.env.BETTER_AUTH_URL;
-  const origins=(process.env.FAJI_WEB_ORIGINS??'').split(',').map(s=>s.trim()).filter(Boolean);
-  if(!secret||secret.length<32||!baseURL||!origins.length)throw new Error('Configure Better Auth secret, URL and web origins');
-  for(const value of [baseURL,...origins]){const url=new URL(value);if(url.username||url.password||url.search||url.hash||url.pathname!=='/'||!['http:','https:'].includes(url.protocol))throw new Error('Invalid authentication origin');}
-  if(['production','staging'].includes(process.env.NODE_ENV??'')&&(!baseURL.startsWith('https://')||origins.some(s=>!s.startsWith('https://'))))throw new Error('Authentication requires HTTPS');
+  const configuredBaseURL=process.env.BETTER_AUTH_URL;
+  if(!secret||secret.length<32||!configuredBaseURL||!process.env.FAJI_WEB_ORIGINS)throw new Error('Configure Better Auth secret, URL and web origins');
+  this.baseURL=normalizeAuthenticationOrigin(configuredBaseURL);
+  const origins=normalizeAuthenticationOrigins(process.env.FAJI_WEB_ORIGINS);
+  if(['production','staging'].includes(process.env.NODE_ENV??'')&&(!this.baseURL.startsWith('https://')||origins.some(s=>!s.startsWith('https://'))))throw new Error('Authentication requires HTTPS');
   const [{betterAuth},{drizzleAdapter},{bearer,twoFactor,phoneNumber},{toNodeHandler},{createAuthMiddleware,APIError}]=await Promise.all([
    load<typeof import('better-auth')>('better-auth'),load<typeof import('better-auth/adapters/drizzle')>('better-auth/adapters/drizzle'),
    load<typeof import('better-auth/plugins')>('better-auth/plugins'),load<typeof import('better-auth/node')>('better-auth/node'),load<typeof import('better-auth/api')>('better-auth/api')]);
@@ -38,7 +40,7 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
      const response=await fetch(endpoint,{method:'POST',headers:{authorization:`Bearer ${key}`,'content-type':'application/json'},body:JSON.stringify({phoneNumber,code,purpose}),redirect:'error',signal:AbortSignal.timeout(5000)});
      if(!response.ok)throw new APIError('SERVICE_UNAVAILABLE',{message:'SMS delivery failed'});
     };
-  const options:import('better-auth').BetterAuthOptions={secret,baseURL,basePath:'/api/auth',trustedOrigins:origins,
+  const options:import('better-auth').BetterAuthOptions={secret,baseURL:this.baseURL,basePath:'/api/auth',trustedOrigins:origins,
    database:drizzleAdapter(drizzle(this.pool,{schema}),{provider:'pg',schema,transaction:true}),
    user:{additionalFields:{
     username:{type:'string',required:false,validator:{input:z.string().regex(/^[a-zA-Z0-9_.-]{3,40}$/)}},
@@ -50,7 +52,7 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
    emailAndPassword:{enabled:true,minPasswordLength:12,revokeSessionsOnPasswordReset:true,
     sendResetPassword:async({user,url,token})=>{if(!mail)throw new APIError('SERVICE_UNAVAILABLE',{message:'Password recovery email is temporarily unavailable'});await mail.sendMail({from:process.env.AUTH_EMAIL_FROM??'Faji <auth@localhost>',to:user.email,subject:'Reset your Faji password',text:`Your password recovery token is: ${token}\nPaste it into the recovery form in your Faji app. Or reset on the Faji website: ${url}`});}},
    session:{expiresIn:60*60*24*7,updateAge:60*60*24,cookieCache:{enabled:false}},
-   advanced:{ipAddress:{ipAddressHeaders:['x-faji-client-ip']},useSecureCookies:baseURL.startsWith('https://'),defaultCookieAttributes:{httpOnly:true,sameSite:'lax'}},
+   advanced:{ipAddress:{ipAddressHeaders:['x-faji-client-ip']},useSecureCookies:this.baseURL.startsWith('https://'),defaultCookieAttributes:{httpOnly:true,sameSite:'lax'}},
    rateLimit:{enabled:true,storage:'database',customRules:{'/phone-number/*':{window:60,max:3},'/two-factor/*':{window:60,max:5}}},
    hooks:{before:createAuthMiddleware(async ctx=>{
     if(ctx.path==='/sign-up/email'){
@@ -95,7 +97,7 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
  }
  handle(req:IncomingMessage,res:ServerResponse){
   const origin=req.headers.origin;
-  if(origin&&!(process.env.FAJI_WEB_ORIGINS??'').split(',').map(s=>s.trim()).includes(origin)){res.writeHead(403,{'content-type':'application/json'});res.end(JSON.stringify({message:'Untrusted authentication origin'}));return Promise.resolve();}
+  if(origin&&!normalizeAuthenticationOrigins(process.env.FAJI_WEB_ORIGINS??'').includes(origin)){res.writeHead(403,{'content-type':'application/json'});res.end(JSON.stringify({message:'Untrusted authentication origin'}));return Promise.resolve();}
   req.headers['x-faji-client-ip']=requestIp(req,this.proxies);
   return this.handler(req,res);
  }
@@ -104,7 +106,7 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
   if(!result)throw new UnauthorizedException();
   const proof=await this.pool.query<{step_up_at:Date|null}>('SELECT step_up_at FROM auth_session WHERE id=$1',[result.session.id]);
   const roles=await this.pool.query<{role:string}>('SELECT role FROM application_roles WHERE identity_subject=$1',[result.user.id]);
-  return {subject:result.user.id,issuer:process.env.BETTER_AUTH_URL!,audience:['faji-api'],
+  return {subject:result.user.id,issuer:this.baseURL,audience:['faji-api'],
    expiresAt:Math.floor(result.session.expiresAt.getTime()/1000),issuedAt:Math.floor(result.session.createdAt.getTime()/1000),
    authTime:proof.rows[0]?.step_up_at?Math.floor(proof.rows[0].step_up_at.getTime()/1000):undefined,sessionId:result.session.id,roles:roles.rows.map(r=>r.role)};
  }
@@ -119,7 +121,7 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
   if(!r.rows[0]?.password||!await verifyPassword({hash:r.rows[0].password,password}))throw new UnauthorizedException('Reauthentication failed');
   if(r.rows[0].two_factor_enabled){
    if(!code&&!backupCode)throw new BadRequestException('Your enrolled second factor is required');
-   const response=await this.auth.handler(new Request(`${process.env.BETTER_AUTH_URL}/api/auth/two-factor/${backupCode?'verify-backup-code':'verify-totp'}`,{method:'POST',headers:new Headers({...Object.fromEntries(headers),'content-type':'application/json'}),body:JSON.stringify({code:backupCode??code,trustDevice:false})}));
+   const response=await this.auth.handler(new Request(`${this.baseURL}/api/auth/two-factor/${backupCode?'verify-backup-code':'verify-totp'}`,{method:'POST',headers:new Headers({...Object.fromEntries(headers),'content-type':'application/json'}),body:JSON.stringify({code:backupCode??code,trustDevice:false})}));
    if(!response.ok)throw new UnauthorizedException('Reauthentication failed');
   }
   const updated=await this.pool.query('UPDATE auth_session SET step_up_at=now(),mfa_verified_at=CASE WHEN $2 THEN now() ELSE NULL END WHERE id=$1 AND expires_at>now() RETURNING id',[identity.sessionId,r.rows[0].two_factor_enabled]);

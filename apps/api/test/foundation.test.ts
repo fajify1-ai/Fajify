@@ -12,6 +12,12 @@ test('issuer localhost exception checks hostname and protocol',()=>{
   assert.throws(()=>validateEnvironment({...config,BETTER_AUTH_URL:issuer}));
  }
 });
+test('authentication environment requires a secret, API base URL, and trusted web origins',()=>{
+ for(const key of ['BETTER_AUTH_SECRET','BETTER_AUTH_URL','FAJI_WEB_ORIGINS']){
+  const missing={...config};delete (missing as Record<string,string>)[key];
+  assert.throws(()=>validateEnvironment(missing));
+ }
+});
 test('bearer parsing does not accept malformed credentials',()=>{assert.equal(extractBearerToken('Basic abc'),null);assert.equal(extractBearerToken('Bearer abc.def.sig'),'abc.def.sig');});
 test('correlation ID ignores untrusted control characters',()=>{
  let responseId='';let called=false;
