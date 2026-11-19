@@ -15,14 +15,14 @@ function fixture(fail=false){
 }
 test('new identity provisioned suspended in one transaction',async()=>{
  const f=fixture();
- await f.service.provisionSubject('keycloak-subject');
+ await f.service.provisionSubject('better-auth-subject');
  assert.deepEqual(f.queries.map(x=>x.text.slice(0,6)),['BEGIN','INSERT','INSERT','INSERT','COMMIT']);
- assert.equal(f.queries[1].args[0],'keycloak-subject');
+ assert.equal(f.queries[1].args[0],'better-auth-subject');
  assert.equal(f.isReleased(),true);
 });
 test('failure to audit rolls back account provisioning',async()=>{
  const f=fixture(true);
- await assert.rejects(f.service.provisionSubject('keycloak-subject'),/audit unavailable/);
+ await assert.rejects(f.service.provisionSubject('better-auth-subject'),/audit unavailable/);
  assert.equal(f.queries.at(-1)?.text,'ROLLBACK');
  assert.equal(f.isReleased(),true);
 });

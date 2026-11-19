@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createHmac,randomUUID} from 'node:crypto';
+import {randomUUID} from 'node:crypto';
 import {Pool} from 'pg';
 import {assertDisposable} from '../../../packages/database/scripts/disposable-target';
 import {applyMigrations} from '../../../packages/database/scripts/migrate';
@@ -25,8 +25,8 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
  const adminUrl=new URL(process.env.FAJI_DATABASE_URL!),runtimeUrl=new URL(process.env.FAJI_RUNTIME_DATABASE_URL!);
  assert.equal(adminUrl.host,runtimeUrl.host);assert.equal(adminUrl.pathname,runtimeUrl.pathname);assert.notEqual(adminUrl.username,runtimeUrl.username);
  const admin=new Pool({connectionString:adminUrl.toString(),max:3}),runtime=new Pool({connectionString:runtimeUrl.toString(),max:16});
- const ledger=new FinanceLedger(runtime),customers=new CustomerService(runtime),gateway=new PaystackGateway(),commerce=new CommerceLifecycle(ledger,customers,gateway),operations=new FinancialOperations(ledger,commerce,gateway),payments=new PaymentsService(runtime,gateway,commerce,operations),preparations=new OrderIntentsService(customers,gateway),jobs=new FinanceJobs(ledger,commerce,operations,payments);
- const merchant=new BusinessService(runtime,new AccessService(runtime)),fake=new FakePaystack(),previousFetch=globalThis.fetch,environment={...process.env};
+ const ledger=new FinanceLedger(runtime),customers=new CustomerService(runtime),fake=new FakePaystack(),isolated:typeof fetch=(input,init)=>fake.fetch(input,init),gateway=new PaystackGateway(isolated),commerce=new CommerceLifecycle(ledger,customers),operations=new FinancialOperations(ledger,commerce,gateway),payments=new PaymentsService(runtime,gateway,commerce,operations),preparations=new OrderIntentsService(customers),jobs=new FinanceJobs(ledger,commerce,operations,payments,gateway);
+ const merchant=new BusinessService(runtime,new AccessService(runtime)),previousFetch=globalThis.fetch,environment={...process.env};
  const suffix=randomUUID(),owner='m5-owner-'+suffix,a='m5-a-'+suffix,b='m5-b-'+suffix;
  const identity=(subject:string):VerifiedIdentity=>({subject,issuer:'https://fixture.invalid',audience:['faji-api'],roles:['customer'],issuedAt:Math.floor(Date.now()/1000)-1,expiresAt:Math.floor(Date.now()/1000)+3600,sessionId:subject});
  const policy={commissionBps:137,gatewayFeeBearer:'merchant' as const,payoutFeeBearer:'merchant' as const,settlementDelayHours:0,refundWindowHours:48,cancellationCutoffMinutes:30,holdMinutes:5};
@@ -47,12 +47,11 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
   const o=await customers.placeOrder(identity(a),{branchId:f.branch,requestKey:randomUUID(),items:[{catalogueId:f.product,quantity:1,expectedPriceMinor:'10001'}]});
   const prepared=await preparations.prepare(identity(a),o.id,randomUUID());return {order:o.id,id:prepared.paymentIntentId};
  }
- async function checkout(id:string){const session=await commerce.checkout(identity(a),id,'fixture@example.invalid');assert.equal(session.checkoutEnabled,true);return session;}
- async function capture(id:string,fees=15){
+ async function checkout(id:string){const session=await commerce.checkout(identity(a),id,'fixture@example.invalid');assert.equal(session.mode,'simulated');assert.equal(session.checkoutEnabled,false);return session;}
+ async function capture(id:string){
   const p=(await admin.query('SELECT provider_reference,amount_minor::text FROM payment_intents WHERE id=$1',[id])).rows[0];
-  let charge=fake.transactions.get(p.provider_reference);if(!charge)charge=fake.charge(p.provider_reference,Number(p.amount_minor));charge.status='success';charge.fees=fees;
-  const raw=Buffer.from(JSON.stringify({event:'charge.success',data:{reference:p.provider_reference,amount:1,status:'spoofed'}})),sig=createHmac('sha512',process.env.PAYSTACK_SECRET_KEY!).update(raw).digest('hex');
-  await Promise.all(Array.from({length:4},()=>payments.webhook(raw,sig)));return charge;
+  await Promise.all(Array.from({length:4},()=>payments.simulate('fixture-admin',id,'succeeded')));
+  return {id:'sim-'+id,reference:p.provider_reference,amount:Number(p.amount_minor),status:'success'};
  }
  async function fulfil(f:Awaited<ReturnType<typeof fixture>>,id:string){for(const status of ['accepted','preparing','ready','fulfilled'] as const)await merchant.orderStatus(owner,f.business,f.branch,id,status);await operations.fulfilment();}
  async function balance(code:string){return ledger.tx(randomUUID(),c=>ledger.balance(c,code));}
@@ -68,7 +67,7 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
  }
  try{
   await assertDisposable(admin);await assertDisposable(runtime);await applyMigrations(admin);await applyMigrations(admin);await grantM5Runtime(admin,runtimeUrl.toString());
-  globalThis.fetch=fake.fetch;process.env.PAYSTACK_SECRET_KEY='sk_test_disposablefixture';process.env.PAYMENT_CALLBACK_URL='https://fixture.invalid/callback';process.env.TICKET_SIGNING_KEYS=JSON.stringify({fixture:'4'.repeat(64)});process.env.TICKET_ACTIVE_KEY_ID='fixture';
+  globalThis.fetch=fake.fetch;process.env.FAJI_PAYMENT_MODE='simulated';process.env.PAYSTACK_SECRET_KEY='sk_test_disposablefixture';process.env.TICKET_SIGNING_KEYS=JSON.stringify({fixture:'4'.repeat(64)});process.env.TICKET_ACTIVE_KEY_ID='fixture';
   for(const subject of [owner,a,b]){await admin.query('INSERT INTO account_access(identity_subject) VALUES($1)',[subject]);await admin.query('INSERT INTO user_profiles(identity_subject) VALUES($1)',[subject]);}
   await t.test('runtime cannot perform DDL, change migrations, edit capture history or reach identity sentinel',async()=>{
    for(const sql of ['CREATE TABLE m5_escape(id int)','TRUNCATE ledger_entries','UPDATE _faji_migrations SET checksum=checksum'])await assert.rejects(runtime.query(sql),{code:'42501'});
@@ -81,26 +80,28 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
    await assert.rejects(()=>ledger.tx(randomUUID(),c=>ledger.environment(c,'live')),{status:409});
    await assert.rejects(runtime.query("UPDATE finance_environment SET environment='live'"),{code:'42501'});
   });
-  await t.test('server-priced checkout persists once, capture allocates exact fee and policy snapshots and gates fulfilment',async()=>{
+  await t.test('server-priced simulated checkout persists once, captures internally and gates fulfilment',async()=>{
    const f=await fixture(),o=await order(f);await assert.rejects(()=>merchant.orderStatus(owner,f.business,f.branch,o.order,'accepted'));
-   const init=await checkout(o.id),count=fake.count('POST','/transaction/initialize');const replay=await checkout(o.id);assert.equal(replay.authorizationUrl,init.authorizationUrl);
-   assert.equal(fake.count('POST','/transaction/initialize'),count);
+   const init=await checkout(o.id),count=fake.count('POST','/transaction/initialize');const replay=await checkout(o.id);assert.equal(replay.state,init.state);
+   assert.equal(replay.state,'pending');assert.equal(fake.count('POST','/transaction/initialize'),count);
    await assert.rejects(()=>commerce.checkout(identity(b),o.id,'fixture@example.invalid'),{status:404});
    const charge=await capture(o.id);assert.equal(charge.amount,10001);
    assert.equal((await admin.query('SELECT count(*)::int AS n FROM ledger_entries WHERE intent_id=$1',[o.id])).rows[0].n,1);
-   assert.equal(await balance('merchant_payable:'+f.business),9849n); // gross 10001, commission 137, verified fee 15
+   assert.equal(await balance('merchant_payable:'+f.business),9864n);
    const terms=(await admin.query('SELECT commission_minor::text,merchant_minor::text FROM payment_terms WHERE intent_id=$1',[o.id])).rows[0];assert.deepEqual(terms,{commission_minor:'137',merchant_minor:'9864'});
    await operations.policy('fixture-admin',f.business,{...policy,commissionBps:5000});assert.equal((await admin.query('SELECT commission_minor::text FROM payment_terms WHERE intent_id=$1',[o.id])).rows[0].commission_minor,'137');
    await assert.rejects(admin.query('UPDATE finance_policies SET commission_bps=0 WHERE business_id=$1',[f.business]));await assert.rejects(admin.query('UPDATE payment_terms SET merchant_minor=1 WHERE intent_id=$1',[o.id]));
    await fulfil(f,o.order);assert.ok((await admin.query('SELECT eligible_at<=now() AS yes FROM payment_terms WHERE intent_id=$1',[o.id])).rows[0].yes);
    await assert.rejects(()=>operations.merchantFinance(identity(b),f.business,10,0),{status:403});
   });
-  await t.test('lost initialization stays uncertain and an explicit same-reference retry cannot create a second charge',async()=>{
-   const f=await fixture(),o=await order(f);fake.loseInitializationResponse=true;await assert.rejects(()=>checkout(o.id));
-   const state=(await admin.query('SELECT state FROM checkout_sessions WHERE intent_id=$1',[o.id])).rows[0];assert.equal(state.state,'uncertain');
-   const calls=fake.count('POST','/transaction/initialize');const retry=await commerce.checkout(identity(a),o.id,'fixture@example.invalid');assert.equal(retry.checkoutEnabled,false);assert.equal(fake.count('POST','/transaction/initialize'),calls);
-   await admin.query("UPDATE checkout_sessions SET attempted_at=now()-interval '1 minute' WHERE intent_id=$1",[o.id]);await assert.rejects(()=>commerce.retryInitialization('fixture-admin',o.id));assert.equal((await admin.query('SELECT count(*)::int AS n FROM payment_order_links WHERE order_id=$1',[o.order])).rows[0].n,1);
-   await capture(o.id);assert.equal((await commerce.checkout(identity(a),o.id,'fixture@example.invalid')).state,'paid');
+  await t.test('simulated checkout retries idempotently and does not invoke a payment provider',async()=>{
+   const f=await fixture(),o=await order(f),calls=fake.count('POST','/transaction/initialize');
+   await checkout(o.id);await checkout(o.id);
+   const state=(await admin.query('SELECT state FROM checkout_sessions WHERE intent_id=$1',[o.id])).rows[0];assert.equal(state.state,'simulated');
+   assert.equal(fake.count('POST','/transaction/initialize'),calls);
+   await assert.rejects(()=>commerce.retryInitialization('fixture-admin',o.id));
+   assert.equal((await admin.query('SELECT count(*)::int AS n FROM payment_order_links WHERE order_id=$1',[o.order])).rows[0].n,1);
+   await capture(o.id);assert.equal((await commerce.checkout(identity(a),o.id,'fixture@example.invalid')).state,'succeeded');
   });
   await t.test('concurrent holds consume one seat; expiry releases once; a late capture creates refund without a reservation',async()=>{
    const f=await fixture(),input={kind:'reservation' as const,sourceId:f.slot,quantity:1,guestName:'Fixture',requestKey:randomUUID()};
@@ -108,8 +109,9 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
    await assert.rejects(()=>commerce.hold(identity(b),{...input,requestKey:randomUUID()}),{status:409});
    await checkout(one.paymentIntentId);await timeFixture('paid_holds',one.id);await Promise.all([commerce.expire(),commerce.expire()]);
    assert.equal((await admin.query('SELECT reserved FROM business_availability WHERE id=$1',[f.slot])).rows[0].reserved,0);
-   await capture(one.paymentIntentId);assert.equal((await admin.query('SELECT count(*)::int AS n FROM business_reservations WHERE availability_id=$1',[f.slot])).rows[0].n,0);
-   const refund=(await admin.query('SELECT amount_minor::text,state FROM finance_refunds WHERE intent_id=$1',[one.paymentIntentId])).rows[0];assert.deepEqual(refund,{amount_minor:'10001',state:'approved'});
+   await assert.rejects(()=>capture(one.paymentIntentId),{status:409});
+   assert.equal((await admin.query('SELECT count(*)::int AS n FROM business_reservations WHERE availability_id=$1',[f.slot])).rows[0].n,0);
+   assert.equal((await admin.query('SELECT count(*)::int AS n FROM finance_refunds WHERE intent_id=$1',[one.paymentIntentId])).rows[0].n,0);
    assert.equal((await commerce.holds(a,100,0)).find(h=>h.id===one.id)?.status,'expired');
   });
   await t.test('verified paid reservation confirms once; cancellation restores capacity and refunds remaining capture',async()=>{
@@ -130,45 +132,41 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
    await assert.rejects(()=>commerce.redeem(identity(owner),f.business,f.branch,tickets[1].qrToken!),{status:409});
    assert.equal((await admin.query('SELECT issued FROM ticket_inventory WHERE catalogue_id=$1',[f.event])).rows[0].issued,1);
   });
-  await t.test('ambiguous refund is discovered without another POST; verified processing is idempotent; cumulative excess is rejected',async()=>{
+  await t.test('simulated-payment refunds remain pending for an external decision; cumulative excess is rejected',async()=>{
    const f=await fixture(),o=await order(f);await checkout(o.id);await capture(o.id);
    const r=await operations.requestRefund(identity(a),o.id,{requestKey:randomUUID(),amountMinor:'3000',reason:'Synthetic partial refund'});await operations.decision('fixture-admin',r.id,true);
-   fake.loseRefundResponse=true;const before=fake.count('POST','/refund');assert.equal(await operations.submitRefund(r.id),false);assert.equal(await operations.submitRefund(r.id),false);assert.equal(fake.count('POST','/refund'),before+1);
-   const provider=(await admin.query('SELECT provider_id FROM finance_refunds WHERE id=$1',[r.id])).rows[0].provider_id;fake.refunds.get(provider).status='processed';await Promise.all([operations.reconcileRefund(r.id),operations.reconcileRefund(r.id)]);
-   assert.equal((await admin.query("SELECT count(*)::int AS n FROM finance_postings WHERE posting_key=$1",[r.id+':processed'])).rows[0].n,1);
+   assert.equal((await admin.query('SELECT state FROM finance_refunds WHERE id=$1',[r.id])).rows[0].state,'approved');
+   assert.equal(fake.count('POST','/refund'),0);
    const excess=await operations.adminRefund('fixture-admin',o.id,{requestKey:randomUUID(),amountMinor:'8000',reason:'Synthetic excessive refund'});await assert.rejects(()=>operations.decision('fixture-admin',excess.id,true),{status:409});await operations.decision('fixture-admin',excess.id,false);
-   const failed=await operations.adminRefund('fixture-admin',o.id,{requestKey:randomUUID(),amountMinor:'1000',reason:'Synthetic failed refund'});await operations.decision('fixture-admin',failed.id,true);const reserved=await balance('merchant_payable:'+f.business);await operations.submitRefund(failed.id);const fp=(await admin.query('SELECT provider_id FROM finance_refunds WHERE id=$1',[failed.id])).rows[0].provider_id;fake.refunds.get(fp).status='failed';await operations.reconcileRefund(failed.id);assert.ok(await balance('merchant_payable:'+f.business)>reserved);
    await operations.cancelResource('order',o.order);assert.equal((await admin.query("SELECT amount_minor::text FROM finance_refunds WHERE intent_id=$1 AND request_key='system-unfulfilled'",[o.id])).rows[0].amount_minor,'7001');
   });
-  await t.test('failed order retry keeps stable attempts and late old success never confirms a second purchase',async()=>{
-   const f=await fixture(),o=await order(f);const foreign=await order(f),extra=await order(f);await assert.rejects(admin.query('INSERT INTO payment_order_attempts(intent_id,order_id,previous_intent_id) VALUES($1,$2,$3)',[extra.id,o.order,foreign.id]),/same unpaid order/);await checkout(o.id);const p=(await admin.query('SELECT provider_reference FROM payment_intents WHERE id=$1',[o.id])).rows[0];fake.transactions.get(p.provider_reference).status='failed';
-   const key=randomUUID(),retry=await commerce.retryOrder(identity(a),o.order,o.id,key);assert.equal((await commerce.retryOrder(identity(a),o.order,o.id,key)).paymentIntentId,retry.paymentIntentId);await checkout(retry.paymentIntentId);await capture(retry.paymentIntentId);await capture(o.id);
-   assert.equal((await admin.query('SELECT resolution FROM payment_terms WHERE intent_id=$1',[o.id])).rows[0].resolution,'refund_required');assert.equal((await admin.query('SELECT resolution FROM payment_terms WHERE intent_id=$1',[retry.paymentIntentId])).rows[0].resolution,'confirmed');
+  await t.test('failed order retry keeps stable attempts and terminal failure cannot become a second purchase',async()=>{
+   const f=await fixture(),o=await order(f);const foreign=await order(f),extra=await order(f);await assert.rejects(admin.query('INSERT INTO payment_order_attempts(intent_id,order_id,previous_intent_id) VALUES($1,$2,$3)',[extra.id,o.order,foreign.id]),/terminal and belong/);await checkout(o.id);await payments.simulate('fixture-admin',o.id,'failed');
+   const key=randomUUID(),retry=await commerce.retryOrder(identity(a),o.order,o.id,key);assert.equal((await commerce.retryOrder(identity(a),o.order,o.id,key)).paymentIntentId,retry.paymentIntentId);await checkout(retry.paymentIntentId);await capture(retry.paymentIntentId);await assert.rejects(()=>capture(o.id),{status:409});
+   assert.equal((await admin.query('SELECT resolution FROM payment_terms WHERE intent_id=$1',[o.id])).rows[0].resolution,'cancelled');assert.equal((await admin.query('SELECT resolution FROM payment_terms WHERE intent_id=$1',[retry.paymentIntentId])).rows[0].resolution,'confirmed');
   });
   await t.test('settlement claims race safely; OTP requires canonical success; reversal compensates and fee recovery remains exact',async()=>{
    const f=await fixture(),o=await order(f);await checkout(o.id);await capture(o.id);await fulfil(f,o.order);
    const recipient=await operations.registerRecipient('fixture-admin',f.business,'RCP_fixture'),key=randomUUID();
-   const simultaneous=await Promise.all([operations.batch('fixture-admin',f.business,recipient.id,key),operations.batch('fixture-admin',f.business,recipient.id,key)]);assert.equal(simultaneous[0].id,simultaneous[1].id);const batch=simultaneous[0];assert.equal(batch.amountMinor,'9849');
+   const simultaneous=await Promise.all([operations.batch('fixture-admin',f.business,recipient.id,key),operations.batch('fixture-admin',f.business,recipient.id,key)]);assert.equal(simultaneous[0].id,simultaneous[1].id);const batch=simultaneous[0];assert.equal(batch.amountMinor,'9864');
    await assert.rejects(()=>operations.batch('fixture-admin',f.business,recipient.id,randomUUID()),{status:409});
    fake.transferState='otp';fake.loseTransferResponse=true;const submissions=fake.count('POST','/transfer');assert.equal(await operations.submitPayout(batch.id),false);assert.equal(await operations.submitPayout(batch.id),false);assert.equal(fake.count('POST','/transfer'),submissions+1);assert.equal((await admin.query('SELECT state FROM settlement_batches WHERE id=$1',[batch.id])).rows[0].state,'otp');await operations.finalize('fixture-admin',batch.id,'123456');await Promise.all([operations.reconcilePayout(batch.id),operations.reconcilePayout(batch.id)]);
    assert.equal(await balance('merchant_payable:'+f.business),0n);assert.equal(await balance('merchant_recoverable:'+f.business),-10n);
    const ref=(await admin.query('SELECT provider_reference FROM settlement_batches WHERE id=$1',[batch.id])).rows[0].provider_reference;fake.transfers.get(ref).status='reversed';fake.transfers.get(ref).fee_charged=0;await operations.reconcilePayout(batch.id);await operations.reconcilePayout(batch.id);
-   assert.equal(await balance('merchant_payable:'+f.business),9849n);assert.equal(await balance('merchant_recoverable:'+f.business),0n);
-   const next=await operations.batch('fixture-admin',f.business,recipient.id,randomUUID());await operations.cancelPayout('fixture-admin',next.id);assert.equal(await balance('merchant_payable:'+f.business),9849n);fake.transferState='success';
+   assert.equal(await balance('merchant_payable:'+f.business),9864n);assert.equal(await balance('merchant_recoverable:'+f.business),0n);
+   const next=await operations.batch('fixture-admin',f.business,recipient.id,randomUUID());await operations.cancelPayout('fixture-admin',next.id);assert.equal(await balance('merchant_payable:'+f.business),9864n);fake.transferState='success';
   });
   await t.test('post-payout refunds create recovery debt and the next eligible balance can be a recovery-only idempotent batch',async()=>{
    const f=await fixture(),o=await order(f);await checkout(o.id);await capture(o.id);await fulfil(f,o.order);const recipient=await operations.registerRecipient('fixture-admin',f.business,'RCP_recovery');
    const first=await operations.batch('fixture-admin',f.business,recipient.id,randomUUID());await operations.submitPayout(first.id);
-   const refund=await operations.adminRefund('fixture-admin',o.id,{requestKey:randomUUID(),amountMinor:'10001',reason:'Synthetic post-payout refund'});await operations.decision('fixture-admin',refund.id,true);assert.ok(await balance('merchant_recoverable:'+f.business)<-9849n);
-   const second=await order(f);await checkout(second.id);await capture(second.id);await fulfil(f,second.order);const key=randomUUID(),batch=await operations.batch('fixture-admin',f.business,recipient.id,key);assert.equal(batch.status,'recovered');assert.equal(batch.amountMinor,'0');assert.equal(batch.recoveredMinor,'9849');assert.equal((await operations.batch('fixture-admin',f.business,recipient.id,key)).id,batch.id);assert.equal(await balance('merchant_payable:'+f.business),0n);
+   const refund=await operations.adminRefund('fixture-admin',o.id,{requestKey:randomUUID(),amountMinor:'10001',reason:'Synthetic post-payout refund'});await operations.decision('fixture-admin',refund.id,true);assert.ok(await balance('merchant_recoverable:'+f.business)<-9864n);
+   const second=await order(f);await checkout(second.id);await capture(second.id);await fulfil(f,second.order);const key=randomUUID(),batch=await operations.batch('fixture-admin',f.business,recipient.id,key);assert.equal(batch.status,'recovered');assert.equal(batch.amountMinor,'0');assert.equal(batch.recoveredMinor,'9864');assert.equal((await operations.batch('fixture-admin',f.business,recipient.id,key)).id,batch.id);assert.equal(await balance('merchant_payable:'+f.business),0n);
   });
-  await t.test('disputes reserve exposure, a win restores funding and partial loss consumes only verified loss',async()=>{
-   const f=await fixture(),o=await order(f);await checkout(o.id);const charge=await capture(o.id);const before=await balance('merchant_payable:'+f.business);
-   const d={id:String(++fake.serial),transaction:{id:charge.id},currency:'NGN',domain:'test',status:'pending',amount:10001};fake.disputes.set(d.id,d);await operations.reconcileDispute(d.id);assert.equal(await balance('merchant_payable:'+f.business),0n);
-   Object.assign(d,{status:'resolved',resolution:'declined'});await operations.reconcileDispute(d.id);assert.equal(await balance('merchant_payable:'+f.business),before);
-   const lost={...d,id:String(++fake.serial),status:'pending'};fake.disputes.set(lost.id,lost);await operations.reconcileDispute(lost.id);Object.assign(lost,{status:'resolved',resolution:'merchant-accepted',refund_amount:3333});await operations.reconcileDispute(lost.id);await operations.reconcileDispute(lost.id);
-   assert.equal((await admin.query('SELECT resolved_amount_minor::text FROM finance_disputes WHERE provider_id=$1',[lost.id])).rows[0].resolved_amount_minor,'3333');assert.equal(await balance('dispute_reserve'),0n);
-   const r=await operations.adminRefund('fixture-admin',o.id,{requestKey:randomUUID(),amountMinor:'100',reason:'Must not exceed chargeback exposure'});await assert.rejects(()=>operations.decision('fixture-admin',r.id,true),{status:409});
+  await t.test('synthetic transactions cannot enter the external-provider dispute workflow',async()=>{
+   const f=await fixture(),o=await order(f);await checkout(o.id);const charge=await capture(o.id);
+   const d={id:String(++fake.serial),transaction:{id:charge.id},currency:'NGN',domain:'test',status:'pending',amount:10001};fake.disputes.set(d.id,d);
+   await assert.rejects(()=>operations.reconcileDispute(d.id),/Invalid provider identifier/);
+   assert.equal((await admin.query('SELECT count(*)::int AS n FROM finance_disputes')).rows[0].n,0);
   });
   await t.test('worker deduplicates outbox, recovers expired leases and dead-letters repeated errors with redacted diagnostics',async()=>{
    const consumed=await jobs.consume(10000);assert.ok(consumed>0);assert.equal(await jobs.consume(10000),0);
@@ -179,6 +177,6 @@ test('M5 complete financial lifecycle on marked PostgreSQL 16 with restricted ru
    assert.equal((await admin.query('SELECT count(*)::int AS n FROM (SELECT posting_key FROM finance_postings GROUP BY posting_key HAVING count(*)>1) x')).rows[0].n,0);
   });
  }finally{
-  globalThis.fetch=previousFetch;for(const key of ['PAYSTACK_SECRET_KEY','PAYMENT_CALLBACK_URL','TICKET_SIGNING_KEYS','TICKET_ACTIVE_KEY_ID']){if(environment[key]===undefined)delete process.env[key];else process.env[key]=environment[key];}await Promise.all([admin.end(),runtime.end()]);
+  globalThis.fetch=previousFetch;for(const key of ['FAJI_PAYMENT_MODE','PAYSTACK_SECRET_KEY','PAYMENT_CALLBACK_URL','TICKET_SIGNING_KEYS','TICKET_ACTIVE_KEY_ID']){if(environment[key]===undefined)delete process.env[key];else process.env[key]=environment[key];}await Promise.all([admin.end(),runtime.end()]);
  }
 });

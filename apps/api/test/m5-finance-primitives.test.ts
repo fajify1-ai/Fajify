@@ -40,7 +40,7 @@ test('M5 opaque tickets authenticate identity, nonce and signing-key version and
  delete process.env.TICKET_SIGNING_KEYS;assert.throws(()=>parseTicketToken(token));
 });
 test('M5 adapter exercises initialization, ambiguous refund discovery, OTP, fees and reversal on isolated transport',async()=>{
- process.env.PAYSTACK_SECRET_KEY='sk_test_disposablefixture';const fake=new FakePaystack(),gateway=new PaystackGateway(),previous=globalThis.fetch;globalThis.fetch=fake.fetch;
+ process.env.PAYSTACK_SECRET_KEY='sk_test_disposablefixture';const fake=new FakePaystack(),isolated:typeof fetch=(input,init)=>fake.fetch(input,init),gateway=new PaystackGateway(isolated),previous=globalThis.fetch;globalThis.fetch=fake.fetch;
  try{
   const reference='faji-'+randomUUID();const init=await gateway.initialize({reference,amount:'12500',email:'fixture@example.invalid',callbackUrl:'https://example.invalid/callback'});assert.equal(init.reference,reference);
   await assert.rejects(()=>gateway.initialize({reference,amount:'12500',email:'fixture@example.invalid',callbackUrl:'https://example.invalid/callback'}));

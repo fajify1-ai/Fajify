@@ -7,7 +7,7 @@ type Props = {
   initialMode: AuthMode
   onBack: () => void
   onComplete: () => void
-  authenticate?: (mode: AuthMode, form: {name:string;email:string;phone:string;password:string}) => Promise<void>
+  authenticate?: (mode: AuthMode, form: {name:string;email:string;phone:string;password:string;termsAccepted:boolean}) => Promise<void>
   onRecovery?: () => void
 }
 
@@ -22,6 +22,7 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
     phone: "",
     password: "",
   })
+  const [termsAccepted,setTermsAccepted] = useState(false)
 
   const update = (field: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [field]: value }))
@@ -75,7 +76,7 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
               if(busy)return
               if(!authenticate){onComplete();return}
               setBusy(true);setError('')
-              try{await authenticate(mode,form)}catch(error){setError(error instanceof Error?error.message:'Sign-in unavailable. Please retry.')}finally{setBusy(false)}
+              try{await authenticate(mode,{...form,termsAccepted})}catch(error){setError(error instanceof Error?error.message:'Sign-in unavailable. Please retry.')}finally{setBusy(false)}
             }}
           >
             {mode === "register" && (
@@ -110,6 +111,8 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
                 <span className="text-xs font-bold text-[#4F4A4B]">Phone number</span>
                 <input
                   type="tel"
+                  required={!!authenticate}
+                  pattern="\+[1-9][0-9]{6,14}"
                   value={form.phone}
                   onChange={(event) => update("phone", event.target.value)}
                   placeholder="+234 801 234 5678"
@@ -147,6 +150,19 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
                 </label>
                 <button type="button" onClick={onRecovery} className="text-xs font-bold text-[#FA3F38]">Forgot password?</button>
               </div>
+            )}
+
+            {mode === "register" && (
+              <label className="flex items-start gap-3 text-xs font-semibold leading-5 text-[#6F696A]">
+                <input
+                  type="checkbox"
+                  required={!!authenticate}
+                  checked={termsAccepted}
+                  onChange={(event) => setTermsAccepted(event.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-[#FA3F38]"
+                />
+                <span>I agree to the Fajify Terms &amp; Conditions and Privacy Policy.</span>
+              </label>
             )}
 
             <button type="submit" disabled={busy} className="mt-2 h-14 rounded-2xl bg-[#FA3F38] text-sm font-black text-white transition hover:bg-[#E9352F]">

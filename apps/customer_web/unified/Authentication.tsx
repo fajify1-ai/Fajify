@@ -8,8 +8,8 @@ import BusinessSignInScreen from '@faji/business-web/webapp/screens/BusinessSign
 export default function Authentication({business=false,register=false,returnTo='/customer'}:{business?:boolean;register?:boolean;returnTo?:CustomerReturnTo}){
  const [challenge,setChallenge]=useState(false);
  const destination=business?(register?'/business/dashboard#onboarding':'/business/dashboard'):returnTo;
- async function authenticate(mode:'signin'|'register',form:{email:string;password:string;name?:string}){
-  const result=await authPost(mode==='register'?'sign-up/email':'sign-in/email',{email:form.email,password:form.password,...(mode==='register'?{name:form.name}:{})});
+ async function authenticate(mode:'signin'|'register',form:{email:string;password:string;name?:string;phone?:string;termsAccepted?:boolean}){
+  const result=await authPost(mode==='register'?'sign-up/email':'sign-in/email',{email:form.email,password:form.password,...(mode==='register'?{name:form.name,phoneNumber:form.phone,termsAccepted:form.termsAccepted}:{})});
   if(result.twoFactorRedirect){setChallenge(true);return;}
   window.location.assign(destination);
  }

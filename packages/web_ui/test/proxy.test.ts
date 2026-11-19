@@ -37,3 +37,25 @@ test('unified bridge accepts both product contracts and preserves server denials
  const response=await platformProxy(req('businesses/abc/finance'),'unified');
  assert.equal(response.status,403);assert.doesNotMatch(await response.text(),/not exposed/);
 });
+test('Admin bridge exposes only governance review and simulated-payment controls',async()=>{
+ for(const [path,method] of [
+  ['admin/governance/approvals','GET'],
+  ['admin/governance/approvals/00000000-0000-4000-8000-000000000000','GET'],
+  ['business/onboarding/00000000-0000-4000-8000-000000000000/review','POST'],
+  ['admin/finance/simulations','GET'],
+  ['admin/finance/payments/00000000-0000-4000-8000-000000000000/simulation','POST'],
+ ] as const)assert.equal(allowedRoute(path,method,'admin'),true,`${method} ${path}`);
+ for(const [path,method] of [
+  ['admin/finance/payments/00000000-0000-4000-8000-000000000000/provider-recheck','POST'],
+  ['admin/finance/refunds/00000000-0000-4000-8000-000000000000/decision','POST'],
+  ['admin/governance/reviews','GET'],
+  ['business/onboarding/00000000-0000-4000-8000-000000000000/workspace','GET'],
+  ['admin/governance/approvals','POST'],
+ ] as const)assert.equal(allowedRoute(path,method,'admin'),false,`${method} ${path}`);
+ assert.equal(allowedRoute('admin/finance/simulations','GET','unified'),false);
+ setup();let target='';
+ globalThis.fetch=async(input)=>{target=String(input);return Response.json({items:[],nextOffset:null});};
+ const response=await platformProxy(req('admin/finance/simulations?limit=20&offset=0'),'admin');
+ assert.equal(response.status,200);
+ assert.equal(target,'http://127.0.0.1:3001/api/v1/admin/finance/simulations?limit=20&offset=0');
+});

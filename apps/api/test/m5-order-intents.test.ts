@@ -6,7 +6,6 @@ import type {PoolClient} from 'pg';
 import {CustomerService} from '../src/customer/customer.service';
 import type {VerifiedIdentity} from '../src/auth/identity.types';
 import {OrderIntentsService} from '../src/payments/order-intents.service';
-import {PaystackGateway} from '../src/payments/paystack.gateway';
 const id='ae5d7bce-c422-4eae-bf45-e68e46c06c11',other='ae5d7bce-c422-4eae-bf45-e68e46c06c12';
 const identity={subject:'customer'} as VerifiedIdentity;
 function fixture(options:{missing?:boolean;eligible?:boolean;amount?:string;currency?:string;status?:string;linked?:boolean;priorOrder?:string|null;priorEnvironment?:string}={}){
@@ -21,8 +20,7 @@ function fixture(options:{missing?:boolean;eligible?:boolean;amount?:string;curr
   return {rows:[],rowCount:1};
  }} as unknown as PoolClient;
  const customers={withAccountTransaction:async<T>(who:VerifiedIdentity,run:(c:PoolClient)=>Promise<T>)=>{assert.equal(who,identity);return run(client);}} as CustomerService;
- const gateway={environment:()=> 'test'} as unknown as PaystackGateway;
- return {service:new OrderIntentsService(customers,gateway),queries};
+ return {service:new OrderIntentsService(customers),queries};
 }
 test('M5 order intents: persist server total, owner, reference and link without charging or changing the order',async()=>{
  const f=fixture({amount:'9007199254740991'});const result=await f.service.prepare(identity,id,'retry_key');

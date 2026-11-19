@@ -1,8 +1,15 @@
+import {createHash} from 'node:crypto';
+
 /** Deterministic provider boundary. No request can escape to the network. */
 export class FakePaystack {
  transactions=new Map<string,any>();refunds=new Map<string,any>();transfers=new Map<string,any>();disputes=new Map<string,any>();
  calls:Array<{method:string;path:string;body:any}>=[];serial=1000n;loseRefundResponse=false;loseInitializationResponse=false;transferState='success';loseTransferResponse=false;
- charge(reference:string,amount:number,status='success',fees=15){const d={id:String(++this.serial),reference,amount,currency:'NGN',domain:'test',status,fees};this.transactions.set(reference,d);return d;}
+ charge(reference:string,amount:number,status='success',fees=15){
+  const digest=createHash('sha256').update(reference).digest();
+  const id=(digest.readBigUInt64BE(0)%18446744073709551615n+1n).toString();
+  const d={id,reference,amount,currency:'NGN',domain:'test',status,fees};
+  this.transactions.set(reference,d);return d;
+ }
  fetch:typeof fetch=async(input,init)=>{
   const u=new URL(String(input));if(u.origin!=='https://api.paystack.co')throw Error('Unexpected provider origin');
   if(new Headers(init?.headers).get('Authorization')!=='Bearer sk_test_disposablefixture')throw Error('Only synthetic test credentials permitted');

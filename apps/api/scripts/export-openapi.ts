@@ -42,19 +42,19 @@ async function run(){
    if(hasBody&&!operation.requestBody)
     throw new Error('Missing M3 request body schema: '+verb+' '+suffix);
   }
-  const webhook=doc.paths['/api/v1/payments/webhooks/paystack']?.post;
-  if(!webhook?.requestBody||!webhook.parameters?.some(p=>'name' in p&&p.name==='x-paystack-signature'&&p.required))
-   throw new Error('Missing signed M5 payment webhook contract');
+  if(doc.paths['/api/v1/payments/webhooks/paystack']||doc.paths['/api/v1/admin/finance/payments/{id}/provider-recheck'])
+   throw new Error('External payment-provider routes must remain unregistered in simulated-payment mode');
+  const simulation=doc.paths['/api/v1/admin/finance/payments/{id}/simulation']?.post;
+  if(!simulation?.requestBody||!simulation.responses?.['200']||
+   !simulation.security?.some(v=>Object.hasOwn(v,'session'))||
+   !simulation.parameters?.some(p=>'name' in p&&p.name==='id'&&p.in==='path'&&p.required))
+   throw new Error('Missing protected M5 simulated-payment outcome contract');
   for(const path of ['/api/v1/customer/payments/{id}','/api/v1/admin/finance/payments/{id}/reconciliation']){
    const operation=doc.paths[path]?.get;
    if(!operation?.security?.some(v=>Object.hasOwn(v,'session'))||!operation.responses?.['200']||
     !operation.parameters?.some(p=>'name' in p&&p.name==='id'&&p.in==='path'&&p.required))
     throw new Error('Missing protected M5 payment read contract: '+path);
   }
-  const recovery=doc.paths['/api/v1/admin/finance/payments/{id}/provider-recheck']?.post;
-  if(!recovery?.security?.some(v=>Object.hasOwn(v,'session'))||!recovery.responses?.['200']||
-   !recovery.parameters?.some(p=>'name' in p&&p.name==='id'&&p.in==='path'&&p.required))
-   throw new Error('Missing privileged M5 provider-recheck contract');
   const prepare=doc.paths['/api/v1/customer/orders/{id}/payment-intent']?.post;
   if(!prepare?.security?.some(s=>Object.hasOwn(s,'session'))||!prepare.requestBody||!prepare.responses?.['200'])
    throw new Error('Missing authoritative M5 order-intent preparation contract');
@@ -164,13 +164,16 @@ async function run(){
   }
   const snapshot=resolve(__dirname,'../../../packages/api_contracts/openapi.json');
   const previous=JSON.parse(readFileSync(snapshot,'utf8')) as typeof doc;
-  // Permit only the reviewed additive onboarding request body; retain all legacy operations.
+  const activePathContracts=JSON.stringify(doc.paths);
+  const changedPaymentSchemas=new Set(['M5CheckoutResponse','PaymentStatusResponse','CaptureReconciliationResponse','PreparedOrderIntentResponse']);
+  // Permit reviewed auth, payment-simulation and onboarding contract changes.
   const onboarding=JSON.parse(JSON.stringify(doc.paths['/api/v1/business/onboarding']));
   delete onboarding.post.requestBody;
   const oldOnboarding=JSON.parse(JSON.stringify(previous.paths['/api/v1/business/onboarding']));delete oldOnboarding.post.requestBody;
   if(!isDeepStrictEqual(onboarding,oldOnboarding))throw new Error('Legacy onboarding operation changed');
+  const retiredProviderRoutes=new Set(['/api/v1/payments/webhooks/paystack','/api/v1/admin/finance/payments/{id}/provider-recheck']);
   for(const [path,operation] of Object.entries(previous.paths))
-   if(path!=='/api/v1/business/onboarding'&&!path.startsWith('/api/auth/faji/')&&!path.startsWith('/api/v1/auth/')&&!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!WEB_COMPLETION_PATHS.includes(path)&&!isDeepStrictEqual(doc.paths[path],operation))
+   if(path!=='/api/v1/business/onboarding'&&!retiredProviderRoutes.has(path)&&!path.startsWith('/api/auth/faji/')&&!path.startsWith('/api/v1/auth/')&&!M5_OPERATIONS.some(([owned])=>owned===path)&&!path.startsWith('/api/v1/customer/')&&!path.startsWith('/api/v1/discovery/')&&!WEB_COMPLETION_PATHS.includes(path)&&!isDeepStrictEqual(doc.paths[path],operation))
     throw new Error('Existing identity/merchant contract changed: '+path);
   for(const [name,schema] of Object.entries(previous.components?.schemas??{})){
    if(name==='WishlistView'){
@@ -180,7 +183,7 @@ async function run(){
     current.required=current.required.filter((field:string)=>field!=='media');
     const old=JSON.parse(JSON.stringify(schema));delete old.properties.media;old.required=old.required.filter((field:string)=>field!=='media');
     if(!isDeepStrictEqual(current,old))throw new Error('Legacy wishlist fields changed');
-   }else if(!name.startsWith('Web')&&!isDeepStrictEqual(doc.components?.schemas?.[name],schema))throw new Error('Existing schema changed: '+name);
+   }else if(!name.startsWith('Web')&&!changedPaymentSchemas.has(name)&&activePathContracts.includes('#/components/schemas/'+name)&&!isDeepStrictEqual(doc.components?.schemas?.[name],schema))throw new Error('Existing schema changed: '+name);
   }
   writeFileSync(resolve(__dirname,'../../../packages/api_contracts/openapi.json'),JSON.stringify(doc,null,2)+"\n");
  }finally{await app.close();}

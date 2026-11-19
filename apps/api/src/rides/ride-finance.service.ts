@@ -4,6 +4,7 @@ import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 import {FinanceLedger,type FinanceIntent} from '../payments/finance-ledger.service';
 import {PaystackGateway} from '../payments/paystack.gateway';
+import {SIMULATED_PAYMENT_ENVIRONMENT} from '../payments/payment-mode';
 
 const validUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function operatorBusiness(){
@@ -16,7 +17,7 @@ export class RideFinanceService {
  constructor(@Inject(DATABASE_POOL)private readonly pool:Pool,@Inject(FinanceLedger)private readonly ledger:FinanceLedger,
  @Inject(PaystackGateway)private readonly gateway:PaystackGateway){}
  async prepare(subject:string,rideId:string){
-  const business=operatorBusiness(),environment=this.gateway.environment();
+  const business=operatorBusiness(),environment=SIMULATED_PAYMENT_ENVIRONMENT;
   return this.ledger.tx(business,async c=>{
    await this.ledger.environment(c,environment);
    const account=await c.query("SELECT 1 FROM account_access a JOIN user_profiles p ON p.identity_subject=a.identity_subject WHERE a.identity_subject=$1 AND NOT a.suspended AND NOT p.suspended FOR SHARE OF a,p",[subject]);
@@ -35,8 +36,8 @@ export class RideFinanceService {
     throw new ConflictException('Ride operator requires zero M5 commission and platform-borne gateway/payout fees');
    const id=randomUUID();
    const reference='faji-'+randomUUID();
-   await c.query(`INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider_reference,environment,amount_minor,currency)
-      VALUES($1,$2,$3,$4,$5,$6,$7,'NGN')`,
+   await c.query(`INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider,provider_reference,environment,amount_minor,currency,execution_mode)
+      VALUES($1,$2,$3,$4,'simulation',$5,$6,$7,'NGN','simulated')`,
       [id,subject,business,'ride-'+rideId,reference,environment,ride.rows[0].gross_minor]);
    await c.query('INSERT INTO ride_payment_links(ride_id,intent_id) VALUES($1,$2)',[rideId,id]);
    await c.query('UPDATE ride_fares SET payment_intent_id=$2 WHERE ride_id=$1',[rideId,id]);
@@ -143,7 +144,7 @@ export class RideFinanceService {
   // This verification is read-only; never repeat a provider transfer on uncertain responses.
   const provider=await this.gateway.transferStatus(expected.provider_reference);
   const recipient=typeof provider.recipient==='object'?provider.recipient?.recipient_code:provider.recipient;
-  if(provider.reference!==expected.provider_reference||provider.domain!==this.gateway.environment()||
+  if(provider.reference!==expected.provider_reference||provider.domain!==SIMULATED_PAYMENT_ENVIRONMENT||
      String(provider.amount)!==expected.amount_minor||provider.currency!=='NGN'||recipient!==expected.recipient_ref)
    throw new ConflictException('Payout evidence mismatch');
   return this.ledger.tx(business,async c=>{

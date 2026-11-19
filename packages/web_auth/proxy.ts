@@ -14,7 +14,7 @@ export async function proxyAuth(request:NextRequest){
  try{
   const {api,origin}=authConfiguration();
   if(!['GET','POST'].includes(request.method))return new Response(null,{status:405,headers:outgoing});
-  if(request.method==='POST'&&request.headers.get('origin')!==origin)return new Response('Invalid origin',{status:403,headers:outgoing});
+  if(request.method==='POST'&&request.headers.get('origin')!==origin)return Response.json({code:'UNTRUSTED_ORIGIN',message:'This site is not authorized to start authentication.'},{status:403,headers:outgoing});
   if(!request.nextUrl.pathname.startsWith('/api/auth/'))return new Response(null,{status:404,headers:outgoing});
   const target=new URL(request.nextUrl.pathname+request.nextUrl.search,api);
   if(target.origin!==api.origin)throw Error('Invalid upstream');

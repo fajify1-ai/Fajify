@@ -1,4 +1,6 @@
 # Developer 1 — backend integration contract (M1)
+
+> **Historical M1 contract:** The identity-provider and mobile/web authentication notes below are superseded. Active web authentication uses Better Auth sessions as described in [Better Auth implementation](../engineering/BETTER_AUTH_IMPLEMENTATION.md); Keycloak/OIDC is not an active runtime dependency.
 - Base URL: `/api/v1`; JSON UTF-8, ISO 8601 UTC timestamps, UUID resource IDs.
 - `GET /api/v1/health` is liveness; `GET /api/v1/health/ready` is database readiness (503 on DB failure).
 - All responses include `x-request-id`; clients can send a 1–64 character alphanumeric, underscore or hyphen correlation ID.

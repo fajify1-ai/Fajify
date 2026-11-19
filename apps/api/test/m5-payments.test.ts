@@ -7,10 +7,17 @@ import type {Pool} from 'pg';
 import {PaystackGateway} from '../src/payments/paystack.gateway';
 import {PaymentsService} from '../src/payments/payments.service';
 import {captureDependencies} from './m5-capture-fixtures';
+import {FakePaystack} from './m5-fake-provider';
 
 const secret='sk_test_fixture123',reference='faji_fixture123';
 const payload=Buffer.from(JSON.stringify({event:'charge.success',data:{reference,amount:1,status:'failure'}}));
 const signature=(raw:Buffer)=>createHmac('sha512',secret).update(raw).digest('hex');
+test('M5 synthetic provider transaction IDs are stable per reference and isolated across references',()=>{
+ const first=new FakePaystack(),second=new FakePaystack();
+ const a=first.charge('faji_reference_a',100),b=first.charge('faji_reference_b',100),replay=second.charge('faji_reference_a',100);
+ assert.match(a.id,/^[1-9][0-9]{0,19}$/);
+ assert.notEqual(a.id,b.id);assert.equal(a.id,replay.id);
+});
 function fixture(options:{amount?:string;currency?:string;environment?:string;prior?:string;known?:boolean;ledger?:boolean;fail?:boolean}={}){
  const queries:string[]=[];
  const client={query:async(q:string)=>{
