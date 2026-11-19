@@ -1,2 +1,3 @@
-import {AuthForm} from '@faji/web-auth/form';
-export default function Page(){return <AuthForm mode="register"/>;}
+import {redirect} from 'next/navigation';
+
+export default function Page(){redirect('/login');}

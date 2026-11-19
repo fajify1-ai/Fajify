@@ -14,7 +14,9 @@ export async function optionalIdentity(){
 }
 export async function requireIdentity(loginPath:'/login'|'/business/login'='/login'){
  const incoming=await headers();
- const response=await identityResponse(authCookies(incoming.get('cookie')??''));
+ const cookie=authCookies(incoming.get('cookie')??'');
+ if(!cookie)redirect(loginPath);
+ const response=await identityResponse(cookie);
  if(response.status===401)redirect(loginPath);
  if(response.status===403)redirect('/access-denied');
  if(!response.ok)throw new Error('Session validation unavailable');
