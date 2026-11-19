@@ -18,6 +18,7 @@ export type ProviderRecord=Record<string,any>;
 /** Fixed-origin transport shared by all provider operations; errors never include credentials/payloads. */
 export async function providerRequest(secret:string,path:string,method='GET',body?:unknown,transport:typeof fetch=fetch):Promise<ProviderRecord>{
  try{
+  if(transport===globalThis.fetch)throw Error('External provider execution is disabled');
   if(!path.startsWith('/')||path.startsWith('//'))throw Error('Invalid path');
   const r=await transport('https://api.paystack.co'+path,{method,headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(10000)});
   if(!r.ok)throw Error('Provider HTTP failure');

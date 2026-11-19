@@ -30,14 +30,15 @@ const market=new MarketplaceService(runtime,customer),management=new ManagementS
 // use the fake transport, while real HMAC and capture/ledger checks stay enabled.
 const fakeProvider=new FakePaystack();
 class AcceptancePaystackGateway extends PaystackGateway {
+ constructor(){super((input,init)=>fakeProvider.fetch(input,init));}
  override initialize(input:Parameters<PaystackGateway['initialize']>[0]){
-  return super.initialize(input,fakeProvider.fetch);
+  return super.initialize(input,(url,init)=>fakeProvider.fetch(url,init));
  }
  override verify(reference:string){
-  return super.verify(reference,fakeProvider.fetch);
+  return super.verify(reference,(url,init)=>fakeProvider.fetch(url,init));
  }
 }
-const gateway=new AcceptancePaystackGateway(),ledger=new FinanceLedger(runtime),commerce=new CommerceLifecycle(ledger,customer,gateway);
+const gateway=new AcceptancePaystackGateway(),ledger=new FinanceLedger(runtime),commerce=new CommerceLifecycle(ledger,customer);
 const finance=new FinancialOperations(ledger,commerce,gateway),planning=new PlanningService(runtime,customer,commerce);
 const suffix=randomUUID(),owner='m6-owner-'+suffix,a='m6-a-'+suffix,b='m6-b-'+suffix;
 const identity=(subject:string):VerifiedIdentity=>({subject,issuer:'https://fixture.invalid',audience:['faji-api'],roles:['customer'],issuedAt:Math.floor(Date.now()/1000)-2,expiresAt:Math.floor(Date.now()/1000)+3600,sessionId:subject+'-session'});

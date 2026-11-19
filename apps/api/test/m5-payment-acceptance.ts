@@ -54,7 +54,7 @@ test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings 
   gateway.verify=async()=>({id:BigInt('0x'+randomUUID().replaceAll('-','').slice(0,12)).toString(),reference,amountMinor:12500,currency:'NGN',environment:'test'});
   // Keep a stable provider transaction identity across concurrent callbacks.
   const charge=await gateway.verify(reference);gateway.verify=async()=>charge;
-  const ledger=new FinanceLedger(runtime),commerce=new CommerceLifecycle(ledger,new CustomerService(runtime),gateway),operations=new FinancialOperations(ledger,commerce,gateway);
+  const ledger=new FinanceLedger(runtime),commerce=new CommerceLifecycle(ledger,new CustomerService(runtime)),operations=new FinancialOperations(ledger,commerce,gateway);
   const service=new PaymentsService(runtime,gateway,commerce,operations);
   const raw=Buffer.from(JSON.stringify({event:'charge.success',data:{reference}}));
   const signature=createHmac('sha512',process.env.PAYSTACK_SECRET_KEY).update(raw).digest('hex');
@@ -129,7 +129,7 @@ test('M5 PostgreSQL: migrations, concurrent replay, immutable balanced postings 
   const order=(await pool.query("INSERT INTO business_orders(business_id,branch_id,customer_subject,total_minor,currency) VALUES($1,$2,$3,12500,'NGN') RETURNING id",[business,branch,subject])).rows[0].id;
   const now=Math.floor(Date.now()/1000);
   const identity:VerifiedIdentity={subject,issuer:'https://identity.example.invalid',audience:['faji-api'],roles:['customer'],issuedAt:now,expiresAt:now+600};
-  const preparations=new OrderIntentsService(new CustomerService(runtime),gateway);
+  const preparations=new OrderIntentsService(new CustomerService(runtime));
   const orderKey=randomUUID();
   const prepared=await Promise.all(Array.from({length:6},()=>preparations.prepare(identity,order,orderKey)));
   assert.equal(new Set(prepared.map(p=>p.paymentIntentId)).size,1);assert.equal(prepared[0].amountMinor,'12500');

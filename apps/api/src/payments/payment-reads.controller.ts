@@ -10,11 +10,12 @@ import {PaymentReadsService} from './payment-reads.service';
 
 class PaymentStatusResponse {
  @ApiProperty({type:String,format:'uuid'}) paymentIntentId!:string;
- @ApiProperty({enum:['pending','succeeded']}) status!:string;
+ @ApiProperty({enum:['pending','succeeded','failed','cancelled']}) status!:string;
  @ApiProperty({type:String,pattern:'^[0-9]+$',description:'Integer minor units, encoded as a decimal string'}) amountMinor!:string;
  @ApiProperty({enum:['NGN']}) currency!:string;
  @ApiProperty({type:String,format:'date-time'}) createdAt!:string;
  @ApiProperty({type:String,format:'date-time',nullable:true}) verifiedAt!:string|null;
+ @ApiProperty({type:'array',items:{type:'object',additionalProperties:false,properties:{type:{type:'string'},previousStatus:{type:'string',nullable:true},status:{type:'string'},createdAt:{type:'string',format:'date-time'}},required:['type','previousStatus','status','createdAt']}}) events!:Array<{type:string;previousStatus:string|null;status:string;createdAt:string}>;
 }
 class CaptureChecks {
  @ApiProperty({type:Boolean}) verification!:boolean;
@@ -25,7 +26,7 @@ class CaptureChecks {
 }
 class CaptureReconciliationResponse {
  @ApiProperty({type:String,format:'uuid'}) paymentIntentId!:string;
- @ApiProperty({enum:['pending','succeeded']}) status!:string;
+ @ApiProperty({enum:['pending','succeeded','failed','cancelled']}) status!:string;
  @ApiProperty({type:String,pattern:'^[0-9]+$'}) amountMinor!:string;
  @ApiProperty({enum:['NGN']}) currency!:string;
  @ApiProperty({enum:['internal_capture']}) scope!:string;

@@ -2,9 +2,9 @@ import {randomUUID} from 'node:crypto';
 import {BadRequestException,ConflictException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import {CustomerService} from '../customer/customer.service';
 import type {VerifiedIdentity} from '../auth/identity.types';
-import {PaystackGateway} from './paystack.gateway';
+import {SIMULATED_PAYMENT_ENVIRONMENT} from './payment-mode';
 
-type PreparedIntent={id:string;order_id:string|null;request_key:string;amount_minor:string;currency:string;environment:string;status:'pending'|'succeeded'};
+type PreparedIntent={id:string;order_id:string|null;request_key:string;amount_minor:string;currency:string;environment:string;status:'pending'|'succeeded'|'failed'|'cancelled'};
 function response(row:PreparedIntent){
  return {paymentIntentId:row.id,orderId:row.order_id!,amountMinor:row.amount_minor,currency:row.currency,
   status:row.status,checkoutEnabled:false as const};
@@ -12,10 +12,10 @@ function response(row:PreparedIntent){
 /** Prepare a single durable intent from the persisted M4 order; no provider charge or checkout URL yet. */
 @Injectable()
 export class OrderIntentsService {
- constructor(@Inject(CustomerService)private readonly customers:CustomerService,@Inject(PaystackGateway)private readonly gateway:PaystackGateway){}
+ constructor(@Inject(CustomerService)private readonly customers:CustomerService){}
  async prepare(identity:VerifiedIdentity,orderId:string,key:string){
   if(!/^[A-Za-z0-9_-]{8,100}$/.test(key))throw new BadRequestException('Invalid request key');
-  const environment=this.gateway.environment();
+  const environment=SIMULATED_PAYMENT_ENVIRONMENT;
   return this.customers.withAccountTransaction(identity,async c=>{
    // M4's account transaction locks serialize this customer's writes and recheck revocation.
    const prior=await c.query<PreparedIntent>(`SELECT p.id,l.order_id,p.request_key,p.amount_minor::text,p.currency,p.environment,p.status
@@ -39,8 +39,8 @@ export class OrderIntentsService {
    if(purchase.status!=='placed'||purchase.currency!=='NGN'||BigInt(purchase.total_minor)<1n||BigInt(purchase.total_minor)>9007199254740991n)
     throw new ConflictException('Order is not eligible for payment preparation');
    const id=randomUUID();
-   await c.query(`INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider_reference,environment,amount_minor,currency)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,[id,identity.subject,purchase.business_id,key,'faji-'+randomUUID(),environment,purchase.total_minor,purchase.currency]);
+   await c.query(`INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider,provider_reference,environment,amount_minor,currency,execution_mode)
+    VALUES($1,$2,$3,$4,'simulation',$5,$6,$7,$8,'simulated')`,[id,identity.subject,purchase.business_id,key,'faji-'+randomUUID(),environment,purchase.total_minor,purchase.currency]);
    await c.query('INSERT INTO payment_order_links(order_id,intent_id) VALUES($1,$2)',[orderId,id]);
    await c.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'payment.intent_prepared','payment_intent',$2)",[identity.subject,id]);
    await c.query("INSERT INTO outbox_events(event_type,payload) VALUES('payment.intent_prepared',$1)",[JSON.stringify({paymentIntentId:id,orderId:orderId.toLowerCase()})]);

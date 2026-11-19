@@ -14,7 +14,7 @@ class PreparedOrderIntentResponse {
  @ApiProperty({type:String,format:'uuid'}) orderId!:string;
  @ApiProperty({type:String,pattern:'^[0-9]+$'}) amountMinor!:string;
  @ApiProperty({enum:['NGN']}) currency!:string;
- @ApiProperty({enum:['pending','succeeded']}) status!:string;
+ @ApiProperty({enum:['pending','succeeded','failed','cancelled']}) status!:string;
  @ApiProperty({enum:[false],description:'Preparation does not initialize a gateway session or initiate a charge'}) checkoutEnabled!:boolean;
 }
 @ApiTags('customer-payments') @ApiBearerAuth('session')
@@ -23,7 +23,7 @@ class PreparedOrderIntentResponse {
 export class OrderIntentsController {
  constructor(@Inject(OrderIntentsService)private readonly service:OrderIntentsService){}
  @Post(':id/payment-intent') @HttpCode(200) @Header('Cache-Control','no-store')
- @ApiOperation({summary:'Prepare one payment intent from the current customer\'s authoritative order; checkout remains unavailable'})
+ @ApiOperation({summary:'Prepare one payment intent from the current customer\'s authoritative order; simulated checkout does not contact a provider'})
  @ApiParam({name:'id',type:String,format:'uuid',required:true})
  @ApiBody({type:PrepareOrderIntentInput}) @ApiOkResponse({type:PreparedOrderIntentResponse})
  prepare(@Req()req:{identity:VerifiedIdentity},@Param('id',new ParseUUIDPipe())id:string,

@@ -57,6 +57,7 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
    hooks:{before:createAuthMiddleware(async ctx=>{
     if(ctx.path==='/sign-up/email'){
      if(process.env.FAJI_REGISTRATION_ENABLED==='false'||(['production','staging'].includes(process.env.NODE_ENV??'')&&process.env.FAJI_REGISTRATION_ENABLED!=='true'))throw new APIError('FORBIDDEN',{message:'Registration temporarily unavailable'});
+     if(ctx.body?.termsAccepted!==true)throw new APIError('BAD_REQUEST',{message:'Accept the Terms & Conditions to create an account'});
      // Compatibility with released native forms: profile phone is never a verified login identity.
      if(ctx.body?.phoneNumber){ctx.body.registrationPhone=ctx.body.phoneNumber;delete ctx.body.phoneNumber;}
     }

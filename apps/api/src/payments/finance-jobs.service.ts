@@ -4,10 +4,11 @@ import {FinanceLedger} from './finance-ledger.service';
 import {CommerceLifecycle} from './commerce-lifecycle.service';
 import {FinancialOperations} from './financial-operations.service';
 import {PaymentsService} from './payments.service';
+import {PaystackGateway} from './paystack.gateway';
 
 @Injectable()
 export class FinanceJobs {
- constructor(@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle,@Inject(FinancialOperations)readonly operations:FinancialOperations,@Inject(PaymentsService)readonly payments:PaymentsService){}
+ constructor(@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle,@Inject(FinancialOperations)readonly operations:FinancialOperations,@Inject(PaymentsService)readonly payments:PaymentsService,@Inject(PaystackGateway)readonly gateway:PaystackGateway){}
  async consume(limit=100){
   const c=await this.ledger.pool.connect();try{
    await c.query('BEGIN');const rows=(await c.query(`SELECT o.id,o.event_type,o.payload FROM outbox_events o
@@ -36,9 +37,10 @@ export class FinanceJobs {
   }
   if(kind==='dispute')return {done:await this.operations.reconcileDispute(id),recurring:false};
   if(kind==='payment'){
-   const p=(await this.ledger.pool.query('SELECT provider_reference,status FROM payment_intents WHERE id=$1',[id])).rows[0];if(!p)return {done:true,recurring:false};
+   const p=(await this.ledger.pool.query('SELECT provider_reference,status,execution_mode FROM payment_intents WHERE id=$1',[id])).rows[0];if(!p)return {done:true,recurring:false};
+   if(p.execution_mode==='simulated')return {done:true,recurring:false};
    if(p.status!=='succeeded'){
-    const status=await this.commerce.gateway.transaction(p.provider_reference);
+    const status=await this.gateway.transaction(p.provider_reference);
     if(status.status==='success')await this.payments.recheck('system:m5-reconciler',id);
     else return {done:['failed','abandoned','reversed'].includes(status.status),recurring:false};
    }

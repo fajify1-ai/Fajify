@@ -14,13 +14,17 @@ const captured:CaptureSnapshot={id,status:'succeeded',amount_minor:'900719925474
 test('M5 reads: customer projection preserves exact money strings and excludes provider/private records',async()=>{
  let parameters:unknown[]|undefined;
  const pool={query:async(sql:string,args:unknown[])=>{
+  if(sql.includes('FROM payment_lifecycle_events')){
+   assert.match(sql,/WHERE intent_id=\$1/);
+   return {rows:[]};
+  }
   assert.match(sql,/WHERE id=\$1 AND customer_subject=\$2/);parameters=args;
   return {rows:[{...captured,provider_reference:'private',customer_subject:'customer',business_id:'private',unexpected:'private'}]};
  }} as unknown as Pool;
  const value=await new PaymentReadsService(pool).customerPayment('customer',id);
  assert.deepEqual(parameters,[id,'customer']);
  assert.deepEqual(value,{paymentIntentId:id,status:'succeeded',amountMinor:'9007199254740991',currency:'NGN',
-  createdAt:'2026-11-01T00:00:00.000Z',verifiedAt:'2026-11-01T00:01:00.000Z'});
+  createdAt:'2026-11-01T00:00:00.000Z',verifiedAt:'2026-11-01T00:01:00.000Z',events:[]});
 });
 test('M5 reads: missing or foreign payment returns the same not-found result',async()=>{
  const pool={query:async()=>({rows:[]})} as unknown as Pool;

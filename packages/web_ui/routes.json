@@ -20,6 +20,11 @@
     "audience": "business"
   },
   {
+    "path": "business/onboarding/{id}/review",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
     "path": "businesses/{businessId}/branches",
     "method": "POST",
     "audience": "business"
@@ -520,11 +525,6 @@
     "audience": "customer"
   },
   {
-    "path": "customer/payments/{id}/recheck",
-    "method": "POST",
-    "audience": "customer"
-  },
-  {
     "path": "customer/payments/{id}/refunds",
     "method": "POST",
     "audience": "customer"
@@ -553,6 +553,16 @@
     "path": "businesses/{businessId}/branches/{branchId}/tickets/redemption",
     "method": "POST",
     "audience": "business"
+  },
+  {
+    "path": "admin/finance/simulations",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/finance/payments/{id}/simulation",
+    "method": "POST",
+    "audience": "admin"
   },
   {
     "path": "plans",
@@ -608,5 +618,15 @@
     "path": "customer/support-notifications/{id}/read",
     "method": "PUT",
     "audience": "customer"
+  },
+  {
+    "path": "admin/governance/approvals",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/approvals/{id}",
+    "method": "GET",
+    "audience": "admin"
   }
 ]

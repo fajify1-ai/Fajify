@@ -3925,48 +3925,6 @@
         ]
       }
     },
-    "/api/v1/payments/webhooks/paystack": {
-      "post": {
-        "operationId": "PaymentsController_webhook_v1",
-        "parameters": [
-          {
-            "name": "x-paystack-signature",
-            "in": "header",
-            "description": "HMAC-SHA512 over the exact raw request bytes",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": true
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Event accepted or safely replayed"
-          },
-          "401": {
-            "description": "Signature rejected"
-          },
-          "503": {
-            "description": "Provider verification unavailable; retry notification"
-          }
-        },
-        "summary": "Signed Paystack notification; independently verified before posting funds",
-        "tags": [
-          "payments"
-        ]
-      }
-    },
     "/api/v1/customer/payments/{id}": {
       "get": {
         "operationId": "CustomerPaymentsController_payment_v1",
@@ -4041,60 +3999,6 @@
         ]
       }
     },
-    "/api/v1/admin/finance/payments/{id}/provider-recheck": {
-      "post": {
-        "operationId": "PaymentRecoveryController_recheck_v1",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": false
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaymentRecheckResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Verified charge differs from local intent or receipt"
-          },
-          "503": {
-            "description": "Provider verification unavailable or transaction not successful; no capture posted"
-          }
-        },
-        "security": [
-          {
-            "session": []
-          }
-        ],
-        "summary": "Recover a missed notification by independently verifying the stored payment reference; no charge is initiated",
-        "tags": [
-          "finance-admin"
-        ]
-      }
-    },
     "/api/v1/customer/orders/{id}/payment-intent": {
       "post": {
         "operationId": "OrderIntentsController_prepare_v1",
@@ -4136,7 +4040,7 @@
             "session": []
           }
         ],
-        "summary": "Prepare one payment intent from the current customer's authoritative order; checkout remains unavailable",
+        "summary": "Prepare one payment intent from the current customer's authoritative order; simulated checkout does not contact a provider",
         "tags": [
           "customer-payments"
         ]
@@ -4396,7 +4300,9 @@
                       "type": "string",
                       "enum": [
                         "pending",
-                        "succeeded"
+                        "succeeded",
+                        "failed",
+                        "cancelled"
                       ]
                     },
                     "checkoutEnabled": {
@@ -4410,79 +4316,6 @@
                     "currency",
                     "status",
                     "checkoutEnabled"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Purchase, policy, capacity or financial state conflict; refresh before retry"
-          },
-          "503": {
-            "description": "Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation"
-          }
-        },
-        "security": [
-          {
-            "session": []
-          }
-        ],
-        "tags": [
-          "customer-finance"
-        ]
-      }
-    },
-    "/api/v1/customer/payments/{id}/recheck": {
-      "post": {
-        "operationId": "M5CustomerController_recheck_v1",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": false
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "paymentIntentId": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "succeeded"
-                      ]
-                    },
-                    "replayed": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "paymentIntentId",
-                    "status",
-                    "replayed"
                   ]
                 }
               }
@@ -5382,6 +5215,63 @@
         ]
       }
     },
+    "/api/v1/admin/finance/simulations": {
+      "get": {
+        "operationId": "M5AdminController_simulatedPayments_v1",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size, 1–50; default 20",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Zero-based row offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M5SimulatedPaymentPage"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
     "/api/v1/admin/finance/payments/{id}/checkout-retry": {
       "post": {
         "operationId": "M5AdminController_retryCheckout_v1",
@@ -5413,6 +5303,87 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/M5CheckoutResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Financial state conflict; unresolved provider evidence blocks money movement"
+          },
+          "503": {
+            "description": "Provider unavailable; reconcile ambiguous writes before retry"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "finance-admin"
+        ]
+      }
+    },
+    "/api/v1/admin/finance/payments/{id}/simulation": {
+      "post": {
+        "operationId": "M5AdminController_simulate_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/M5SimulationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "paymentIntentId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "failed",
+                        "cancelled"
+                      ]
+                    },
+                    "replayed": {
+                      "type": "boolean"
+                    },
+                    "mode": {
+                      "type": "string",
+                      "enum": [
+                        "simulated"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "paymentIntentId",
+                    "status",
+                    "replayed",
+                    "mode"
+                  ]
                 }
               }
             }
@@ -12878,7 +12849,9 @@
             "type": "string",
             "enum": [
               "pending",
-              "succeeded"
+              "succeeded",
+              "failed",
+              "cancelled"
             ]
           },
           "amountMinor": {
@@ -12900,6 +12873,35 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "previousStatus": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "status": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "type",
+                "previousStatus",
+                "status",
+                "createdAt"
+              ]
+            }
           }
         },
         "required": [
@@ -12908,7 +12910,8 @@
           "amountMinor",
           "currency",
           "createdAt",
-          "verifiedAt"
+          "verifiedAt",
+          "events"
         ]
       },
       "CaptureChecks": {
@@ -12949,7 +12952,9 @@
             "type": "string",
             "enum": [
               "pending",
-              "succeeded"
+              "succeeded",
+              "failed",
+              "cancelled"
             ]
           },
           "amountMinor": {
@@ -13004,30 +13009,6 @@
           "issues"
         ]
       },
-      "PaymentRecheckResponse": {
-        "type": "object",
-        "properties": {
-          "paymentIntentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "succeeded"
-            ]
-          },
-          "replayed": {
-            "type": "boolean",
-            "description": "True when the matching capture was already posted"
-          }
-        },
-        "required": [
-          "paymentIntentId",
-          "status",
-          "replayed"
-        ]
-      },
       "PrepareOrderIntentInput": {
         "type": "object",
         "properties": {
@@ -13065,7 +13046,9 @@
             "type": "string",
             "enum": [
               "pending",
-              "succeeded"
+              "succeeded",
+              "failed",
+              "cancelled"
             ]
           },
           "checkoutEnabled": {
@@ -13251,30 +13234,36 @@
           "state": {
             "type": "string",
             "enum": [
-              "initializing",
-              "ready",
-              "uncertain",
-              "closed",
-              "paid"
+              "pending",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "simulated"
             ]
           },
           "checkoutEnabled": {
             "type": "boolean"
-          },
-          "authorizationUrl": {
-            "type": "string",
-            "format": "uri"
-          },
-          "accessCode": {
-            "type": "string"
-          },
-          "reference": {
-            "type": "string"
           }
         },
         "required": [
           "paymentIntentId",
           "state",
+          "status",
+          "mode",
           "checkoutEnabled"
         ]
       },
@@ -13467,6 +13456,67 @@
         },
         "required": [
           "token"
+        ]
+      },
+      "M5SimulatedPayment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amountMinor": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "amountMinor",
+          "currency",
+          "createdAt"
+        ]
+      },
+      "M5SimulatedPaymentPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/M5SimulatedPayment"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "M5SimulationInput": {
+        "type": "object",
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed",
+              "cancelled"
+            ]
+          }
+        },
+        "required": [
+          "outcome"
         ]
       },
       "M5PolicyInput": {

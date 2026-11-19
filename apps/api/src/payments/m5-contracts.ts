@@ -4,8 +4,9 @@ const nullable=(s:SchemaObject):SchemaObject=>({...s,nullable:true});
 const array=(items:SchemaObject):SchemaObject=>({type:'array',items});
 const object=(properties:Record<string,SchemaObject>,optional:string[]=[]):SchemaObject=>({type:'object',additionalProperties:false,properties,required:Object.keys(properties).filter(k=>!optional.includes(k))});
 export const M5_SCHEMAS={
- retry:object({paymentIntentId:uuid,orderId:uuid,amountMinor:money,currency:{type:'string',enum:['NGN']},status:{type:'string',enum:['pending','succeeded']},checkoutEnabled:boolean}),
- recheck:object({paymentIntentId:uuid,status:{type:'string',enum:['succeeded']},replayed:boolean}),
+ retry:object({paymentIntentId:uuid,orderId:uuid,amountMinor:money,currency:{type:'string',enum:['NGN']},status:{type:'string',enum:['pending','succeeded','failed','cancelled']},checkoutEnabled:boolean}),
+ simulation:object({paymentIntentId:uuid,status:{type:'string',enum:['succeeded','failed','cancelled']},replayed:boolean,mode:{type:'string',enum:['simulated']}}),
+ simulatedPaymentPage:object({items:array(object({id:uuid,amountMinor:money,currency:string,createdAt:date})),nextOffset:nullable(integer)}),
  terminal:object({id:string,terminal:boolean}),id:object({id:uuid}),pending:object({id:string,pending:boolean,status:string},['pending','status']),queued:object({id:uuid,queued:boolean}),
  recipient:object({id:uuid,recipient_code:string,environment:{type:'string',enum:['test','live']},active:boolean}),disabled:object({id:uuid,active:boolean}),
  inventory:object({catalogue_id:uuid,capacity:integer,held:integer,issued:integer}),redeemed:object({id:uuid,status:{type:'string',enum:['redeemed']}}),
@@ -25,12 +26,14 @@ export const M5_OVERVIEW_SCHEMA=object({
 /** Explicit inventory: generation fails when any M5 lifecycle route/security/schema disappears. */
 export const M5_OPERATIONS:ReadonlyArray<readonly [string,'get'|'post',boolean]>=[
  ...(['paid-holds','payments/{id}/checkout','orders/{id}/payment-retry','payments/{id}/refunds'] as const).map(p=>['/api/v1/customer/'+p,'post',true] as const),
- ...(['paid-holds/{id}/cancellation','payments/{id}/recheck'] as const).map(p=>['/api/v1/customer/'+p,'post',false] as const),
+ ...(['paid-holds/{id}/cancellation'] as const).map(p=>['/api/v1/customer/'+p,'post',false] as const),
  ...(['paid-holds','refunds','tickets'] as const).map(p=>['/api/v1/customer/'+p,'get',false] as const),
  ['/api/v1/businesses/{businessId}/finance','get',false],
  ['/api/v1/businesses/{businessId}/branches/{branchId}/events/{eventId}/inventory','post',true],
  ['/api/v1/businesses/{businessId}/branches/{branchId}/tickets/redemption','post',true],
  ...(['businesses/{businessId}/policies','payments/{id}/refunds','refunds/{id}/decision','refunds/{id}/provider-link','payments/{id}/external-refunds','businesses/{businessId}/recipients','businesses/{businessId}/settlements','settlements/{id}/otp','disputes/{providerId}/resolution'] as const).map(p=>['/api/v1/admin/finance/'+p,'post',true] as const),
  ...(['payments/{id}/checkout-retry','refunds/{id}/reconciliation','recipients/{id}/disable','settlements/{id}/cancellation','settlements/{id}/reconciliation','disputes/{providerId}/reconciliation','jobs/{id}/retry'] as const).map(p=>['/api/v1/admin/finance/'+p,'post',false] as const),
+ ['/api/v1/admin/finance/payments/{id}/simulation','post',true],
+ ['/api/v1/admin/finance/simulations','get',false],
  ...(['operations','businesses/{businessId}/policies','audit'] as const).map(p=>['/api/v1/admin/finance/'+p,'get',false] as const),
 ];

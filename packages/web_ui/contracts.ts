@@ -1338,23 +1338,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/payments/webhooks/paystack": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Signed Paystack notification; independently verified before posting funds */
-        post: operations["PaymentsController_webhook_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/customer/payments/{id}": {
         parameters: {
             query?: never;
@@ -1389,23 +1372,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/admin/finance/payments/{id}/provider-recheck": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Recover a missed notification by independently verifying the stored payment reference; no charge is initiated */
-        post: operations["PaymentRecoveryController_recheck_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/customer/orders/{id}/payment-intent": {
         parameters: {
             query?: never;
@@ -1415,7 +1381,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Prepare one payment intent from the current customer's authoritative order; checkout remains unavailable */
+        /** Prepare one payment intent from the current customer's authoritative order; simulated checkout does not contact a provider */
         post: operations["OrderIntentsController_prepare_v1"];
         delete?: never;
         options?: never;
@@ -1481,22 +1447,6 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["M5CustomerController_retryOrder_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/customer/payments/{id}/recheck": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["M5CustomerController_recheck_v1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1631,6 +1581,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/finance/simulations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["M5AdminController_simulatedPayments_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/finance/payments/{id}/checkout-retry": {
         parameters: {
             query?: never;
@@ -1641,6 +1607,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["M5AdminController_retryCheckout_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/finance/payments/{id}/simulation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["M5AdminController_simulate_v1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3858,7 +3840,7 @@ export interface components {
             /** Format: uuid */
             paymentIntentId: string;
             /** @enum {string} */
-            status: "pending" | "succeeded";
+            status: "pending" | "succeeded" | "failed" | "cancelled";
             /** @description Integer minor units, encoded as a decimal string */
             amountMinor: string;
             /** @enum {string} */
@@ -3867,6 +3849,13 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             verifiedAt: string | null;
+            events: {
+                type: string;
+                previousStatus: string | null;
+                status: string;
+                /** Format: date-time */
+                createdAt: string;
+            }[];
         };
         CaptureChecks: {
             verification: boolean;
@@ -3879,7 +3868,7 @@ export interface components {
             /** Format: uuid */
             paymentIntentId: string;
             /** @enum {string} */
-            status: "pending" | "succeeded";
+            status: "pending" | "succeeded" | "failed" | "cancelled";
             amountMinor: string;
             /** @enum {string} */
             currency: "NGN";
@@ -3893,14 +3882,6 @@ export interface components {
             /** @description Names of failed internal consistency checks */
             issues: string[];
         };
-        PaymentRecheckResponse: {
-            /** Format: uuid */
-            paymentIntentId: string;
-            /** @enum {string} */
-            status: "succeeded";
-            /** @description True when the matching capture was already posted */
-            replayed: boolean;
-        };
         PrepareOrderIntentInput: {
             requestKey: string;
         };
@@ -3913,7 +3894,7 @@ export interface components {
             /** @enum {string} */
             currency: "NGN";
             /** @enum {string} */
-            status: "pending" | "succeeded";
+            status: "pending" | "succeeded" | "failed" | "cancelled";
             /**
              * @description Preparation does not initialize a gateway session or initiate a charge
              * @enum {boolean}
@@ -3973,12 +3954,12 @@ export interface components {
             /** Format: uuid */
             paymentIntentId: string;
             /** @enum {string} */
-            state: "initializing" | "ready" | "uncertain" | "closed" | "paid";
+            state: "pending" | "succeeded" | "failed" | "cancelled";
+            /** @enum {string} */
+            status: "pending" | "succeeded" | "failed" | "cancelled";
+            /** @enum {string} */
+            mode: "simulated";
             checkoutEnabled: boolean;
-            /** Format: uri */
-            authorizationUrl?: string;
-            accessCode?: string;
-            reference?: string;
         };
         M5OrderRetryInput: {
             /** Format: uuid */
@@ -4033,6 +4014,22 @@ export interface components {
         M5RedeemInput: {
             /** @description Opaque QR token; do not log */
             token: string;
+        };
+        M5SimulatedPayment: {
+            /** Format: uuid */
+            id: string;
+            amountMinor: string;
+            currency: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        M5SimulatedPaymentPage: {
+            items: components["schemas"]["M5SimulatedPayment"][];
+            nextOffset: number | null;
+        };
+        M5SimulationInput: {
+            /** @enum {string} */
+            outcome: "succeeded" | "failed" | "cancelled";
         };
         M5PolicyInput: {
             commissionBps: number;
@@ -6801,47 +6798,6 @@ export interface operations {
             };
         };
     };
-    PaymentsController_webhook_v1: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description HMAC-SHA512 over the exact raw request bytes */
-                "x-paystack-signature": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    [key: string]: unknown;
-                };
-            };
-        };
-        responses: {
-            /** @description Event accepted or safely replayed */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Signature rejected */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provider verification unavailable; retry notification */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     CustomerPaymentsController_payment_v1: {
         parameters: {
             query?: never;
@@ -6881,45 +6837,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CaptureReconciliationResponse"];
                 };
-            };
-        };
-    };
-    PaymentRecoveryController_recheck_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaymentRecheckResponse"];
-                };
-            };
-            /** @description Verified charge differs from local intent or receipt */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provider verification unavailable or transaction not successful; no capture posted */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -7130,53 +7047,8 @@ export interface operations {
                         /** @enum {string} */
                         currency: "NGN";
                         /** @enum {string} */
-                        status: "pending" | "succeeded";
+                        status: "pending" | "succeeded" | "failed" | "cancelled";
                         checkoutEnabled: boolean;
-                    };
-                };
-            };
-            /** @description Purchase, policy, capacity or financial state conflict; refresh before retry */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Provider or signing configuration unavailable; an ambiguous provider write requires reconciliation */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    M5CustomerController_recheck_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: unknown;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** Format: uuid */
-                        paymentIntentId: string;
-                        /** @enum {string} */
-                        status: "succeeded";
-                        replayed: boolean;
                     };
                 };
             };
@@ -7600,6 +7472,44 @@ export interface operations {
             };
         };
     };
+    M5AdminController_simulatedPayments_v1: {
+        parameters: {
+            query?: {
+                /** @description Page size, 1–50; default 20 */
+                limit?: number;
+                /** @description Zero-based row offset */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["M5SimulatedPaymentPage"];
+                };
+            };
+            /** @description Financial state conflict; unresolved provider evidence blocks money movement */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Provider unavailable; reconcile ambiguous writes before retry */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     M5AdminController_retryCheckout_v1: {
         parameters: {
             query?: never;
@@ -7621,6 +7531,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["M5CheckoutResponse"];
+                };
+            };
+            /** @description Financial state conflict; unresolved provider evidence blocks money movement */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Provider unavailable; reconcile ambiguous writes before retry */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    M5AdminController_simulate_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: unknown;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["M5SimulationInput"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        paymentIntentId: string;
+                        /** @enum {string} */
+                        status: "succeeded" | "failed" | "cancelled";
+                        replayed: boolean;
+                        /** @enum {string} */
+                        mode: "simulated";
+                    };
                 };
             };
             /** @description Financial state conflict; unresolved provider evidence blocks money movement */

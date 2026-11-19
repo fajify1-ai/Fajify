@@ -3,8 +3,8 @@
 Status: M8-P1 implementation branch, **verification and production rollout pending**. No unreviewed production use.
 
 ## 1. Runtime and safe configuration
-- Use the existing supervised NestJS API, application PostgreSQL role and configured Keycloak issuer/audience. Keep Keycloak's database isolated. TLS and secrets come from the deployment environment, never Git.
-- M8 routes are all under `/api/v1/admin` and rely on `platform-admin`, `azp=faji-admin-web`, trusted `faji-mfa` ACR and `auth_time` no older than 5 minutes.
+- Use the existing NestJS API, Better Auth session and application PostgreSQL role. Better Auth is the sole active authentication provider. TLS and secrets come from the deployment environment, never Git.
+- M8 routes are under `/api/v1/admin` and require the server-side `platform-admin` role, active account/session, applicable privileged step-up policy, and explicit database-backed admin scopes.
 - Suspend/revoke inactive admins using existing M2 security operations. A UI role is never a backend authorization decision.
 - Provision explicit `admin_scope_grants` for allowed duties **out-of-band using the migration-owner/DB operator role** after independently verifying the Keycloak identity and obtaining two-person approval. The API runtime has only SELECT on grants.
 
@@ -13,7 +13,7 @@ Example *transaction pattern* for an approved operator, with a verified subject 
 ```sql
 BEGIN;
 INSERT INTO admin_scope_grants(identity_subject,scope,granted_by)
-VALUES ('<verified-keycloak-subject>', 'support.read', '<approver-identity>')
+VALUES ('<verified-better-auth-subject>', 'support.read', '<approver-identity>')
 ON CONFLICT(identity_subject,scope)
 DO UPDATE SET active=true,granted_by=EXCLUDED.granted_by;
 COMMIT;

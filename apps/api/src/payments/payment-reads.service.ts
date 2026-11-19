@@ -3,7 +3,7 @@ import {Pool} from 'pg';
 import {DATABASE_POOL} from '../tokens';
 
 type PaymentRow={
- id:string;status:'pending'|'succeeded';amount_minor:string;currency:'NGN';
+ id:string;status:'pending'|'succeeded'|'failed'|'cancelled';amount_minor:string;currency:'NGN';
  created_at:Date;verified_at:Date|null;
 };
 export type CaptureSnapshot=PaymentRow&{
@@ -44,8 +44,12 @@ export class PaymentReadsService {
   );
   const row=result.rows[0];
   if(!row)throw new NotFoundException('Payment not found');
+  const events=await this.pool.query(`SELECT event_type,previous_status,resulting_status,created_at
+   FROM payment_lifecycle_events WHERE intent_id=$1 ORDER BY created_at,id`,[id]);
   return {paymentIntentId:row.id,status:row.status,amountMinor:row.amount_minor,currency:row.currency,
-   createdAt:row.created_at.toISOString(),verifiedAt:row.verified_at?.toISOString()??null};
+   createdAt:row.created_at.toISOString(),verifiedAt:row.verified_at?.toISOString()??null,
+   events:events.rows.map(event=>({type:event.event_type,previousStatus:event.previous_status,
+    status:event.resulting_status,createdAt:event.created_at.toISOString()}))};
  }
 
  async reconciliation(actor:string,id:string){
@@ -53,8 +57,8 @@ export class PaymentReadsService {
   const result=await this.pool.query<CaptureSnapshot>(`SELECT p.id,p.status,p.amount_minor::text,p.currency,p.created_at,p.verified_at,
    r.intent_id AS receipt_id,j.id AS journal_id,j.amount_minor::text AS journal_amount,j.currency AS journal_currency,
    d.code AS debit_code,c.code AS credit_code,
-   (SELECT count(*)::int FROM audit_events a WHERE a.resource_id=p.id AND a.resource_type='payment_intent' AND a.action='payment.verified') AS audit_count,
-   (SELECT count(*)::int FROM outbox_events o WHERE o.event_type='payment.verified' AND o.payload::jsonb->>'paymentIntentId'=p.id::text) AS outbox_count
+   (SELECT count(*)::int FROM audit_events a WHERE a.resource_id=p.id AND a.resource_type='payment_intent' AND a.action IN ('payment.verified','payment.simulated.succeeded')) AS audit_count,
+   (SELECT count(*)::int FROM outbox_events o WHERE o.event_type IN ('payment.verified','payment.simulated.succeeded') AND o.payload::jsonb->>'paymentIntentId'=p.id::text) AS outbox_count
    FROM payment_intents p LEFT JOIN payment_receipts r ON r.intent_id=p.id
    LEFT JOIN ledger_entries j ON j.intent_id=p.id
    LEFT JOIN ledger_accounts d ON d.id=j.debit_account_id

@@ -7,7 +7,7 @@ const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH??'
 try{
  const email=process.env.BUSINESS_TEST_EMAIL??`business-web-${Date.now()}@example.test`,password=process.env.BUSINESS_TEST_PASSWORD??'Disposable-test-browser-2026!';
  await page.goto(base+(process.env.BUSINESS_TEST_EMAIL?'/login':'/register'));
- if(!process.env.BUSINESS_TEST_EMAIL)await page.getByLabel('Name',{exact:true}).fill('Web Verification Merchant');await page.getByLabel('Email',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill(password);await page.getByRole('button',{name:'Continue',exact:true}).click();await page.waitForURL('**/dashboard');
+ if(!process.env.BUSINESS_TEST_EMAIL)await page.getByLabel('Name',{exact:true}).fill('Web Verification Merchant');await page.getByLabel('Email',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill(password);if(!process.env.BUSINESS_TEST_EMAIL)await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Continue',exact:true}).click();await page.waitForURL('**/dashboard');
  if(!process.env.BUSINESS_TEST_EMAIL){
   await page.getByRole('heading',{name:'Business approval',exact:true}).waitFor();await page.getByRole('button',{name:'Register a business',exact:true}).click();
   for(let step=1;step<=8;step++){

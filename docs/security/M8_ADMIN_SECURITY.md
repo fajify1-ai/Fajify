@@ -1,9 +1,9 @@
 # M8-P1 Administrative Security and Failure Model
 
-**Status:** Engineering design/implementation; real Keycloak and deployment acceptance pending.
+**Status:** Implementation; Better Auth and deployment acceptance remain environment-dependent.
 
 ## Trust boundaries
-- Keycloak owns the signed issuer/audience/subject, `platform-admin` role, authorized admin web party, MFA ACR and authentication time. Application Postgres owns account suspension/revocation, explicitly scoped grant decisions, business records and operational history. UI route checks are not an authority.
+- Better Auth owns authentication credentials and sessions. PostgreSQL application roles and resource memberships determine platform-admin and business authorization; privileged admin routes additionally require the relevant database-backed scope and step-up policy. UI route checks are not an authority.
 - All M8 routes use identity, active account/session, privileged recent MFA, explicitly granted M8 scope(s), and PostgreSQL-backed budget guards. Scope DB outage is fail-closed. Revenue reports require two scopes.
 - Sensitive privileged reads produce append-only static-operation audit requests without URLs, user query values or private content. An audit of a read request is not a successful-read receipt.
 - Operator grants are made outside runtime, with human review. The runtime cannot modify scope grant rows. Grant changes have append-only audited history and cannot be deleted or retargeted.
@@ -22,7 +22,7 @@
 - Audit/command rows are append-only. Sensitive provider credentials, OTP, ticket QR, message bodies and raw provider payloads are not included in M8 operation history or command replay receipts.
 
 ## Threat and operational risks still requiring verification
-- Real Keycloak MFA assurance and admin session/auth-time mappings, configuration of `platform-admin`/admin client, and operator grant process.
+- Production Better Auth session/MFA configuration, `platform-admin` provisioning, and the controlled operator scope-grant process.
 - Existing M3/M5 admin commands retain their legacy privileged authorization until coordinated dual-scope migration. Do not describe M8 granular scopes as globally applied to historical admin APIs yet.
 - PostgreSQL runtime currently serves several modules; verify least privileges and avoid unreviewed raw SQL access. No claimed row-level security on pooled global-administrator reads.
 - Database backup/restore, incident response exercises and tamper recovery. SQL-level database superusers remain an ultimate trust boundary.

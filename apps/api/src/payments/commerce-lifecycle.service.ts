@@ -1,19 +1,19 @@
 import {randomUUID} from 'node:crypto';
-import {BadRequestException,ConflictException,ForbiddenException,Inject,Injectable,NotFoundException,ServiceUnavailableException} from '@nestjs/common';
+import {BadRequestException,ConflictException,ForbiddenException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import type {PoolClient} from 'pg';
 import {CustomerService} from '../customer/customer.service';
 import type {VerifiedIdentity} from '../auth/identity.types';
 import {FinanceLedger,minor,type FinanceIntent} from './finance-ledger.service';
-import {PaystackGateway} from './paystack.gateway';
+import {requireSimulatedPayments,SIMULATED_PAYMENT_ENVIRONMENT} from './payment-mode';
 import {parseTicketToken,ticketKey,ticketNonce,ticketToken} from './ticket-token';
 
 export type HoldInput={kind:'reservation'|'ticket';sourceId:string;quantity:number;guestName:string;requestKey:string;expectedAmountMinor?:string;planId?:string;planRevision?:number};
 @Injectable()
 export class CommerceLifecycle {
- constructor(@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CustomerService)readonly customers:CustomerService,@Inject(PaystackGateway)readonly gateway:PaystackGateway){}
+ constructor(@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CustomerService)readonly customers:CustomerService){}
  async hold(who:VerifiedIdentity,input:HoldInput){
   if(!input.guestName.trim())throw new BadRequestException('Guest name is required');
-  const environment=this.gateway.environment();const key=input.kind==='ticket'?ticketKey().keyId:null;
+  const environment=SIMULATED_PAYMENT_ENVIRONMENT;const key=input.kind==='ticket'?ticketKey().keyId:null;
   return this.customers.withAccountTransaction(who,async c=>{
    const prior=(await c.query('SELECT h.*,p.amount_minor::text,p.currency FROM paid_holds h JOIN payment_intents p ON p.id=h.intent_id WHERE h.customer_subject=$1 AND h.request_key=$2',[who.subject,input.requestKey])).rows[0];
    if(prior){
@@ -90,8 +90,8 @@ export class CommerceLifecycle {
     if(!(await c.query('UPDATE ticket_inventory SET held=held+$2 WHERE catalogue_id=$1 AND held+issued+$2<=capacity RETURNING catalogue_id',[source.catalogue_id,input.quantity])).rowCount)throw new ConflictException('Tickets exhausted');
    }
    const intent=randomUUID(),id=randomUUID();
-   await c.query(`INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider_reference,environment,amount_minor,currency)
-    VALUES($1,$2,$3,$4,$5,$6,$7,'NGN')`,[intent,who.subject,source.business_id,'hold-'+id,'faji-'+randomUUID(),environment,amount.toString()]);
+   await c.query(`INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider,provider_reference,environment,amount_minor,currency,execution_mode)
+    VALUES($1,$2,$3,$4,'simulation',$5,$6,$7,'NGN','simulated')`,[intent,who.subject,source.business_id,'hold-'+id,'faji-'+randomUUID(),environment,amount.toString()]);
    const p:FinanceIntent={id:intent,customer_subject:who.subject,business_id:source.business_id,amount_minor:amount.toString(),currency:'NGN',environment,provider_reference:'',status:'pending'};
    await this.ledger.terms(c,p,policy.id);
    const hold=(await c.query(`INSERT INTO paid_holds(id,intent_id,customer_subject,business_id,branch_id,catalogue_id,kind,availability_id,quantity,guest_name,request_key,expires_at,key_id)
@@ -169,37 +169,28 @@ export class CommerceLifecycle {
   else if(!(await c.query('SELECT 1 FROM business_availability WHERE id=$1 AND active AND starts_at>now() FOR UPDATE',[h.availability_id])).rowCount)throw new ConflictException('Slot no longer available');
  }
  async checkout(who:VerifiedIdentity,id:string,email:string){
-  const callback=process.env.PAYMENT_CALLBACK_URL;
-  if(!callback)throw new ServiceUnavailableException('Payment callback URL is not configured');const u=new URL(callback);
-  if(u.protocol!=='https:'||u.username||u.password||u.hash)throw new ServiceUnavailableException('Invalid configured payment callback URL');
+  requireSimulatedPayments();
   const known=(await this.ledger.pool.query('SELECT business_id FROM payment_intents WHERE id=$1 AND customer_subject=$2',[id,who.subject])).rows[0];if(!known)throw new NotFoundException('Payment not found');
   const selected=await this.customers.withAccountTransaction(who,async c=>{
    await this.ledger.lock(c,known.business_id);
-   const p=(await c.query<FinanceIntent>('SELECT *,amount_minor::text FROM payment_intents WHERE id=$1 AND customer_subject=$2 FOR UPDATE',[id,who.subject])).rows[0];
+   const p=(await c.query<FinanceIntent & {execution_mode:string}>('SELECT *,amount_minor::text FROM payment_intents WHERE id=$1 AND customer_subject=$2 FOR UPDATE',[id,who.subject])).rows[0];
+   if(p.execution_mode!=='simulated')throw new ConflictException('Legacy payment cannot use simulated checkout');
+   if(p.status==='failed'||p.status==='cancelled')throw new ConflictException('Payment is terminal; create a new payment attempt');
    await this.ledger.environment(c,p.environment);
-   if(p.status==='succeeded')return {paid:true,p};if(p.environment!==this.gateway.environment())throw new ConflictException('Payment environment changed');
+   if(p.status==='succeeded')return {paid:true,p};
    await this.validatePurchase(c,p);await this.ledger.terms(c,p);
    const old=(await c.query('SELECT * FROM checkout_sessions WHERE intent_id=$1',[id])).rows[0];
    if(old){if(old.email!==email.toLowerCase())throw new ConflictException('Checkout email differs from original attempt');return {old,p};}
-   await c.query("INSERT INTO checkout_sessions(intent_id,email,state) VALUES($1,$2,'initializing')",[id,email.toLowerCase()]);
-   await this.ledger.event(c,'checkout',id,'initialization_requested',who.subject);await this.ledger.enqueue(c,'payment',id,30);return {p};
+   await c.query("INSERT INTO checkout_sessions(intent_id,email,state) VALUES($1,$2,'simulated')",[id,email.toLowerCase()]);
+   await this.ledger.event(c,'checkout',id,'simulation_pending',who.subject);return {p};
   });
-  if(selected.paid)return {paymentIntentId:id,state:'paid',checkoutEnabled:false};
-  if(selected.old){const s=selected.old;return {paymentIntentId:id,state:s.state,checkoutEnabled:s.state==='ready',authorizationUrl:s.authorization_url??undefined,accessCode:s.access_code??undefined};}
-  return this.initializeSelected(selected.p,email.toLowerCase(),callback,who.subject);
+  if(selected.paid)return {paymentIntentId:id,state:'succeeded',status:'succeeded',mode:'simulated',checkoutEnabled:false};
+  if(selected.old)return {paymentIntentId:id,state:selected.p.status,status:selected.p.status,mode:'simulated',checkoutEnabled:false};
+  return {paymentIntentId:id,state:'pending',status:'pending',mode:'simulated',checkoutEnabled:false};
  }
  async initializeSelected(p:FinanceIntent,email:string,callback:string,actor:string){
-  const id=p.id;
-  try{
-   const session=await this.gateway.initialize({reference:p.provider_reference,amount:p.amount_minor,email:email.toLowerCase(),callbackUrl:callback});
-   // Save provider evidence even if eligibility changed while the provider was contacted; revalidate before disclosure.
-   return await this.ledger.intentTx(id,async(c,p)=>{
-    await c.query("UPDATE checkout_sessions SET state='ready',authorization_url=$2,access_code=$3 WHERE intent_id=$1",[id,session.authorizationUrl,session.accessCode]);
-    try{await this.validatePurchase(c,p);}catch{await c.query("UPDATE checkout_sessions SET state='closed',authorization_url=NULL,access_code=NULL WHERE intent_id=$1",[id]);return {paymentIntentId:id,state:'closed',checkoutEnabled:false};}
-    await this.ledger.event(c,'checkout',id,'initialized',actor);
-    return {paymentIntentId:id,state:'ready',checkoutEnabled:true,...session};
-   });
-  }catch(e){await this.ledger.pool.query("UPDATE checkout_sessions SET state='uncertain',authorization_url=NULL,access_code=NULL WHERE intent_id=$1 AND state='initializing'",[id]);throw e;}
+  void p;void email;void callback;void actor;
+  throw new ConflictException('External checkout is disabled; use the simulated payment lifecycle');
  }
  async captured(c:PoolClient,p:FinanceIntent){
   const terms=(await c.query('SELECT * FROM payment_terms WHERE intent_id=$1',[p.id])).rows[0];
@@ -234,32 +225,25 @@ export class CommerceLifecycle {
   await this.ledger.allocate(c,p);await this.ledger.event(c,'payment',p.id,'purchase_confirmed','system:m5');
  }
  async retryInitialization(actor:string,id:string){
-  const callback=process.env.PAYMENT_CALLBACK_URL;if(!callback||new URL(callback).protocol!=='https:')throw new ServiceUnavailableException('Payment callback URL unavailable');
-  const selected=await this.ledger.intentTx(id,async(c,p)=>{
-   if(p.status==='succeeded')throw new ConflictException('Payment already captured');await this.validatePurchase(c,p);
-   const old=(await c.query('SELECT *,attempted_at<now()-interval \'30 seconds\' AS retryable FROM checkout_sessions WHERE intent_id=$1 FOR UPDATE',[id])).rows[0];
-   if(!old||!['uncertain','initializing'].includes(old.state)||!old.retryable)throw new ConflictException('Initialization is not eligible for a reconciled retry');
-   if(p.environment!==this.gateway.environment())throw new ConflictException('Environment mismatch');
-   await c.query("UPDATE checkout_sessions SET state='initializing',attempted_at=now(),authorization_url=NULL,access_code=NULL WHERE intent_id=$1",[id]);
-   await this.ledger.event(c,'checkout',id,'same_reference_retry',actor);await this.ledger.enqueue(c,'payment',id,30);return {p,email:old.email};
-  });return this.initializeSelected(selected.p,selected.email,callback,actor);
+  void actor;void id;
+  throw new ConflictException('External checkout retry is disabled; create an explicit simulated payment attempt');
  }
  async retryOrder(who:VerifiedIdentity,orderId:string,previousId:string,key:string){
   const prior=(await this.ledger.pool.query(`SELECT p.id,p.amount_minor::text,p.currency,p.status,a.order_id,a.previous_intent_id FROM payment_intents p JOIN payment_order_attempts a ON a.intent_id=p.id WHERE p.customer_subject=$1 AND p.request_key=$2`,[who.subject,key])).rows[0];
   if(prior){if(prior.order_id!==orderId.toLowerCase()||prior.previous_intent_id!==previousId.toLowerCase())throw new ConflictException('Retry key conflict');return {paymentIntentId:prior.id,orderId:prior.order_id,amountMinor:prior.amount_minor,currency:prior.currency,status:prior.status,checkoutEnabled:false};}
-  const old=(await this.ledger.pool.query<FinanceIntent>('SELECT *,amount_minor::text FROM payment_intents WHERE id=$1 AND customer_subject=$2',[previousId,who.subject])).rows[0];if(!old)throw new NotFoundException('Payment not found');
-  const provider=await this.gateway.transaction(old.provider_reference);
-  if(!['failed','abandoned'].includes(provider.status)||provider.reference!==old.provider_reference||provider.domain!==old.environment||String(provider.amount)!==old.amount_minor||provider.currency!==old.currency)throw new ConflictException('Previous attempt is not independently verified as failed or abandoned');
+  const old=(await this.ledger.pool.query<FinanceIntent & {execution_mode:string}>('SELECT *,amount_minor::text FROM payment_intents WHERE id=$1 AND customer_subject=$2',[previousId,who.subject])).rows[0];if(!old)throw new NotFoundException('Payment not found');
+  if(old.execution_mode!=='simulated'||!['failed','cancelled'].includes(old.status))
+   throw new ConflictException('Only a terminal simulated payment can be retried');
   return this.customers.withAccountTransaction(who,async c=>{
    await this.ledger.lock(c,old.business_id);
    const replay=(await c.query('SELECT p.id,a.order_id,a.previous_intent_id FROM payment_intents p LEFT JOIN payment_order_attempts a ON a.intent_id=p.id WHERE p.customer_subject=$1 AND p.request_key=$2',[who.subject,key])).rows[0];
    if(replay){if(replay.order_id!==orderId.toLowerCase()||replay.previous_intent_id!==previousId.toLowerCase())throw new ConflictException('Retry key conflict');return {paymentIntentId:replay.id,orderId:replay.order_id,amountMinor:old.amount_minor,currency:old.currency,status:'pending',checkoutEnabled:false};}
    const current=(await c.query('SELECT coalesce(n.intent_id,l.intent_id) AS id FROM payment_order_links l LEFT JOIN payment_order_current n ON n.order_id=l.order_id WHERE l.order_id=$1',[orderId])).rows[0];
    if(current?.id!==previousId.toLowerCase())throw new ConflictException('Previous payment is not the current order attempt');
-   const locked=(await c.query<FinanceIntent>('SELECT *,amount_minor::text FROM payment_intents WHERE id=$1 FOR UPDATE',[previousId])).rows[0];
-   if(locked.status!=='pending'||locked.environment!==this.gateway.environment())throw new ConflictException('Previous payment was captured or environment changed');
+   const locked=(await c.query<FinanceIntent & {execution_mode:string}>('SELECT *,amount_minor::text FROM payment_intents WHERE id=$1 FOR UPDATE',[previousId])).rows[0];
+   if(locked.status!==old.status||locked.execution_mode!=='simulated')throw new ConflictException('Previous payment state changed');
    await this.validatePurchase(c,locked);const id=randomUUID();
-   await c.query("INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider_reference,environment,amount_minor,currency) VALUES($1,$2,$3,$4,$5,$6,$7,$8)",[id,who.subject,old.business_id,key,'faji-'+randomUUID(),old.environment,old.amount_minor,old.currency]);
+   await c.query("INSERT INTO payment_intents(id,customer_subject,business_id,request_key,provider,provider_reference,environment,amount_minor,currency,execution_mode) VALUES($1,$2,$3,$4,'simulation',$5,$6,$7,$8,'simulated')",[id,who.subject,old.business_id,key,'faji-'+randomUUID(),SIMULATED_PAYMENT_ENVIRONMENT,old.amount_minor,old.currency]);
    await c.query('INSERT INTO payment_order_attempts(intent_id,order_id,previous_intent_id) VALUES($1,$2,$3)',[id,orderId,previousId]);
    await c.query('INSERT INTO payment_order_current(order_id,intent_id) VALUES($1,$2) ON CONFLICT(order_id) DO UPDATE SET intent_id=EXCLUDED.intent_id',[orderId,id]);
    await this.ledger.terms(c,{...locked,id});await this.ledger.event(c,'payment',id,'explicit_failed_attempt_retry',who.subject);

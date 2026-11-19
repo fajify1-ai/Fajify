@@ -33,7 +33,7 @@ before(async()=>{
 after(async()=>{await app?.close();await owner.end();await new Promise<void>(resolve=>sms?.close(()=>resolve()));});
 test('optional MFA: enrollment, challenge, recovery, step-up and revocation',async()=>{
  await clearLimits();const email=`mfa-${randomUUID()}@example.test`;
- const signup=await request(http()).post('/api/auth/sign-up/email').send({name:'MFA test',email,password});assert.equal(signup.status,200,JSON.stringify(signup.body));let token=signup.body.token;
+ const signup=await request(http()).post('/api/auth/sign-up/email').send({name:'MFA test',email,password,termsAccepted:true});assert.equal(signup.status,200,JSON.stringify(signup.body));let token=signup.body.token;
  const first=await request(http()).post('/api/auth/two-factor/enable').set(bearer(token)).send({password});assert.equal(first.status,200,JSON.stringify(first.body));assert.equal(first.body.backupCodes.length,10);
  const uri=first.body.totpURI;const enroll=await request(http()).post('/api/auth/two-factor/verify-totp').set(bearer(token)).send({code:totp(uri)});assert.equal(enroll.status,200,JSON.stringify(enroll.body));
  // Enrollment may rotate the current session; use the issued token when provided.
@@ -51,7 +51,7 @@ test('optional MFA: enrollment, challenge, recovery, step-up and revocation',asy
 });
 test('phone OTP is verified, single-use, rate limited, cannot bypass MFA or admin step-up',async()=>{
  await clearLimits();const email=`phone-${randomUUID()}@example.test`,phone='+234'+String(Date.now()).slice(-10);
- const signup=await request(http()).post('/api/auth/sign-up/email').send({name:'Phone test',email,password,phoneNumber:phone});assert.equal(signup.status,200,JSON.stringify(signup.body));let token=signup.body.token;
+ const signup=await request(http()).post('/api/auth/sign-up/email').send({name:'Phone test',email,password,phoneNumber:phone,termsAccepted:true});assert.equal(signup.status,200,JSON.stringify(signup.body));let token=signup.body.token;
  const pre=await owner.query('SELECT phone_number,registration_phone FROM auth_user WHERE id=$1',[signup.body.user.id]);assert.equal(pre.rows[0].phone_number,null);assert.equal(pre.rows[0].registration_phone,phone);
  assert.equal((await request(http()).post('/api/auth/faji/step-up').set(bearer(token)).send({password})).status,201);
  assert.equal((await request(http()).post('/api/auth/phone-number/send-otp').send({phoneNumber:phone})).status,200);
@@ -70,7 +70,7 @@ test('phone OTP is verified, single-use, rate limited, cannot bypass MFA or admi
 });
 test('verified phone recovery expires, is single-use, revokes sessions and preserves enrolled MFA',async()=>{
  await clearLimits();const phone='+1555'+String(Date.now()).slice(-7),email=`phone-recovery-${randomUUID()}@example.test`;
- const signup=await request(http()).post('/api/auth/sign-up/email').send({name:'Phone recovery',email,password});let token=signup.body.token;
+ const signup=await request(http()).post('/api/auth/sign-up/email').send({name:'Phone recovery',email,password,termsAccepted:true});let token=signup.body.token;
  assert.equal((await request(http()).post('/api/auth/faji/step-up').set(bearer(token)).send({password})).status,201);
  await request(http()).post('/api/auth/phone-number/send-otp').send({phoneNumber:phone});
  assert.equal((await request(http()).post('/api/auth/phone-number/verify').set(bearer(token)).send({phoneNumber:phone,code:deliveries.get(phone),updatePhoneNumber:true,disableSession:true})).status,200);
@@ -88,7 +88,7 @@ test('verified phone recovery expires, is single-use, revokes sessions and prese
 
 test('legacy administrative mutations require password step-up and an operator scope',async()=>{
  await clearLimits();const email=`admin-scope-${randomUUID()}@example.test`;
- const a=await request(http()).post('/api/auth/sign-up/email').send({name:'Admin scope',email,password});const b=await request(http()).post('/api/auth/sign-up/email').send({name:'Scope target',email:`target-${randomUUID()}@example.test`,password});const token=a.body.token,subject=a.body.user.id,target=b.body.user.id;
+ const a=await request(http()).post('/api/auth/sign-up/email').send({name:'Admin scope',email,password,termsAccepted:true});const b=await request(http()).post('/api/auth/sign-up/email').send({name:'Scope target',email:`target-${randomUUID()}@example.test`,password,termsAccepted:true});const token=a.body.token,subject=a.body.user.id,target=b.body.user.id;
  await owner.query("INSERT INTO application_roles(identity_subject,role) VALUES($1,'platform-admin')",[subject]);
  const endpoint=`/api/v1/admin/accounts/${target}/suspension`;
  assert.equal((await request(http()).post(endpoint).set(bearer(token)).send({suspended:true})).status,403);
@@ -100,7 +100,7 @@ test('legacy administrative mutations require password step-up and an operator s
 });
 test('credential changes revoke sessions atomically and rotate the authenticated session',async()=>{
  await clearLimits();const email=`password-change-${randomUUID()}@example.test`;
- const signup=await request(http()).post('/api/auth/sign-up/email').send({name:'Password change',email,password});const token=signup.body.token;
+ const signup=await request(http()).post('/api/auth/sign-up/email').send({name:'Password change',email,password,termsAccepted:true});const token=signup.body.token;
  assert.equal((await request(http()).post('/api/auth/faji/step-up').set(bearer(token)).send({password})).status,201);
  const changed=await request(http()).post('/api/auth/change-password').set(bearer(token)).send({currentPassword:password,newPassword:password+'-changed',revokeOtherSessions:false});assert.equal(changed.status,200,JSON.stringify(changed.body));
  assert.equal((await request(http()).get('/api/v1/auth/me').set(bearer(token))).status,401);

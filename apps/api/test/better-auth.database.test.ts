@@ -46,6 +46,8 @@ test('Better Auth: native bearer and web cookie lifecycle, recovery and authoriz
   assert.equal(created.status,200,JSON.stringify(created.body));
   const duplicate=await request(http).post('/api/auth/sign-up/email').set('Origin','http://localhost:3000').send(registration);
   assert.ok(duplicate.status>=400,'duplicate email must not create another account');
+  const missingTerms=await request(http).post('/api/auth/sign-up/email').set('Origin','http://localhost:3000').send({...registration,email:'no-terms@example.test',termsAccepted:false});
+  assert.equal(missingTerms.status,400,'terms acceptance must be validated by the API');
   const invalid=await request(http).post('/api/auth/sign-up/email').set('Origin','http://localhost:3000').send({...registration,email:'invalid'});
   assert.ok(invalid.status>=400,'invalid registration data must be rejected');
   assert.equal((await pool.query('SELECT count(*)::int AS count FROM auth_user WHERE email=$1',[email])).rows[0].count,1);

@@ -16,7 +16,7 @@ function fixture(options:{missing?:boolean;prior?:string;amount?:string;currency
  const client={query:async(query:string,args?:unknown[])=>{
   calls.push({query,args});
   if(query.startsWith('SELECT business_id FROM payment_intents'))return {rowCount:1,rows:[{business_id:id}]};
-  if(query.startsWith('SELECT id,amount_minor'))return {rowCount:1,rows:[{id,amount_minor:options.amount??'12500',currency:options.currency??'NGN',environment:options.environment??'test',status:options.prior?'succeeded':'pending'}]};
+  if(query.startsWith('SELECT id,amount_minor'))return {rowCount:1,rows:[{id,amount_minor:options.amount??'12500',currency:options.currency??'NGN',environment:options.environment??'test',status:options.prior?'succeeded':'pending',provider_reference:reference,execution_mode:'legacy'}]};
   if(query.startsWith('SELECT provider_transaction_id'))return {rowCount:options.prior?1:0,rows:options.prior?[{provider_transaction_id:options.prior}]:[]};
   if(options.confirmedAuditFails&&query.includes('provider_recheck_confirmed'))throw Error('confirmation audit unavailable');
   return {rowCount:1,rows:[]};
@@ -40,7 +40,7 @@ test('M5 recovery: selects stored reference, audits actor and posts normalized p
  const receipt=f.calls.find(c=>c.query.startsWith('INSERT INTO payment_receipts'))!;
  assert.deepEqual(receipt.args,[id,'123',createHash('sha256').update(JSON.stringify(f.charge)).digest('hex'),'provider_recheck','admin-subject']);
  assert.ok(f.calls.some(c=>c.query.includes('provider_recheck_confirmed')));
- assert.deepEqual(f.calls.find(c=>c.query.includes("'payment.verified'"))?.args,['admin-subject',id]);
+ assert.deepEqual(f.calls.find(c=>c.query.includes('INSERT INTO audit_events')&&c.args?.[1]==='payment.verified')?.args,['admin-subject','payment.verified',id]);
  assert.equal(f.outbound(),1);assert.deepEqual(f.calls.slice(-2).map(c=>c.query),['COMMIT','RELEASE']);
 });
 test('M5 recovery: matching replay remains auditable without reposting money or capture events',async()=>{

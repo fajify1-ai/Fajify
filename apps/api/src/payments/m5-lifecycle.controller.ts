@@ -1,5 +1,5 @@
 import {AdminScopeGuard,RequireAdminScope} from '../admin/admin-scope.guard';
-import {applyDecorators,BadRequestException,Body,Controller,Get,Header,HttpCode,Inject,NotFoundException,Param,ParseUUIDPipe,Post,Query,Req,UseGuards,ValidationPipe,type Type,type CanActivate,type ExecutionContext} from '@nestjs/common';
+import {applyDecorators,BadRequestException,Body,Controller,Get,Header,HttpCode,Inject,Param,ParseUUIDPipe,Post,Query,Req,UseGuards,ValidationPipe,type Type,type CanActivate,type ExecutionContext} from '@nestjs/common';
 import {ApiBearerAuth,ApiBody,ApiOkResponse,ApiParam,ApiQuery,ApiResponse,ApiProperty,ApiPropertyOptional,ApiTags} from '@nestjs/swagger';
 import {IsBoolean,IsEmail,IsIn,IsInt,IsOptional,IsString,IsUUID,Length,Matches,Max,Min} from 'class-validator';
 import {IdentityGuard} from '../auth/identity.guard';
@@ -13,6 +13,7 @@ import {CommerceLifecycle} from './commerce-lifecycle.service';
 import {FinancialOperations} from './financial-operations.service';
 import {PaymentsService} from './payments.service';
 import {FinanceLedger} from './finance-ledger.service';
+import {requireSimulatedPayments} from './payment-mode';
 import {M5_SCHEMAS as schemas,M5_MERCHANT_SCHEMA,M5_OVERVIEW_SCHEMA} from './m5-contracts';
 const strict=(expectedType:Type<unknown>)=>new ValidationPipe({expectedType,transform:true,whitelist:true,forbidNonWhitelisted:true});
 const paginated=()=>applyDecorators(ApiQuery({name:'limit',required:false,type:Number,description:'Page size, 1–50; default 20',schema:{type:'integer',minimum:1,maximum:50,default:20}}),ApiQuery({name:'offset',required:false,type:Number,description:'Zero-based row offset',schema:{type:'integer',minimum:0,maximum:10000,default:0}}));
@@ -28,6 +29,19 @@ export class M5HoldInput {
  @ApiProperty({type:String}) @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey!:string;
 }
 export class M5CheckoutInput {@ApiProperty({type:String,format:'email',description:'Receipt contact only; never establishes account ownership'}) @IsEmail() @Length(3,254) email!:string;}
+export class M5SimulationInput {
+ @ApiProperty({enum:['succeeded','failed','cancelled']}) @IsIn(['succeeded','failed','cancelled']) outcome!:'succeeded'|'failed'|'cancelled';
+}
+class M5SimulatedPayment {
+ @ApiProperty({type:String,format:'uuid'}) id!:string;
+ @ApiProperty({type:String,pattern:'^[0-9]+$'}) amountMinor!:string;
+ @ApiProperty({type:String}) currency!:string;
+ @ApiProperty({type:String,format:'date-time'}) createdAt!:string;
+}
+class M5SimulatedPaymentPage {
+ @ApiProperty({type:()=>[M5SimulatedPayment]}) items!:M5SimulatedPayment[];
+ @ApiProperty({type:Number,nullable:true}) nextOffset!:number|null;
+}
 export class M5OrderRetryInput {
  @ApiProperty({type:String,format:'uuid'}) @IsUUID() previousPaymentIntentId!:string;
  @ApiProperty({type:String}) @Matches(/^[A-Za-z0-9_-]{8,100}$/) requestKey!:string;
@@ -81,11 +95,10 @@ class M5HoldResponse {
 }
 class M5CheckoutResponse {
  @ApiProperty({type:String,format:'uuid'}) paymentIntentId!:string;
- @ApiProperty({enum:['initializing','ready','uncertain','closed','paid']}) state!:string;
+ @ApiProperty({enum:['pending','succeeded','failed','cancelled']}) state!:string;
+ @ApiProperty({enum:['pending','succeeded','failed','cancelled']}) status!:string;
+ @ApiProperty({enum:['simulated']}) mode!:string;
  @ApiProperty({type:Boolean}) checkoutEnabled!:boolean;
- @ApiPropertyOptional({type:String,format:'uri'}) authorizationUrl?:string;
- @ApiPropertyOptional({type:String}) accessCode?:string;
- @ApiPropertyOptional({type:String}) reference?:string;
 }
 class M5RefundResponse {
  @ApiProperty({type:String,format:'uuid'}) id!:string;
@@ -122,7 +135,7 @@ function page<T>(rows:T[],q:PageQuery){return {items:rows.slice(0,q.limit),nextO
 @ApiTags('customer-finance') @ApiBearerAuth('session')
 @Controller({path:'customer',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,CustomerWriteGuard)
 export class M5CustomerController {
- constructor(@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle,@Inject(FinancialOperations)readonly finance:FinancialOperations,@Inject(PaymentsService)readonly payments:PaymentsService){}
+ constructor(@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle,@Inject(FinancialOperations)readonly finance:FinancialOperations){}
  @Post('paid-holds') @HttpCode(200) @ApiBody({type:M5HoldInput}) @ApiOkResponse({type:M5HoldResponse})
  hold(@Req()r:IdentityRequest,@Body(strict(M5HoldInput))i:M5HoldInput){return this.commerce.hold(r.identity,i);}
  @paginated() @Get('paid-holds') @Header('Cache-Control','no-store') @ApiOkResponse({type:M5HoldPage})
@@ -133,8 +146,6 @@ export class M5CustomerController {
  checkout(@Req()r:IdentityRequest,@Param('id',new ParseUUIDPipe())id:string,@Body(strict(M5CheckoutInput))i:M5CheckoutInput){return this.commerce.checkout(r.identity,id,i.email);}
  @Post('orders/:id/payment-retry') @HttpCode(200) @ApiParam({name:'id',format:'uuid'}) @ApiBody({type:M5OrderRetryInput}) @ApiOkResponse({schema:schemas.retry})
  retryOrder(@Req()r:IdentityRequest,@Param('id',new ParseUUIDPipe())id:string,@Body(strict(M5OrderRetryInput))i:M5OrderRetryInput){return this.commerce.retryOrder(r.identity,id,i.previousPaymentIntentId,i.requestKey);}
- @Post('payments/:id/recheck') @UseGuards(FinanceEmptyBodyGuard) @ApiBody({required:false,schema:{type:'object',additionalProperties:false}}) @HttpCode(200) @ApiParam({name:'id',format:'uuid'}) @ApiOkResponse({schema:schemas.recheck})
- async recheck(@Req()r:IdentityRequest,@Param('id',new ParseUUIDPipe())id:string){if(!(await this.commerce.ledger.pool.query('SELECT 1 FROM payment_intents WHERE id=$1 AND customer_subject=$2',[id,r.identity.subject])).rowCount)throw new NotFoundException('Payment unavailable');return this.payments.recheck(r.identity.subject,id);}
  @Post('payments/:id/refunds') @HttpCode(200) @ApiBody({type:M5RefundInput}) @ApiParam({name:'id',format:'uuid'}) @ApiOkResponse({type:M5RefundResponse})
  refund(@Req()r:IdentityRequest,@Param('id',new ParseUUIDPipe())id:string,@Body(strict(M5RefundInput))i:M5RefundInput){return this.finance.requestRefund(r.identity,id,i);}
  @paginated() @Get('refunds') @Header('Cache-Control','no-store') @ApiOkResponse({type:M5RefundPage})
@@ -160,13 +171,25 @@ export class M5MerchantController {
 @Controller({path:'admin/finance',version:'1'}) @UseGuards(IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,AdminScopeGuard)
 @RequireAdminScope('finance.write')
 export class M5AdminController {
- constructor(@Inject(FinancialOperations)readonly finance:FinancialOperations,@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle){}
+ constructor(@Inject(FinancialOperations)readonly finance:FinancialOperations,@Inject(FinanceLedger)readonly ledger:FinanceLedger,@Inject(CommerceLifecycle)readonly commerce:CommerceLifecycle,@Inject(PaymentsService)readonly payments:PaymentsService){}
  @RequireAdminScope('finance.read') @paginated() @Get('businesses/:businessId/policies') @Header('Cache-Control','no-store') @ApiParam({name:'businessId',format:'uuid'}) @ApiOkResponse({schema:{type:'array',items:schemas.policy}})
  policies(@Param('businessId',new ParseUUIDPipe())b:string,@Query(strict(PageQuery))q:PageQuery){return this.finance.policies(b,q.limit,q.offset);}
  @RequireAdminScope('finance.read') @paginated() @Get('audit') @Header('Cache-Control','no-store') @ApiOkResponse({schema:schemas.audit})
  async history(@Req()r:IdentityRequest,@Query(strict(PageQuery))q:PageQuery){await this.audit('operations','audit',r.identity.subject);return (await this.ledger.pool.query('SELECT id,resource_type,resource_id,action,actor,created_at FROM finance_operation_events ORDER BY created_at DESC,id DESC LIMIT $1 OFFSET $2',[q.limit,q.offset])).rows;}
+ @RequireAdminScope('finance.read') @paginated() @Get('simulations') @Header('Cache-Control','no-store') @ApiOkResponse({type:M5SimulatedPaymentPage})
+ async simulatedPayments(@Req()r:IdentityRequest,@Query(strict(PageQuery))q:PageQuery){
+  requireSimulatedPayments();
+  await this.audit('operations','simulations',r.identity.subject);
+  const rows=(await this.ledger.pool.query(`SELECT id,amount_minor::text AS "amountMinor",currency,created_at AS "createdAt"
+   FROM payment_intents WHERE execution_mode='simulated' AND status='pending'
+   ORDER BY created_at,id LIMIT $1 OFFSET $2`,[q.limit+1,q.offset])).rows;
+  return page(rows,q);
+ }
  @Post('payments/:id/checkout-retry') @UseGuards(FinanceEmptyBodyGuard) @ApiBody({required:false,schema:{type:'object',additionalProperties:false}}) @HttpCode(200) @ApiParam({name:'id',format:'uuid'}) @ApiOkResponse({type:M5CheckoutResponse})
  retryCheckout(@Req()r:IdentityRequest,@Param('id',new ParseUUIDPipe())id:string){return this.commerce.retryInitialization(r.identity.subject,id);}
+ @Post('payments/:id/simulation') @Header('Cache-Control','no-store') @HttpCode(200) @ApiParam({name:'id',format:'uuid'})
+ @ApiBody({type:M5SimulationInput}) @ApiOkResponse({schema:{type:'object',additionalProperties:false,properties:{paymentIntentId:{type:'string',format:'uuid'},status:{type:'string',enum:['succeeded','failed','cancelled']},replayed:{type:'boolean'},mode:{type:'string',enum:['simulated']}},required:['paymentIntentId','status','replayed','mode']}})
+ simulate(@Req()r:IdentityRequest,@Param('id',new ParseUUIDPipe())id:string,@Body(strict(M5SimulationInput))input:M5SimulationInput){return this.payments.simulate(r.identity.subject,id,input.outcome);}
  @Post('businesses/:businessId/policies') @HttpCode(200) @ApiParam({name:'businessId',format:'uuid'}) @ApiBody({type:M5PolicyInput}) @ApiOkResponse({schema:schemas.policy})
  policy(@Req()r:IdentityRequest,@Param('businessId',new ParseUUIDPipe())b:string,@Body(strict(M5PolicyInput))i:M5PolicyInput){return this.finance.policy(r.identity.subject,b,i);}
  @Post('payments/:id/refunds') @HttpCode(200) @ApiParam({name:'id',format:'uuid'}) @ApiBody({type:M5RefundInput}) @ApiOkResponse({type:M5RefundResponse})
