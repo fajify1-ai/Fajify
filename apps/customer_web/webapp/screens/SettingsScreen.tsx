@@ -4,7 +4,11 @@ import BottomNav from '../components/BottomNav'
 import { IconArrowRight, IconGlyph, type IconName } from '../components/Icons'
 import { useDarkMode } from '../store/darkMode'
 
-type Props = { navigate: NavigateFn }
+type Props = {
+ navigate: NavigateFn
+ onPersonalInformation?:()=>void
+ onSecurity?:()=>void
+}
 
 const RED = '#FA3F38'
 const LANGUAGES = ['English', 'Yoruba', 'Igbo', 'Hausa', 'Pidgin', 'French']
@@ -43,7 +47,7 @@ function PickerSheet({
   )
 }
 
-export default function SettingsScreen({ navigate }: Props) {
+export default function SettingsScreen({ navigate,onPersonalInformation,onSecurity }: Props) {
   const { dark, mode: themeMode, setMode } = useDarkMode()
   const [notifications, setNotifications] = useState(true)
   const [locationServices, setLocationServices] = useState(true)
@@ -111,11 +115,11 @@ export default function SettingsScreen({ navigate }: Props) {
         <section>
           <SectionLabel text="Account" />
           <div className="rounded-[18px] overflow-hidden border" style={{ background: surface, borderColor: border }}>
-            <ArrowRow icon="user" label="Personal Information" />
-            <ArrowRow icon="lock" label="Change Password" />
-            <ArrowRow icon="mail" label="Email Preferences" />
+            <ArrowRow icon="user" label="Personal Information" onPress={onPersonalInformation??(()=>navigate({name:'profile'}))} />
+            <ArrowRow icon="lock" label="Change Password" onPress={onSecurity} />
+            <ArrowRow icon="mail" label="Email Preferences" onPress={onSecurity} />
             <div style={{ borderBottom: 'none' }}>
-              <ArrowRow icon="phone" label="Phone Number" />
+              <ArrowRow icon="phone" label="Phone Number" onPress={onSecurity} />
             </div>
           </div>
         </section>

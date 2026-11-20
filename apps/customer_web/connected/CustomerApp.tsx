@@ -18,6 +18,9 @@ import Cart,{AddToCart} from './Cart';
 import {Events,Gathering,Invitations} from './Events';
 import {SearchFilters,PlanFilters,PlanQuote,SavedPlanEditor,ReviewHistory} from './Planning';
 import ProfileScreen from '../webapp/screens/ProfileScreen';
+import SettingsScreen from '../webapp/screens/SettingsScreen';
+import HelpScreen from '../webapp/screens/HelpScreen';
+import OnboardingScreen from '../webapp/screens/OnboardingScreen';
 import {authClient} from '@faji/web-auth/client';
 import FajifyLogo from '../webapp/components/FajifyLogo';
 import type { Screen } from '../webapp/App';
@@ -56,6 +59,8 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
  {view.name==='gathering'?<Gathering id={view.id??''} navigate={navigate} open={go}/>:null}
  {view.name==='inviteFriends'?<Invitations token={view.id} navigate={navigate} open={go}/>:null}
  {view.name==='globalCart'?<Cart navigate={navigate}/>:null}
+ {view.name==='cart'?<Cart navigate={navigate}/>:null}
+ {view.name==='onboarding'?<OnboardingScreen navigate={navigate}/>:null}
  {view.name==='myTickets'?<History navigate={navigate} payment={hold=><Payment hold={hold}/>} review={resource=><Review resource={resource}/>}/>:null}
  {view.name==='reviewHistory'?<main><h1>Review history</h1><ReviewHistory/></main>:null}
  {view.name==='savedPlans'?<SavedPlans open={id=>go('offering',id)}/>:null}
@@ -67,7 +72,8 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
  {view.name==='offers'?<Promotions navigate={navigate}/>:null}
  {view.name==='wishlist'?<Wishlist navigate={navigate} open={id=>go('offering',id)}/>:null}
  {view.name==='notifications'?<Notifications navigate={navigate}/>:null}
- {['settings','help'].includes(view.name)?<Account screen={view.name} open={go}/>:null}
+ {view.name==='settings'?<SettingsScreen navigate={navigate} onPersonalInformation={()=>go('profile')} onSecurity={()=>location.assign('/account-security')}/>:null}
+ {view.name==='help'?<HelpScreen navigate={navigate}/>:null}
  {view.name==='comingSoon'?<ComingSoon onBack={()=>go('home')}/>:null}
  </div>;
 }
