@@ -1,4 +1,8 @@
 @import "@faji/web-ui/styles.css";
+.connected > .faji-tabs { display: none; }
+.connected { min-height: 100svh; background: #F8F8F8; }
+.connected main,
+.connected [class*="original-"] { position: relative; }
 .connected > .faji-tabs {position:sticky;top:0;z-index:150;background:white;border-bottom:1px solid #eee;}
 .connected > main > header.fixed {top:77px;}
 
