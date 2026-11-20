@@ -1,6 +1,17 @@
 import { useState } from "react"
 import { IconArrowRight, IconGlyph, IconMapPin, IconSearch, IconStar } from "../components/Icons"
 
+type LandingVenue={
+  id:string
+  name:string
+  category?:string
+  cat?:string
+  location:string
+  rating:string|number
+  price:string
+  image:string
+}
+
 type Props = {
   onExplore: () => void
   onSearch?: (query: string) => void
@@ -11,7 +22,7 @@ type Props = {
   onVenue: (id: string) => void
   onPlan: () => void
   live?: boolean
-  venues?: typeof experiences
+  venues?: LandingVenue[]
 }
 
 const experiences = [
@@ -103,6 +114,7 @@ function SearchPanel({ onExplore }: { onExplore: (query: string) => void }) {
 
 export default function LandingScreen({ onExplore, onSearch, onGetStarted, onSignIn, onBusiness, onRide, onVenue, onPlan, live = false, venues }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const discoverVenues:LandingVenue[] = live ? (venues ?? []) : experiences
 
   return (
     <main className="min-h-screen overflow-hidden bg-white font-[family-name:var(--font-ui)] text-[#1A1A1A]">
@@ -240,8 +252,8 @@ export default function LandingScreen({ onExplore, onSearch, onGetStarted, onSig
           </button>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {(venues ?? experiences).map((experience, index) => (
+        {discoverVenues.length ? <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {discoverVenues.map((experience, index) => (
             <button
               key={experience.id}
               onClick={() => onVenue(experience.id)}
@@ -250,7 +262,7 @@ export default function LandingScreen({ onExplore, onSearch, onGetStarted, onSig
               <img src={experience.image} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/5" />
               <span className="absolute left-5 top-5 rounded-full bg-white/90 px-3 py-2 text-[10px] font-extrabold uppercase tracking-wider text-[#1A1A1A] backdrop-blur">
-                {experience.category}
+                {experience.category ?? experience.cat ?? 'Experience'}
               </span>
               <div className="absolute inset-x-0 bottom-0 p-6 text-white">
                 <div className="mb-2 flex items-center gap-1.5 text-xs font-bold text-white/75">
@@ -268,7 +280,11 @@ export default function LandingScreen({ onExplore, onSearch, onGetStarted, onSig
               </div>
             </button>
           ))}
-        </div>
+        </div> : <div className="mt-10 rounded-[28px] border border-[#E8E8E8] bg-[#FAFAFA] px-6 py-12 text-center">
+          <p className="text-lg font-black text-[#1A1A1A]">Published experiences are coming soon</p>
+          <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-[#777477]">Fajify will show verified businesses and live availability here as they publish their offerings.</p>
+          <button onClick={onPlan} className="mt-6 rounded-full bg-[#FA3F38] px-6 py-3 text-sm font-extrabold text-white">Plan an experience</button>
+        </div>}
       </section>
 
       <section id="how-it-works" className="border-y border-[#ECECEC] bg-[#F8F8F8] py-20 text-[#1A1A1A] lg:py-28">
