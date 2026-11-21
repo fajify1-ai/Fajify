@@ -6,7 +6,7 @@ import { useSaved } from '../store/saved'
 import { useDarkMode } from '../store/darkMode'
 
 export type SavedPlace={id:string;name:string;type:string;location:string;rating?:number;price:string;tag:string;image?:string;imageAlt?:string};
-type Props = { navigate: NavigateFn; liveItems?:SavedPlace[]; onRemove?:(id:string)=>void; onOpen?:(id:string)=>void; status?:ReactNode; pagination?:ReactNode }
+type Props = { navigate: NavigateFn; liveItems?:SavedPlace[]; onRemove?:(id:string)=>void; onOpen?:(id:string)=>void; loading?:boolean; error?:string; actionError?:string; onRetry?:()=>void; pagination?:ReactNode }
 
 const RED = '#FA3F38'
 
@@ -25,7 +25,7 @@ const ALL_ITEMS = [
 
 const TABS = ['All', 'Restaurant', 'Beach', 'Event', 'Park', 'Club']
 
-export default function WishlistScreen({ navigate, liveItems, onRemove, onOpen, status, pagination }: Props) {
+export default function WishlistScreen({ navigate, liveItems, onRemove, onOpen, loading = false, error, actionError, onRetry, pagination }: Props) {
   const { isSaved, toggle } = useSaved()
   const { dark } = useDarkMode()
   const saved:SavedPlace[] = liveItems ?? ALL_ITEMS.filter(item => isSaved(item.id))
@@ -42,14 +42,34 @@ export default function WishlistScreen({ navigate, liveItems, onRemove, onOpen, 
       <div className="sticky top-0 z-10 px-5 pt-14 pb-4 md:px-10 md:pt-8 lg:px-16" style={{ background: surface, borderBottom: `1px solid ${border}` }}>
         <div className="mx-auto max-w-7xl">
         <h1 className="text-[24px] font-black tracking-[-0.03em] md:text-[32px]" style={{ color: ink }}>Saved places</h1>
-        <p className="text-[13px] mt-0.5" style={{ color: muted }}>{saved.length} saved {saved.length === 1 ? 'place' : 'places'}</p>
+        <p className="text-[13px] mt-0.5" style={{ color: muted }}>
+          {loading ? 'Loading saved places…' : error ? 'Your saved places are temporarily unavailable.' : `${saved.length} saved ${saved.length === 1 ? 'place' : 'places'}`}
+        </p>
         </div>
       </div>
 
-      {status}
+      {actionError ? <p role="alert" className="mx-auto mt-5 max-w-7xl px-5 text-sm md:px-10 lg:px-16" style={{ color: dark ? '#FF8B85' : '#A52520' }}>{actionError}</p> : null}
+
       {/* Content */}
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 px-5 pt-6 pb-32 md:grid-cols-2 md:px-10 lg:grid-cols-3 lg:px-16">
-        {saved.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center md:col-span-2 lg:col-span-3" role="status" aria-live="polite">
+            <div className="mb-4 h-10 w-10 animate-spin rounded-full border-[3px] border-current border-r-transparent" style={{ color: RED }} aria-hidden="true" />
+            <p className="text-sm font-semibold" style={{ color: muted }}>Loading your saved places…</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center md:col-span-2 lg:col-span-3" role="alert">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ background: dark ? '#321918' : '#FFF1F0' }}>
+              <IconHeart size={30} color={RED} filled={false} />
+            </div>
+            <h2 className="mb-2 text-[18px] font-bold" style={{ color: ink }}>Your saved places didn’t load</h2>
+            <p className="max-w-sm text-[14px]" style={{ color: muted }}>{error}</p>
+            {onRetry ? (
+              <button onClick={onRetry} className="mt-6 rounded-full px-6 py-3 text-[14px] font-bold text-white" style={{ background: dark ? RED : '#D92D27' }}>Try again</button>
+            ) : null}
+            {error.toLowerCase().includes('sign in') ? <a href="/login" className="mt-4 text-sm underline" style={{ color: dark ? '#FF807A' : '#C82924' }}>Sign in</a> : null}
+          </div>
+        ) : saved.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center md:col-span-2 lg:col-span-3">
             <div className="h-20 w-20 rounded-full flex items-center justify-center mb-4" style={{ background: '#FFF1F0' }}>
               <IconHeart size={36} color={RED} filled={false} />

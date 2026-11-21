@@ -57,9 +57,9 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
         </button>
 
         <div className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center py-10">
-          <div className="mb-7">
+          <div className="mb-6">
             <FajifyLogo />
-            <h2 className="mt-7 text-3xl font-black tracking-[-0.045em] text-[#1A1A1A]">
+            <h2 className="mt-6 text-3xl font-black tracking-[-0.045em] text-[#1A1A1A]">
               {mode === "signin" ? "Welcome back" : "Create your account"}
             </h2>
             <p className="mt-2 text-sm font-medium text-[#777477]">
@@ -123,7 +123,7 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
 
             <label className="flex flex-col gap-2">
               <span className="text-xs font-bold text-[#4F4A4B]">Password</span>
-              <span className="flex h-14 items-center rounded-2xl border border-[#E4E4E4] bg-[#FAFAFA] px-4 focus-within:border-[#FA3F38]">
+              <span className="relative flex h-14 items-center overflow-hidden rounded-2xl border border-[#E4E4E4] bg-[#FAFAFA] focus-within:border-[#FA3F38] focus-within:ring-2 focus-within:ring-[#FA3F38]/10">
                 <input
                   aria-label="Password"
                   type={showPassword ? "text" : "password"}
@@ -134,9 +134,9 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
                   value={form.password}
                   onChange={(event) => update("password", event.target.value)}
                   placeholder={mode === "register" ? "Create a password" : "Enter your password"}
-                  className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none"
+                  className="h-full min-w-0 flex-1 rounded-l-2xl border-0 bg-transparent px-4 pr-16 text-sm font-medium outline-none ring-0"
                 />
-                <button type="button" onClick={() => setShowPassword((shown) => !shown)} className="text-xs font-bold text-[#777477]">
+                <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((shown) => !shown)} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2 py-2 text-xs font-bold text-[#777477] outline-none hover:text-[#1A1A1A]">
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </span>
@@ -181,14 +181,6 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
             </button>
           </p>
 
-          <div className="my-6 flex items-center gap-3">
-            <span className="h-px flex-1 bg-[#EEEEEE]" />
-            <span className="text-xs font-semibold text-[#999]">or</span>
-            <span className="h-px flex-1 bg-[#EEEEEE]" />
-          </div>
-          <button onClick={onComplete} className="flex h-13 items-center justify-center gap-3 rounded-2xl border border-[#DEDEDE] py-4 text-sm font-bold text-[#2A2A2A]">
-            Continue with Google
-          </button>
         </div>
       </section>
     </main>

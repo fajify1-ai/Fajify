@@ -4,24 +4,22 @@ import { IconArrowRight, IconEdit } from '../components/Icons'
 import { IconGlyph, type IconName } from '../components/Icons'
 import { useDarkMode } from '../store/darkMode'
 
-type Props = { navigate: NavigateFn; onLogout: () => void; profile?: {displayName:string} }
+type Props = {
+  navigate: NavigateFn
+  onLogout: () => void
+  profile?: {displayName:string; email?:string; createdAt?:string}
+}
 
 const RED = '#FA3F38'
 
 const menuItems = [
   { icon: 'ticket',  label: 'My Tickets',      screen: 'myTickets' as const,      badge: '3' },
-  { icon: 'tag',     label: 'Offers & Promos',  screen: 'offers' as const,         badge: '4' },
+  { icon: 'tag',     label: 'Offers & Promos',  screen: 'offers' as const },
   { icon: 'users',   label: 'Invite Friends',   screen: 'inviteFriends' as const },
-  { icon: 'trophy',  label: 'My Reviews',       screen: null },
+  { icon: 'trophy',  label: 'My Reviews',       screen: 'reviewHistory' as const },
   { icon: 'message', label: 'Notifications',    screen: 'notifications' as const },
   { icon: 'message', label: 'Help & Support',   screen: 'help' as const },
   { icon: 'more',    label: 'Settings',         screen: 'settings' as const },
-]
-
-const stats = [
-  { label: 'Bookings', value: '12' },
-  { label: 'Events',   value: '5' },
-  { label: 'Reviews',  value: '8' },
 ]
 
 export default function ProfileScreen({ navigate, onLogout, profile }: Props) {
@@ -38,49 +36,34 @@ export default function ProfileScreen({ navigate, onLogout, profile }: Props) {
   return (
     <div className="min-h-screen w-full pb-24 font-[family-name:var(--font-ui)] md:pl-24" style={{ background: bg }}>
 
-      {/* ── Clean white header (no gradient) ── */}
-      <div className="sticky top-0 z-10 px-5 pt-14 pb-6 md:px-10 md:pt-8 lg:px-16" style={{ background: surface, borderBottom: `1px solid ${border}` }}>
-        <div className="w-full">
-        {/* Avatar row */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative">
-            <img
-              src="/reference/467b6b06e1735885.jpg"
-              alt={profile?"Illustrative profile portrait":"Alex Johnson"}
-              className="h-[72px] w-[72px] rounded-full object-cover"
-              style={{ border: `3px solid ${RED}` }}
-            />
-            <div className="absolute bottom-0 right-0 h-[18px] w-[18px] rounded-full border-2 border-white bg-[#22c55e]" />
-          </div>
-          <div className="flex-1">
-            <h1 className="m-0 text-[22px] font-black tracking-[-0.03em]" style={{ color: ink }}>{profile?.displayName??'Alex Johnson'}</h1>
-            <p className="mt-0.5 text-[13px]" style={{ color: muted }}>{profile?'Manage your account securely':'alexjohnson@email.com'}</p>
-            <span className="mt-1.5 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white" style={{ background: RED }}>
-              fajify Member
-            </span>
-          </div>
-          <button onClick={() => navigate({ name: 'settings' })}
-            className="flex h-10 w-10 items-center justify-center rounded-full border"
-            style={{ background: bg, borderColor: border }}>
+      <header className="px-5 pt-10 pb-5 md:px-10 md:pt-8 lg:px-16" style={{ background: bg }}>
+        <div className="mx-auto max-w-5xl">
+          <div className="flex items-center gap-4 rounded-[24px] border p-5 md:p-6" style={{ background: surface, borderColor: border }}>
+            <div
+              aria-label={`${profile?.displayName ?? 'Fajify'} profile`}
+              className="grid h-[68px] w-[68px] shrink-0 place-items-center rounded-full text-2xl font-black text-white"
+              style={{ background: 'linear-gradient(135deg, #FA3F38, #C82924)', boxShadow: '0 8px 24px rgba(250,63,56,.22)' }}
+            >
+              {(profile?.displayName?.trim()[0] ?? 'F').toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="truncate text-[22px] font-black tracking-[-0.03em]" style={{ color: ink }}>{profile?.displayName || 'Fajify account'}</h1>
+              <p className="mt-1 truncate text-[13px]" style={{ color: muted }}>{profile?.email || 'Email unavailable'}</p>
+              <span className="mt-2 inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold" style={{ background: dark ? '#321918' : '#FFF1F0', color: dark ? '#FF807A' : '#C82924' }}>
+                Customer account
+              </span>
+            </div>
+            <button aria-label="Open settings" onClick={() => navigate({ name: 'settings' })}
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-full border"
+              style={{ background: bg, borderColor: border }}>
             <IconEdit size={16} color={muted} />
           </button>
         </div>
-
-        {/* Stats row */}
-        <div className="grid grid-cols-3 divide-x rounded-2xl overflow-hidden"
-          style={{ background: dark ? '#2A2A2A' : '#F8F8F8', borderColor: border }}>
-          {stats.map(s => (
-            <div key={s.label} className="py-4 text-center" style={{ borderColor: border }}>
-              <p className="m-0 text-[24px] font-black" style={{ color: RED }}>{profile?'—':s.value}</p>
-              <p className="m-0 mt-0.5 text-[11px] font-semibold" style={{ color: muted }}>{s.label}</p>
-            </div>
-          ))}
         </div>
-        </div>
-      </div>
+      </header>
 
       {/* ── Menu list ── */}
-      <div className="flex w-full flex-col gap-5 px-5 py-6 pb-28 md:px-10 lg:px-16">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-5 py-4 pb-28 md:px-10 lg:px-16">
         <p className="text-[11px] font-bold uppercase tracking-[0.15em]" style={{ color: muted }}>Account and activity</p>
         <div className="rounded-[20px] overflow-hidden border" style={{ background: surface, borderColor: border }}>
           {menuItems.map((item, i) => (

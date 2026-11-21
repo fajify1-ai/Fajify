@@ -16,7 +16,7 @@ import Event from './Event';
 import History from './History';
 import Cart,{AddToCart} from './Cart';
 import {Events,Gathering,Invitations} from './Events';
-import {SearchFilters,PlanFilters,PlanQuote,SavedPlanEditor,ReviewHistory} from './Planning';
+import {PlanFilters,PlanQuote,SavedPlanEditor,ReviewHistory} from './Planning';
 import ProfileScreen from '../webapp/screens/ProfileScreen';
 import SettingsScreen from '../webapp/screens/SettingsScreen';
 import HelpScreen from '../webapp/screens/HelpScreen';
@@ -35,6 +35,7 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
  const [query,setQuery]=useState(''),[category,setCategory]=useState('All'),[searchFilters,setSearchFilters]=useState<Record<string,string>>({}),[planFilters,setPlanFilters]=useState<Record<string,string>>({});
  const categories=useResource<{items:{id:string;name:string}[]}>('discovery/categories');
  const venues=usePages<Schema<'VenuePage'>>('discovery/venues?'+new URLSearchParams({...searchFilters,...(query?{q:query}:{}),...(category==='All'?{}:{category})}));
+ const profile=useResource<{displayName:string}>(view.name==='home'?'customer/profile':null);
  const plans=usePages<Schema<'PlanPage'>>('discovery/plans?'+new URLSearchParams(planFilters));
  const go=(name:string,id?:string)=>{window.scrollTo(0,0);window.location.hash=name+(id?'/'+encodeURIComponent(id):'');setView({name,id});};
  const navigate=(screen:Screen)=>{
@@ -49,10 +50,11 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
   const results=await platform<Schema<'CustomerPlanRecommendationPage'>>(`plans/${saved.id}/recommendations`);
   return results.items.map(item=>({id:item.id,name:item.name,location:answers.location,desc:'Recommended from current availability',people:`${answers.guests} guests`,price:money(item.totalMinor,item.currency),image:illustration,tag:'Best Match'}));
  }
- const liveVenues=(venues.data?.items??[]).map(venue=>({id:venue.id,name:venue.name,cat:'Business',location:venue.city||venue.address||'Location not published',tag:venue.businessName,rating:Number(venue.rating),price:'View prices',open:true,image:illustration}));
+ const liveVenues=(venues.data?.items??[]).map(venue=>({id:venue.id,name:venue.name,cat:'Experience',location:venue.city||venue.address||'Location not published',tag:venue.businessName,rating:Number(venue.rating),reviewCount:venue.reviewCount,summary:venue.summary,price:'View prices',open:false,image:illustration}));
+ const homeVenues=liveVenues.map(venue=>({...venue,image:''}));
  return <div className="connected">
  {view.name==='landing'?<LandingScreen live venues={liveVenues} onExplore={()=>go('home')} onSearch={value=>{setQuery(value);go('home');}} onGetStarted={()=>location.assign('/register')} onSignIn={()=>location.assign('/login')} onBusiness={()=>location.assign('/business')} onRide={()=>go('comingSoon')} onVenue={id=>go('restaurant',id)} onPlan={()=>go('planForMe')}/>:null}
- {view.name==='home'?<><SearchFilters apply={setSearchFilters}/><State loading={venues.loading} error={venues.error} retry={venues.reload}/><HomeScreen live initialSearch={query} venues={liveVenues} categoryOptions={['All',...(categories.data?.items??[]).map(item=>item.id)]} onQuery={(value,category)=>{setQuery(value);setCategory(category);}} navigate={navigate}/><More resource={venues}/></>:null}
+ {view.name==='home'?<><HomeScreen live initialSearch={query} initialCategory={category} venues={homeVenues} profileName={profile.data?.displayName} profileError={profile.error} loading={venues.loading} error={venues.error} onRetry={venues.reload} searchFilters={searchFilters} onFilters={setSearchFilters} categoryOptions={[{id:'All',name:'All'},...(categories.data?.items??[])]} onQuery={(value,category)=>{setQuery(value);setCategory(category);}} navigate={navigate}/><More resource={venues}/></>:null}
  {view.name==='planForMe'?<PlanForMeScreen navigate={navigate} recommend={recommend} onBook={id=>go('offering',id)}/>:null}
  {view.name==='browsePlans'?<><PlanFilters apply={setPlanFilters}/><State loading={plans.loading} error={plans.error} retry={plans.reload}/><BrowsePlansScreen navigate={navigate} onBook={id=>go('offering',id)} livePlans={(plans.data?.items??[]).map(plan=>({id:plan.id,name:plan.name,image:illustration,inclusions:[plan.description??plan.branchName],price:Number(plan.groupTotalMinor)/100,maxPeople:plan.maxGuests,category:plan.category}))}/><More resource={plans}/></>:null}
  {view.name==='createEvent'?<Events navigate={navigate} open={go}/>:null}
@@ -109,10 +111,11 @@ function Offering({id,open}:{id:string;open:(screen:string,id?:string)=>void}){
 }
 function Profile({navigate}:{navigate:(screen:Screen)=>void}){
  const profile=useResource<Schema<'ProfileView'>>('customer/profile');
+ const session=authClient.useSession();
  const [error,setError]=useState('');
- return <><State loading={profile.loading} error={profile.error||error} retry={profile.reload}/>{profile.data&&<ProfileScreen navigate={navigate} profile={profile.data} onLogout={async()=>{const result=await authClient.signOut();if(result.error){setError('Sign out failed. Please retry.');return;}location.assign('/');}}/>}</>;
+ return <><State loading={profile.loading||session.isPending} error={profile.error||error||session.error?.message} retry={profile.reload}/>{profile.data&&<ProfileScreen navigate={navigate} profile={{...profile.data,email:session.data?.user?.email}} onLogout={async()=>{const result=await authClient.signOut();if(result.error){setError('Sign out failed. Please retry.');return;}location.assign('/');}}/>}</>;
 }
-function Account({screen,open}:{screen:string;open:(name:string,id?:string)=>void}){
+function _Account({screen,open}:{screen:string;open:(name:string,id?:string)=>void}){
  const path=screen==='profile'||screen==='settings'?'customer/profile':screen==='myTickets'?'customer/reservations':screen==='wishlist'?'customer/wishlist':screen==='notifications'?'customer/notifications':screen==='help'?'customer/support':null;
  const profile=useResource<Schema<'ProfileView'>>(screen==='profile'||screen==='settings'?path:null);
  const rows=useResource<{items:Record<string,unknown>[];nextOffset?:number|null}>(screen!=='profile'&&screen!=='settings'?path:null);

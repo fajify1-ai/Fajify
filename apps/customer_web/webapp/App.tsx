@@ -54,6 +54,7 @@ export type Screen =
   | { name: 'help' }
   | { name: 'settings' }
   | { name: 'profile' }
+  | { name: 'reviewHistory' }
   | { name: 'orderTracking'; orderTotal: string; venueName: string; venueImage: string; items: { name: string; qty: number; price: number }[] }
 
 export type NavigateFn = (s: Screen) => void
@@ -168,6 +169,15 @@ export default function App({initialMode='landing',initialScreen={name:'home'},d
   if (screen.name === 'inviteFriends') return <InviteFriendsScreen navigate={navigate} />
   if (screen.name === 'help') return <HelpScreen navigate={navigate} />
   if (screen.name === 'settings') return <SettingsScreen navigate={navigate} />
+  if (screen.name === 'reviewHistory') return (
+    <main className="min-h-screen px-5 py-10 md:px-10 lg:px-16">
+      <div className="mx-auto max-w-5xl">
+        <h1>My reviews</h1>
+        <p>No reviews yet.</p>
+        <button onClick={() => navigate({name:'profile'})} className="faji-primary mt-6">Back to profile</button>
+      </div>
+    </main>
+  )
   if (screen.name === 'profile') return <ProfileScreen navigate={navigate} onLogout={() => { setMode('landing') }} />
   if (screen.name === 'orderTracking') return <OrderTrackingScreen navigate={navigate} orderTotal={screen.orderTotal} venueName={screen.venueName} venueImage={screen.venueImage} items={screen.items} />
   return null

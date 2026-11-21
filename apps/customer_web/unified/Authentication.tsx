@@ -5,7 +5,7 @@ import {authPost} from '@faji/web-auth/client';
 import {AuthForm} from '@faji/web-auth/form';
 import CustomerAuthScreen from '../webapp/screens/CustomerAuthScreen';
 import BusinessSignInScreen from '@faji/business-web/webapp/screens/BusinessSignInScreen';
-export default function Authentication({business=false,register=false,returnTo='/customer'}:{business?:boolean;register?:boolean;returnTo?:CustomerReturnTo}){
+export default function Authentication({business=false,register=false,returnTo='/customer#home'}:{business?:boolean;register?:boolean;returnTo?:CustomerReturnTo}){
  const [challenge,setChallenge]=useState(false);
  const destination=business?(register?'/business/dashboard#onboarding':'/business/dashboard'):returnTo;
  async function authenticate(mode:'signin'|'register',form:{email:string;password:string;name?:string;phone?:string;termsAccepted?:boolean}){
