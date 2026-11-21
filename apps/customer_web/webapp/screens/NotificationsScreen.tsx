@@ -57,6 +57,7 @@ export default function NotificationsScreen({ navigate, liveItems, loading=false
         {!loading && error && <div className="rounded-2xl border p-5" role="alert" style={{ background: surface, borderColor: border, color: ink }}>
           <p className="m-0 text-sm">{error}</p>
           {onRetry && <button className="faji-outline mt-4" onClick={onRetry}>Try again</button>}
+          <a className="faji-outline ml-2 mt-4 inline-block" href="/login">Sign in</a>
         </div>}
         {liveMode && !loading && !error && items.length === 0 && <div className="rounded-2xl border p-6 text-center md:p-10" style={{ background: surface, borderColor: border }}>
           <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full" aria-hidden="true" style={{ background: dark ? '#2A2010' : '#FFF6E7', color: dark ? '#F3C879' : '#9A6414' }}>
