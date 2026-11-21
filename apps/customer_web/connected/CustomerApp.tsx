@@ -32,12 +32,29 @@ const illustration='/reference/ec7238b7cf1876f2.jpg';
 export default function CustomerApp({initial='landing'}:{initial?:string}) {
  const [view,setView]=useState<View>(()=>{const parts=window.location.hash.slice(1).split('/');return {name:parts[0]||initial,id:parts[1]};});
  useEffect(()=>{const restore=()=>{const [name,id]=window.location.hash.slice(1).split('/');setView({name:name||initial,id});};window.addEventListener('hashchange',restore);restore();return()=>window.removeEventListener('hashchange',restore);},[initial]);
- const [query,setQuery]=useState(''),[category,setCategory]=useState('All'),[searchFilters,setSearchFilters]=useState<Record<string,string>>({}),[planFilters,setPlanFilters]=useState<Record<string,string>>({});
+ const [query,setQuery]=useState(''),[category,setCategory]=useState('All'),[searchFilters,setSearchFilters]=useState<Record<string,string>>({}),[planFilters,setPlanFilters]=useState<Record<string,string>>({maxBudgetMinor:'10000000'}),[activePlanBudget,setActivePlanBudget]=useState('Under ₦100k');
  const categories=useResource<{items:{id:string;name:string}[]}>(['landing','home'].includes(view.name)?'discovery/categories':null);
  const venues=usePages<Schema<'VenuePage'>>(['landing','home'].includes(view.name)?'discovery/venues?'+new URLSearchParams({...searchFilters,...(query?{q:query}:{}),...(category==='All'?{}:{category})}):null);
  const profile=useResource<{displayName:string}>(view.name==='home'?'customer/profile':null);
  const plans=usePages<Schema<'PlanPage'>>(view.name==='browsePlans'?'discovery/plans?'+new URLSearchParams(planFilters):null);
  const go=(name:string,id?:string)=>{window.scrollTo(0,0);window.location.hash=name+(id?'/'+encodeURIComponent(id):'');setView({name,id});};
+ const choosePlanBudget=(budget:string)=>{
+  setActivePlanBudget(budget);
+  setPlanFilters(previous=>{
+   const next={...previous};
+   delete next.minBudgetMinor;
+   delete next.maxBudgetMinor;
+   const limits:Record<string,string>={'Under ₦50k':'5000000','Under ₦100k':'10000000','Under ₦500k':'50000000','Under ₦1M':'100000000'};
+   if(limits[budget])next.maxBudgetMinor=limits[budget];
+   return next;
+  });
+ };
+ const applyPlanFilters=(filters:Record<string,string>)=>{
+  setPlanFilters(filters);
+  const budget=Object.entries({'Under ₦50k':'5000000','Under ₦100k':'10000000','Under ₦500k':'50000000','Under ₦1M':'100000000'})
+   .find(([,limit])=>filters.maxBudgetMinor===limit&&!filters.minBudgetMinor)?.[0]??'All Plans';
+  setActivePlanBudget(budget);
+ };
  const navigate=(screen:Screen)=>{
   if(['transportation','orderTracking','deliveryRestaurant','deliveryCart'].includes(screen.name)){go('comingSoon');return;}
   if('id' in screen)go(screen.name,screen.id);else if('venueId' in screen)go(screen.name,screen.venueId);else go(screen.name);
@@ -56,7 +73,30 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
  {view.name==='landing'?<LandingScreen live venues={liveVenues} onExplore={()=>go('home')} onSearch={value=>{setQuery(value);go('home');}} onGetStarted={()=>location.assign('/register')} onSignIn={()=>location.assign('/login')} onBusiness={()=>location.assign('/business')} onRide={()=>go('comingSoon')} onVenue={id=>go('restaurant',id)} onPlan={()=>go('planForMe')}/>:null}
  {view.name==='home'?<><HomeScreen live initialSearch={query} initialCategory={category} venues={homeVenues} profileName={profile.data?.displayName} profileError={profile.error} loading={venues.loading} error={venues.error} onRetry={venues.reload} searchFilters={searchFilters} onFilters={setSearchFilters} categoryOptions={[{id:'All',name:'All'},...(categories.data?.items??[])]} onQuery={(value,category)=>{setQuery(value);setCategory(category);}} navigate={navigate}/><More resource={venues}/></>:null}
  {view.name==='planForMe'?<PlanForMeScreen navigate={navigate} recommend={recommend} onBook={id=>go('offering',id)}/>:null}
- {view.name==='browsePlans'?<><PlanFilters apply={setPlanFilters}/><State loading={plans.loading} error={plans.error} retry={plans.reload}/><BrowsePlansScreen navigate={navigate} onBook={id=>go('offering',id)} livePlans={(plans.data?.items??[]).map(plan=>({id:plan.id,name:plan.name,image:illustration,inclusions:[plan.description??plan.branchName],price:Number(plan.groupTotalMinor)/100,maxPeople:plan.maxGuests,category:plan.category}))}/><More resource={plans}/></>:null}
+ {view.name==='browsePlans'?<BrowsePlansScreen
+  navigate={navigate}
+  onBook={id=>go('offering',id)}
+  activeBudget={activePlanBudget}
+  onBudgetChange={choosePlanBudget}
+  hasAppliedFilters={Object.keys(planFilters).length>0}
+  onClearFilters={()=>applyPlanFilters({})}
+  filters={<PlanFilters apply={applyPlanFilters}/>}
+  loading={plans.loading}
+  error={plans.error}
+  onRetry={plans.reload}
+  pagination={<More resource={plans}/>}
+  livePlans={(plans.data?.items??[]).map(plan=>({
+   id:plan.id,
+   name:plan.name,
+   image:'',
+   inclusions:[plan.description??plan.branchName],
+   price:Number(plan.groupTotalMinor)/100,
+   currency:plan.currency,
+   minPeople:plan.minGuests,
+   maxPeople:plan.maxGuests,
+   category:plan.category,
+  }))}
+ />:null}
  {view.name==='createEvent'?<Events navigate={navigate} open={go}/>:null}
  {view.name==='gathering'?<Gathering id={view.id??''} navigate={navigate} open={go}/>:null}
  {view.name==='inviteFriends'?<Invitations token={view.id} navigate={navigate} open={go}/>:null}

@@ -91,9 +91,11 @@ export class MarketplaceService {
  async plans(input:PlanQuery){
   const values:unknown[]=[],filters:string[]=[];const bind=(v:unknown)=>{values.push(v);return '$'+values.length;};
   if(input.minBudgetMinor&&input.maxBudgetMinor&&BigInt(input.minBudgetMinor)>BigInt(input.maxBudgetMinor))throw new BadRequestException('Invalid budget range');
-  const guests=bind(input.guests),currency=bind(input.currency);
-  const total=`i.price_minor::numeric*CASE WHEN p.pricing_model='per_guest' THEN ${guests}::integer ELSE 1 END`;
-  filters.push(`${guests}::integer BETWEEN p.min_guests AND p.max_guests`,`i.currency=${currency}`,packageReady);
+  const guests=input.guests===undefined?undefined:bind(input.guests),currency=bind(input.currency);
+  const guestCount=guests??'p.min_guests';
+  const total=`i.price_minor::numeric*CASE WHEN p.pricing_model='per_guest' THEN ${guestCount}::integer ELSE 1 END`;
+  if(guests)filters.push(`${guests}::integer BETWEEN p.min_guests AND p.max_guests`);
+  filters.push(`i.currency=${currency}`,packageReady);
   if(input.minBudgetMinor!==undefined)filters.push(`${total}>=${bind(input.minBudgetMinor)}::numeric`);
   if(input.maxBudgetMinor!==undefined)filters.push(`${total}<=${bind(input.maxBudgetMinor)}::numeric`);
   if(input.q){const v=bind(searchPattern(input.q));filters.push(`(i.name ILIKE ${v} OR b.name ILIKE ${v} OR m.display_name ILIKE ${v})`);}
@@ -102,7 +104,7 @@ export class MarketplaceService {
   if(input.category&&input.category!=='package')throw new BadRequestException('Browse Plans contains packages');
   if(input.startsAt){
    if(Date.parse(input.startsAt)<=Date.now())throw new BadRequestException('Start time must be in the future');
-   const start=bind(input.startsAt);filters.push(`EXISTS(SELECT 1 FROM business_availability a WHERE a.catalogue_id=i.id AND a.active AND a.starts_at=${start}::timestamptz AND a.starts_at>now() AND a.capacity-a.reserved>=${guests}::integer)`);
+   const start=bind(input.startsAt);filters.push(`EXISTS(SELECT 1 FROM business_availability a WHERE a.catalogue_id=i.id AND a.active AND a.starts_at=${start}::timestamptz AND a.starts_at>now() AND a.capacity-a.reserved>=${guestCount}::integer)`);
   }
   if(this.geo(input)){
    const lat=bind(input.latitude),lon=bind(input.longitude),radius=bind((input.radiusKm??10)*1000);

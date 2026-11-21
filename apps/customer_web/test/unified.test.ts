@@ -81,6 +81,30 @@ test('Customer profile keeps its themed shell while loading and uses supplied li
  }
 });
 
+test('Browse Plans keeps loading, errors, empty results, filters, and published plans distinct',async()=>{
+ const previousWindow=globalThis.window,previousDocument=globalThis.document;
+ Object.assign(globalThis,{
+  window:{matchMedia:()=>({matches:false,addEventListener(){}})},
+  document:{documentElement:{setAttribute(){}}},
+ });
+ try{
+  const {default:BrowsePlansScreen}=await import('../webapp/screens/BrowsePlansScreen');
+  const loading=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],loading:true}));
+  assert.match(loading,/Loading available plans/);assert.doesNotMatch(loading,/No plans available yet/);
+  const failed=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],error:'Plans are temporarily unavailable.',onRetry(){}}));
+  assert.match(failed,/Plans are temporarily unavailable/);assert.doesNotMatch(failed,/No plans available yet/);
+  const empty=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],activeBudget:'All Plans'}));
+  assert.match(empty,/No plans available yet/);assert.match(empty,/Published plans from Fajify businesses/);
+  const filtered=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[{id:'package-1',name:'Published package',image:'',inclusions:['Included service'],price:120000,currency:'NGN',minPeople:2,maxPeople:4,category:'package'}],activeBudget:'Under ₦100k',hasAppliedFilters:true,onClearFilters(){}}));
+  assert.match(filtered,/No plans match these filters/);assert.match(filtered,/Clear filters/);assert.doesNotMatch(filtered,/No plans available yet/);
+  const available=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[{id:'package-1',name:'Published package',image:'',inclusions:['Included service'],price:120000,currency:'NGN',minPeople:2,maxPeople:4,category:'package'}],activeBudget:'All Plans',onBook(){}}));
+  assert.match(available,/Published package/);assert.match(available,/View plan/);assert.match(available,/2–4 guests/);assert.doesNotMatch(available,/\/reference\//);
+ }finally{
+  if(previousWindow===undefined)delete (globalThis as {window?:Window}).window;else Object.assign(globalThis,{window:previousWindow});
+  if(previousDocument===undefined)delete (globalThis as {document?:Document}).document;else Object.assign(globalThis,{document:previousDocument});
+ }
+});
+
 test('connected original checkout excludes sample bank/card and ride workflows without fabricating a ticket',async()=>{
  const oldWindow=globalThis.window,oldDocument=globalThis.document;
  Object.assign(globalThis,{window:{matchMedia:()=>({matches:false,addEventListener(){}})},document:{documentElement:{setAttribute(){}}}});

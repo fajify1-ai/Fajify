@@ -27,7 +27,7 @@ export class MarketplaceController {
  @ApiQuery({name:'minBudgetMinor',required:false,schema:{type:'string',pattern:'^(0|[1-9][0-9]{0,18})$'}})
  @ApiQuery({name:'maxBudgetMinor',required:false,schema:{type:'string',pattern:'^(0|[1-9][0-9]{0,18})$'}})
  @ApiQuery({name:'currency',required:false,schema:{type:'string',pattern:'^[A-Z]{3}$',default:'NGN'}})
- @ApiQuery({name:'guests',required:false,schema:{type:'integer',minimum:1,maximum:10000,default:1}})
+ @ApiQuery({name:'guests',required:false,schema:{type:'integer',minimum:1,maximum:10000}})
  @ApiQuery({name:'startsAt',required:false,schema:{type:'string',format:'date-time'}})
  plans(@Query(validated(PlanQuery)) input:PlanQuery){return this.service.plans(input);}
  @Post('plans/:id/quote') @HttpCode(200) @ApiOkResponse({type:PlanQuoteView}) @ApiBody({type:PlanQuoteInput}) @resourceId()
