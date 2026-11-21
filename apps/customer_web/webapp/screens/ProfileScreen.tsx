@@ -13,7 +13,7 @@ type Props = {
 const RED = '#FA3F38'
 
 const menuItems = [
-  { icon: 'ticket',  label: 'My Tickets',      screen: 'myTickets' as const,      badge: '3' },
+  { icon: 'ticket',  label: 'My Tickets',      screen: 'myTickets' as const },
   { icon: 'tag',     label: 'Offers & Promos',  screen: 'offers' as const },
   { icon: 'users',   label: 'Invite Friends',   screen: 'inviteFriends' as const },
   { icon: 'trophy',  label: 'My Reviews',       screen: 'reviewHistory' as const },
@@ -37,9 +37,10 @@ export default function ProfileScreen({ navigate, onLogout, profile }: Props) {
     <div className="min-h-screen w-full pb-24 font-[family-name:var(--font-ui)] md:pl-24" style={{ background: bg }}>
 
       <header className="px-5 pt-10 pb-5 md:px-10 md:pt-8 lg:px-16" style={{ background: bg }}>
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-6xl">
           <div className="flex items-center gap-4 rounded-[24px] border p-5 md:p-6" style={{ background: surface, borderColor: border }}>
             <div
+              role="img"
               aria-label={`${profile?.displayName ?? 'Fajify'} profile`}
               className="grid h-[68px] w-[68px] shrink-0 place-items-center rounded-full text-2xl font-black text-white"
               style={{ background: 'linear-gradient(135deg, #FA3F38, #C82924)', boxShadow: '0 8px 24px rgba(250,63,56,.22)' }}
@@ -63,7 +64,7 @@ export default function ProfileScreen({ navigate, onLogout, profile }: Props) {
       </header>
 
       {/* ── Menu list ── */}
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-5 py-4 pb-28 md:px-10 lg:px-16">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-5 py-4 pb-28 md:px-10 lg:px-16">
         <p className="text-[11px] font-bold uppercase tracking-[0.15em]" style={{ color: muted }}>Account and activity</p>
         <div className="rounded-[20px] overflow-hidden border" style={{ background: surface, borderColor: border }}>
           {menuItems.map((item, i) => (
@@ -82,12 +83,6 @@ export default function ProfileScreen({ navigate, onLogout, profile }: Props) {
                 <IconGlyph name={item.icon as IconName} size={20} color={RED} />
               </div>
               <span className="flex-1 text-[14px] font-semibold" style={{ color: ink }}>{item.label}</span>
-              {!profile && item.badge && (
-                <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full text-[11px] font-bold text-white"
-                  style={{ background: RED }}>
-                  {item.badge}
-                </span>
-              )}
               {item.screen && <IconArrowRight size={16} color={muted} />}
             </button>
           ))}

@@ -1,1 +1,2 @@
-export default function Loading(){return <main className="connected"><p className="connection-state" role="status">Loading Fajify…</p></main>}
+import LoadingFallback from '../connected/LoadingFallback';
+export default function Loading(){return <LoadingFallback/>}

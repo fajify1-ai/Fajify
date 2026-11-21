@@ -59,7 +59,7 @@ test('Customer invitation return targets preserve only local validated one-use t
  const {customerReturnTo}=await import('../unified/return-to');
  const target='/customer#inviteFriends/'+'ab'.repeat(32);
  assert.equal(customerReturnTo(target),target);
- for(const value of ['https://evil.example','//evil.example','/business/dashboard','/customer#inviteFriends/not-a-token',null,['/customer']])assert.equal(customerReturnTo(value),'/customer');
+ for(const value of ['https://evil.example','//evil.example','/business/dashboard','/customer#inviteFriends/not-a-token',null,['/customer']])assert.equal(customerReturnTo(value),'/customer#home');
 });
 
 test('connected original checkout excludes sample bank/card and ride workflows without fabricating a ticket',async()=>{
