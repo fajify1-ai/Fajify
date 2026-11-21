@@ -33,10 +33,10 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
  const [view,setView]=useState<View>(()=>{const parts=window.location.hash.slice(1).split('/');return {name:parts[0]||initial,id:parts[1]};});
  useEffect(()=>{const restore=()=>{const [name,id]=window.location.hash.slice(1).split('/');setView({name:name||initial,id});};window.addEventListener('hashchange',restore);restore();return()=>window.removeEventListener('hashchange',restore);},[initial]);
  const [query,setQuery]=useState(''),[category,setCategory]=useState('All'),[searchFilters,setSearchFilters]=useState<Record<string,string>>({}),[planFilters,setPlanFilters]=useState<Record<string,string>>({});
- const categories=useResource<{items:{id:string;name:string}[]}>('discovery/categories');
- const venues=usePages<Schema<'VenuePage'>>('discovery/venues?'+new URLSearchParams({...searchFilters,...(query?{q:query}:{}),...(category==='All'?{}:{category})}));
+ const categories=useResource<{items:{id:string;name:string}[]}>(['landing','home'].includes(view.name)?'discovery/categories':null);
+ const venues=usePages<Schema<'VenuePage'>>(['landing','home'].includes(view.name)?'discovery/venues?'+new URLSearchParams({...searchFilters,...(query?{q:query}:{}),...(category==='All'?{}:{category})}):null);
  const profile=useResource<{displayName:string}>(view.name==='home'?'customer/profile':null);
- const plans=usePages<Schema<'PlanPage'>>('discovery/plans?'+new URLSearchParams(planFilters));
+ const plans=usePages<Schema<'PlanPage'>>(view.name==='browsePlans'?'discovery/plans?'+new URLSearchParams(planFilters):null);
  const go=(name:string,id?:string)=>{window.scrollTo(0,0);window.location.hash=name+(id?'/'+encodeURIComponent(id):'');setView({name,id});};
  const navigate=(screen:Screen)=>{
   if(['transportation','orderTracking','deliveryRestaurant','deliveryCart'].includes(screen.name)){go('comingSoon');return;}
@@ -112,8 +112,14 @@ function Offering({id,open}:{id:string;open:(screen:string,id?:string)=>void}){
 function Profile({navigate}:{navigate:(screen:Screen)=>void}){
  const profile=useResource<Schema<'ProfileView'>>('customer/profile');
  const session=authClient.useSession();
- const [error,setError]=useState('');
- return <><State loading={profile.loading||session.isPending} error={profile.error||error||session.error?.message} retry={profile.reload}/>{profile.data&&<ProfileScreen navigate={navigate} profile={{...profile.data,email:session.data?.user?.email}} onLogout={async()=>{const result=await authClient.signOut();if(result.error){setError('Sign out failed. Please retry.');return;}location.assign('/');}}/>}</>;
+ const [logoutError,setLogoutError]=useState('');
+ const bookings=usePages<Schema<'ReservationPage'>>('customer/reservations');
+ const events=usePages<Schema<'WebHostedEvents'>>('customer/events',true);
+ const reviews=usePages<Schema<'PrivateReviewPage'>>('customer/reviews');
+ const retry=()=>{profile.reload();bookings.reload();events.reload();reviews.reload();};
+ const profileError=profile.error||session.error?.message;
+ const profileLoading=profile.loading||session.isPending;
+ return <ProfileScreen navigate={navigate} loading={profileLoading} error={profileError||(!profileLoading&&!profile.data?'Profile information is unavailable.':undefined)} logoutError={logoutError} onRetry={retry} profile={profile.data?{...profile.data,email:session.data?.user?.email}:undefined} activity={{bookings:bookings.error?null:bookings.data?.items.length??null,bookingsMore:bookings.hasMore,events:events.error?null:events.data?.items.length??null,eventsMore:events.hasMore,reviews:reviews.error?null:reviews.data?.items.filter(review=>!review.withdrawn).length??null,reviewsMore:reviews.hasMore,loading:bookings.loading||events.loading||reviews.loading,error:[bookings.error,events.error,reviews.error].filter(Boolean).join(' ')||undefined}} onLogout={async()=>{setLogoutError('');try{const result=await authClient.signOut();if(result.error){setLogoutError('Sign out failed. Please retry.');return;}location.assign('/');}catch{setLogoutError('Sign out failed. Please retry.');}}}/>;
 }
 function _Account({screen,open}:{screen:string;open:(name:string,id?:string)=>void}){
  const path=screen==='profile'||screen==='settings'?'customer/profile':screen==='myTickets'?'customer/reservations':screen==='wishlist'?'customer/wishlist':screen==='notifications'?'customer/notifications':screen==='help'?'customer/support':null;

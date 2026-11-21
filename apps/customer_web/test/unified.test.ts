@@ -62,6 +62,25 @@ test('Customer invitation return targets preserve only local validated one-use t
  for(const value of ['https://evil.example','//evil.example','/business/dashboard','/customer#inviteFriends/not-a-token',null,['/customer']])assert.equal(customerReturnTo(value),'/customer#home');
 });
 
+test('Customer profile keeps its themed shell while loading and uses supplied live activity counts',async()=>{
+ const previousWindow=globalThis.window,previousDocument=globalThis.document;
+ Object.assign(globalThis,{
+  window:{matchMedia:()=>({matches:true,addEventListener(){}})},
+  document:{documentElement:{setAttribute(){}}},
+ });
+ try{
+  const {default:ProfileScreen}=await import('../webapp/screens/ProfileScreen');
+  const common={navigate(){},onLogout(){},activity:{bookings:12,bookingsMore:false,events:5,eventsMore:false,reviews:8,reviewsMore:false,loading:false}};
+  const loading=renderToStaticMarkup(React.createElement(ProfileScreen,{...common,loading:true}));
+  assert.match(loading,/Loading your profile/);assert.match(loading,/Account activity/);assert.doesNotMatch(loading,/class="connection-state"/);
+  const loaded=renderToStaticMarkup(React.createElement(ProfileScreen,{...common,profile:{displayName:'Alex Johnson',email:'alex@example.test'}}));
+  assert.match(loaded,/Alex Johnson/);assert.match(loaded,/alex@example\.test/);assert.match(loaded,/>12</);assert.match(loaded,/>5</);assert.match(loaded,/>8</);assert.doesNotMatch(loaded,/>3</);
+ }finally{
+  if(previousWindow===undefined)delete (globalThis as {window?:Window}).window;else Object.assign(globalThis,{window:previousWindow});
+  if(previousDocument===undefined)delete (globalThis as {document?:Document}).document;else Object.assign(globalThis,{document:previousDocument});
+ }
+});
+
 test('connected original checkout excludes sample bank/card and ride workflows without fabricating a ticket',async()=>{
  const oldWindow=globalThis.window,oldDocument=globalThis.document;
  Object.assign(globalThis,{window:{matchMedia:()=>({matches:false,addEventListener(){}})},document:{documentElement:{setAttribute(){}}}});
