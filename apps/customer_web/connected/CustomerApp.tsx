@@ -76,6 +76,7 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
  {view.name==='browsePlans'?<BrowsePlansScreen
   navigate={navigate}
   onBook={id=>go('offering',id)}
+  onPlanForMe={()=>go('planForMe')}
   activeBudget={activePlanBudget}
   onBudgetChange={choosePlanBudget}
   hasAppliedFilters={Object.keys(planFilters).length>0}
@@ -89,12 +90,14 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
    id:plan.id,
    name:plan.name,
    image:'',
-   inclusions:[plan.description??plan.branchName],
+   inclusions:[plan.description??''].filter(Boolean),
    price:Number(plan.groupTotalMinor)/100,
    currency:plan.currency,
    minPeople:plan.minGuests,
    maxPeople:plan.maxGuests,
    category:plan.category,
+   businessName:plan.businessName,
+   location:plan.branchName,
   }))}
  />:null}
  {view.name==='createEvent'?<Events navigate={navigate} open={go}/>:null}

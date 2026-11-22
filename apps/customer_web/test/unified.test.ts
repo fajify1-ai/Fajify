@@ -91,14 +91,18 @@ test('Browse Plans keeps loading, errors, empty results, filters, and published 
   const {default:BrowsePlansScreen}=await import('../webapp/screens/BrowsePlansScreen');
   const loading=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],loading:true}));
   assert.match(loading,/Loading available plans/);assert.doesNotMatch(loading,/No plans available yet/);
+  assert.match(loading,/animate-pulse/);
   const failed=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],error:'Plans are temporarily unavailable.',onRetry(){}}));
-  assert.match(failed,/Plans are temporarily unavailable/);assert.doesNotMatch(failed,/No plans available yet/);
+  assert.match(failed,/We couldn’t load plans/);assert.match(failed,/Plans are temporarily unavailable/);assert.doesNotMatch(failed,/No plans available just yet/);
   const empty=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],activeBudget:'All Plans'}));
-  assert.match(empty,/No plans available yet/);assert.match(empty,/Published plans from Fajify businesses/);
-  const filtered=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[{id:'package-1',name:'Published package',image:'',inclusions:['Included service'],price:120000,currency:'NGN',minPeople:2,maxPeople:4,category:'package'}],activeBudget:'Under ₦100k',hasAppliedFilters:true,onClearFilters(){}}));
-  assert.match(filtered,/No plans match these filters/);assert.match(filtered,/Clear filters/);assert.doesNotMatch(filtered,/No plans available yet/);
+  assert.match(empty,/No plans available just yet/);assert.match(empty,/approved Fajify businesses/);
+  const filtered=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[{id:'package-1',name:'Published package',image:'',inclusions:['Included service'],price:120000,currency:'NGN',minPeople:2,maxPeople:4,category:'package'}],activeBudget:'Under ₦100k',hasAppliedFilters:true,onClearFilters(){},onPlanForMe(){}}));
+  assert.match(filtered,/No plans found for this budget/);assert.match(filtered,/Clear filters/);assert.match(filtered,/Plan for me/);assert.doesNotMatch(filtered,/No plans available just yet/);
   const available=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[{id:'package-1',name:'Published package',image:'',inclusions:['Included service'],price:120000,currency:'NGN',minPeople:2,maxPeople:4,category:'package'}],activeBudget:'All Plans',onBook(){}}));
-  assert.match(available,/Published package/);assert.match(available,/View plan/);assert.match(available,/2–4 guests/);assert.doesNotMatch(available,/\/reference\//);
+  assert.match(available,/Published package/);assert.match(available,/View details/);assert.match(available,/2–4 guests/);assert.doesNotMatch(available,/\/reference\//);
+  const filters=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],activeBudget:'All Plans',filters:React.createElement('div',{'data-filter-panel':true},'More filters')}));
+  assert.ok(filters.indexOf('Browse Plans')<filters.indexOf('data-filter-panel'),'filters must be below the page header');
+  assert.doesNotMatch(filters,/Plan budget, guests &amp; date/);
  }finally{
   if(previousWindow===undefined)delete (globalThis as {window?:Window}).window;else Object.assign(globalThis,{window:previousWindow});
   if(previousDocument===undefined)delete (globalThis as {document?:Document}).document;else Object.assign(globalThis,{document:previousDocument});
