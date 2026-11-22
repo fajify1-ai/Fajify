@@ -1,5 +1,124 @@
 @import "@faji/web-ui/styles.css";
-.merchant-shell{background:#f0f0f4}.merchant-overview{display:grid;gap:20px;align-items:start}.merchant-overview h2{font-size:16px;margin:0;font-weight:750}.overview-card,.overview-panel{border-radius:24px;padding:22px;min-width:0}.overview-card{background:white;border:1px solid #e9e9ed;box-shadow:0 8px 28px #22212b08}.overview-panel{background:#f0f0f4;border:1px solid #e7e7ec;box-shadow:0 8px 28px #22212b06}.overview-heading{display:flex;justify-content:space-between;align-items:start;gap:16px}.overview-eyebrow{font-size:11px;text-transform:uppercase;color:#6a686f;font-weight:650}.overview-value{font-size:30px;line-height:1.25!important;font-weight:800;margin:6px 0}.overview-caption{font-size:12px;color:#68656d;line-height:1.6}.overview-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.overview-card>.overview-pair{margin-top:20px;padding-top:16px;border-top:1px solid #eee}.overview-link{color:#bd2520;background:#fff1f0;padding:10px 14px;border-radius:12px;font-size:12px;white-space:nowrap}.overview-health{display:flex;gap:18px;align-items:center}.overview-health-mark{width:56px;height:56px;border:5px solid #eee;border-radius:50%;display:grid;place-items:center;flex-shrink:0;color:#68656d}.overview-accent{color:#bd2520;font-weight:750}.overview-capacity{height:8px;border-radius:8px;overflow:hidden;background:#f0f0f4;margin:18px 0 8px}.overview-capacity span{display:block;height:100%;background:#FA3F38;border-radius:8px}.overview-task{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:white;border-radius:18px;padding:16px;margin-top:12px;min-width:0}.overview-task>span:nth-child(2){flex:1;min-width:0}.overview-task strong{font-size:13px;display:block}.overview-task small{font-size:11px;color:#68656d;display:block;overflow-wrap:anywhere}.overview-task-mark{background:#fff1f0;color:#bd2520;width:36px;height:36px;display:grid;place-items:center;border-radius:12px;flex-shrink:0}.overview-status{font-size:10px;color:#146c37;background:#edfff2;padding:5px 8px;border-radius:10px}.overview-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}.overview-actions button{display:grid;justify-items:center;gap:10px;font-size:11px;padding:18px 6px;min-height:98px}.overview-actions button>span{color:#bd2520;background:#fff1f0;border-radius:10px;font-size:22px;padding:2px 12px}.merchant-nav button{display:grid;justify-items:center;gap:6px}.merchant-shell .content>h1{font-size:26px}.merchant-overview .connection-state{margin:8px 0;padding:18px 0;background:transparent;font-size:13px}
-@media(min-width:1024px){.merchant-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.merchant-overview .overview-pair .overview-card{padding:18px}.merchant-overview{padding-top:12px}}
 
-.merchant-shell>header{flex-wrap:wrap}.merchant-shell>header>div{min-width:0}.merchant-shell .content{min-width:0}.merchant-shell .overflow-auto{max-width:100%;overflow:auto}
+.merchant-shell{background:#f0f0f4}
+.merchant-overview{display:grid;gap:20px;align-items:start}
+.merchant-overview h2{font-size:16px;margin:0;font-weight:750}
+.overview-card,.overview-panel{border-radius:24px;padding:22px;min-width:0}
+.overview-card{background:white;border:1px solid #e9e9ed;box-shadow:0 8px 28px #22212b08}
+.overview-panel{background:#f0f0f4;border:1px solid #e7e7ec;box-shadow:0 8px 28px #22212b06}
+.overview-heading{display:flex;justify-content:space-between;align-items:start;gap:16px}
+.overview-eyebrow{font-size:11px;text-transform:uppercase;color:#6a686f;font-weight:650}
+.overview-value{font-size:30px;line-height:1.25!important;font-weight:800;margin:6px 0}
+.overview-caption{font-size:12px;color:#68656d;line-height:1.6}
+.overview-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.overview-card>.overview-pair{margin-top:20px;padding-top:16px;border-top:1px solid #eee}
+.overview-link{color:#bd2520;background:#fff1f0;padding:10px 14px;border-radius:12px;font-size:12px;white-space:nowrap}
+.overview-accent{color:#bd2520;font-weight:750}
+.overview-capacity{height:8px;border-radius:8px;overflow:hidden;background:#f0f0f4;margin:18px 0 8px}
+.overview-capacity span{display:block;height:100%;background:#FA3F38;border-radius:8px}
+.overview-task{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:white;border-radius:18px;padding:16px;margin-top:12px;min-width:0}
+.overview-task>span:nth-child(2){flex:1;min-width:0}
+.overview-task strong{font-size:13px;display:block}
+.overview-task small{font-size:11px;color:#68656d;display:block;overflow-wrap:anywhere}
+.overview-task-mark{background:#fff1f0;color:#bd2520;width:36px;height:36px;display:grid;place-items:center;border-radius:12px;flex-shrink:0}
+.overview-status{font-size:10px;color:#146c37;background:#edfff2;padding:5px 8px;border-radius:10px}
+.overview-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.overview-actions button{display:grid;justify-items:center;gap:10px;font-size:11px;padding:18px 6px;min-height:98px}
+.overview-actions button>span{color:#bd2520;background:#fff1f0;border-radius:10px;font-size:22px;padding:2px 12px}
+.merchant-nav button{display:grid;justify-items:center;gap:6px}
+.merchant-shell .content>h1{font-size:26px}
+.merchant-overview .connection-state{margin:8px 0;padding:18px 0;background:transparent;font-size:13px}
+.merchant-shell>header{flex-wrap:wrap}
+.merchant-shell>header>div{min-width:0}
+.merchant-shell .content{min-width:0}
+.merchant-shell .overflow-auto{max-width:100%;overflow:auto}
+
+.merchant-topbar{position:relative}
+.merchant-identity{display:flex;align-items:center;gap:12px;min-width:0}
+.merchant-avatar{display:grid;width:40px;height:40px;flex:none;place-items:center;border-radius:12px;background:#FA3F38;color:white;font-size:16px;font-weight:800}
+.merchant-identity-controls{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:1px}
+.merchant-select-label,.merchant-branch-label{display:flex!important;align-items:center;gap:8px}
+.merchant-identity-controls select{max-width:min(42vw,280px)!important;border:0!important;background:transparent!important;padding:0!important;color:inherit!important;font-size:14px;font-weight:750}
+.merchant-identity-controls option{background:#1b1b1b;color:#f5f5f5}
+.merchant-branch-label select{max-width:150px!important;font-size:11px!important;font-weight:500!important}
+.merchant-branch-status{font-size:10px;color:#aaa}
+.merchant-branch-status.is-active{color:#4ade80}
+.merchant-topbar-actions{display:flex;align-items:center;gap:8px}
+.merchant-icon-button{display:grid;min-width:38px;min-height:38px;place-items:center;border:1px solid #323232;border-radius:50%;background:#1d1d1d;color:#e5e5e5}
+.merchant-icon-button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.merchant-icon-button:hover{border-color:#FA3F38;color:#FA3F38}
+.merchant-page-heading{display:flex;align-items:end;justify-content:space-between;margin:0 0 24px}
+.merchant-page-heading h1{margin:0;color:inherit;font-size:26px;font-weight:750;letter-spacing:-.03em}
+.merchant-page-heading p{margin:5px 0 0;color:#919191;font-size:12px}
+.overview-empty{margin-top:14px;border-radius:14px;background:#222;padding:16px;color:#a6a6a6;font-size:12px}
+.overview-count{display:grid;width:28px;height:28px;place-items:center;border-radius:50%;background:#351b19;color:#ff665e;font-size:11px;font-weight:750}
+.overview-order-status{text-transform:capitalize;color:#e6bc61;background:#3a301b}
+
+.merchant-home{--red:#FA3F38;--ink:#f4f4f4;--surface:#191919;--canvas:#0b0b0b;color:var(--ink);background:var(--canvas)!important;min-height:100vh}
+.merchant-home .merchant-topbar{position:sticky;top:0;z-index:40;display:flex;min-height:64px;flex-wrap:nowrap;justify-content:space-between;gap:16px;border-bottom:1px solid #292929;background:#191919;padding:10px clamp(18px,3vw,48px)}
+.merchant-home .content{max-width:1480px;margin:0 auto 0 88px;padding:22px clamp(18px,3vw,48px) 64px}
+.merchant-home .merchant-nav{position:fixed;top:50%;left:12px;z-index:35;display:flex;width:64px;transform:translateY(-50%);flex-direction:column;gap:4px;overflow:visible;border:1px solid #303030;border-radius:24px;background:#191919;padding:8px}
+.merchant-home .merchant-nav button{min-height:54px;border:0;border-radius:14px;background:transparent;color:#8a8a8a;font-size:10px;transition:background .16s,color .16s}
+.merchant-home .merchant-nav button:hover{background:#252525;color:#eee}
+.merchant-home .merchant-nav button[aria-current=page]{background:#2b1b1a;color:#FA3F38}
+.merchant-home .merchant-nav svg{width:19px;height:19px}
+.merchant-home .merchant-page-heading{margin:0 0 24px}
+.merchant-home .merchant-page-heading h1{font-size:26px}
+.merchant-home .merchant-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.merchant-home .overview-card,.merchant-home .overview-panel{border-radius:20px;border-color:#292929;background:#191919;box-shadow:none;color:#f3f3f3;padding:20px}
+.merchant-home .overview-revenue,.merchant-home .overview-capacity-card,.merchant-home .overview-metrics,.merchant-home .overview-tasks,.merchant-home .overview-quick-actions{grid-column:1/-1}
+.merchant-home .overview-revenue{padding:22px}
+.merchant-home .overview-eyebrow{margin:0;color:#a0a0a0;font-size:10px;letter-spacing:.04em}
+.merchant-home .overview-value{color:#f5f5f5;font-size:30px;font-weight:700}
+.merchant-home .overview-caption{margin-top:5px;color:#858585;font-size:11px}
+.merchant-home .overview-balances{margin-top:18px!important;border-top-color:#303030!important;padding-top:14px!important}
+.merchant-home .overview-balances strong{color:#f0f0f0;font-size:14px}
+.merchant-home .overview-link{border:0;background:#2c1a19;color:#ff655d}
+.merchant-home .overview-accent{color:#ff625b}
+.merchant-home .overview-capacity{background:#292929}
+.merchant-home .overview-capacity span{background:#FA3F38}
+.merchant-home .overview-capacity-card .overview-caption strong{color:#ddd}
+.merchant-home .overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;background:transparent;padding:0}
+.merchant-home .overview-metric{display:flex;min-height:108px;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left}
+.merchant-home .overview-metric .overview-value{margin:5px 0 0;font-size:24px}
+.merchant-home .overview-task{border:1px solid #2c2c2c;background:#202020;color:#eee}
+.merchant-home .overview-task small{color:#929292}
+.merchant-home .overview-task-mark{background:#321e1c;color:#ff655d}
+.merchant-home .overview-status{background:#173022;color:#57d88a}
+.merchant-home .overview-actions{margin-top:14px}
+.merchant-home .overview-actions button{min-height:80px;border-radius:14px;background:#1d1d1d;color:#eee}
+.merchant-home .overview-actions button>span{border-radius:10px;background:#2c1a19;color:#ff655d}
+.merchant-home .overview-empty{background:#202020;color:#a4a4a4}
+.merchant-home .overview-order-status{background:#3a301b;color:#e6bc61}
+.merchant-home .connection-state{color:#a7a7a7}
+.merchant-home .connection-state a{color:#ff756d}
+.merchant-home .connection-state .faji-outline{border-color:#404040;background:#222;color:#eee}
+
+@media(min-width:1200px){
+ .merchant-home .overview-revenue{min-height:174px}
+}
+@media(max-width:767px){
+ .merchant-home .merchant-topbar{min-height:60px;padding:8px 12px}
+ .merchant-home .merchant-avatar{width:36px;height:36px}
+ .merchant-home .merchant-identity{gap:8px}
+ .merchant-home .merchant-identity-controls select{max-width:38vw!important;font-size:12px}
+ .merchant-home .merchant-branch-label select{max-width:100px!important}
+ .merchant-home .merchant-topbar-actions{gap:5px}
+ .merchant-home .merchant-icon-button{min-width:34px;min-height:34px}
+ .merchant-home .merchant-topbar-actions .merchant-icon-button[aria-label="Account security"]{display:none}
+ .merchant-home .merchant-topbar-actions form button{min-height:34px!important;padding:6px 9px!important;font-size:11px!important}
+ .merchant-home .content{margin:0;padding:20px 16px 104px}
+ .merchant-home .merchant-nav{top:auto;right:12px;bottom:12px;left:12px;width:auto;transform:none;flex-direction:row;justify-content:space-around;gap:2px;border-radius:20px;padding:6px}
+ .merchant-home .merchant-nav button{min-height:52px;flex:1;gap:3px;font-size:9px}
+ .merchant-home .merchant-overview{grid-template-columns:minmax(0,1fr);gap:14px}
+ .merchant-home .overview-revenue,.merchant-home .overview-capacity-card,.merchant-home .overview-metrics,.merchant-home .overview-tasks,.merchant-home .overview-quick-actions{grid-column:auto}
+ .merchant-home .overview-card,.merchant-home .overview-panel{border-radius:18px;padding:16px}
+ .merchant-home .overview-value{font-size:26px}
+ .merchant-home .overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr));padding:0}
+ .merchant-home .overview-metric{min-height:96px;padding:14px}
+ .merchant-home .overview-actions{gap:7px}
+ .merchant-home .overview-actions button{padding:12px 4px;font-size:10px}
+ .merchant-home .overview-heading{gap:8px}
+ .merchant-home .overview-link{padding:8px 10px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){.merchant-home .merchant-nav button,.merchant-home .overview-task{transition:none}}
