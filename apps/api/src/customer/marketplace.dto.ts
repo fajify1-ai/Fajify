@@ -12,7 +12,7 @@ export class PlanQuery extends VenueQuery {
  @ApiPropertyOptional({type:String}) @IsOptional() @Matches(/^(0|[1-9][0-9]{0,18})$/) minBudgetMinor?:string;
  @ApiPropertyOptional({type:String}) @IsOptional() @Matches(/^(0|[1-9][0-9]{0,18})$/) maxBudgetMinor?:string;
  @ApiPropertyOptional({type:String,default:'NGN'}) @Matches(/^[A-Z]{3}$/) currency='NGN';
- @ApiPropertyOptional({type:Number,default:1}) @Type(()=>Number) @IsInt() @Min(1) @Max(10000) guests=1;
+ @ApiPropertyOptional({type:Number,minimum:1,maximum:10000}) @IsOptional() @Type(()=>Number) @IsInt() @Min(1) @Max(10000) guests?:number;
  @ApiPropertyOptional({type:String,format:'date-time'}) @IsOptional() @IsISO8601({strict:true}) @Matches(/T.*(?:Z|[+-]\d{2}:\d{2})$/) startsAt?:string;
 }
 export class PublicProfileInput {

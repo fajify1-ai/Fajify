@@ -1,16 +1,43 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { NavigateFn } from '../App'
 import { useDarkMode } from '../store/darkMode'
 import CalendarSheet from '../components/CalendarSheet'
 import BottomNav from '../components/BottomNav'
 
-type Props = { navigate: NavigateFn; livePlans?: typeof plans; onBook?: (id:string)=>void }
+type BrowsePlan = {
+  id:string
+  name:string
+  image:string
+  inclusions:string[]
+  price:number
+  currency?:string
+  minPeople?:number
+  maxPeople:number
+  category:string
+  businessName?:string
+  location?:string
+}
+type Props = {
+  navigate: NavigateFn
+  livePlans?: BrowsePlan[]
+  onBook?: (id:string)=>void
+  onPlanForMe?: ()=>void
+  activeBudget?: string
+  onBudgetChange?: (budget:string)=>void
+  hasAppliedFilters?: boolean
+  onClearFilters?: ()=>void
+  loading?: boolean
+  error?: string
+  onRetry?: ()=>void
+  filters?: ReactNode
+  pagination?: ReactNode
+}
 
 const RED = '#FA3F38'
 
 const BUDGETS = ['Under ₦100k', 'Under ₦500k', 'Under ₦50k', 'Under ₦1M', 'All Plans']
 
-const plans = [
+const plans:BrowsePlan[] = [
   {
     id: 'plan1',
     name: 'ILASHE BEACH',
@@ -77,15 +104,33 @@ const BUDGET_LIMITS: Record<string, number> = {
 
 const PEOPLE_OPTIONS = ['1 person', '2 people', '3–4 people', '5–6 people', '7–10 people', '10+ people']
 
-function fmt(n: number) { return '₦' + n.toLocaleString('en-NG') }
+function fmt(n: number, currency='NGN') {
+  try { return new Intl.NumberFormat('en-NG',{style:'currency',currency}).format(n) }
+  catch { return 'Price unavailable' }
+}
 
-export default function BrowsePlansScreen({ navigate, livePlans, onBook }: Props) {
+export default function BrowsePlansScreen({
+  navigate,
+  livePlans,
+  onBook,
+  onPlanForMe,
+  activeBudget: selectedBudget,
+  onBudgetChange,
+  hasAppliedFilters = false,
+  onClearFilters,
+  loading = false,
+  error,
+  onRetry,
+  filters,
+  pagination,
+}: Props) {
   const { dark } = useDarkMode()
-  const [activeBudget, setActiveBudget] = useState('Under ₦100k')
+  const [localBudget, setLocalBudget] = useState('Under ₦100k')
   const [guests,   setGuests]   = useState<Record<string, string>>({})
   const [calOpen,  setCalOpen]  = useState(false)
   const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)
 
+  const activeBudget=selectedBudget??localBudget
   const bg      = dark ? '#0F0F0F' : '#F8F8F8'
   const surface = dark ? '#1C1C1C' : '#FFFFFF'
   const ink     = dark ? '#F0F0F0' : '#1A1A1A'
@@ -93,83 +138,163 @@ export default function BrowsePlansScreen({ navigate, livePlans, onBook }: Props
   const border  = dark ? '#2A2A2A' : '#E8E8E8'
 
   const limit    = BUDGET_LIMITS[activeBudget] ?? Infinity
-  const filtered = (livePlans ?? plans).filter(p => p.price <= limit)
+  const allPlans = livePlans ?? plans
+  const filtered = allPlans.filter(p => p.price <= limit)
+  const liveMode = livePlans !== undefined
+  const narrowed = activeBudget !== 'All Plans' || hasAppliedFilters
 
   return (
-    <div className="min-h-screen w-full pb-24 font-[family-name:var(--font-ui)] md:pl-24" style={{ background: bg }}>
+    <div className="min-h-screen w-full pb-24 font-[family-name:var(--font-ui)] md:pl-24" style={{ background: bg, color: ink }}>
       {/* Header */}
-      <div className="flex items-center gap-4 sticky top-0 z-10 px-5 pt-14 pb-4 md:px-10 md:pt-8 lg:px-16" style={{ background: surface, borderBottom: `1px solid ${border}` }}>
+      <header className="sticky top-0 z-20 flex items-center gap-3" style={{ background: surface, borderBottom: `1px solid ${border}`, padding: '12px clamp(16px, 4vw, 64px)', justifyContent: 'flex-start' }}>
         <button aria-label="Back to discovery" onClick={() => navigate({ name: 'home' })}
-          className="flex h-10 w-10 items-center justify-center rounded-full border"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors hover:border-[#FA3F38]"
           style={{ background: bg, borderColor: border }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ink} strokeWidth="2.2" strokeLinecap="round">
             <path d="M15 18l-6-6 6-6"/>
           </svg>
         </button>
-        <h1 className="text-[20px] font-black tracking-[-0.02em]" style={{ color: ink }}>Browse Plans</h1>
-      </div>
+        <div className="min-w-0">
+          <h1 className="m-0 text-lg font-extrabold tracking-tight md:text-xl" style={{ color: ink, fontSize: 'clamp(18px, 2vw, 22px)', lineHeight: 1.2 }}>Browse Plans</h1>
+          <p className="m-0 mt-1 hidden text-xs sm:block" style={{ color: muted }}>Discover experiences and packages from Fajify businesses.</p>
+        </div>
+      </header>
 
-      {/* Budget filter */}
-      <div className="flex gap-3 overflow-x-auto px-5 py-5 [scrollbar-width:none] md:flex-wrap md:px-10 lg:px-16">
-        {BUDGETS.map(b => {
-          const active = activeBudget === b
-          return (
-            <button key={b} onClick={() => setActiveBudget(b)}
-              className="shrink-0 rounded-full px-4 py-2 text-[13px] font-bold transition-all"
-              style={{ background: active ? RED : surface, color: active ? '#fff' : RED, border: `2px solid ${RED}` }}>
-              {b}
+      <section className="mx-auto w-full max-w-[1440px] px-4 pt-5 md:px-10 md:pt-6 lg:px-16" aria-label="Plan filters">
+        <div className="flex items-center justify-between gap-3">
+          <p className="m-0 text-sm font-bold" style={{ color: ink }}>Find a plan for your budget</p>
+          {onPlanForMe && (
+            <button onClick={onPlanForMe} className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold sm:inline-flex"
+              style={{ color: RED, background: dark ? '#321918' : '#FFF1F0' }}>
+              Need ideas? Plan for me
+              <span aria-hidden="true">→</span>
             </button>
-          )
-        })}
-      </div>
+          )}
+        </div>
+        <div className="mt-3 flex items-start gap-2">
+          <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-2 [scrollbar-width:none] md:flex-wrap">
+            {BUDGETS.map(b => {
+            const active = activeBudget === b
+            return (
+              <button key={b} onClick={() => {setLocalBudget(b);onBudgetChange?.(b)}}
+                aria-pressed={active}
+                className="shrink-0 rounded-full px-4 py-2 text-xs font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FA3F38]"
+                style={{ background: active ? RED : 'transparent', color: active ? '#fff' : RED, border: `1px solid ${RED}` }}>
+                {b}
+              </button>
+            )
+            })}
+          </div>
+          {filters}
+        </div>
+        {onPlanForMe && (
+          <button onClick={onPlanForMe} className="mt-1 inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold sm:hidden"
+            style={{ color: RED, background: dark ? '#321918' : '#FFF1F0' }}>
+            Need ideas? Plan for me <span aria-hidden="true">→</span>
+          </button>
+        )}
+      </section>
 
       {/* Plan cards */}
-      <div className="grid w-full grid-cols-1 gap-5 px-4 pb-24 md:grid-cols-2 md:px-10 xl:grid-cols-3 lg:px-16">
-        {filtered.length === 0 && (
-          <div className="py-20 text-center md:col-span-2 xl:col-span-3">
-            <p className="text-[16px] font-bold" style={{ color: ink }}>No plans in this range</p>
-            <p className="text-[13px] mt-1" style={{ color: muted }}>Try a higher budget filter</p>
+      <section className="mx-auto w-full max-w-[1440px] px-4 pb-24 pt-4 md:px-10 md:pt-5 lg:px-16" aria-label="Available plans">
+        {filtered.length > 0 && !loading && !error && (
+          <p className="mb-3 text-xs" style={{ color: muted }}>
+            {filtered.length}{plans.length === filtered.length && liveMode && plans.length === 20 ? '+' : ''} {filtered.length === 1 ? 'plan' : 'plans'}
+          </p>
+        )}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {loading && (
+          <>
+            <p className="sr-only" role="status" aria-live="polite">Loading available plans…</p>
+            {[0,1,2].map(item=><div key={item} className="overflow-hidden rounded-[20px] border" aria-hidden="true" style={{ background: surface, borderColor: border }}>
+              <div className="h-40 animate-pulse" style={{ background: dark ? '#292929' : '#EEEEEE' }} />
+              <div className="space-y-3 p-4">
+                <div className="h-4 w-2/3 animate-pulse rounded" style={{ background: dark ? '#292929' : '#EEEEEE' }} />
+                <div className="h-3 w-1/2 animate-pulse rounded" style={{ background: dark ? '#292929' : '#EEEEEE' }} />
+                <div className="h-10 animate-pulse rounded-full" style={{ background: dark ? '#292929' : '#EEEEEE' }} />
+              </div>
+            </div>)}
+          </>
+        )}
+        {!loading && error && (
+          <div className="rounded-2xl border px-6 py-10 text-center sm:col-span-2 xl:col-span-3" role="alert" style={{ background: surface, borderColor: border }}>
+            <p className="m-0 text-base font-bold" style={{ color: ink }}>We couldn’t load plans</p>
+            <p className="mx-auto mb-0 mt-2 max-w-md text-sm" style={{ color: muted }}>{error}</p>
+            {onRetry && <button className="mt-5 rounded-full px-5 py-3 text-sm font-bold text-white" style={{ background: RED }} onClick={onRetry}>Try again</button>}
           </div>
         )}
-        {filtered.map(plan => (
-          <div key={plan.id} className="rounded-[20px] overflow-hidden"
-            style={{ background: surface, border: `1px solid ${border}` }}>
-            <div className="flex h-full flex-col">
-              <img src={plan.image} alt={plan.name} className="h-[190px] w-full shrink-0 object-cover" />
-              <div className="flex flex-col p-3.5 flex-1 min-w-0">
-                <h2 className="text-[14px] font-black mb-2 leading-tight" style={{ color: ink }}>{plan.name}</h2>
-                <div className="flex flex-col gap-0.5 mb-3 flex-1">
+        {!loading && !error && filtered.length === 0 && (
+          <div className="relative overflow-hidden rounded-[24px] border px-6 py-10 text-center sm:col-span-2 sm:px-10 sm:py-14 xl:col-span-3" style={{ background: surface, borderColor: border }}>
+            <div className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full opacity-50" aria-hidden="true" style={{ background: dark ? 'radial-gradient(circle,#4A201D 0%,transparent 70%)' : 'radial-gradient(circle,#FFE0DE 0%,transparent 70%)' }} />
+            <div className="relative mx-auto grid h-14 w-14 place-items-center rounded-2xl" aria-hidden="true" style={{ background: dark ? '#321918' : '#FFF1F0', color: RED }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m4.5 7.8 7.5 4.3 7.5-4.3M12 12.2V21"/>
+              </svg>
+            </div>
+            <p className="relative mb-0 mt-5 text-lg font-extrabold" style={{ color: ink }}>{narrowed ? 'No plans found for this budget' : 'No plans available just yet'}</p>
+            <p className="relative mx-auto mb-0 mt-2 max-w-md text-sm" style={{ color: muted }}>
+              {narrowed
+                ? 'Try a higher budget or clear your filters. New packages from approved Fajify businesses appear here as they are published.'
+                : liveMode
+                  ? 'We’re preparing experiences from approved Fajify businesses. Check back soon, or let us help you plan something.'
+                  : 'Choose a budget range to discover an experience that fits.'}
+            </p>
+            <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
+              {narrowed && onClearFilters && <button className="rounded-full border px-5 py-3 text-sm font-bold" style={{ background: 'transparent', borderColor: border, color: ink }} onClick={onClearFilters}>Clear filters</button>}
+              {onPlanForMe && <button className="rounded-full px-5 py-3 text-sm font-bold text-white" style={{ background: RED }} onClick={onPlanForMe}>Plan for me</button>}
+            </div>
+          </div>
+        )}
+        {!loading && !error && filtered.map(plan => (
+          <article key={plan.id} className="group flex min-w-0 flex-col overflow-hidden rounded-[20px] border transition-transform duration-200 hover:-translate-y-0.5"
+            style={{ background: surface, borderColor: border }}>
+              {plan.image
+                ? <img src={plan.image} alt="" className="h-44 w-full shrink-0 object-cover" />
+                : <div className="relative grid h-40 w-full shrink-0 place-items-center overflow-hidden" aria-hidden="true" style={{ background: dark ? 'linear-gradient(130deg,#291817,#3A2827 55%,#242020)' : 'linear-gradient(130deg,#FFF1F0,#FFE0DE 55%,#F5E9E8)' }}>
+                    <span className="absolute -right-5 -top-12 h-36 w-36 rounded-full border opacity-40" style={{ borderColor: dark ? '#FF807A' : '#C82924' }} />
+                    <span className="absolute -bottom-16 -left-7 h-40 w-40 rounded-full border opacity-30" style={{ borderColor: dark ? '#FF807A' : '#C82924' }} />
+                    <span className="relative rounded-full border px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em]" style={{ background: dark ? '#1C1C1Caa' : '#ffffffb3', borderColor: dark ? '#583331' : '#FFD0CD', color: dark ? '#FF807A' : '#C82924' }}>{plan.category}</span>
+                  </div>}
+              <div className="flex min-h-[220px] flex-1 flex-col p-4">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <h2 className="m-0 text-base font-extrabold leading-snug" style={{ color: ink, fontSize: 16, fontWeight: 800, margin: 0 }}>{plan.name}</h2>
+                  <span className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold" style={{ background: dark ? '#292929' : '#F4F4F4', color: muted }}>{plan.category}</span>
+                </div>
+                {plan.businessName && <p className="m-0 text-xs font-semibold" style={{ color: muted }}>{plan.businessName}{plan.location ? ` · ${plan.location}` : ''}</p>}
+                <div className="mb-4 mt-3 flex flex-1 flex-col gap-1">
                   {plan.inclusions.map(inc => (
-                    <p key={inc} className="flex items-start gap-1.5 text-[12px] leading-snug" style={{ color: muted }}>
-                      <span className="shrink-0">·</span><span>{inc}</span>
+                    <p key={inc} className="m-0 flex items-start gap-2 text-xs leading-relaxed" style={{ color: muted }}>
+                      <span className="mt-0.5 shrink-0 font-bold" style={{ color: RED }}>✓</span><span>{inc}</span>
                     </p>
                   ))}
                 </div>
-                <div className="flex items-center gap-2 mb-2.5">
-                  <select
-                    value={guests[plan.id] ?? '2 people'}
-                    onChange={e => setGuests(g => ({ ...g, [plan.id]: e.target.value }))}
-                    className="rounded-lg border px-2 py-1.5 text-[11px] font-semibold outline-none"
-                    style={{ background: bg, borderColor: border, color: ink, maxWidth: 88 }}>
-                    {PEOPLE_OPTIONS.map(o => <option key={o}>{o}</option>)}
-                  </select>
-                  <span className="text-[15px] font-black" style={{ color: RED }}>
-                    {fmt(plan.price)}
-                  </span>
+                <div className="mb-3 flex items-end justify-between gap-2 border-t pt-3" style={{ borderColor: border }}>
+                  {liveMode
+                    ? <span className="text-xs" style={{ color: muted }}>{plan.minPeople ?? 1}–{plan.maxPeople} guests</span>
+                    : <select
+                        aria-label={`Guests for ${plan.name}`}
+                        value={guests[plan.id] ?? '2 people'}
+                        onChange={e => setGuests(g => ({ ...g, [plan.id]: e.target.value }))}
+                        className="rounded-lg border px-2 py-1.5 text-[11px] font-semibold outline-none"
+                        style={{ background: bg, borderColor: border, color: ink, maxWidth: 100 }}>
+                        {PEOPLE_OPTIONS.map(o => <option key={o}>{o}</option>)}
+                      </select>}
+                  <span className="text-base font-extrabold" style={{ color: RED }}>{fmt(plan.price,plan.currency)}</span>
                 </div>
                 <button
-                  onClick={() => { setPendingPlanId(plan.id); setCalOpen(true) }}
-                  className="w-full rounded-full py-2 text-[13px] font-black text-white"
+                  onClick={() => {if(onBook){onBook(plan.id);return;}setPendingPlanId(plan.id);setCalOpen(true)}}
+                  className="w-full rounded-full py-3 text-sm font-extrabold text-white transition-colors hover:bg-[#D92D27] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FA3F38]"
                   style={{ background: RED }}>
-                  Book Now
+                  {liveMode ? 'View details' : 'Book Now'}
                 </button>
               </div>
-            </div>
-          </div>
+          </article>
         ))}
-      </div>
+        </div>
+      </section>
 
-      <CalendarSheet
+      {pagination}
+      {!onBook && <CalendarSheet
         open={calOpen}
         onClose={() => { setCalOpen(false); setPendingPlanId(null) }}
         onConfirm={(date, time) => {
@@ -178,7 +303,7 @@ export default function BrowsePlansScreen({ navigate, livePlans, onBook }: Props
           setPendingPlanId(null)
         }}
         venueTimeType="default"
-      />
+      />}
       <BottomNav active="home" navigate={navigate} />
     </div>
   )

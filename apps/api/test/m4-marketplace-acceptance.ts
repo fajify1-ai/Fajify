@@ -57,6 +57,8 @@ test('Browse Plans obeys currency, guest/date/budget filters and quotes exact ad
  await market.configurePackage(identity(owner),business,branch,pack,{pricingModel:'per_guest',minGuests:2,maxGuests:4,addOns:[{catalogueId:product,maxQuantity:2}]});
  const startsAt=new Date(Date.now()+86400000).toISOString();
  await merchant.createSlot(owner,business,branch,{catalogueId:pack,startsAt,endsAt:new Date(Date.now()+90000000).toISOString(),capacity:4});
+ const anyGuestQuery=Object.assign(new PlanQuery(),{maxBudgetMinor:'20000',branchId:branch});
+ assert.ok((await market.plans(anyGuestQuery)).items.some(v=>v.id===pack&&v.groupTotalMinor==='20000'));
  const query=Object.assign(new PlanQuery(),{guests:2,minBudgetMinor:'20000',maxBudgetMinor:'20000',startsAt,branchId:branch});
  assert.ok((await market.plans(query)).items.some(v=>v.id===pack&&v.groupTotalMinor==='20000'));
  assert.ok(!(await market.plans({...query,maxBudgetMinor:'19999',minBudgetMinor:'0'})).items.some(v=>v.id===pack));

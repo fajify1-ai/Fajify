@@ -3,7 +3,10 @@ import BottomNav from '../components/BottomNav'
 import { IconGlyph, type IconName } from '../components/Icons'
 import { useDarkMode } from '../store/darkMode'
 
-type Props = { navigate: NavigateFn }
+type Props = {
+ navigate: NavigateFn
+ onSupport?:()=>void
+}
 
 const topics = [
   { icon: 'calendar', title: 'How to make a booking', desc: 'Step-by-step guide to reserving tables, events and venues' },
@@ -14,7 +17,7 @@ const topics = [
   { icon: 'message', title: 'Other Questions', desc: 'Browse all FAQs or ask us anything' },
 ]
 
-export default function HelpScreen({ navigate }: Props) {
+export default function HelpScreen({ navigate,onSupport }: Props) {
   const { dark } = useDarkMode()
 
   const bg      = dark ? '#0F0F0F' : '#F8F8F8'
@@ -47,7 +50,7 @@ export default function HelpScreen({ navigate }: Props) {
 
         <div className="grid grid-cols-1 gap-3 mb-6 md:grid-cols-2">
           {topics.map(t => (
-            <button key={t.title} style={{ background: surface, borderRadius: 14, border: `1px solid ${border}`, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', textAlign: 'left', width: '100%' }}>
+            <button key={t.title} onClick={onSupport} style={{ background: surface, borderRadius: 14, border: `1px solid ${border}`, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', textAlign: 'left', width: '100%' }}>
               <div style={{ width: 42, height: 42, borderRadius: 12, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <IconGlyph name={t.icon as IconName} size={20} color="#FA3F38" />
               </div>
@@ -64,7 +67,7 @@ export default function HelpScreen({ navigate }: Props) {
           <span style={{ fontSize: 32 }}>💬</span>
           <p style={{ margin: '10px 0 6px', fontSize: 16, fontWeight: 700 }}>Still need help?</p>
           <p style={{ margin: '0 0 16px', fontSize: 13, opacity: 0.9 }}>Chat with our support team — we typically reply in under 2 minutes.</p>
-          <button style={{ padding: '11px 28px', borderRadius: 999, background: '#fff', color: '#FA3F38', fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer' }}>
+          <button onClick={onSupport} style={{ padding: '11px 28px', borderRadius: 999, background: '#fff', color: '#FA3F38', fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer' }}>
             Chat with Support
           </button>
         </div>

@@ -59,7 +59,54 @@ test('Customer invitation return targets preserve only local validated one-use t
  const {customerReturnTo}=await import('../unified/return-to');
  const target='/customer#inviteFriends/'+'ab'.repeat(32);
  assert.equal(customerReturnTo(target),target);
- for(const value of ['https://evil.example','//evil.example','/business/dashboard','/customer#inviteFriends/not-a-token',null,['/customer']])assert.equal(customerReturnTo(value),'/customer');
+ for(const value of ['https://evil.example','//evil.example','/business/dashboard','/customer#inviteFriends/not-a-token',null,['/customer']])assert.equal(customerReturnTo(value),'/customer#home');
+});
+
+test('Customer profile keeps its themed shell while loading and uses supplied live activity counts',async()=>{
+ const previousWindow=globalThis.window,previousDocument=globalThis.document;
+ Object.assign(globalThis,{
+  window:{matchMedia:()=>({matches:true,addEventListener(){}})},
+  document:{documentElement:{setAttribute(){}}},
+ });
+ try{
+  const {default:ProfileScreen}=await import('../webapp/screens/ProfileScreen');
+  const common={navigate(){},onLogout(){},activity:{bookings:12,bookingsMore:false,events:5,eventsMore:false,reviews:8,reviewsMore:false,loading:false}};
+  const loading=renderToStaticMarkup(React.createElement(ProfileScreen,{...common,loading:true}));
+  assert.match(loading,/Loading your profile/);assert.match(loading,/Account activity/);assert.doesNotMatch(loading,/class="connection-state"/);
+  const loaded=renderToStaticMarkup(React.createElement(ProfileScreen,{...common,profile:{displayName:'Alex Johnson',email:'alex@example.test'}}));
+  assert.match(loaded,/Alex Johnson/);assert.match(loaded,/alex@example\.test/);assert.match(loaded,/>12</);assert.match(loaded,/>5</);assert.match(loaded,/>8</);assert.doesNotMatch(loaded,/>3</);
+ }finally{
+  if(previousWindow===undefined)delete (globalThis as {window?:Window}).window;else Object.assign(globalThis,{window:previousWindow});
+  if(previousDocument===undefined)delete (globalThis as {document?:Document}).document;else Object.assign(globalThis,{document:previousDocument});
+ }
+});
+
+test('Browse Plans keeps loading, errors, empty results, filters, and published plans distinct',async()=>{
+ const previousWindow=globalThis.window,previousDocument=globalThis.document;
+ Object.assign(globalThis,{
+  window:{matchMedia:()=>({matches:false,addEventListener(){}})},
+  document:{documentElement:{setAttribute(){}}},
+ });
+ try{
+  const {default:BrowsePlansScreen}=await import('../webapp/screens/BrowsePlansScreen');
+  const loading=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],loading:true}));
+  assert.match(loading,/Loading available plans/);assert.doesNotMatch(loading,/No plans available yet/);
+  assert.match(loading,/animate-pulse/);
+  const failed=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],error:'Plans are temporarily unavailable.',onRetry(){}}));
+  assert.match(failed,/We couldn’t load plans/);assert.match(failed,/Plans are temporarily unavailable/);assert.doesNotMatch(failed,/No plans available just yet/);
+  const empty=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],activeBudget:'All Plans'}));
+  assert.match(empty,/No plans available just yet/);assert.match(empty,/approved Fajify businesses/);
+  const filtered=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[{id:'package-1',name:'Published package',image:'',inclusions:['Included service'],price:120000,currency:'NGN',minPeople:2,maxPeople:4,category:'package'}],activeBudget:'Under ₦100k',hasAppliedFilters:true,onClearFilters(){},onPlanForMe(){}}));
+  assert.match(filtered,/No plans found for this budget/);assert.match(filtered,/Clear filters/);assert.match(filtered,/Plan for me/);assert.doesNotMatch(filtered,/No plans available just yet/);
+  const available=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[{id:'package-1',name:'Published package',image:'',inclusions:['Included service'],price:120000,currency:'NGN',minPeople:2,maxPeople:4,category:'package'}],activeBudget:'All Plans',onBook(){}}));
+  assert.match(available,/Published package/);assert.match(available,/View details/);assert.match(available,/2–4 guests/);assert.doesNotMatch(available,/\/reference\//);
+  const filters=renderToStaticMarkup(React.createElement(BrowsePlansScreen,{navigate(){},livePlans:[],activeBudget:'All Plans',filters:React.createElement('div',{'data-filter-panel':true},'More filters')}));
+  assert.ok(filters.indexOf('Browse Plans')<filters.indexOf('data-filter-panel'),'filters must be below the page header');
+  assert.doesNotMatch(filters,/Plan budget, guests &amp; date/);
+ }finally{
+  if(previousWindow===undefined)delete (globalThis as {window?:Window}).window;else Object.assign(globalThis,{window:previousWindow});
+  if(previousDocument===undefined)delete (globalThis as {document?:Document}).document;else Object.assign(globalThis,{document:previousDocument});
+ }
 });
 
 test('connected original checkout excludes sample bank/card and ride workflows without fabricating a ticket',async()=>{

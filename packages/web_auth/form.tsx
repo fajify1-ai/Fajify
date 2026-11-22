@@ -1,7 +1,7 @@
 "use client";
 import {useState,useEffect,type FormEvent} from 'react';
 import {authClient,authPost} from './client';
-export function AuthForm({mode,initialSecondFactor=false,returnTo='/dashboard'}:{mode:'login'|'register'|'recover'|'reset'|'phone'|'phone-reset';initialSecondFactor?:boolean;returnTo?:'/dashboard'|'/customer'|`/customer#inviteFriends/${string}`|'/business/dashboard'|'/business/dashboard#onboarding'}){
+export function AuthForm({mode,initialSecondFactor=false,returnTo='/dashboard'}:{mode:'login'|'register'|'recover'|'reset'|'phone'|'phone-reset';initialSecondFactor?:boolean;returnTo?:'/dashboard'|'/customer'|'/customer#home'|`/customer#inviteFriends/${string}`|'/business/dashboard'|'/business/dashboard#onboarding'}){
  const [resetToken,setResetToken]=useState('');
  const [termsAccepted,setTermsAccepted]=useState(false);
  useEffect(()=>{if(mode==='reset'){const url=new URL(window.location.href);setResetToken(url.searchParams.get('token')??'');url.searchParams.delete('token');window.history.replaceState(null,'',url.pathname+url.search+url.hash);}},[mode]);

@@ -1,4 +1,3 @@
-import { Button } from '../../components/ui/button'
 import { upcomingEvents } from '../data'
 import { useState, useEffect, useRef } from 'react'
 import type { NavigateFn } from '../App'
@@ -7,7 +6,39 @@ import { IconBell, IconSearch, IconFilter, IconHeart, IconStar, IconMapPin } fro
 import { useSaved } from '../store/saved'
 import { useDarkMode } from '../store/darkMode'
 
-type Props = { navigate: NavigateFn; onVendorSwitch?: () => void; initialSearch?: string; venues?: typeof allVenues; live?: boolean; categoryOptions?: string[]; onQuery?: (query: string, category: string) => void }
+type HomeVenue = {
+  id: string
+  name: string
+  cat: string
+  location: string
+  tag: string
+  rating: number
+  reviewCount?: number
+  summary?: string
+  price?: string
+  open: boolean
+  image?: string
+}
+
+type CategoryOption = string | { id: string; name: string }
+
+type Props = {
+  navigate: NavigateFn
+  onVendorSwitch?: () => void
+  initialSearch?: string
+  initialCategory?: string
+  venues?: HomeVenue[]
+  live?: boolean
+  categoryOptions?: CategoryOption[]
+  searchFilters?: Record<string, string>
+  profileName?: string
+  profileError?: string
+  loading?: boolean
+  error?: string
+  onRetry?: () => void
+  onQuery?: (query: string, category: string) => void
+  onFilters?: (filters: Record<string, string>) => void
+}
 
 const RED = '#FA3F38'
 
@@ -85,7 +116,7 @@ const billboardItems = [
 const categories = ['All', 'Restaurant', 'Beach', 'Cinema', 'Park', 'Bar', 'Club', 'Outdoor']
 
 // ── Venues (vertical list, filterable) ───────────────────────────────────────
-const allVenues = [
+const allVenues: HomeVenue[] = [
   { id: 'v1', name: 'Shiro Lagos', cat: 'Restaurant', location: 'Victoria Island', tag: 'Fine Dining', rating: 4.8, price: '₦25,000+', open: true, image: '/reference/ec7238b7cf1876f2.jpg' },
   { id: 'v2', name: 'Landmark Beach', cat: 'Beach', location: 'Lekki', tag: 'Beach', rating: 4.7, price: '₦5,000+', open: true, image: '/reference/d2809f966c87657b.jpg' },
   { id: 'v3', name: 'Filmhouse Cinemas', cat: 'Cinema', location: 'Lekki Phase 1', tag: 'Cinema', rating: 4.6, price: '₦3,500+', open: true, image: '/reference/eb233bf152443ce4.jpg' },
@@ -288,12 +319,19 @@ function HeroBanner({ navigate }: { navigate: NavigateFn }) {
 }
 
 // ── Main screen ───────────────────────────────────────────────────────────────
-export default function HomeScreen({ navigate, onVendorSwitch, initialSearch = '', venues, live = false, categoryOptions, onQuery }: Props) {
+export default function HomeScreen({ navigate, onVendorSwitch, initialSearch = '', initialCategory = 'All', venues, live = false, categoryOptions, searchFilters = {}, profileName, profileError, loading = false, error, onRetry, onQuery, onFilters }: Props) {
   const { dark } = useDarkMode()
-  const [activeCategory, setActiveCategory] = useState('All')
+  const [activeCategory, setActiveCategory] = useState(initialCategory)
   const [search, setSearch] = useState(initialSearch)
   const [filterOpen, setFilterOpen] = useState(false)
   const [fabOpen, setFabOpen] = useState(false)
+  const [location, setLocation] = useState(searchFilters.location ?? '')
+  const [coordinates, setCoordinates] = useState({
+    latitude: searchFilters.latitude ?? '',
+    longitude: searchFilters.longitude ?? '',
+  })
+  const [radiusKm, setRadiusKm] = useState(searchFilters.radiusKm ?? '10')
+  const [filterError, setFilterError] = useState('')
 
   const bg = dark ? '#0F0F0F' : '#F8F8F8'
   const surface = dark ? '#1C1C1C' : '#FFFFFF'
@@ -307,26 +345,79 @@ export default function HomeScreen({ navigate, onVendorSwitch, initialSearch = '
     const matchSearch = !search || v.name.toLowerCase().includes(search.toLowerCase()) || v.location.toLowerCase().includes(search.toLowerCase())
     return matchCat && matchSearch
   })
+  const hasActiveFilters = Boolean(search.trim() || activeCategory !== 'All' || Object.values(searchFilters).some(Boolean))
+  const options = (categoryOptions ?? categories.map(name => ({ id: name, name }))).map(option =>
+    typeof option === 'string' ? { id: option, name: option } : option
+  )
+  const displayName = profileName?.trim()
+  const firstName = displayName?.split(/\s+/)[0]
+  const greeting = new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 18 ? 'Good afternoon' : 'Good evening'
+
+  function applyFilters() {
+    if (Boolean(coordinates.latitude) !== Boolean(coordinates.longitude)) {
+      setFilterError('Enter both latitude and longitude, or leave both blank.')
+      return
+    }
+    if (coordinates.latitude && coordinates.longitude) {
+      const latitude = Number(coordinates.latitude)
+      const longitude = Number(coordinates.longitude)
+      if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+        setFilterError('Enter a valid latitude and longitude.')
+        return
+      }
+      if (radiusKm && (!Number.isInteger(Number(radiusKm)) || Number(radiusKm) < 1 || Number(radiusKm) > 100)) {
+        setFilterError('Search radius must be between 1 and 100 km.')
+        return
+      }
+    }
+
+    const filters = {
+      ...(location.trim() ? { location: location.trim() } : {}),
+      ...(coordinates.latitude ? { latitude: coordinates.latitude, longitude: coordinates.longitude } : {}),
+      ...(coordinates.latitude && radiusKm ? { radiusKm } : {}),
+    }
+
+    setFilterError('')
+    onFilters?.(filters)
+    onQuery?.(search, activeCategory)
+    setFilterOpen(false)
+  }
+
+  function clearFilters() {
+    setSearch('')
+    setLocation('')
+    setCoordinates({ latitude: '', longitude: '' })
+    setRadiusKm('10')
+    setActiveCategory('All')
+    setFilterError('')
+    onFilters?.({})
+    onQuery?.('', 'All')
+  }
 
   return (
-    <main className="min-h-screen w-full pb-36 font-[family-name:var(--font-ui)] md:pb-16 md:pl-24" style={{ background: bg }}>
+    <main data-original-screen={live ? true : undefined} className="min-h-screen w-full pb-36 font-[family-name:var(--font-ui)] md:pb-16 md:pl-24" style={{ background: bg }}>
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-10 px-5 pt-14 pb-4 md:px-10 md:pt-7 lg:px-16" style={{ background: bg }}>
         <div className="flex w-full items-center gap-3">
-          <img className="h-12 w-12 rounded-full object-cover ring-2 ring-white shadow-sm"
-            src="/reference/c2a1304c9cfc6e70.jpg" alt="Fajify discovery" />
+          <div
+            aria-hidden="true"
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-full text-base font-black text-white shadow-sm ring-2 ring-white/10"
+            style={{ background: 'linear-gradient(135deg, #FA3F38, #C82924)' }}
+          >
+            {firstName?.[0]?.toUpperCase() ?? 'F'}
+          </div>
           <div className="flex-1">
             <p className="m-0 text-[20px] font-bold tracking-[-0.035em]" style={{ color: ink }}>
-              {live ? 'Discover Fajify' : 'Good morning'} <span style={{ color: RED }}>✦</span>
+              {live ? `${greeting}${firstName ? `, ${firstName}` : ''}` : 'Good morning'} <span style={{ color: RED }}>✦</span>
             </p>
-            <p className="m-0.5 text-[14px] font-medium" style={{ color: muted }}>{live ? 'Explore places and experiences' : 'Alex Johnson'}</p>
+            <p className="m-0.5 text-[14px] font-medium" style={{ color: muted }}>{live ? 'Find a place for your next moment' : 'Alex Johnson'}</p>
+            {live && profileError ? <p role="status" className="m-0.5 text-xs" style={{ color: muted }}>Your profile name could not be loaded.</p> : null}
           </div>
           <button onClick={() => navigate({ name: 'notifications' })}
             className="relative grid h-11 w-11 place-items-center rounded-full border shadow-sm"
             style={{ background: surface, borderColor: border }}>
             <IconBell size={20} color={ink} />
-            <i className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full ring-2" style={{ background: RED }} />
           </button>
         </div>
       </header>
@@ -350,14 +441,14 @@ export default function HomeScreen({ navigate, onVendorSwitch, initialSearch = '
       </section>
 
       {/* ── Category filter pills ── */}
-      <div className="mt-3 mb-8 flex w-full gap-2.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:flex-wrap md:overflow-visible md:px-10 lg:px-16">
-        {(categoryOptions ?? categories).map(cat => (
-          <button key={cat} onClick={() => {setActiveCategory(cat);onQuery?.(search,cat)}}
+      <div className="mt-3 mb-8 flex w-full gap-2.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:flex-wrap md:overflow-visible md:px-10 lg:px-16" role="group" aria-label="Filter by experience type">
+        {options.map(({ id, name }) => (
+          <button key={id} aria-pressed={activeCategory === id} onClick={() => {setActiveCategory(id);onQuery?.(search,id)}}
             className="shrink-0 rounded-full px-4 py-2 text-[13px] font-semibold border-2 transition-all"
-            style={activeCategory === cat
+            style={activeCategory === id
               ? { borderColor: RED, background: RED, color: '#fff' }
               : { borderColor: 'transparent', background: surface, color: muted }}>
-            {cat}
+            {id === 'All' ? 'All' : name.charAt(0).toUpperCase() + name.slice(1)}
           </button>
         ))}
       </div>
@@ -365,77 +456,99 @@ export default function HomeScreen({ navigate, onVendorSwitch, initialSearch = '
       <div className="mb-5 flex w-full items-end justify-between px-5 md:px-10 lg:px-16">
         <div>
           <h1 className="text-[24px] font-black tracking-[-0.04em] md:text-[30px]" style={{ color: ink }}>Recommended for you</h1>
-          <p className="mt-1 text-[13px]" style={{ color: muted }}>{live?'Published places and experiences available on Fajify.':'Places matching what people are booking around Lagos.'}</p>
+          <p className="mt-1 text-[13px]" style={{ color: muted }}>{live?'Places and experiences published by our local businesses.':'Places matching what people are booking around Lagos.'}</p>
         </div>
-        <span className="hidden text-[13px] font-semibold md:block" style={{ color: muted }}>{filteredVenues.length} places</span>
+        {!loading && !error ? <span className="hidden text-[13px] font-semibold md:block" style={{ color: muted }}>{filteredVenues.length} {filteredVenues.length === 1 ? 'place' : 'places'}</span> : null}
       </div>
 
-      <section className="px-5 mb-8 md:px-10 lg:px-16" aria-label="Events">
+      {!live ? <section className="px-5 mb-8 md:px-10 lg:px-16" aria-label="Events">
         <h2 className="text-xl font-bold mb-4">Events and hangouts</h2>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {(live ? [] : upcomingEvents).filter(event => !search || `${event.title} ${event.restaurantName}`.toLowerCase().includes(search.toLowerCase())).map(event => (
+          {upcomingEvents.filter(event => !search || `${event.title} ${event.restaurantName}`.toLowerCase().includes(search.toLowerCase())).map(event => (
             <button key={event.id} onClick={() => navigate({ name: 'eventDetail', id: event.id })} className="rounded-2xl overflow-hidden bg-white text-left">
               <img src={event.image} alt={event.title} className="w-full h-36 object-cover" />
               <div className="p-4"><h3 className="font-bold">{event.title}</h3><p className="text-sm mt-1">{event.date}</p><p className="text-sm mt-1">{event.ticketPrice ? `₦${event.ticketPrice.toLocaleString('en-NG')}` : 'Free'}</p></div>
             </button>
           ))}
         </div>
-      </section>
+      </section> : null}
 
       {/* ── Venue grid ── */}
-      <section className="grid w-full grid-cols-1 gap-5 px-5 md:grid-cols-2 md:px-10 xl:grid-cols-3 2xl:grid-cols-4 lg:px-16">
-        {filteredVenues.length === 0 ? (
-          <div className="py-16 text-center md:col-span-2 xl:col-span-3">
-            <p className="text-[16px] font-bold" style={{ color: ink }}>No results</p>
-            <p className="text-[13px] mt-1" style={{ color: muted }}>Try a different category or search term</p>
+      <section className="grid w-full grid-cols-1 gap-5 px-5 sm:grid-cols-2 lg:grid-cols-3 lg:px-10 xl:grid-cols-4 xl:px-16" aria-label="Recommended places">
+        {loading ? (
+          <div className="col-span-full rounded-3xl border p-10 text-center" role="status" style={{ background: surface, borderColor: border, color: muted }}>
+            Finding places for you…
+          </div>
+        ) : error ? (
+          <div className="col-span-full rounded-3xl border p-8 text-center" role="alert" style={{ background: surface, borderColor: border }}>
+            <p className="font-bold" style={{ color: ink }}>We couldn’t load places right now.</p>
+            <p className="mt-2 text-sm" style={{ color: muted }}>Please try again in a moment.</p>
+            {onRetry ? <button className="mt-5 rounded-full px-5 py-2.5 text-sm font-bold text-white" style={{ background: RED }} onClick={onRetry}>Try again</button> : null}
+          </div>
+        ) : filteredVenues.length === 0 ? (
+          <div className="col-span-full rounded-3xl border px-6 py-12 text-center sm:px-10" style={{ background: surface, borderColor: border }}>
+            <div aria-hidden="true" className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-2xl text-2xl font-black text-white" style={{ background: 'linear-gradient(135deg, #FA3F38, #C82924)' }}>f.</div>
+            <h2 className="text-lg font-extrabold" style={{ color: ink }}>
+              {hasActiveFilters ? 'No places match that search' : 'New experiences are on the way'}
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6" style={{ color: muted }}>
+              {hasActiveFilters
+                ? 'Try another search or clear your filters to see all published places.'
+                : 'We’re preparing the first set of places for Fajify. Check back soon, or start planning something you have in mind.'}
+            </p>
+            {hasActiveFilters ? (
+              <button onClick={clearFilters} className="mt-6 rounded-full px-5 py-2.5 text-sm font-bold text-white" style={{ background: RED }}>Clear search and filters</button>
+            ) : (
+              <button onClick={() => navigate({ name: 'planForMe' })} className="mt-6 rounded-full px-5 py-2.5 text-sm font-bold text-white" style={{ background: RED }}>Plan something</button>
+            )}
           </div>
         ) : filteredVenues.map(venue => {
+          const destination = venue.tag === 'Delivery'
+            ? { name: 'deliveryRestaurant' as const, id: venue.id }
+            : { name: 'restaurant' as const, id: venue.id }
+
           return (
-          <article key={venue.id}
-            onClick={() => venue.tag === 'Delivery'
-              ? navigate({ name: 'deliveryRestaurant', id: venue.id })
-              : navigate({ name: 'restaurant', id: venue.id })
-            }
-            className="overflow-hidden rounded-[20px] cursor-pointer shadow-[0_4px_20px_rgba(30,15,15,.07)]"
-            style={{ background: surface }}>
+            <article key={venue.id} className="group overflow-hidden rounded-[20px] border shadow-[0_8px_24px_rgba(0,0,0,.12)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(0,0,0,.18)]" style={{ background: surface, borderColor: border }}>
+              <div className="relative">
+                {venue.image ? (
+                  <img src={venue.image} alt="" className="h-[156px] w-full object-cover md:h-[168px]" />
+                ) : (
+                  <div aria-hidden="true" className="relative grid h-[156px] place-items-center overflow-hidden md:h-[168px]" style={{ background: 'linear-gradient(135deg, #291817, #522923 55%, #302018)' }}>
+                    <span className="absolute -right-4 -top-14 text-[180px] font-black leading-none text-white/[0.04]">f.</span>
+                    <span className="grid h-14 w-14 place-items-center rounded-full border border-white/20 bg-white/10 text-xl font-black text-white/90">{venue.name.charAt(0).toUpperCase()}</span>
+                  </div>
+                )}
+                {!live && <div className="absolute right-3 top-3"><SaveBtn id={venue.id} /></div>}
+                <span className="absolute bottom-3 left-3 max-w-[75%] truncate rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold text-[#333]">{venue.tag}</span>
+                {!live ? (
+                  venue.open
+                    ? <span className="absolute bottom-3 right-3 rounded-full bg-[#22b969] px-3 py-1 text-[10px] font-bold text-white">Open</span>
+                    : <span className="absolute bottom-3 right-3 rounded-full bg-[#666] px-3 py-1 text-[10px] font-bold text-white">Closed</span>
+                ) : null}
+              </div>
 
-            {/* Hero image */}
-            <div className="relative">
-              <img src={venue.image} alt={venue.name} className="h-[150px] w-full object-cover md:h-[190px]" />
-              {!live && <div className="absolute top-2.5 right-2.5"><SaveBtn id={venue.id} /></div>}
-              <span className="absolute bottom-2.5 left-2.5 rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold text-[#333]">{venue.tag}</span>
-              {live ? <span className="absolute bottom-2.5 right-2.5 rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] text-[#333]">View hours</span> : venue.open
-                ? <span className="absolute bottom-2.5 right-2.5 rounded-full bg-[#22b969] px-2.5 py-0.5 text-[10px] font-bold text-white">Open</span>
-                : <span className="absolute bottom-2.5 right-2.5 rounded-full bg-[#888] px-2.5 py-0.5 text-[10px] font-bold text-white">Closed</span>}
-            </div>
-
-            {/* Body */}
-            <div className="px-4 pt-4 pb-5">
-              {/* Name + price */}
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div className="min-w-0">
-                  <h3 className="text-[16px] font-bold leading-tight truncate" style={{ color: ink }}>{venue.name}</h3>
-                  <p className="mt-0.5 flex items-center gap-1 text-[11px]" style={{ color: muted }}>
-                    <IconMapPin size={11} color={muted} />{venue.location}
-                  </p>
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <button onClick={() => navigate(destination)} className="max-w-full truncate text-left text-[15px] font-extrabold leading-tight hover:text-[#FA3F38]" style={{ color: ink }}>{venue.name}</button>
+                    <p className="mt-1 flex items-center gap-1 text-[11px]" style={{ color: muted }}>
+                      <IconMapPin size={12} color={muted} />{venue.location}
+                    </p>
+                  </div>
+                  {venue.price && !live ? <span className="shrink-0 text-[13px] font-extrabold" style={{ color: RED }}>{venue.price}</span> : null}
                 </div>
-                <span className="text-[14px] font-black shrink-0" style={{ color: RED }}>{venue.price}</span>
+                {venue.summary ? <p className="mt-3 line-clamp-2 text-xs leading-5" style={{ color: muted }}>{venue.summary}</p> : null}
+                <div className="mt-4 flex min-h-9 items-center justify-between gap-2 border-t pt-3" style={{ borderColor: border }}>
+                  {venue.reviewCount && venue.rating > 0 ? (
+                    <span className="flex min-w-0 items-center gap-1 text-[11px] font-bold text-[#D99520]">
+                      <IconStar size={13} color="#D99520" />{venue.rating.toFixed(1)}
+                      <span className="truncate font-medium" style={{ color: muted }}>· {venue.reviewCount} {venue.reviewCount === 1 ? 'review' : 'reviews'}</span>
+                    </span>
+                  ) : <span className="text-[11px] font-medium" style={{ color: muted }}>{live ? 'New on Fajify' : venue.cat}</span>}
+                  <button onClick={() => navigate(destination)} className="shrink-0 rounded-full px-4 py-2 text-[11px] font-bold text-white transition-colors hover:bg-[#E9352F]" style={{ background: RED }}>View place</button>
+                </div>
               </div>
-
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1 text-[12px] font-semibold text-[#D99520]">
-                  <IconStar size={12} color="#D99520" />{venue.rating}
-                  <span className="ml-1 font-medium" style={{ color: muted }}>{venue.cat}</span>
-                </span>
-                <button
-                  onClick={e => { e.stopPropagation(); navigate(venue.tag === 'Delivery' ? { name: 'deliveryRestaurant', id: venue.id } : { name: 'restaurant', id: venue.id }) }}
-                  className="rounded-full px-4 py-2 text-[12px] font-bold text-white"
-                  style={{ background: RED }}>
-                  View place
-                </button>
-              </div>
-            </div>
-          </article>
+            </article>
           )
         })}
       </section>
@@ -445,21 +558,19 @@ export default function HomeScreen({ navigate, onVendorSwitch, initialSearch = '
         <button onClick={() => setFabOpen(false)}
           className="fixed inset-0 z-[80] bg-black/30" />
       )}
-      <div className="customer-fab fixed bottom-[98px] left-1/2 z-[90] w-[360px] max-w-[calc(100%-48px)] -translate-x-1/2 pointer-events-none">
+      <div className="customer-fab pointer-events-none fixed bottom-[98px] right-5 z-[90] w-fit max-w-[calc(100%-32px)] md:bottom-8 md:right-8">
         {fabOpen && (
           <div className="mb-3 flex flex-col items-end gap-3 pr-1">
             <button onClick={() => { setFabOpen(false); navigate({ name: 'planForMe' }) }}
-              className="pointer-events-auto rounded-full px-5 py-3 text-[14px] font-black text-white shadow-[0_8px_24px_rgba(250,63,56,.35)]"
+              className="pointer-events-auto rounded-full px-5 py-3 text-[14px] font-black text-white shadow-[0_8px_24px_rgba(250,63,56,.35)] transition hover:-translate-y-0.5"
               style={{ background: RED }}>
               ✦ Plan For Me
             </button>
             <button onClick={() => { setFabOpen(false); navigate({ name: 'browsePlans' }) }}
-              className="pointer-events-auto rounded-full border px-5 py-3 text-[14px] font-semibold shadow-[0_6px_20px_rgba(0,0,0,.10)]"
+              className="pointer-events-auto rounded-full border px-5 py-3 text-[14px] font-semibold shadow-[0_6px_20px_rgba(0,0,0,.10)] transition hover:-translate-y-0.5"
               style={{ background: surface, borderColor: border, color: ink }}>
               Browse Plans
             </button>
-            <Button variant="outline" onClick={() => { setFabOpen(false); navigate({ name: 'createEvent' }) }} className="pointer-events-auto">Plan a hangout</Button>
-            <Button variant="outline" onClick={() => { setFabOpen(false); navigate({ name: 'transportation', venueId: '', bookingDetails: { venue: 'Your destination', total: '₦0' } }) }} className="pointer-events-auto">Book a ride</Button>
           </div>
         )}
         <button aria-label="Planning actions" aria-expanded={fabOpen} onClick={() => setFabOpen(o => !o)}
@@ -469,7 +580,58 @@ export default function HomeScreen({ navigate, onVendorSwitch, initialSearch = '
         </button>
       </div>
 
-      {filterOpen && live && <section role="dialog" aria-modal="true" aria-label="Filter businesses" className="fixed inset-0 z-[100] grid place-items-center bg-black/40 p-5"><div className="faji-card"><h2>Filter by offering type</h2><select aria-label="Offering type" value={activeCategory} onChange={event=>{setActiveCategory(event.target.value);onQuery?.(search,event.target.value);}}>{(categoryOptions??['All']).map(category=><option key={category}>{category}</option>)}</select><button className="faji-primary" onClick={()=>setFilterOpen(false)}>Apply filters</button></div></section>}
+      {filterOpen && live ? (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4" onMouseDown={event => { if (event.target === event.currentTarget) setFilterOpen(false) }}>
+          <section role="dialog" aria-modal="true" aria-labelledby="home-filter-title" className="max-h-[min(90vh,760px)] w-full max-w-xl overflow-y-auto rounded-3xl border p-6 shadow-2xl sm:p-8" style={{ background: surface, borderColor: border, color: ink }}>
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <h2 id="home-filter-title" className="text-xl font-extrabold">Refine your search</h2>
+                <p className="mt-1 text-sm" style={{ color: muted }}>Choose a type or narrow places by location.</p>
+              </div>
+              <button aria-label="Close filters" onClick={() => setFilterOpen(false)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full border text-xl" style={{ borderColor: border, color: muted }}>×</button>
+            </div>
+            <div className="grid gap-5">
+              <label className="grid gap-2 text-sm font-semibold">Experience type
+                <select aria-label="Experience type" value={activeCategory} onChange={event => setActiveCategory(event.target.value)} className="rounded-xl border px-4 py-3" style={{ background: inputBg, borderColor: border, color: ink }}>
+                  {options.map(option => <option key={option.id} value={option.id}>{option.id === 'All' ? 'All types' : option.name.charAt(0).toUpperCase() + option.name.slice(1)}</option>)}
+                </select>
+              </label>
+              <label className="grid gap-2 text-sm font-semibold">City or area
+                <input value={location} onChange={event => setLocation(event.target.value)} maxLength={120} placeholder="e.g. Victoria Island" className="rounded-xl border px-4 py-3" style={{ background: inputBg, borderColor: border, color: ink }} />
+              </label>
+              <div>
+                <p className="mb-2 text-sm font-semibold">Search near a point <span className="font-normal" style={{ color: muted }}>(optional)</span></p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="grid gap-2 text-xs font-semibold" style={{ color: muted }}>Latitude
+                    <input type="number" step="any" min={-90} max={90} value={coordinates.latitude} onChange={event => setCoordinates(value => ({ ...value, latitude: event.target.value }))} placeholder="6.5244" className="rounded-xl border px-4 py-3 text-sm" style={{ background: inputBg, borderColor: border, color: ink }} />
+                  </label>
+                  <label className="grid gap-2 text-xs font-semibold" style={{ color: muted }}>Longitude
+                    <input type="number" step="any" min={-180} max={180} value={coordinates.longitude} onChange={event => setCoordinates(value => ({ ...value, longitude: event.target.value }))} placeholder="3.3792" className="rounded-xl border px-4 py-3 text-sm" style={{ background: inputBg, borderColor: border, color: ink }} />
+                  </label>
+                </div>
+              </div>
+              {coordinates.latitude && coordinates.longitude ? (
+                <label className="grid gap-2 text-sm font-semibold">Search radius
+                  <input type="number" min={1} max={100} step={1} value={radiusKm} onChange={event => setRadiusKm(event.target.value)} className="rounded-xl border px-4 py-3" style={{ background: inputBg, borderColor: border, color: ink }} />
+                </label>
+              ) : null}
+              <button type="button" onClick={() => {
+                if (!navigator.geolocation) { setFilterError('Location is unavailable. Enter coordinates manually.'); return }
+                navigator.geolocation.getCurrentPosition(
+                  position => { setCoordinates({ latitude: String(position.coords.latitude), longitude: String(position.coords.longitude) }); setFilterError('') },
+                  () => setFilterError('Location permission was denied. Enter coordinates manually.'),
+                  { timeout: 10000 }
+                )
+              }} className="justify-self-start text-sm font-bold" style={{ color: dark ? '#FF807A' : '#C82924' }}>Use my location</button>
+              {filterError ? <p role="alert" className="text-sm" style={{ color: dark ? '#FF8B85' : '#A52520' }}>{filterError}</p> : null}
+              <div className="mt-2 flex flex-col-reverse justify-between gap-3 border-t pt-5 sm:flex-row" style={{ borderColor: border }}>
+                <button onClick={clearFilters} className="rounded-full border px-5 py-3 text-sm font-bold" style={{ borderColor: border, color: ink }}>Clear all</button>
+                <button onClick={applyFilters} className="rounded-full px-6 py-3 text-sm font-bold text-white" style={{ background: RED }}>Show places</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      ) : null}
       {filterOpen && !live && <FilterSheet onClose={() => setFilterOpen(false)} dark={dark} />}
       <BottomNav active="home" navigate={navigate} />
     </main>

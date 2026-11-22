@@ -16,8 +16,11 @@ import Event from './Event';
 import History from './History';
 import Cart,{AddToCart} from './Cart';
 import {Events,Gathering,Invitations} from './Events';
-import {SearchFilters,PlanFilters,PlanQuote,SavedPlanEditor,ReviewHistory} from './Planning';
+import {PlanFilters,PlanQuote,SavedPlanEditor,ReviewHistory} from './Planning';
 import ProfileScreen from '../webapp/screens/ProfileScreen';
+import SettingsScreen from '../webapp/screens/SettingsScreen';
+import HelpScreen from '../webapp/screens/HelpScreen';
+import OnboardingScreen from '../webapp/screens/OnboardingScreen';
 import {authClient} from '@faji/web-auth/client';
 import FajifyLogo from '../webapp/components/FajifyLogo';
 import type { Screen } from '../webapp/App';
@@ -29,11 +32,29 @@ const illustration='/reference/ec7238b7cf1876f2.jpg';
 export default function CustomerApp({initial='landing'}:{initial?:string}) {
  const [view,setView]=useState<View>(()=>{const parts=window.location.hash.slice(1).split('/');return {name:parts[0]||initial,id:parts[1]};});
  useEffect(()=>{const restore=()=>{const [name,id]=window.location.hash.slice(1).split('/');setView({name:name||initial,id});};window.addEventListener('hashchange',restore);restore();return()=>window.removeEventListener('hashchange',restore);},[initial]);
- const [query,setQuery]=useState(''),[category,setCategory]=useState('All'),[searchFilters,setSearchFilters]=useState<Record<string,string>>({}),[planFilters,setPlanFilters]=useState<Record<string,string>>({});
- const categories=useResource<{items:{id:string;name:string}[]}>('discovery/categories');
- const venues=usePages<Schema<'VenuePage'>>('discovery/venues?'+new URLSearchParams({...searchFilters,...(query?{q:query}:{}),...(category==='All'?{}:{category})}));
- const plans=usePages<Schema<'PlanPage'>>('discovery/plans?'+new URLSearchParams(planFilters));
+ const [query,setQuery]=useState(''),[category,setCategory]=useState('All'),[searchFilters,setSearchFilters]=useState<Record<string,string>>({}),[planFilters,setPlanFilters]=useState<Record<string,string>>({maxBudgetMinor:'10000000'}),[activePlanBudget,setActivePlanBudget]=useState('Under ₦100k');
+ const categories=useResource<{items:{id:string;name:string}[]}>(['landing','home'].includes(view.name)?'discovery/categories':null);
+ const venues=usePages<Schema<'VenuePage'>>(['landing','home'].includes(view.name)?'discovery/venues?'+new URLSearchParams({...searchFilters,...(query?{q:query}:{}),...(category==='All'?{}:{category})}):null);
+ const profile=useResource<{displayName:string}>(view.name==='home'?'customer/profile':null);
+ const plans=usePages<Schema<'PlanPage'>>(view.name==='browsePlans'?'discovery/plans?'+new URLSearchParams(planFilters):null);
  const go=(name:string,id?:string)=>{window.scrollTo(0,0);window.location.hash=name+(id?'/'+encodeURIComponent(id):'');setView({name,id});};
+ const choosePlanBudget=(budget:string)=>{
+  setActivePlanBudget(budget);
+  setPlanFilters(previous=>{
+   const next={...previous};
+   delete next.minBudgetMinor;
+   delete next.maxBudgetMinor;
+   const limits:Record<string,string>={'Under ₦50k':'5000000','Under ₦100k':'10000000','Under ₦500k':'50000000','Under ₦1M':'100000000'};
+   if(limits[budget])next.maxBudgetMinor=limits[budget];
+   return next;
+  });
+ };
+ const applyPlanFilters=(filters:Record<string,string>)=>{
+  setPlanFilters(filters);
+  const budget=Object.entries({'Under ₦50k':'5000000','Under ₦100k':'10000000','Under ₦500k':'50000000','Under ₦1M':'100000000'})
+   .find(([,limit])=>filters.maxBudgetMinor===limit&&!filters.minBudgetMinor)?.[0]??'All Plans';
+  setActivePlanBudget(budget);
+ };
  const navigate=(screen:Screen)=>{
   if(['transportation','orderTracking','deliveryRestaurant','deliveryCart'].includes(screen.name)){go('comingSoon');return;}
   if('id' in screen)go(screen.name,screen.id);else if('venueId' in screen)go(screen.name,screen.venueId);else go(screen.name);
@@ -46,16 +67,45 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
   const results=await platform<Schema<'CustomerPlanRecommendationPage'>>(`plans/${saved.id}/recommendations`);
   return results.items.map(item=>({id:item.id,name:item.name,location:answers.location,desc:'Recommended from current availability',people:`${answers.guests} guests`,price:money(item.totalMinor,item.currency),image:illustration,tag:'Best Match'}));
  }
- const liveVenues=(venues.data?.items??[]).map(venue=>({id:venue.id,name:venue.name,cat:'Business',location:venue.city||venue.address||'Location not published',tag:venue.businessName,rating:Number(venue.rating),price:'View prices',open:true,image:illustration}));
- return <div className="connected"><nav className="faji-tabs" aria-label="Customer navigation"><a className="faji-outline" href="/">All experiences</a><button className="faji-outline" onClick={()=>go('landing')}>Homepage</button><button className="faji-outline" onClick={()=>go('home')}>Discover</button><button className="faji-outline" onClick={()=>go('planForMe')}>Plan for Me</button><button className="faji-outline" onClick={()=>go('browsePlans')}>Browse Plans</button><button className="faji-outline" onClick={()=>go('myTickets')}>Bookings & orders</button><button className="faji-outline" onClick={()=>go('profile')}>My account</button><button className="faji-outline" onClick={()=>go('reviewHistory')}>Your reviews</button></nav>
- {view.name==='landing'?<LandingScreen live venues={[]} onExplore={()=>go('home')} onSearch={value=>{setQuery(value);go('home');}} onGetStarted={()=>location.assign('/register')} onSignIn={()=>location.assign('/login')} onBusiness={()=>location.assign('/business')} onRide={()=>go('comingSoon')} onVenue={()=>go('home')} onPlan={()=>go('planForMe')}/>:null}
- {view.name==='home'?<><SearchFilters apply={setSearchFilters}/><State loading={venues.loading} error={venues.error} retry={venues.reload}/><HomeScreen live initialSearch={query} venues={liveVenues} categoryOptions={['All',...(categories.data?.items??[]).map(item=>item.id)]} onQuery={(value,category)=>{setQuery(value);setCategory(category);}} navigate={navigate}/><More resource={venues}/></>:null}
+ const liveVenues=(venues.data?.items??[]).map(venue=>({id:venue.id,name:venue.name,cat:'Experience',location:venue.city||venue.address||'Location not published',tag:venue.businessName,rating:Number(venue.rating),reviewCount:venue.reviewCount,summary:venue.summary,price:'View prices',open:false,image:illustration}));
+ const homeVenues=liveVenues.map(venue=>({...venue,image:''}));
+ return <div className="connected">
+ {view.name==='landing'?<LandingScreen live venues={liveVenues} onExplore={()=>go('home')} onSearch={value=>{setQuery(value);go('home');}} onGetStarted={()=>location.assign('/register')} onSignIn={()=>location.assign('/login')} onBusiness={()=>location.assign('/business')} onRide={()=>go('comingSoon')} onVenue={id=>go('restaurant',id)} onPlan={()=>go('planForMe')}/>:null}
+ {view.name==='home'?<><HomeScreen live initialSearch={query} initialCategory={category} venues={homeVenues} profileName={profile.data?.displayName} profileError={profile.error} loading={venues.loading} error={venues.error} onRetry={venues.reload} searchFilters={searchFilters} onFilters={setSearchFilters} categoryOptions={[{id:'All',name:'All'},...(categories.data?.items??[])]} onQuery={(value,category)=>{setQuery(value);setCategory(category);}} navigate={navigate}/><More resource={venues}/></>:null}
  {view.name==='planForMe'?<PlanForMeScreen navigate={navigate} recommend={recommend} onBook={id=>go('offering',id)}/>:null}
- {view.name==='browsePlans'?<><PlanFilters apply={setPlanFilters}/><State loading={plans.loading} error={plans.error} retry={plans.reload}/><BrowsePlansScreen navigate={navigate} onBook={id=>go('offering',id)} livePlans={(plans.data?.items??[]).map(plan=>({id:plan.id,name:plan.name,image:illustration,inclusions:[plan.description??plan.branchName],price:Number(plan.groupTotalMinor)/100,maxPeople:plan.maxGuests,category:plan.category}))}/><More resource={plans}/></>:null}
+ {view.name==='browsePlans'?<BrowsePlansScreen
+  navigate={navigate}
+  onBook={id=>go('offering',id)}
+  onPlanForMe={()=>go('planForMe')}
+  activeBudget={activePlanBudget}
+  onBudgetChange={choosePlanBudget}
+  hasAppliedFilters={Object.keys(planFilters).length>0}
+  onClearFilters={()=>applyPlanFilters({})}
+  filters={<PlanFilters apply={applyPlanFilters}/>}
+  loading={plans.loading}
+  error={plans.error}
+  onRetry={plans.reload}
+  pagination={<More resource={plans}/>}
+  livePlans={(plans.data?.items??[]).map(plan=>({
+   id:plan.id,
+   name:plan.name,
+   image:'',
+   inclusions:[plan.description??''].filter(Boolean),
+   price:Number(plan.groupTotalMinor)/100,
+   currency:plan.currency,
+   minPeople:plan.minGuests,
+   maxPeople:plan.maxGuests,
+   category:plan.category,
+   businessName:plan.businessName,
+   location:plan.branchName,
+  }))}
+ />:null}
  {view.name==='createEvent'?<Events navigate={navigate} open={go}/>:null}
  {view.name==='gathering'?<Gathering id={view.id??''} navigate={navigate} open={go}/>:null}
  {view.name==='inviteFriends'?<Invitations token={view.id} navigate={navigate} open={go}/>:null}
  {view.name==='globalCart'?<Cart navigate={navigate}/>:null}
+ {view.name==='cart'?<Cart navigate={navigate}/>:null}
+ {view.name==='onboarding'?<OnboardingScreen navigate={navigate}/>:null}
  {view.name==='myTickets'?<History navigate={navigate} payment={hold=><Payment hold={hold}/>} review={resource=><Review resource={resource}/>}/>:null}
  {view.name==='reviewHistory'?<main><h1>Review history</h1><ReviewHistory/></main>:null}
  {view.name==='savedPlans'?<SavedPlans open={id=>go('offering',id)}/>:null}
@@ -67,7 +117,8 @@ export default function CustomerApp({initial='landing'}:{initial?:string}) {
  {view.name==='offers'?<Promotions navigate={navigate}/>:null}
  {view.name==='wishlist'?<Wishlist navigate={navigate} open={id=>go('offering',id)}/>:null}
  {view.name==='notifications'?<Notifications navigate={navigate}/>:null}
- {['settings','help'].includes(view.name)?<Account screen={view.name} open={go}/>:null}
+ {view.name==='settings'?<SettingsScreen navigate={navigate} onPersonalInformation={()=>go('profile')} onSecurity={()=>location.assign('/account-security')}/>:null}
+ {view.name==='help'?<HelpScreen navigate={navigate}/>:null}
  {view.name==='comingSoon'?<ComingSoon onBack={()=>go('home')}/>:null}
  </div>;
 }
@@ -103,10 +154,17 @@ function Offering({id,open}:{id:string;open:(screen:string,id?:string)=>void}){
 }
 function Profile({navigate}:{navigate:(screen:Screen)=>void}){
  const profile=useResource<Schema<'ProfileView'>>('customer/profile');
- const [error,setError]=useState('');
- return <><State loading={profile.loading} error={profile.error||error} retry={profile.reload}/>{profile.data&&<ProfileScreen navigate={navigate} profile={profile.data} onLogout={async()=>{const result=await authClient.signOut();if(result.error){setError('Sign out failed. Please retry.');return;}location.assign('/');}}/>}</>;
+ const session=authClient.useSession();
+ const [logoutError,setLogoutError]=useState('');
+ const bookings=usePages<Schema<'ReservationPage'>>('customer/reservations');
+ const events=usePages<Schema<'WebHostedEvents'>>('customer/events',true);
+ const reviews=usePages<Schema<'PrivateReviewPage'>>('customer/reviews');
+ const retry=()=>{profile.reload();bookings.reload();events.reload();reviews.reload();};
+ const profileError=profile.error||session.error?.message;
+ const profileLoading=profile.loading||session.isPending;
+ return <ProfileScreen navigate={navigate} loading={profileLoading} error={profileError||(!profileLoading&&!profile.data?'Profile information is unavailable.':undefined)} logoutError={logoutError} onRetry={retry} profile={profile.data?{...profile.data,email:session.data?.user?.email}:undefined} activity={{bookings:bookings.error?null:bookings.data?.items.length??null,bookingsMore:bookings.hasMore,events:events.error?null:events.data?.items.length??null,eventsMore:events.hasMore,reviews:reviews.error?null:reviews.data?.items.filter(review=>!review.withdrawn).length??null,reviewsMore:reviews.hasMore,loading:bookings.loading||events.loading||reviews.loading,error:[bookings.error,events.error,reviews.error].filter(Boolean).join(' ')||undefined}} onLogout={async()=>{setLogoutError('');try{const result=await authClient.signOut();if(result.error){setLogoutError('Sign out failed. Please retry.');return;}location.assign('/');}catch{setLogoutError('Sign out failed. Please retry.');}}}/>;
 }
-function Account({screen,open}:{screen:string;open:(name:string,id?:string)=>void}){
+function _Account({screen,open}:{screen:string;open:(name:string,id?:string)=>void}){
  const path=screen==='profile'||screen==='settings'?'customer/profile':screen==='myTickets'?'customer/reservations':screen==='wishlist'?'customer/wishlist':screen==='notifications'?'customer/notifications':screen==='help'?'customer/support':null;
  const profile=useResource<Schema<'ProfileView'>>(screen==='profile'||screen==='settings'?path:null);
  const rows=useResource<{items:Record<string,unknown>[];nextOffset?:number|null}>(screen!=='profile'&&screen!=='settings'?path:null);

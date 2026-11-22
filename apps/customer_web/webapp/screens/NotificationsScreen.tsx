@@ -5,7 +5,7 @@ import { IconGear, IconGlyph, type IconName } from '../components/Icons'
 import { useDarkMode } from '../store/darkMode'
 
 export type NotificationCard={id:string;title:string;body:string;time:string;read:boolean};
-type Props = { navigate: NavigateFn; liveItems?: NotificationCard[]; onRead?:(id:string)=>void; status?:ReactNode; pagination?:ReactNode }
+type Props = { navigate: NavigateFn; liveItems?: NotificationCard[]; loading?:boolean; error?:string; onRetry?:()=>void; onRead?:(id:string)=>void; pagination?:ReactNode }
 
 const notifications = {
   Today: [
@@ -24,14 +24,17 @@ const notifications = {
   ],
 }
 
-export default function NotificationsScreen({ navigate, liveItems, onRead, status, pagination }: Props) {
+export default function NotificationsScreen({ navigate, liveItems, loading=false, error, onRetry, onRead, pagination }: Props) {
   const { dark } = useDarkMode()
 
   const bg      = dark ? '#0F0F0F' : '#F8F8F8'
   const surface = dark ? '#1C1C1C' : '#FFFFFF'
   const ink     = dark ? '#F0F0F0' : '#1F1F1F'
-  const muted   = liveItems!==undefined ? (dark ? '#AAA' : '#666') : (dark ? '#888' : '#777477')
+  const muted   = dark ? '#AAA' : '#666'
   const border  = dark ? '#2A2A2A' : '#E8E8E8'
+  const liveMode = liveItems !== undefined
+  const items = liveItems ?? []
+  const hasLiveContent = liveMode && !loading && !error && items.length > 0
 
   return (
     <div className="min-h-screen w-full pb-24 md:pl-24" style={{ background: bg, fontFamily: "'Montserrat:Regular', sans-serif" }}>
@@ -50,8 +53,20 @@ export default function NotificationsScreen({ navigate, liveItems, onRead, statu
       </div>
 
       <div className="w-full px-5 pb-28 pt-6 md:px-10 lg:px-16">
-        {status}
-        {Object.entries(liveItems===undefined?notifications:{'Your notifications':liveItems.map(item=>({icon:'ticket',color:'#FA3F38',bg:'#FFF2F1',darkBg:'#2A1010',...item}))}).map(([period, items]) => (
+        {loading && <div className="rounded-2xl border p-5 text-sm" role="status" aria-live="polite" style={{ background: surface, borderColor: border, color: muted }}>Loading your notifications…</div>}
+        {!loading && error && <div className="rounded-2xl border p-5" role="alert" style={{ background: surface, borderColor: border, color: ink }}>
+          <p className="m-0 text-sm">{error}</p>
+          {onRetry && <button className="faji-outline mt-4" onClick={onRetry}>Try again</button>}
+          <a className="faji-outline ml-2 mt-4 inline-block" href="/login">Sign in</a>
+        </div>}
+        {liveMode && !loading && !error && items.length === 0 && <div className="rounded-2xl border p-6 text-center md:p-10" style={{ background: surface, borderColor: border }}>
+          <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full" aria-hidden="true" style={{ background: dark ? '#2A2010' : '#FFF6E7', color: dark ? '#F3C879' : '#9A6414' }}>
+            <IconGlyph name="message" size={22} color={dark ? '#F3C879' : '#9A6414'} />
+          </div>
+          <h2 className="m-0 text-base font-bold" style={{ color: ink }}>You’re all caught up</h2>
+          <p className="mb-0 mt-2 text-sm" style={{ color: muted }}>New notifications will appear here.</p>
+        </div>}
+        {(liveMode ? hasLiveContent : true) && Object.entries(liveMode?{'Your notifications':items.map(item=>({icon:'ticket',color:'#FA3F38',bg:'#FFF2F1',darkBg:'#2A1010',...item}))}:notifications).map(([period, items]) => (
           <div key={period} style={{ marginBottom: 24 }}>
             <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: muted }}>{period}</p>
             <div className="flex flex-col gap-3">

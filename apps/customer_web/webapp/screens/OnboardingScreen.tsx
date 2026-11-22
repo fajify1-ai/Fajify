@@ -26,21 +26,10 @@ export default function OnboardingScreen({ navigate }: Props) {
         background: 'linear-gradient(to bottom, rgba(20,10,6,0.45) 0%, transparent 30%, transparent 50%, rgba(20,10,6,0.85) 80%, rgba(20,10,6,0.97) 100%)',
       }} />
 
-      {/* Status bar mock */}
-      <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 22px 0' }}>
-        <span style={{ color: '#fff', fontSize: 15, fontWeight: 700 }}>9:41</span>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span style={{ color: '#fff', fontSize: 13 }}>▌▌▌▌</span>
-          <span style={{ color: '#fff', fontSize: 13 }}>WiFi</span>
-          <span style={{ color: '#fff', fontSize: 13 }}></span>
-        </div>
-      </div>
-
       {/* Logo / brand */}
       <div style={{ position: 'relative', zIndex: 2, padding: '32px 28px 0', textAlign: 'left' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.12)', borderRadius: 999, padding: '6px 16px', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}>
-          <span style={{ fontSize: 18 }}></span>
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: 16, letterSpacing: '0.02em' }}>Lovie</span>
+          <span style={{ color: '#fff', fontWeight: 800, fontSize: 16, letterSpacing: '-0.03em' }}>fajify</span>
         </div>
       </div>
 
