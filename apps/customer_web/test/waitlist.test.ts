@@ -26,5 +26,8 @@ test('waitlist form requests email and phone without claiming a signup was saved
  assert.match(html,/name="whatsapp"/);
  assert.match(html,/\+234/);
  assert.match(html,/Save my spot/);
+ assert.match(html,/Waitlist sign-up isn’t active yet/);
+ assert.match(html,/details won’t be sent or/);
  assert.doesNotMatch(html,/You’re on the list|Welcome to the first fam/);
+ assert.doesNotMatch(html,/By joining, you agree to receive launch updates/);
 });
