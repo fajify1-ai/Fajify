@@ -58,8 +58,8 @@ export default function WaitlistForm() {
         </p>
       ) : (
         <p className="waitlist-privacy-note">
-          By joining, you agree to receive launch updates from Fajify.
-          Unsubscribe anytime.
+          Waitlist sign-up isn’t active yet. Your details won’t be sent or
+          saved.
         </p>
       )}
     </form>
