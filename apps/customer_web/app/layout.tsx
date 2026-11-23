@@ -3,5 +3,6 @@ import '../webapp/styles.css';
 import '../connected/styles.css';
 import '@faji/business-web/feature.css';
 import '@faji/business-web/connected/styles.css';
+import './waitlist/waitlist.css';
 export const metadata = { title: 'Fajify' };
 export default function Layout({children}:{children:ReactNode}) { return <html lang="en"><body>{children}</body></html> }
