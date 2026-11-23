@@ -138,8 +138,8 @@ export default function WaitlistPage() {
           </h2>
           <p>
             Be among the first to discover and book the best places and
-            experiences around you. We’ll send launch news and early-access
-            details directly to you.
+            experiences around you. The waitlist opens soon—check back here to
+            save your spot.
           </p>
         </div>
         <WaitlistForm />
