@@ -21,6 +21,7 @@ import {
  X
 } from 'lucide-react';
 import type {LucideIcon} from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {authClient} from '@faji/web-auth/client';
 import {toast} from 'sonner';
@@ -147,12 +148,12 @@ export function AdminShell({
  function SidebarContents({mobile=false}:{mobile?:boolean}){
   const hideLabels=collapsed&&!mobile;
   return <>
-   <div className="flex h-[72px] items-center gap-3 border-b px-5">
-    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-base font-bold text-primary-foreground">F</span>
-    {!hideLabels&&<div className="min-w-0">
-     <p className="truncate text-sm font-bold tracking-tight">fajify<span className="ml-1 text-[10px] font-semibold tracking-[.15em] text-muted-foreground">ADMIN</span></p>
-     <p className="mt-0.5 text-[11px] text-muted-foreground">Platform control center</p>
+   <div className={cn('flex h-[72px] items-center border-b',hideLabels?'justify-center px-2':'gap-3 px-5')}>
+    {!hideLabels&&<div className="flex min-w-0 items-center gap-2">
+     <Image className="h-auto w-[86px] shrink-0" src="/brand/fajify-logo-primary-horizontal.svg" alt="Fajify" width={86} height={32}/>
+     <span className="text-[9px] font-semibold tracking-[.15em] text-muted-foreground">ADMIN</span>
     </div>}
+    {hideLabels&&<Image className="h-auto w-10 shrink-0" src="/brand/fajify-logo-primary-horizontal.svg" alt="Fajify" width={40} height={15}/>}
     <Button className="ml-auto hidden lg:inline-flex" variant="ghost" size="icon-sm" aria-label={collapsed?'Expand sidebar':'Collapse sidebar'} onClick={toggleSidebar}>
      <ChevronDown className={cn('size-4 transition-transform',collapsed?'-rotate-90':'rotate-90')}/>
     </Button>

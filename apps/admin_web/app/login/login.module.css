@@ -31,34 +31,22 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 30px;
   color: #20232a;
-  font-size: 21px;
-  font-weight: 750;
-  letter-spacing: -0.8px;
 }
 
-.mark {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border-radius: 11px;
-  background: var(--admin-brand);
-  color: #fff;
-  font-size: 20px;
-  font-weight: 800;
-  box-shadow: 0 5px 12px rgba(180, 35, 30, 0.2);
+.logo {
+  display: block;
+  width: 110px;
+  height: auto;
 }
 
 .brandAdmin {
-  margin-left: 8px;
   color: #5e626c;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  vertical-align: 2px;
 }
 
 .card {
