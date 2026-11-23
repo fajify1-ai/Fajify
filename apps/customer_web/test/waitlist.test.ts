@@ -12,6 +12,8 @@ test('waitlist page includes the responsive landing content and branded assets',
  assert.match(html,/Good times\./);
  assert.match(html,/Made simple\./);
  assert.match(html,/Not everyone gets in early/);
+ assert.match(html,/The waitlist opens soon/);
+ assert.doesNotMatch(html,/We’ll send launch news/);
  assert.match(html,/class="waitlist-photo"/);
  assert.match(html,/waitlist\/fajify-logo-primary-horizontal\.svg/);
  assert.match(html,/href="#waitlist"/);
