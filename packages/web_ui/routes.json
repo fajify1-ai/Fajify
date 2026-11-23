@@ -753,5 +753,15 @@
     "path": "admin/integrations/customers/{subject}/activity",
     "method": "GET",
     "audience": "admin"
+  },
+  {
+    "path": "waitlist",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
+    "path": "admin/waitlist",
+    "method": "GET",
+    "audience": "admin"
   }
 ]

@@ -18,11 +18,13 @@ import {AdminInsightsService} from './admin-insights.service';
 import {AdminMonitorService} from './admin-monitor.service';
 import {AdminEmptyBodyGuard} from './admin-empty-body.guard';
 import {AdminReadAuditGuard} from './admin-read-audit.guard';
+import {WaitlistController,AdminWaitlistController} from './waitlist.controller';
+import {WaitlistService} from './waitlist.service';
 
 @Module({
  imports:[IdentityModule,CustomerModule],
- controllers:[CustomerSupportNotificationsController,CustomerBookingRideController,AdminOperationsController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController],
- providers:[CustomerBookingRideService,BookingRideEmptyBodyGuard,CustomerSupportNotificationsService,SupportNoticeEmptyBodyGuard,AdminReadAuditGuard,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
+ controllers:[CustomerSupportNotificationsController,CustomerBookingRideController,AdminOperationsController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController,WaitlistController,AdminWaitlistController],
+ providers:[CustomerBookingRideService,BookingRideEmptyBodyGuard,CustomerSupportNotificationsService,SupportNoticeEmptyBodyGuard,WaitlistService,AdminReadAuditGuard,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
   AdminIncidentService,AdminInsightsService,AdminMonitorService]
 })
 export class AdminOperationsModule {}

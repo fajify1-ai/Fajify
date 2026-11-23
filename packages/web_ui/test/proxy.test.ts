@@ -3,7 +3,12 @@ import assert from 'node:assert/strict';
 import {NextRequest} from 'next/server';
 import {allowedRoute,platformProxy} from '../server';
 const original=globalThis.fetch;
-afterEach(()=>{globalThis.fetch=original;});
+const originalIngress=process.env.FAJI_TRUSTED_INGRESS;
+afterEach(()=>{
+ globalThis.fetch=original;
+ if(originalIngress===undefined)delete process.env.FAJI_TRUSTED_INGRESS;
+ else process.env.FAJI_TRUSTED_INGRESS=originalIngress;
+});
 function setup(){process.env.NODE_ENV='test';process.env.FAJI_API_URL='http://127.0.0.1:3001';process.env.FAJI_WEB_ORIGIN='https://customer.test';}
 function req(path:string,method='GET',origin='https://customer.test',body?:string){return new NextRequest('https://customer.test/api/platform/'+path,{method,headers:{origin,authorization:'Bearer attacker','x-forwarded-for':'attacker',cookie:'private=secret; __Secure-better-auth.session_token=opaque'},body});}
 test('contract allowlist isolates merchant, customer and deferred products',()=>{
@@ -37,6 +42,37 @@ test('unified bridge accepts both product contracts and preserves server denials
  const response=await platformProxy(req('businesses/abc/finance'),'unified');
  assert.equal(response.status,403);assert.doesNotMatch(await response.text(),/not exposed/);
 });
+test('waitlist bridge preserves the trusted origin, omits auth cookies and conditionally forwards ingress IP',async()=>{
+ setup();
+ assert.equal(allowedRoute('waitlist','POST','customer'),true);
+ assert.equal(allowedRoute('waitlist','POST','unified'),true);
+ assert.equal(allowedRoute('waitlist','POST','business'),false);
+ assert.equal(allowedRoute('admin/waitlist','GET','unified'),false);
+ process.env.FAJI_TRUSTED_INGRESS='true';
+ const visitor=()=>new NextRequest('https://customer.test/api/platform/waitlist',{method:'POST',headers:{
+  origin:'https://customer.test','content-type':'application/json','x-faji-client-ip':'203.0.113.8',
+  cookie:'__Secure-better-auth.session_token=opaque'
+ },body:'{"email":"person@example.com","whatsapp":"8012345678","consent":true}'});
+ globalThis.fetch=async(input,init)=>{
+  assert.equal(String(input),'http://127.0.0.1:3001/api/v1/waitlist');
+  const headers=new Headers(init?.headers);
+  assert.equal(headers.get('cookie'),null);
+  assert.equal(headers.get('origin'),'https://customer.test');
+  assert.equal(headers.get('x-faji-client-ip'),'203.0.113.8');
+  return Response.json({accepted:true},{status:201});
+ };
+ assert.equal((await platformProxy(visitor(),'unified')).status,201);
+ process.env.FAJI_TRUSTED_INGRESS='false';
+ globalThis.fetch=async(_input,init)=>{
+  assert.equal(new Headers(init?.headers).get('x-faji-client-ip'),null);
+  return Response.json({accepted:true},{status:201});
+ };
+ assert.equal((await platformProxy(visitor(),'unified')).status,201);
+ globalThis.fetch=async()=>new Response('Invalid origin',{status:400});
+ const rejected=await platformProxy(visitor(),'unified');
+ assert.equal(rejected.status,400);
+ assert.equal((await rejected.json()).message,'The request could not be completed. Check your details and try again.');
+});
 test('Admin bridge exposes only reviewed admin workflows and preserves the strict allowlist',async()=>{
  for(const [path,method] of [
   ['admin/governance/approvals','GET'],
@@ -45,6 +81,7 @@ test('Admin bridge exposes only reviewed admin workflows and preserves the stric
   ['admin/finance/simulations','GET'],
   ['admin/finance/payments/00000000-0000-4000-8000-000000000000/simulation','POST'],
   ['admin/operations/overview','GET'],
+  ['admin/waitlist','GET'],
   ['admin/operations/audit','GET'],
   ['admin/operations/command-audit','GET'],
   ['admin/governance/reviews','GET'],

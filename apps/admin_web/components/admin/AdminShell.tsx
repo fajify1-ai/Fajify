@@ -19,6 +19,7 @@ import {
  ShieldCheck,
  Sun,
  TriangleAlert,
+ UserPlus,
  Users,
  X
 } from 'lucide-react';
@@ -41,6 +42,7 @@ const navigation:{label:string;items:NavigationItem[]}[]=[
  {label:'Operations',items:[
   {id:'applications',label:'Business approvals',icon:Building2,available:true},
   {id:'payments',label:'Finance simulations',icon:CreditCard,available:true},
+  {id:'waitlist',label:'Waitlist signups',icon:UserPlus,available:true},
   {id:'reviews',label:'Review moderation',icon:ShieldCheck,available:true},
   {id:'restrictions',label:'Marketplace restrictions',icon:LockKeyhole,available:true},
   {id:'support',label:'Support cases',icon:CircleHelp,available:true},
@@ -62,6 +64,7 @@ const viewCopy:Record<AdminView,{title:string;description:string}>={
  overview:{title:'Platform overview',description:'A clear view of the operational queues that need attention.'},
  applications:{title:'Business approvals',description:'Review submitted business applications and record an approval decision.'},
  payments:{title:'Finance simulations',description:'Review pending test payments. These controls never move real money.'},
+ waitlist:{title:'Waitlist signups',description:'Review consented early-access signups. Contact data is limited to authorized administrators.'},
  reviews:{title:'Review moderation',description:'Moderate customer reviews using audited governance actions.'},
  restrictions:{title:'Marketplace restrictions',description:'Restrict or restore branches and catalogue entries with a recorded reason.'},
  support:{title:'Support cases',description:'Review customer support cases and record scoped, audited actions.'},

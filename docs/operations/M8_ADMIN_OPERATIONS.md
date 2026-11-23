@@ -19,7 +19,7 @@ DO UPDATE SET active=true,granted_by=EXCLUDED.granted_by;
 COMMIT;
 ```
 
-Use exact allowed scopes defined in migration `0023_m8_admin_operations.sql`. Revocation sets `active=false` with a recorded operator; never delete or rename grant identity rows. The trigger writes append-only history. The code has no public self-grant API.
+Use exact allowed scopes defined in migration `0023_m8_admin_operations.sql` and subsequent additive scope migrations, including `waitlist.read` from `0113_waitlist_signups.sql`. Revocation sets `active=false` with a recorded operator; never delete or rename grant identity rows. The trigger writes append-only history. The code has no public self-grant API.
 
 ## 2. Moderation and customer support
 - Review the pending merchant queue; use the existing authoritative M3 business review command, not SQL updates to merchant status.
@@ -52,5 +52,10 @@ Schedule only through reviewed operational orchestration, with managed secrets a
 - Apply additive migrations using the approved migrator and restricted grants; back up first. Do **not** drop M8 tables during rollback while older application versions may still reference audit, case or restriction state.
 - If a release fails, revert the application binary/configuration while retaining compatible additive schema, and investigate in an isolated environment. Never disable audit triggers, scopes or financial idempotency to make acceptance green.
 - Do not enable GitHub Actions, deploy production, or merge a draft PR on the basis of this handoff alone.
+
+## 6. Waitlist contact data
+- Public signup accepts only an exact browser origin in `FAJI_WEB_ORIGINS`, validates email, Nigerian mobile number and explicit consent, and limits attempts using an HMAC of the trusted ingress IP. The rate-limit table contains no raw IP addresses.
+- Apply `0113_waitlist_signups.sql` and the matching runtime grants before enabling the form. Signup persists only consented contact details; duplicate normalized emails return the same success response without updating the original record.
+- Grant `waitlist.read` out-of-band with the same two-person approval process above. Platform-admin role alone does not grant access. The admin list is paginated, searchable, no-store, and read-audited; exports contain only loaded rows. Treat the CSV as sensitive personal data and distribute/store it only through approved secure channels.
 
 Accepted M7-P1 ride/dispatch/fare contracts were merged into the M8 source tree at `d45215af3de7c7bb590c9486af728f5bebd22b6e`. Customers may associate **an existing ride** with an existing service reservation using M8's `/api/v1/customer/integrations/booking-rides` API. Require explicit `consent:true`, strict ownership and a geocoded venue destination within 250m; a link does not create/pay for a ride, alter driver dispatch or expose real-time GPS. Unlinking a historical association does not cancel the ride. M8 PostGIS schema `0102_m8_booking_ride_links.sql` follows M7 migration `0101`. Never treat the passenger ride state machine as delivery/courier fulfillment; that workflow needs its own domain contract.
