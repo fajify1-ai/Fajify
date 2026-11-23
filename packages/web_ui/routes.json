@@ -620,12 +620,137 @@
     "audience": "customer"
   },
   {
+    "path": "admin/operations/overview",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/operations/audit",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
     "path": "admin/governance/approvals",
     "method": "GET",
     "audience": "admin"
   },
   {
     "path": "admin/governance/approvals/{id}",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/reviews",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/restrictions",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/reviews/{id}/moderation",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/branches/{id}/restriction",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/catalogue/{id}/restriction",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/support/cases",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/support/cases/{id}",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/support/cases/{id}/assignment",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/support/cases/{id}/messages",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/support/cases/{id}/status",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/incidents",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/incidents",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/incidents/{id}/status",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/finance/summary",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/reports/overview",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/reports/businesses/{id}",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/integrations/consistency",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/monitoring/status",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/monitoring/check",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/monitoring/alerts",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/monitoring/alerts/{id}/acknowledgement",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/operations/command-audit",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/integrations/customers/{subject}/activity",
     "method": "GET",
     "audience": "admin"
   }

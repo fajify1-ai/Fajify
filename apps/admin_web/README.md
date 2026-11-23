@@ -9,9 +9,11 @@ The current dashboard UI provides:
 - Live business-application review and simulated-payment queues backed by the existing admin API endpoints.
 - Searchable, sortable, filterable, paginated tables, row selection and local export of selected visible fields.
 - Explicitly confirmed application decisions and test-only payment outcomes.
-- Loading, empty, retry/error, and review-detail states. Other platform areas are presented as not yet connected; no sample platform metrics are shown.
+- Connected, scoped API workspaces for customer-review moderation, marketplace restrictions, support cases, incident management, monitoring, reporting, business reports, customer activity, consistency checks, and audit history.
+- Governed mutations use the existing audited backend commands and request keys; every read and write still passes through the same-origin admin proxy and NestJS scope checks.
+- Loading, empty, retry/error, detail, and pagination states. No sample platform metrics are shown.
 - Current queue totals and recent queue activity only; historical trend percentages are omitted until the API provides a real comparison period.
 
-The additional platform areas are UI placeholders only. New user, business lifecycle, ride, reporting and global-setting workflows require separately reviewed backend endpoints and authorization scopes before they are enabled.
+Global platform settings and full customer, business, and ride directories remain unavailable because the API does not provide those admin endpoints. The connected customer and business views are limited to the existing audited activity and report lookups. Higher-risk account suspension, provider-finance, payout, settlement, and tariff operations are deliberately not exposed by the web proxy.
 
 See [authentication implementation and setup](../../docs/engineering/BETTER_AUTH_IMPLEMENTATION.md).

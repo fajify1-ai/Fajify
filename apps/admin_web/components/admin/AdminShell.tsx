@@ -10,6 +10,7 @@ import {
  Command,
  CreditCard,
  LayoutDashboard,
+ LockKeyhole,
  LogOut,
  Menu,
  Moon,
@@ -17,6 +18,7 @@ import {
  Settings2,
  ShieldCheck,
  Sun,
+ TriangleAlert,
  Users,
  X
 } from 'lucide-react';
@@ -38,13 +40,20 @@ const navigation:{label:string;items:NavigationItem[]}[]=[
  {label:'Overview',items:[{id:'overview',label:'Overview',icon:LayoutDashboard,available:true}]},
  {label:'Operations',items:[
   {id:'applications',label:'Business approvals',icon:Building2,available:true},
-  {id:'payments',label:'Finance simulations',icon:CreditCard,available:true}
+  {id:'payments',label:'Finance simulations',icon:CreditCard,available:true},
+  {id:'reviews',label:'Review moderation',icon:ShieldCheck,available:true},
+  {id:'restrictions',label:'Marketplace restrictions',icon:LockKeyhole,available:true},
+  {id:'support',label:'Support cases',icon:CircleHelp,available:true},
+  {id:'incidents',label:'Incident register',icon:TriangleAlert,available:true},
+  {id:'monitoring',label:'Monitoring',icon:Activity,available:true}
  ]},
  {label:'Platform',items:[
-  {id:'customers',label:'Customers',icon:Users,available:false},
-  {id:'businesses',label:'Businesses',icon:Building2,available:false},
-  {id:'rides',label:'Rides & dispatch',icon:Activity,available:false},
-  {id:'reports',label:'Reports',icon:ArrowUpRight,available:false}
+  {id:'customers',label:'Customer activity',icon:Users,available:true},
+  {id:'businesses',label:'Business reports',icon:Building2,available:true},
+  {id:'rides',label:'Ride reporting',icon:Activity,available:true},
+  {id:'reports',label:'Platform reports',icon:ArrowUpRight,available:true},
+  {id:'integrations',label:'Data consistency',icon:ShieldCheck,available:true},
+  {id:'audit',label:'Audit history',icon:LockKeyhole,available:true}
  ]},
  {label:'Workspace',items:[{id:'settings',label:'Platform settings',icon:Settings2,available:false}]}
 ];
@@ -53,11 +62,18 @@ const viewCopy:Record<AdminView,{title:string;description:string}>={
  overview:{title:'Platform overview',description:'A clear view of the operational queues that need attention.'},
  applications:{title:'Business approvals',description:'Review submitted business applications and record an approval decision.'},
  payments:{title:'Finance simulations',description:'Review pending test payments. These controls never move real money.'},
- customers:{title:'Customer accounts',description:'Customer administration will be connected after its backend controls are ready.'},
- businesses:{title:'Business directory',description:'Business account management will be connected after its backend controls are ready.'},
- rides:{title:'Rides & dispatch',description:'Ride and dispatch controls will be connected after their backend controls are ready.'},
- reports:{title:'Platform reports',description:'Verified platform reporting will be connected after reporting APIs are ready.'},
- settings:{title:'Platform settings',description:'Global platform settings will be designed with their audited backend workflows.'}
+ reviews:{title:'Review moderation',description:'Moderate customer reviews using audited governance actions.'},
+ restrictions:{title:'Marketplace restrictions',description:'Restrict or restore branches and catalogue entries with a recorded reason.'},
+ support:{title:'Support cases',description:'Review customer support cases and record scoped, audited actions.'},
+ incidents:{title:'Incident register',description:'Track platform incidents using API-enforced state transitions.'},
+ monitoring:{title:'Monitoring',description:'Review database-derived platform health signals and alerts.'},
+ customers:{title:'Customer activity',description:'Look up customer activity; each inspection is recorded in the audit history.'},
+ businesses:{title:'Business reports',description:'Retrieve a verified business report by business ID.'},
+ rides:{title:'Ride reporting',description:'View ride counts and verified ride totals from platform reporting.'},
+ reports:{title:'Platform reports',description:'View persisted platform activity and verified finance totals.'},
+ audit:{title:'Audit history',description:'Review security events and audited privileged commands.'},
+ integrations:{title:'Data consistency',description:'Inspect read-only cross-domain consistency checks.'},
+ settings:{title:'Platform settings',description:'Global settings do not have a connected administration API yet.'}
 };
 
 function initials(){

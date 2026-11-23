@@ -15,8 +15,7 @@ import {
  LockKeyhole,
  RefreshCw,
  ShieldCheck,
- TriangleAlert,
- Users
+ TriangleAlert
 } from 'lucide-react';
 import {useForm,type UseFormRegisterReturn} from 'react-hook-form';
 import Link from 'next/link';
@@ -32,6 +31,7 @@ import {
 import {toast} from 'sonner';
 import {z} from 'zod';
 import {AdminShell} from '../../components/admin/AdminShell';
+import AdminBackendViews,{AdminOverviewData} from '../../components/admin/AdminBackendViews';
 import {DataTable,StatusBadge,type TableColumn} from '../../components/admin/DataTable';
 import type {AdminView,Application,ApplicationDetails,Payment} from '../../components/admin/types';
 import {Badge} from '../../components/ui/badge';
@@ -336,6 +336,7 @@ export default function Console(){
     <QueuePreview title="Business approvals" description="Most recently returned applications." icon={Building2} loading={applications.loading} error={applications.error} rows={applications.items.slice(0,5).map(row=>({id:row.id,title:row.displayName,detail:formatDate(row.createdAt,{dateStyle:'medium'}),status:row.status}))} emptyTitle="No applications are awaiting review" onViewAll={()=>setActiveView('applications')} onOpen={id=>{const row=applications.items.find(item=>item.id===id);if(row)void inspect(row);}}/>
     <QueuePreview title="Payment simulations" description="Pending simulated payment outcomes." icon={CreditCard} loading={payments.loading} error={payments.error} rows={payments.items.slice(0,5).map(row=>({id:row.id,title:formatMoney(row.amountMinor,row.currency),detail:formatDate(row.createdAt,{dateStyle:'medium'}),status:'pending'}))} emptyTitle="No payment simulations are pending" onViewAll={()=>setActiveView('payments')} onOpen={()=>setActiveView('payments')}/>
    </section>
+   <AdminOverviewData/>
    <p className="sr-only" aria-live="polite">{activitySummary} operational records loaded.</p>
   </div>}
 
@@ -351,7 +352,8 @@ export default function Console(){
    <DataTable rows={payments.items} columns={paymentColumns} rowKey={row=>row.id} searchText={row=>`${row.id} ${row.amountMinor} ${row.currency} ${row.createdAt}`} emptyTitle="No pending payment simulations" emptyDescription="The finance simulation endpoint currently has no pending test outcomes." filter={{label:'Filter by status',options:[{label:'Pending simulation',value:'pending'}],getValue:()=> 'pending'}} actions={payment=><PaymentActions onChoose={outcome=>openPaymentAction(payment,outcome)}/>}/>
   </QueueSection>}
 
-  {activeView!=='overview'&&activeView!=='applications'&&activeView!=='payments'&&<ComingSoon view={activeView} onBack={()=>setActiveView('overview')}/>}
+  {isBackendView(activeView)&&<AdminBackendViews view={activeView}/>}
+  {activeView==='settings'&&<ComingSoon onBack={()=>setActiveView('overview')}/>}
 
   <Dialog open={selectedApplication!==null} onOpenChange={open=>{if(!open)setSelectedApplication(null);}}>
    <DialogContent className="max-w-2xl">
@@ -527,27 +529,23 @@ function PaymentActions({onChoose}:{onChoose:(outcome:SimulationOutcome)=>void})
  </DropdownMenu>;
 }
 
-function ComingSoon({view,onBack}:{view:Exclude<AdminView,'overview'|'applications'|'payments'>;onBack:()=>void}){
- const titles:Record<typeof view,{icon:typeof Users;next:string}>={
-  customers:{icon:Users,next:'Customer account search, identity status, and audited support workflows.'},
-  businesses:{icon:Building2,next:'Business directory, approval history, and account lifecycle controls.'},
-  rides:{icon:Activity,next:'Ride and dispatch visibility with operational exception handling.'},
-  reports:{icon:ArrowUpRight,next:'Verified reporting based on persisted platform events and finance records.'},
-  settings:{icon:ShieldCheck,next:'Policy and platform configuration with scoped approvals and an audit trail.'}
- };
- const Icon=titles[view].icon;
+function ComingSoon({onBack}:{onBack:()=>void}){
  return <Card className="mx-auto max-w-3xl border-dashed">
   <CardContent className="grid min-h-[360px] place-items-center p-8 text-center">
    <div className="max-w-lg">
-    <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-accent text-primary"><Icon className="size-6"/></span>
-    <Badge variant="outline" className="mt-5">Design preview · backend not connected</Badge>
-    <h2 className="mt-3 text-xl font-semibold">{titles[view].next.split(',')[0]}</h2>
-    <p className="mt-2 text-sm leading-6 text-muted-foreground">{titles[view].next} This area is intentionally not populated with sample or estimated platform data.</p>
+    <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-accent text-primary"><ShieldCheck className="size-6"/></span>
+    <Badge variant="outline" className="mt-5">Backend not connected</Badge>
+    <h2 className="mt-3 text-xl font-semibold">Platform settings</h2>
+    <p className="mt-2 text-sm leading-6 text-muted-foreground">Global settings do not have a connected administration API yet. This view will remain unavailable until scoped and audited backend workflows are implemented.</p>
     <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
      <Button type="button" variant="outline" onClick={onBack}>Back to overview</Button>
-     {view==='settings'&&<Link href="/account-security" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:brightness-95">Open account security<ExternalLink className="size-4"/></Link>}
+     <Link href="/account-security" className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:brightness-95">Open account security<ExternalLink className="size-4"/></Link>
     </div>
    </div>
   </CardContent>
  </Card>;
+}
+
+function isBackendView(view:AdminView):view is Exclude<AdminView,'overview'|'applications'|'payments'|'settings'>{
+ return !['overview','applications','payments','settings'].includes(view);
 }

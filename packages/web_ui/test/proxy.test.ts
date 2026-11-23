@@ -37,18 +37,49 @@ test('unified bridge accepts both product contracts and preserves server denials
  const response=await platformProxy(req('businesses/abc/finance'),'unified');
  assert.equal(response.status,403);assert.doesNotMatch(await response.text(),/not exposed/);
 });
-test('Admin bridge exposes only governance review and simulated-payment controls',async()=>{
+test('Admin bridge exposes only reviewed admin workflows and preserves the strict allowlist',async()=>{
  for(const [path,method] of [
   ['admin/governance/approvals','GET'],
   ['admin/governance/approvals/00000000-0000-4000-8000-000000000000','GET'],
   ['business/onboarding/00000000-0000-4000-8000-000000000000/review','POST'],
   ['admin/finance/simulations','GET'],
   ['admin/finance/payments/00000000-0000-4000-8000-000000000000/simulation','POST'],
+  ['admin/operations/overview','GET'],
+  ['admin/operations/audit','GET'],
+  ['admin/operations/command-audit','GET'],
+  ['admin/governance/reviews','GET'],
+  ['admin/governance/reviews/00000000-0000-4000-8000-000000000000/moderation','POST'],
+  ['admin/governance/restrictions','GET'],
+  ['admin/governance/branches/00000000-0000-4000-8000-000000000000/restriction','POST'],
+  ['admin/governance/catalogue/00000000-0000-4000-8000-000000000000/restriction','POST'],
+  ['admin/support/cases','GET'],
+  ['admin/support/cases/00000000-0000-4000-8000-000000000000','GET'],
+  ['admin/support/cases/00000000-0000-4000-8000-000000000000/assignment','POST'],
+  ['admin/support/cases/00000000-0000-4000-8000-000000000000/messages','POST'],
+  ['admin/support/cases/00000000-0000-4000-8000-000000000000/status','POST'],
+  ['admin/incidents','GET'],
+  ['admin/incidents','POST'],
+  ['admin/incidents/00000000-0000-4000-8000-000000000000/status','POST'],
+  ['admin/finance/summary','GET'],
+  ['admin/reports/overview','GET'],
+  ['admin/reports/businesses/00000000-0000-4000-8000-000000000000','GET'],
+  ['admin/integrations/consistency','GET'],
+  ['admin/integrations/customers/customer_subject-1/activity','GET'],
+  ['admin/monitoring/status','GET'],
+  ['admin/monitoring/check','POST'],
+  ['admin/monitoring/alerts','GET'],
+  ['admin/monitoring/alerts/00000000-0000-4000-8000-000000000000/acknowledgement','POST'],
  ] as const)assert.equal(allowedRoute(path,method,'admin'),true,`${method} ${path}`);
  for(const [path,method] of [
   ['admin/finance/payments/00000000-0000-4000-8000-000000000000/provider-recheck','POST'],
   ['admin/finance/refunds/00000000-0000-4000-8000-000000000000/decision','POST'],
-  ['admin/governance/reviews','GET'],
+  ['admin/accounts/customer_subject-1/suspension','POST'],
+  ['admin/accounts/customer_subject-1/memberships','POST'],
+  ['admin/finance/operations','GET'],
+  ['admin/finance/businesses/00000000-0000-4000-8000-000000000000/settlements','POST'],
+  ['admin/finance/jobs/00000000-0000-4000-8000-000000000000/retry','POST'],
+  ['admin/ride-payouts/00000000-0000-4000-8000-000000000000/submit','POST'],
+  ['admin/ride-tariffs','POST'],
   ['business/onboarding/00000000-0000-4000-8000-000000000000/workspace','GET'],
   ['admin/governance/approvals','POST'],
  ] as const)assert.equal(allowedRoute(path,method,'admin'),false,`${method} ${path}`);
