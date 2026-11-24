@@ -8,6 +8,17 @@ export function allowedRoute(path:string,method:string,audience:'customer'|'busi
   if (!/^[A-Za-z0-9_/-]+$/.test(path) || path.includes('//')) return false;
   return rules.some(rule => (rule.audience===audience||rule.audience==='both'||(audience==='unified'&&(rule.audience==='customer'||rule.audience==='business'))) && rule.method===method && new RegExp('^'+rule.path.replace(/\{[^}]+\}/g,'[A-Za-z0-9_-]+')+'$').test(path));
 }
+function trustedWebOrigins(fallback:string) {
+ const configured=process.env.FAJI_WEB_ORIGINS;
+ if(!configured)return [fallback];
+ const origins=configured.split(',').map(value=>value.trim());
+ if(!origins.length||origins.some(value=>!value))throw Error('Invalid web origins');
+ return [...new Set(origins.map(value=>{
+  const parsed=new URL(value);
+  if(parsed.origin!==value||parsed.pathname!=='/'||parsed.username||parsed.password||parsed.search||parsed.hash||!['http:','https:'].includes(parsed.protocol))throw Error('Invalid web origin');
+  return parsed.origin;
+ }))];
+}
 /** Same-origin, fixed upstream BFF. NestJS remains the authorization authority. */
 export async function platformProxy(request:NextRequest,audience:'customer'|'business'|'unified'|'admin') {
  const responseHeaders={'cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'};
@@ -15,12 +26,14 @@ export async function platformProxy(request:NextRequest,audience:'customer'|'bus
  if(!allowedRoute(path,request.method,audience))return Response.json({message:'This operation is unavailable.'},{status:404,headers:responseHeaders});
  try {
   const {api,origin}=authConfiguration();
-  if(request.method!=='GET' && request.headers.get('origin')!==origin)return Response.json({message:'Invalid request origin.'},{status:403,headers:responseHeaders});
+  const requestOrigin=request.headers.get('origin');
+  const trustedOrigins=trustedWebOrigins(origin);
+  if(request.method!=='GET'&&(!requestOrigin||!trustedOrigins.includes(requestOrigin)))return Response.json({message:'Invalid request origin.'},{status:403,headers:responseHeaders});
   const body=request.method==='GET'?undefined:await request.text();
   if(body&&new TextEncoder().encode(body).length>(/^business\/onboarding\/[^/]+\/verification-documents$/.test(path)?380000:65536))return new Response(null,{status:413,headers:responseHeaders});
   const target=new URL('/api/v1/'+path+request.nextUrl.search,api);
-  const headers:Record<string,string>={'content-type':'application/json',origin};
-  if(path!=='waitlist')headers.cookie=authCookies(request.headers.get('cookie')??'');
+  const headers:Record<string,string>={'content-type':'application/json',origin:request.method==='GET'?origin:requestOrigin!};
+  if(path!=='waitlist'&&path!=='waitlist/business')headers.cookie=authCookies(request.headers.get('cookie')??'');
   else if(process.env.FAJI_TRUSTED_INGRESS==='true'){
    const clientIp=request.headers.get('x-faji-client-ip');
    if(clientIp&&isIP(clientIp))headers['x-faji-client-ip']=clientIp;
@@ -33,8 +46,8 @@ export async function platformProxy(request:NextRequest,audience:'customer'|'bus
   if(raw.length>2_000_000)throw Error('Response too large');
   if(!upstream.ok){
    let message=upstream.status===401?'Sign in to continue.':upstream.status===403?'Your account does not have permission for this operation.':upstream.status===409?'This item changed or is no longer available. Refresh and try again.':upstream.status===429?'Too many requests. Please try again later.':'The request could not be completed. Check your details and try again.';
-   if(path==='waitlist'&&upstream.status===403)message='This signup request was blocked. Refresh the page and try again.';
-   if(path==='waitlist'&&upstream.status===400){
+   if(path.startsWith('waitlist')&&upstream.status===403)message='This signup request was blocked. Refresh the page and try again.';
+   if(path.startsWith('waitlist')&&upstream.status===400){
     try{
      const errorBody:unknown=JSON.parse(raw);
      if(typeof errorBody==='object'&&errorBody!==null&&'message'in errorBody){

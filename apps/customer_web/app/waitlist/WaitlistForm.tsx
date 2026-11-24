@@ -44,9 +44,7 @@ export default function WaitlistForm() {
             : 'We could not save your details. Please try again.';
         throw new Error(detail);
       }
-      setMessage(
-        'Thanks for your interest. If you have not already joined, your waitlist details are saved.',
-      );
+      setMessage('Your waitlist submission was successful. Your details have been saved.');
       setMessageType('success');
       form.reset();
     } catch (error) {
@@ -102,12 +100,16 @@ export default function WaitlistForm() {
         {submitting ? 'Saving…' : 'Save my spot'} <ArrowIcon />
       </button>
       {message ? (
-        <p
+        <div
           className={`waitlist-form-message waitlist-form-message-${messageType}`}
           role={messageType === 'error' ? 'alert' : 'status'}
+          aria-live={messageType === 'error' ? 'assertive' : 'polite'}
         >
-          {message}
-        </p>
+          {messageType === 'success' && (
+            <strong className="waitlist-form-message-title">You’re on the list!</strong>
+          )}
+          <span>{message}</span>
+        </div>
       ) : (
         <p className="waitlist-privacy-note">
           Your contact details will be used only for Fajify early-access and

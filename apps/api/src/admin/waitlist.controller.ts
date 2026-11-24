@@ -8,7 +8,7 @@ import {PrivilegedGuard} from '../auth/privileged.guard';
 import {AdminRateGuard} from '../auth/admin-rate.guard';
 import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
 import {AdminReadAuditGuard} from './admin-read-audit.guard';
-import {WaitlistAdminQuery,WaitlistPage,WaitlistSignupInput} from './waitlist.dto';
+import {BusinessWaitlistPage,BusinessWaitlistSignupInput,WaitlistAdminQuery,WaitlistPage,WaitlistSignupInput} from './waitlist.dto';
 import {WaitlistService,waitlistClientAddress} from './waitlist.service';
 
 const bodyPipe=new ValidationPipe({whitelist:true,forbidNonWhitelisted:true,transform:true,expectedType:WaitlistSignupInput});
@@ -19,17 +19,27 @@ const queryPipe=new ValidationPipe({whitelist:true,forbidNonWhitelisted:true,tra
 export class WaitlistController {
  constructor(@Inject(WaitlistService)private readonly service:WaitlistService){}
 
- @Post() @ApiBody({type:WaitlistSignupInput}) @ApiCreatedResponse({schema:{type:'object',properties:{accepted:{type:'boolean'}}}})
- async signup(@Req() req:Request,@Body(bodyPipe) input:WaitlistSignupInput){
+ private trustedOrigin(req:Request){
   const origin=req.headers.origin??'';
   let trustedOrigins:string[];
   try{trustedOrigins=normalizeAuthenticationOrigins(process.env.FAJI_WEB_ORIGINS??'');}
   catch{throw new ServiceUnavailableException('Waitlist origin configuration is unavailable.');}
   if(!origin||!trustedOrigins.includes(origin))
    throw new ForbiddenException('Waitlist signups must come from an approved Fajify website.');
-  const address=waitlistClientAddress(req);
-  return this.service.signup(input,address);
+  return waitlistClientAddress(req);
  }
+
+ @Post() @ApiBody({type:WaitlistSignupInput}) @ApiCreatedResponse({schema:{type:'object',properties:{accepted:{type:'boolean'}}}})
+ signup(@Req() req:Request,@Body(bodyPipe) input:WaitlistSignupInput){
+  return this.service.signup(input,this.trustedOrigin(req));
+ }
+
+ @Post('business') @ApiBody({type:BusinessWaitlistSignupInput}) @ApiCreatedResponse({schema:{type:'object',properties:{accepted:{type:'boolean'}}}})
+ signupBusiness(@Req() req:Request,@Body(new ValidationPipe({whitelist:true,forbidNonWhitelisted:true,transform:true,expectedType:BusinessWaitlistSignupInput})) input:BusinessWaitlistSignupInput){
+  const address=this.trustedOrigin(req);
+  return this.service.signupBusiness(input,address);
+ }
+
 }
 
 @ApiTags('admin-waitlist') @ApiBearerAuth('session')
@@ -43,4 +53,11 @@ export class AdminWaitlistController {
  @ApiQuery({name:'search',required:false,schema:{type:'string',minLength:1,maxLength:120}})
  @ApiOkResponse({type:WaitlistPage})
  list(@Query(queryPipe) query:WaitlistAdminQuery){return this.service.list(query);}
+
+ @Get('business') @RequireAdminScope('business_waitlist.read') @Header('Cache-Control','no-store')
+ @ApiQuery({name:'limit',required:false,schema:{type:'integer',minimum:1,maximum:50,default:20}})
+ @ApiQuery({name:'offset',required:false,schema:{type:'integer',minimum:0,maximum:10000,default:0}})
+ @ApiQuery({name:'search',required:false,schema:{type:'string',minLength:1,maxLength:120}})
+ @ApiOkResponse({type:BusinessWaitlistPage})
+ listBusiness(@Query(queryPipe) query:WaitlistAdminQuery){return this.service.listBusiness(query);}
 }

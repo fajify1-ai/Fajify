@@ -4,12 +4,15 @@ import {NextRequest} from 'next/server';
 import {allowedRoute,platformProxy} from '../server';
 const original=globalThis.fetch;
 const originalIngress=process.env.FAJI_TRUSTED_INGRESS;
+const originalWebOrigins=process.env.FAJI_WEB_ORIGINS;
 afterEach(()=>{
  globalThis.fetch=original;
  if(originalIngress===undefined)delete process.env.FAJI_TRUSTED_INGRESS;
  else process.env.FAJI_TRUSTED_INGRESS=originalIngress;
+ if(originalWebOrigins===undefined)delete process.env.FAJI_WEB_ORIGINS;
+ else process.env.FAJI_WEB_ORIGINS=originalWebOrigins;
 });
-function setup(){process.env.NODE_ENV='test';process.env.FAJI_API_URL='http://127.0.0.1:3001';process.env.FAJI_WEB_ORIGIN='https://customer.test';}
+function setup(){process.env.NODE_ENV='test';process.env.FAJI_API_URL='http://127.0.0.1:3001';process.env.FAJI_WEB_ORIGIN='https://customer.test';delete process.env.FAJI_WEB_ORIGINS;}
 function req(path:string,method='GET',origin='https://customer.test',body?:string){return new NextRequest('https://customer.test/api/platform/'+path,{method,headers:{origin,authorization:'Bearer attacker','x-forwarded-for':'attacker',cookie:'private=secret; __Secure-better-auth.session_token=opaque'},body});}
 test('contract allowlist isolates merchant, customer and deferred products',()=>{
  assert.ok(allowedRoute('discovery/venues','GET','customer'));
@@ -29,6 +32,25 @@ test('mutations reject untrusted origins and oversized payloads before fetch',as
  assert.equal((await platformProxy(req('customer/profile','PATCH','https://evil.test','{}'),'customer')).status,403);
  assert.equal((await platformProxy(req('customer/profile','PATCH',undefined,'x'.repeat(65537)),'customer')).status,413);
 });
+test('mutations accept only exact explicitly configured web origins and forward the browser origin',async()=>{
+ setup();process.env.FAJI_WEB_ORIGINS='https://customer.test,https://fajify.com';
+ let requests=0;
+ globalThis.fetch=async(input,init)=>{
+  requests++;
+  assert.equal(String(input),'http://127.0.0.1:3001/api/v1/waitlist/business');
+  assert.equal(new Headers(init?.headers).get('origin'),'https://fajify.com');
+  return Response.json({accepted:true},{status:201});
+ };
+ const trusted=new NextRequest('https://fajify.com/api/platform/waitlist/business',{method:'POST',headers:{
+  origin:'https://fajify.com','content-type':'application/json'
+ },body:'{"businessName":"Cafe One","category":"restaurant_lounge","email":"owner@example.com","whatsapp":"8012345678","consent":true}'});
+ assert.equal((await platformProxy(trusted,'unified')).status,201);
+ const untrusted=new NextRequest('https://evil.test/api/platform/waitlist/business',{method:'POST',headers:{
+  origin:'https://evil.test','content-type':'application/json'
+ },body:'{}'});
+ assert.equal((await platformProxy(untrusted,'unified')).status,403);
+ assert.equal(requests,1);
+});
 test('upstream failures, redirects and permission errors never expose internals',async()=>{
  setup();for(const status of [302,500,401,403]){globalThis.fetch=async()=>new Response('password-private-stack',{status});const result=await platformProxy(req('customer/profile'),'customer');assert.equal(result.status,status>=300&&status<400||status>=500?503:status);assert.ok(!(await result.text()).includes('password-private-stack'));}
 });
@@ -46,8 +68,11 @@ test('waitlist bridge preserves the trusted origin, omits auth cookies and condi
  setup();
  assert.equal(allowedRoute('waitlist','POST','customer'),true);
  assert.equal(allowedRoute('waitlist','POST','unified'),true);
+ assert.equal(allowedRoute('waitlist/business','POST','customer'),true);
+ assert.equal(allowedRoute('waitlist/business','POST','unified'),true);
  assert.equal(allowedRoute('waitlist','POST','business'),false);
  assert.equal(allowedRoute('admin/waitlist','GET','unified'),false);
+ assert.equal(allowedRoute('admin/waitlist/business','GET','unified'),false);
  process.env.FAJI_TRUSTED_INGRESS='true';
  const visitor=()=>new NextRequest('https://customer.test/api/platform/waitlist',{method:'POST',headers:{
   origin:'https://customer.test','content-type':'application/json','x-faji-client-ip':'203.0.113.8',
@@ -62,12 +87,25 @@ test('waitlist bridge preserves the trusted origin, omits auth cookies and condi
   return Response.json({accepted:true},{status:201});
  };
  assert.equal((await platformProxy(visitor(),'unified')).status,201);
+ const businessVisitor=()=>new NextRequest('https://customer.test/api/platform/waitlist/business',{method:'POST',headers:{
+  origin:'https://customer.test','content-type':'application/json','x-faji-client-ip':'203.0.113.9',
+  cookie:'__Secure-better-auth.session_token=opaque'
+ },body:'{"businessName":"Cafe One","category":"restaurant_lounge","email":"owner@example.com","whatsapp":"8012345678","consent":true}'});
+ globalThis.fetch=async(input,init)=>{
+  assert.equal(String(input),'http://127.0.0.1:3001/api/v1/waitlist/business');
+  const headers=new Headers(init?.headers);
+  assert.equal(headers.get('cookie'),null);
+  assert.equal(headers.get('origin'),'https://customer.test');
+  assert.equal(headers.get('x-faji-client-ip'),'203.0.113.9');
+  return Response.json({accepted:true},{status:201});
+ };
+ assert.equal((await platformProxy(businessVisitor(),'unified')).status,201);
  process.env.FAJI_TRUSTED_INGRESS='false';
  globalThis.fetch=async(_input,init)=>{
   assert.equal(new Headers(init?.headers).get('x-faji-client-ip'),null);
   return Response.json({accepted:true},{status:201});
  };
- assert.equal((await platformProxy(visitor(),'unified')).status,201);
+ assert.equal((await platformProxy(businessVisitor(),'unified')).status,201);
  globalThis.fetch=async()=>new Response('Invalid origin',{status:400});
  const rejected=await platformProxy(visitor(),'unified');
  assert.equal(rejected.status,400);
@@ -82,6 +120,7 @@ test('Admin bridge exposes only reviewed admin workflows and preserves the stric
   ['admin/finance/payments/00000000-0000-4000-8000-000000000000/simulation','POST'],
   ['admin/operations/overview','GET'],
   ['admin/waitlist','GET'],
+  ['admin/waitlist/business','GET'],
   ['admin/operations/audit','GET'],
   ['admin/operations/command-audit','GET'],
   ['admin/governance/reviews','GET'],

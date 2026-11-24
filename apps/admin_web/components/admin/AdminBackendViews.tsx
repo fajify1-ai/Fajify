@@ -14,10 +14,19 @@ import type {AdminView} from './types';
 type Row=Record<string,unknown>;
 type SupportMessage={id:string;body:string;authorKind:string;createdAt:string};
 type SupportDetail=Row&{messages:AdminPage<SupportMessage>};
-type WaitlistSignup=Row&{id:string;email:string;whatsapp:string;consentVersion:string;consentedAt:string;createdAt:string};
+type WaitlistSignup=Row&{id:string;email:string;whatsapp:string;consentVersion:string;consentedAt:string;createdAt:string;businessName?:never;category?:never};
+type BusinessWaitlistSignup=Row&{id:string;email:string;whatsapp:string;consentVersion:string;consentedAt:string;createdAt:string;businessName:string;category:string};
+type WaitlistRecord=WaitlistSignup|BusinessWaitlistSignup;
 type AdminViewWithApi=Exclude<AdminView,'overview'|'applications'|'payments'|'settings'>;
 type RequestState<T>={data:T|null;loading:boolean;error:string|null};
 const nextIncidentStates:Record<string,string[]>={open:['investigating','resolved'],investigating:['mitigated','resolved'],mitigated:['investigating','resolved'],resolved:['investigating']};
+const businessWaitlistCategoryLabels:Record<string,string>={
+ party_event_organizer:'Party & event organizers',
+ restaurant_lounge:'Restaurants & lounges',
+ event_venue:'Event venues',
+ fun_recreation:'Fun & recreation',
+ other:'Others'
+};
 
 function useResource<T>(path:string|null){
  const [state,setState]=useState<RequestState<T>>({data:null,loading:false,error:null});
@@ -285,13 +294,17 @@ function csvCell(value:string){
  return `"${safe.replaceAll('"','""')}"`;
 }
 
-function WaitlistWorkspace(){
+function isBusinessWaitlistSignup(item:WaitlistRecord):item is BusinessWaitlistSignup{
+ return typeof item.businessName==='string'&&typeof item.category==='string';
+}
+
+function WaitlistWorkspace({business=false}:{business?:boolean}){
  const [search,setSearch]=useState('');
  const [submitted,setSubmitted]=useState('');
  const query=new URLSearchParams({limit:'50',offset:'0'});
  if(submitted)query.set('search',submitted);
- const path=`admin/waitlist?${query.toString()}`;
- const {page,loading,error,refresh,hasMore,loadingMore,moreError,loadMore}=usePage<WaitlistSignup>(path);
+ const path=`admin/waitlist${business?'/business':''}?${query.toString()}`;
+ const {page,loading,error,refresh,hasMore,loadingMore,moreError,loadMore}=usePage<WaitlistRecord>(path);
  function submit(event:React.FormEvent<HTMLFormElement>){
   event.preventDefault();
   const value=search.trim();
@@ -299,23 +312,26 @@ function WaitlistWorkspace(){
   else setSubmitted(value);
  }
  function exportCsv(){
-  const headings=['Email','WhatsApp','Consent version','Consented at','Joined at'];
-  const lines=[headings,...page.items.map(item=>[item.email,item.whatsapp,item.consentVersion,item.consentedAt,item.createdAt])]
+  const headings=business?['Business name','Category','Email','WhatsApp','Consent version','Consented at','Joined at']:['Email','WhatsApp','Consent version','Consented at','Joined at'];
+  const lines=[headings,...page.items.map(item=>business&&isBusinessWaitlistSignup(item)
+   ?[item.businessName,businessWaitlistCategoryLabels[item.category]??item.category,item.email,item.whatsapp,item.consentVersion,item.consentedAt,item.createdAt]
+   :[item.email,item.whatsapp,item.consentVersion,item.consentedAt,item.createdAt])]
    .map(row=>row.map(csvCell).join(','));
   const file=new Blob([`\uFEFF${lines.join('\r\n')}`],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(file),link=document.createElement('a');
   link.href=url;
-  link.download='fajify-waitlist-signups.csv';
+  link.download=business?'fajify-business-waitlist-signups.csv':'fajify-customer-waitlist-signups.csv';
   document.body.append(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
  }
+ const heading=business?'Business waitlist signups':'Customer waitlist signups';
  return <div className="space-y-5">
-  <Card><CardHeader><CardTitle>Waitlist signups</CardTitle><CardDescription>Only visitors who consented to early-access contact are stored. Email and WhatsApp numbers are personal data; handle exports securely.</CardDescription></CardHeader>
+  <Card><CardHeader><CardTitle>{heading}</CardTitle><CardDescription>{business?'Business interest is stored separately from account registration and formal business applications.':'Only visitors who consented to early-access contact are stored.'} Email and WhatsApp numbers are personal data; handle exports securely.</CardDescription></CardHeader>
    <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-end">
     <form className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row" onSubmit={submit}>
-     <label className="min-w-0 flex-1 space-y-1 text-xs font-medium">Search email or WhatsApp<Input value={search} onChange={event=>setSearch(event.target.value)} maxLength={120} placeholder="Search signups" aria-label="Search signups by email or WhatsApp"/></label>
+     <label className="min-w-0 flex-1 space-y-1 text-xs font-medium">Search {business?'business, category, email or WhatsApp':'email or WhatsApp'}<Input value={search} onChange={event=>setSearch(event.target.value)} maxLength={120} placeholder="Search signups" aria-label={`Search ${business?'business':'customer'} waitlist signups`}/></label>
      <Button type="submit" variant="outline">Search</Button>
      {submitted&&<Button type="button" variant="ghost" onClick={()=>{setSearch('');setSubmitted('');}}>Clear</Button>}
     </form>
@@ -323,7 +339,8 @@ function WaitlistWorkspace(){
    </CardContent>
   </Card>
   <PageFrame title="Consented contact list" description={`${page.items.length} signup${page.items.length===1?'':'s'} currently loaded${submitted?` for “${submitted}”`:''}. CSV export includes only loaded rows; load further pages to include more.`} loading={loading} error={error} onRefresh={refresh} hasMore={hasMore} loadingMore={loadingMore} moreError={moreError} onLoadMore={()=>void loadMore()}>
-   {page.items.length?<div className="space-y-3">{page.items.map(item=><article key={item.id} className="grid gap-3 rounded-xl border p-4 sm:grid-cols-2 xl:grid-cols-5">
+   {page.items.length?<div className="space-y-3">{page.items.map(item=><article key={item.id} className={`grid gap-3 rounded-xl border p-4 ${business?'sm:grid-cols-2 xl:grid-cols-6':'sm:grid-cols-2 xl:grid-cols-5'}`}>
+    {business&&isBusinessWaitlistSignup(item)&&<><div className="min-w-0"><p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Business</p><p className="mt-1 break-words text-sm font-medium">{item.businessName}</p></div><div><p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Category</p><p className="mt-1 text-sm">{businessWaitlistCategoryLabels[item.category]??item.category}</p></div></>}
     <div className="min-w-0"><p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Email</p><p className="mt-1 break-all text-sm font-medium">{item.email}</p></div>
     <div><p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">WhatsApp</p><p className="mt-1 text-sm font-medium">{item.whatsapp}</p></div>
     <div><p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Consent</p><p className="mt-1 text-sm">{item.consentVersion}</p></div>
@@ -381,6 +398,7 @@ export function AdminOverviewData(){
 
 export default function AdminBackendViews({view}:{view:AdminViewWithApi}){
  if(view==='waitlist')return <WaitlistWorkspace/>;
+ if(view==='business-waitlist')return <WaitlistWorkspace business/>;
  if(view==='reviews'||view==='restrictions')return <GovernanceWorkspace view={view}/>;
  if(view==='support')return <SupportWorkspace/>;
  if(view==='incidents')return <IncidentsWorkspace/>;

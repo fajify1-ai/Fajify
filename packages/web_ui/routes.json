@@ -760,7 +760,17 @@
     "audience": "customer"
   },
   {
+    "path": "waitlist/business",
+    "method": "POST",
+    "audience": "customer"
+  },
+  {
     "path": "admin/waitlist",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/waitlist/business",
     "method": "GET",
     "audience": "admin"
   }

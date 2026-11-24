@@ -9824,6 +9824,42 @@
         ]
       }
     },
+    "/api/v1/waitlist/business": {
+      "post": {
+        "operationId": "WaitlistController_signupBusiness_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BusinessWaitlistSignupInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accepted": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "waitlist"
+        ]
+      }
+    },
     "/api/v1/admin/waitlist": {
       "get": {
         "operationId": "AdminWaitlistController_list_v1",
@@ -9868,6 +9904,65 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/WaitlistPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "admin-waitlist"
+        ]
+      }
+    },
+    "/api/v1/admin/waitlist/business": {
+      "get": {
+        "operationId": "AdminWaitlistController_listBusiness_v1",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000,
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BusinessWaitlistPage"
                 }
               }
             }
@@ -15455,6 +15550,46 @@
           "consent"
         ]
       },
+      "BusinessWaitlistSignupInput": {
+        "type": "object",
+        "properties": {
+          "businessName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 120
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "party_event_organizer",
+              "restaurant_lounge",
+              "event_venue",
+              "fun_recreation",
+              "other"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254
+          },
+          "whatsapp": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 18,
+            "example": "+234 801 234 5678"
+          },
+          "consent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "businessName",
+          "category",
+          "email",
+          "whatsapp",
+          "consent"
+        ]
+      },
       "WaitlistSignupView": {
         "type": "object",
         "properties": {
@@ -15497,6 +15632,75 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/WaitlistSignupView"
+            }
+          },
+          "nextOffset": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextOffset"
+        ]
+      },
+      "BusinessWaitlistSignupView": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "businessName": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "party_event_organizer",
+              "restaurant_lounge",
+              "event_venue",
+              "fun_recreation",
+              "other"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "whatsapp": {
+            "type": "string"
+          },
+          "consentVersion": {
+            "type": "string"
+          },
+          "consentedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "businessName",
+          "category",
+          "email",
+          "whatsapp",
+          "consentVersion",
+          "consentedAt",
+          "createdAt"
+        ]
+      },
+      "BusinessWaitlistPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BusinessWaitlistSignupView"
             }
           },
           "nextOffset": {

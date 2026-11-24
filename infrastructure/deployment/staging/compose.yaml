@@ -70,7 +70,7 @@ services:
       FAJI_DB_NAME: fajify_staging_local
       FAJI_DB_PASSWORD_SECRET: db_runtime_password
       BETTER_AUTH_URL: https://api.fajify.com
-      FAJI_WEB_ORIGINS: https://preview.fajify.com
+      FAJI_WEB_ORIGINS: https://preview.fajify.com,https://admin-dev.fajify.com,https://fajify.com
       FAJI_TRUSTED_PROXY_CIDRS: 172.30.88.0/24
       FAJI_REGISTRATION_ENABLED: 'true'
       S3_ENDPOINT: ${S3_ENDPOINT:?configure private staging object store}
@@ -104,6 +104,7 @@ services:
     environment:
       FAJI_API_URL: http://api:3001
       FAJI_WEB_ORIGIN: https://preview.fajify.com
+      FAJI_WEB_ORIGINS: https://preview.fajify.com,https://fajify.com
       FAJI_ALLOW_INTERNAL_HTTP: 'true'
       FAJI_TRUSTED_INGRESS: 'true'
     networks:
@@ -142,6 +143,7 @@ services:
     environment:
       FAJI_API_URL: http://api:3001
       FAJI_WEB_ORIGIN: https://preview.fajify.com
+      FAJI_WEB_ORIGINS: https://preview.fajify.com,https://fajify.com
       FAJI_ALLOW_INTERNAL_HTTP: 'true'
       FAJI_TRUSTED_INGRESS: 'true'
     networks:
