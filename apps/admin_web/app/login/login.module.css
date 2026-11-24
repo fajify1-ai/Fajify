@@ -209,23 +209,6 @@
   animation: spin 650ms linear infinite;
 }
 
-.accessNote {
-  margin: 24px 0 0;
-  padding-top: 18px;
-  border-top: 1px solid #edf1ee;
-  color: #5e626c;
-  font-size: 11px;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.accessNote span {
-  margin-right: 6px;
-  color: #8f1d19;
-  font-size: 8px;
-  vertical-align: 1px;
-}
-
 .textButton {
   display: block;
   margin: 17px auto 0;
@@ -237,17 +220,6 @@
   font: inherit;
   font-size: 13px;
   font-weight: 650;
-}
-
-.footer {
-  z-index: 1;
-  display: flex;
-  width: min(100%, 440px);
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 22px;
-  color: #5e626c;
-  font-size: 11px;
 }
 
 @keyframes rise-in {
@@ -272,10 +244,6 @@
   .card {
     padding: 30px 24px;
     border-radius: 16px;
-  }
-
-  .footer {
-    font-size: 10px;
   }
 }
 

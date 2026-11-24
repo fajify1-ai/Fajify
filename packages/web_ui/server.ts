@@ -50,10 +50,16 @@ export async function platformProxy(request:NextRequest,audience:'customer'|'bus
    if(path.startsWith('waitlist')&&upstream.status===400){
     try{
      const errorBody:unknown=JSON.parse(raw);
-     if(typeof errorBody==='object'&&errorBody!==null&&'message'in errorBody){
-      const detail=errorBody.message;
+     if(typeof errorBody==='object'&&errorBody!==null){
+      const apiError='error'in errorBody?errorBody.error:undefined;
+      const detail=apiError&&typeof apiError==='object'&&'message'in apiError
+       ?apiError.message
+       :'message'in errorBody?errorBody.message:undefined;
       if(typeof detail==='string'&&detail.length<=200)message=detail;
-      else if(Array.isArray(detail)&&detail.every(item=>typeof item==='string')&&detail.length<=5)message=detail.join(' ');
+      else if(Array.isArray(detail)&&detail.length<=5&&detail.every(item=>typeof item==='string'&&item.length<=200)){
+       const validationMessage=detail.join(' ');
+       if(validationMessage.length<=500)message=validationMessage;
+      }
      }
     }catch{message='The request could not be completed. Check your details and try again.';}
    }
