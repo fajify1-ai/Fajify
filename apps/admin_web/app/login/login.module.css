@@ -1,4 +1,6 @@
 .page {
+  --admin-brand: #b4231e;
+  --admin-brand-hover: #8f1d19;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -8,9 +10,9 @@
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 50% 34%, rgba(35, 91, 77, 0.1), transparent 44%),
-    #f5f7f6;
-  color: #17231f;
+    radial-gradient(ellipse at 50% 34%, rgba(180, 35, 30, 0.08), transparent 44%),
+    #f7f8fa;
+  color: #20232a;
 }
 
 .glow {
@@ -19,9 +21,9 @@
   height: 540px;
   top: -310px;
   right: -170px;
-  border: 1px solid rgba(32, 99, 78, 0.1);
+  border: 1px solid rgba(180, 35, 30, 0.1);
   border-radius: 50%;
-  box-shadow: 0 0 0 52px rgba(32, 99, 78, 0.025), 0 0 0 104px rgba(32, 99, 78, 0.02);
+  box-shadow: 0 0 0 52px rgba(180, 35, 30, 0.025), 0 0 0 104px rgba(180, 35, 30, 0.02);
   pointer-events: none;
 }
 
@@ -29,49 +31,37 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 30px;
-  color: #163f34;
-  font-size: 21px;
-  font-weight: 750;
-  letter-spacing: -0.8px;
+  color: #20232a;
 }
 
-.mark {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border-radius: 11px;
-  background: #17684f;
-  color: #fff;
-  font-size: 20px;
-  font-weight: 800;
-  box-shadow: 0 5px 12px rgba(23, 104, 79, 0.2);
+.logo {
+  display: block;
+  width: 110px;
+  height: auto;
 }
 
 .brandAdmin {
-  margin-left: 8px;
-  color: #74837d;
+  color: #5e626c;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  vertical-align: 2px;
 }
 
 .card {
   z-index: 1;
   width: min(100%, 440px);
   padding: 42px;
-  border: 1px solid #e1e8e4;
+  border: 1px solid #e2e4e8;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 24px 70px rgba(28, 54, 43, 0.1), 0 2px 6px rgba(28, 54, 43, 0.035);
+  box-shadow: 0 24px 70px rgba(32, 35, 42, 0.08), 0 2px 6px rgba(32, 35, 42, 0.035);
   animation: rise-in 420ms ease-out both;
 }
 
 .eyebrow {
-  color: #367760;
+  color: #8f1d19;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 1.5px;
@@ -79,7 +69,7 @@
 
 .card h1 {
   margin: 14px 0 8px;
-  color: #17231f;
+  color: #20232a;
   font-size: clamp(26px, 5vw, 31px);
   font-weight: 700;
   letter-spacing: -1.1px;
@@ -88,7 +78,7 @@
 
 .subtitle {
   margin: 0 0 29px;
-  color: #687871;
+  color: #5e626c;
   font-size: 14px;
   line-height: 1.6;
 }
@@ -100,7 +90,7 @@
 
 .form label {
   margin: 0 0 8px;
-  color: #34443d;
+  color: #363a43;
   font-size: 13px;
   font-weight: 650;
 }
@@ -110,23 +100,23 @@
   min-height: 48px;
   box-sizing: border-box;
   padding: 0 13px;
-  border: 1px solid #d5dfd9;
+  border: 1px solid #d7d9de;
   border-radius: 9px;
   outline: none;
   background: #fff;
-  color: #17231f;
+  color: #20232a;
   font: inherit;
   font-size: 14px;
   transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
 }
 
 .form input:hover {
-  border-color: #9db5a8;
+  border-color: #9b9fa7;
 }
 
 .form input:focus-visible {
-  border-color: #28775b;
-  box-shadow: 0 0 0 3px rgba(40, 119, 91, 0.16);
+  border-color: #b4231e;
+  box-shadow: 0 0 0 3px rgba(180, 35, 30, 0.16);
 }
 
 .passwordLabel {
@@ -150,7 +140,7 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: #367760;
+  color: #8f1d19;
   cursor: pointer;
   font: inherit;
   font-size: 12px;
@@ -159,14 +149,14 @@
 
 .reveal:hover,
 .textButton:hover {
-  color: #124a38;
+  color: #741713;
   text-decoration: underline;
 }
 
 .reveal:focus-visible,
 .textButton:focus-visible,
 .submit:focus-visible {
-  outline: 3px solid rgba(40, 119, 91, 0.28);
+  outline: 3px solid rgba(180, 35, 30, 0.28);
   outline-offset: 3px;
 }
 
@@ -190,7 +180,7 @@
   margin-top: 23px;
   border: 0;
   border-radius: 9px;
-  background: #17684f;
+  background: var(--admin-brand);
   color: #fff;
   cursor: pointer;
   font: inherit;
@@ -201,8 +191,8 @@
 
 .submit:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: #12583f;
-  box-shadow: 0 7px 16px rgba(23, 104, 79, 0.2);
+  background: var(--admin-brand-hover);
+  box-shadow: 0 7px 16px rgba(180, 35, 30, 0.2);
 }
 
 .submit:disabled {
@@ -223,7 +213,7 @@
   margin: 24px 0 0;
   padding-top: 18px;
   border-top: 1px solid #edf1ee;
-  color: #718078;
+  color: #5e626c;
   font-size: 11px;
   line-height: 1.5;
   text-align: center;
@@ -231,7 +221,7 @@
 
 .accessNote span {
   margin-right: 6px;
-  color: #2f8967;
+  color: #8f1d19;
   font-size: 8px;
   vertical-align: 1px;
 }
@@ -242,7 +232,7 @@
   padding: 7px;
   border: 0;
   background: transparent;
-  color: #367760;
+  color: #8f1d19;
   cursor: pointer;
   font: inherit;
   font-size: 13px;
@@ -256,7 +246,7 @@
   justify-content: space-between;
   gap: 12px;
   margin-top: 22px;
-  color: #89958f;
+  color: #5e626c;
   font-size: 11px;
 }
 

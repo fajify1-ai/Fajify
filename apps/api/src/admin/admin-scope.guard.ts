@@ -4,7 +4,7 @@ import {DATABASE_POOL} from '../tokens';
 import type {VerifiedIdentity} from '../auth/identity.types';
 
 export type AdminScope='operations.read'|'audit.read'|'governance.read'|'governance.write'|
- 'identity.write'|'finance.write'|'finance.read'|'support.read'|'support.write'|'integrations.read'|'reports.read'|'monitoring.read'|'incidents.write';
+ 'identity.write'|'finance.write'|'finance.read'|'support.read'|'support.write'|'integrations.read'|'reports.read'|'monitoring.read'|'incidents.write'|'waitlist.read'|'business_waitlist.read';
 const ADMIN_SCOPE_KEY='faji:m8:required-admin-scope';
 export const RequireAdminScope=(scope:AdminScope)=>SetMetadata(ADMIN_SCOPE_KEY,scope);
 export const RequireAdminScopes=(...scopes:AdminScope[])=>SetMetadata(ADMIN_SCOPE_KEY,scopes);

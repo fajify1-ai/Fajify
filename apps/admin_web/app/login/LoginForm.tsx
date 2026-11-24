@@ -2,6 +2,7 @@
 
 import {useState,type FormEvent} from 'react';
 import {authPost} from '@faji/web-auth/client';
+import Image from 'next/image';
 import styles from './login.module.css';
 
 export default function LoginForm(){
@@ -61,8 +62,8 @@ export default function LoginForm(){
  return <main className={styles.page}>
   <div className={styles.glow} aria-hidden="true"/>
   <header className={styles.brand}>
-   <span className={styles.mark} aria-hidden="true">F</span>
-   <span>fajify<span className={styles.brandAdmin}>ADMIN</span></span>
+   <Image className={styles.logo} src="/brand/fajify-logo-primary-horizontal.svg" alt="Fajify" width={110} height={41} priority/>
+   <span className={styles.brandAdmin}>ADMIN</span>
   </header>
   <section className={styles.card} aria-labelledby="login-title">
    <div className={styles.eyebrow}>SECURE OPERATIONS PORTAL</div>

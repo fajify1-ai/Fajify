@@ -1,0 +1,186 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: Inter;
+  src: url("/fonts/inter-regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url("/fonts/inter-bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+
+@theme inline {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+}
+
+:root {
+  color-scheme: light;
+  --background: #f7f8fa;
+  --foreground: #20232a;
+  --card: #ffffff;
+  --card-foreground: #20232a;
+  --popover: #ffffff;
+  --popover-foreground: #20232a;
+  --primary: #b4231e;
+  --primary-foreground: #ffffff;
+  --secondary: #f0f1f3;
+  --secondary-foreground: #363a43;
+  --muted: #f2f3f5;
+  --muted-foreground: #5e626c;
+  --accent: #fce9e7;
+  --accent-foreground: #8f1d19;
+  --destructive: #b42318;
+  --border: #e2e4e8;
+  --input: #d7d9de;
+  --ring: #c4312a;
+  --success: #e8f5ed;
+  --success-foreground: #166534;
+  --warning: #fff3dc;
+  --warning-foreground: #7a4d00;
+  --brand: #fa3f38;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #3d4149;
+  --sidebar-muted: #727680;
+  --sidebar-active: #fff0ef;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #111214;
+  --foreground: #f2f3f5;
+  --card: #191a1d;
+  --card-foreground: #f2f3f5;
+  --popover: #202125;
+  --popover-foreground: #f2f3f5;
+  --primary: #f16b64;
+  --primary-foreground: #24100e;
+  --secondary: #292a2e;
+  --secondary-foreground: #ededf0;
+  --muted: #242529;
+  --muted-foreground: #b6b8bf;
+  --accent: #382220;
+  --accent-foreground: #ffaaa4;
+  --destructive: #ff7870;
+  --border: #303136;
+  --input: #3a3b41;
+  --ring: #ff7169;
+  --success: #183125;
+  --success-foreground: #93e2b2;
+  --warning: #382b16;
+  --warning-foreground: #f2c56b;
+  --brand: #ff6a63;
+  --sidebar: #17181a;
+  --sidebar-foreground: #e5e6e9;
+  --sidebar-muted: #a4a6ad;
+  --sidebar-active: #39211f;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  min-width: 320px;
+  background: var(--background);
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand) 24%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.admin-sidebar {
+  width: 256px;
+}
+
+.admin-sidebar[data-collapsed="true"] {
+  width: 76px;
+}
+
+.admin-main {
+  min-height: 100vh;
+  margin-left: 256px;
+  transition: margin-left 200ms ease;
+}
+
+.admin-shell-collapsed .admin-main {
+  margin-left: 76px;
+}
+
+.admin-shell-collapsed .admin-sidebar nav button {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus {
+  outline: none;
+}
+
+@media (max-width: 1023px) {
+  .admin-main,
+  .admin-shell-collapsed .admin-main {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -79,7 +79,7 @@ export default function WaitlistPage() {
           <div className="waitlist-eyebrow">
             <span>First access</span>
             <span className="waitlist-eyebrow-line" />
-            <span>Coming soon</span>
+            <span>Join today</span>
           </div>
           <h1 id="waitlist-hero-title">
             Good times.
@@ -138,8 +138,7 @@ export default function WaitlistPage() {
           </h2>
           <p>
             Be among the first to discover and book the best places and
-            experiences around you. The waitlist opens soon—check back here to
-            save your spot.
+            experiences around you. Join now for early access.
           </p>
         </div>
         <WaitlistForm />
