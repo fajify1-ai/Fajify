@@ -111,6 +111,21 @@ test('waitlist bridge preserves the trusted origin, omits auth cookies and condi
  assert.equal(rejected.status,400);
  assert.equal((await rejected.json()).message,'The request could not be completed. Check your details and try again.');
 });
+test('waitlist bridge explains API validation failures for customer and business forms',async()=>{
+ setup();
+ const validations=[
+  {path:'waitlist',message:['email must be an email','Enter a valid Nigerian mobile number.']},
+  {path:'waitlist/business',message:['businessName must be longer than or equal to 2 characters','Enter a valid Nigerian mobile number.']}
+ ];
+ for(const validation of validations){
+  globalThis.fetch=async()=>Response.json({
+   error:{code:'VALIDATION_ERROR',message:validation.message,requestId:'safe-test-id'}
+  },{status:400});
+  const response=await platformProxy(req(validation.path,'POST','https://customer.test','{}'),'unified');
+  assert.equal(response.status,400);
+  assert.equal((await response.json()).message,validation.message.join(' '));
+ }
+});
 test('Admin bridge exposes only reviewed admin workflows and preserves the strict allowlist',async()=>{
  for(const [path,method] of [
   ['admin/governance/approvals','GET'],

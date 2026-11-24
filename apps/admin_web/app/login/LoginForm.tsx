@@ -66,7 +66,7 @@ export default function LoginForm(){
    <span className={styles.brandAdmin}>ADMIN</span>
   </header>
   <section className={styles.card} aria-labelledby="login-title">
-   <div className={styles.eyebrow}>SECURE OPERATIONS PORTAL</div>
+   <div className={styles.eyebrow}>OPERATION PORTAL</div>
    <h1 id="login-title">{heading}</h1>
    <p className={styles.subtitle}>{subtitle}</p>
    <form onSubmit={submit} className={styles.form}>
@@ -99,11 +99,6 @@ export default function LoginForm(){
    {(secondFactor||stepUp)&&<button type="button" className={styles.textButton} onClick={()=>{setUseBackupCode(value=>!value);setMessage('');}}>
     {useBackupCode?'Use authenticator code':'Use a recovery code'}
    </button>}
-   {!secondFactor&&!stepUp&&<p className={styles.accessNote}><span aria-hidden="true">●</span> Access is restricted to authorized Fajify administrators.</p>}
   </section>
-  <footer className={styles.footer}>
-   <span>Fajify Administration</span>
-   <span>Protected by Better Auth</span>
-  </footer>
  </main>;
 }
