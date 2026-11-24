@@ -115,7 +115,14 @@ test('waitlist bridge explains API validation failures for customer and business
  setup();
  const validations=[
   {path:'waitlist',message:['email must be an email','Enter a valid Nigerian mobile number.']},
-  {path:'waitlist/business',message:['businessName must be longer than or equal to 2 characters','Enter a valid Nigerian mobile number.']}
+  {path:'waitlist/business',message:[
+   'businessName must match /\\S/ regular expression',
+   'businessName must be longer than or equal to 2 characters',
+   'category must be one of the following values: party_event_organizer, restaurant_lounge, event_venue, fun_recreation, other',
+   'email must be an email',
+   'whatsapp must be longer than or equal to 7 characters',
+   'consent must be equal to true'
+  ]}
  ];
  for(const validation of validations){
   globalThis.fetch=async()=>Response.json({
