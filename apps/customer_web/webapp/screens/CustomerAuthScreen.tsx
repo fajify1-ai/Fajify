@@ -7,13 +7,18 @@ type Props = {
   initialMode: AuthMode
   onBack: () => void
   onComplete: () => void
+  onContinue?: () => void
+  onResendVerification?: (email:string) => Promise<void>
   authenticate?: (mode: AuthMode, form: {name:string;email:string;phone:string;password:string;termsAccepted:boolean}) => Promise<void>
   onRecovery?: () => void
 }
 
-export default function CustomerAuthScreen({ initialMode, onBack, onComplete, authenticate, onRecovery }: Props) {
+export default function CustomerAuthScreen({ initialMode, onBack, onComplete, onContinue, onResendVerification, authenticate, onRecovery }: Props) {
   const [busy,setBusy] = useState(false)
+  const [verificationBusy,setVerificationBusy] = useState(false)
   const [error,setError] = useState('')
+  const [verificationMessage,setVerificationMessage] = useState('')
+  const [registrationComplete,setRegistrationComplete] = useState(false)
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [showPassword, setShowPassword] = useState(false)
   const [form, setForm] = useState({
@@ -26,6 +31,20 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
 
   const update = (field: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [field]: value }))
+
+  async function resendVerification(){
+    if(!onResendVerification || verificationBusy)return
+    setVerificationBusy(true)
+    setVerificationMessage('')
+    try{
+      await onResendVerification(form.email.trim())
+      setVerificationMessage('If this account needs verification, a verification email has been sent.')
+    }catch{
+      setVerificationMessage('A verification email could not be sent right now. Please try again later.')
+    }finally{
+      setVerificationBusy(false)
+    }
+  }
 
   return (
     <main data-connected-auth={authenticate ? true : undefined} className="grid min-h-screen bg-white font-[family-name:var(--font-ui)] lg:grid-cols-[1.05fr_0.95fr]">
@@ -69,14 +88,20 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
             </p>
           </div>
 
-          <form
+          {!registrationComplete && <form
             className="flex flex-col gap-4"
             onSubmit={async (event) => {
               event.preventDefault()
               if(busy)return
               if(!authenticate){onComplete();return}
-              setBusy(true);setError('')
-              try{await authenticate(mode,{...form,termsAccepted})}catch(error){setError(error instanceof Error?error.message:'Sign-in unavailable. Please retry.')}finally{setBusy(false)}
+              setBusy(true);setError('');setVerificationMessage('')
+              try{
+                await authenticate(mode,{...form,termsAccepted})
+                if(mode==='register'){
+                  setRegistrationComplete(true)
+                  setForm(current=>({...current,password:''}))
+                }
+              }catch(error){setError(error instanceof Error?error.message:'Sign-in unavailable. Please retry.')}finally{setBusy(false)}
             }}
           >
             {mode === "register" && (
@@ -169,9 +194,16 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
               {busy?"Please wait…":mode === "signin" ? "Sign in" : "Create account"}
             </button>
             {error&&<p role="alert" className="text-sm text-red-700">{error}</p>}
-          </form>
+          </form>}
 
-          <p className="mt-6 text-center text-sm font-medium text-[#777477]">
+          {registrationComplete&&<section className="mt-6 rounded-2xl border border-[#DDEBDD] bg-[#F5FBF5] p-5" aria-labelledby="registration-success">
+            <h3 id="registration-success" className="text-base font-bold text-[#214D2A]">Account created</h3>
+            <p className="mt-2 text-sm leading-6 text-[#4F6652]">We attempted to send a verification link to {form.email}. Check your inbox and spam folder. You can continue now, but verify your email before your next sign-in.</p>
+            {onContinue&&<button type="button" onClick={onContinue} className="mt-4 h-12 w-full rounded-2xl bg-[#FA3F38] text-sm font-black text-white">Continue to Fajify</button>}
+            {onResendVerification&&<button type="button" disabled={verificationBusy} onClick={()=>void resendVerification()} className="mt-3 w-full rounded-xl px-3 py-2 text-sm font-bold text-[#FA3F38] disabled:opacity-60">{verificationBusy?'Sending…':'Resend verification email'}</button>}
+          </section>}
+
+          {!registrationComplete&&<p className="mt-6 text-center text-sm font-medium text-[#777477]">
             {mode === "signin" ? "New to fajify?" : "Already have an account?"}
             <button
               onClick={() => setMode(mode === "signin" ? "register" : "signin")}
@@ -179,7 +211,9 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, au
             >
               {mode === "signin" ? "Create an account" : "Sign in"}
             </button>
-          </p>
+          </p>}
+          {!registrationComplete&&mode==='signin'&&onResendVerification&&<button type="button" disabled={verificationBusy} onClick={()=>void resendVerification()} className="mt-3 text-center text-sm font-bold text-[#FA3F38] disabled:opacity-60">{verificationBusy?'Sending…':'Resend verification email'}</button>}
+          {verificationMessage&&<p role="status" className="mt-3 text-center text-sm text-[#4F6652]">{verificationMessage}</p>}
 
         </div>
       </section>

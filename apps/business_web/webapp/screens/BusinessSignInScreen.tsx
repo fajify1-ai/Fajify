@@ -7,15 +7,32 @@ type Props = {
   onRegister: () => void
   authenticate?: (email:string,password:string) => Promise<void>
   onRecovery?: () => void
+  onResendVerification?: (email:string) => Promise<void>
 }
 
-export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, authenticate, onRecovery }: Props) {
+export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, authenticate, onRecovery, onResendVerification }: Props) {
   const [recoveryPreview, setRecoveryPreview] = useState(false)
   const [busy,setBusy] = useState(false)
+  const [verificationBusy,setVerificationBusy] = useState(false)
   const [error,setError] = useState('')
+  const [verificationMessage,setVerificationMessage] = useState('')
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+
+  async function resendVerification(){
+    if(!onResendVerification||verificationBusy)return
+    setVerificationBusy(true)
+    setVerificationMessage('')
+    try{
+      await onResendVerification(email.trim())
+      setVerificationMessage('If this account needs verification, a verification email has been sent.')
+    }catch{
+      setVerificationMessage('A verification email could not be sent right now. Please try again later.')
+    }finally{
+      setVerificationBusy(false)
+    }
+  }
 
   return (
     <main className="grid min-h-screen bg-white font-[family-name:var(--font-ui)] lg:grid-cols-[1.05fr_0.95fr]">
@@ -108,6 +125,8 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, aut
             </button>
             {error&&<p role="alert" className="text-sm text-red-700">{error}</p>}
           </form>
+          {onResendVerification&&<button type="button" disabled={verificationBusy} onClick={()=>void resendVerification()} className="mt-3 text-sm font-bold text-[#FA3F38] disabled:opacity-60">{verificationBusy?'Sending…':'Resend verification email'}</button>}
+          {verificationMessage&&<p role="status" className="mt-2 text-sm text-[#4F6652]">{verificationMessage}</p>}
 
           <div className="mt-8 border-t border-[#EEEEEE] pt-7 text-center">
             <p className="text-sm font-medium text-[#777477]">New to fajify Business?</p>

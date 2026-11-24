@@ -25,6 +25,7 @@ apps/customer_mobile/android/app/src/debug/res/raw/fajify_root_ca.crt
 
 # Private staging credentials and certificates
 infrastructure/deployment/staging/.secrets/
+/Wilberry_key.pem
 
 # Private account-claim delivery files
 *.claims.json

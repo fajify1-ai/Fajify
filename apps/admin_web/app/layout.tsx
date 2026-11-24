@@ -5,7 +5,8 @@ import './globals.css';
 
 export const metadata:Metadata={
  title:{default:'Fajify Platform Admin',template:'%s | Fajify Admin'},
- description:'Restricted Fajify platform administration workspace.'
+ description:'Restricted Fajify platform administration workspace.',
+ icons:{icon:'/icon.svg',shortcut:'/icon.svg',apple:'/icon.svg'}
 };
 
 export default function Layout({children}:{children:ReactNode}){

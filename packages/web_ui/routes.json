@@ -630,6 +630,21 @@
     "audience": "admin"
   },
   {
+    "path": "admin/access/manager",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/access/admins",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/access/grants",
+    "method": "POST",
+    "audience": "admin"
+  },
+  {
     "path": "admin/governance/approvals",
     "method": "GET",
     "audience": "admin"

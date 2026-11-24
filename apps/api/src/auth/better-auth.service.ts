@@ -42,6 +42,18 @@ export class BetterAuthService implements IdentityVerifier, OnModuleInit {
     };
   const options:import('better-auth').BetterAuthOptions={secret,baseURL:this.baseURL,basePath:'/api/auth',trustedOrigins:origins,
    database:drizzleAdapter(drizzle(this.pool,{schema}),{provider:'pg',schema,transaction:true}),
+   emailVerification:emailEnabled?{
+    sendOnSignUp:true,
+    sendVerificationEmail:async({user,url})=>{
+     if(!mail)throw new APIError('SERVICE_UNAVAILABLE',{message:'Email verification delivery is not configured'});
+     await mail.sendMail({
+      from:process.env.AUTH_EMAIL_FROM??'Faji <auth@localhost>',
+      to:user.email,
+      subject:'Verify your Fajify email address',
+      text:`Verify your email address to secure your Fajify account:\n\n${url}\n\nIf you did not create this account, you can ignore this message.`
+     });
+    }
+   }:undefined,
    user:{additionalFields:{
     username:{type:'string',required:false,validator:{input:z.string().regex(/^[a-zA-Z0-9_.-]{3,40}$/)}},
     registrationPhone:{type:'string',required:false,validator:{input:z.string().regex(/^\+[1-9][0-9]{6,14}$/)}},

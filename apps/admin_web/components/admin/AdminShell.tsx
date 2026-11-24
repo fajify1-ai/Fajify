@@ -20,6 +20,7 @@ import {
  Sun,
  TriangleAlert,
  UserPlus,
+ UserCog,
  Users,
  X
 } from 'lucide-react';
@@ -56,7 +57,8 @@ const navigation:{label:string;items:NavigationItem[]}[]=[
   {id:'rides',label:'Ride reporting',icon:Activity,available:true},
   {id:'reports',label:'Platform reports',icon:ArrowUpRight,available:true},
   {id:'integrations',label:'Data consistency',icon:ShieldCheck,available:true},
-  {id:'audit',label:'Audit history',icon:LockKeyhole,available:true}
+  {id:'audit',label:'Audit history',icon:LockKeyhole,available:true},
+  {id:'access',label:'Admin access',icon:UserCog,available:true}
  ]},
  {label:'Workspace',items:[{id:'settings',label:'Platform settings',icon:Settings2,available:false}]}
 ];
@@ -78,12 +80,9 @@ const viewCopy:Record<AdminView,{title:string;description:string}>={
  reports:{title:'Platform reports',description:'View persisted platform activity and verified finance totals.'},
  audit:{title:'Audit history',description:'Review security events and audited privileged commands.'},
  integrations:{title:'Data consistency',description:'Inspect read-only cross-domain consistency checks.'},
+ access:{title:'Admin access',description:'Grant or revoke Platform Admin status and explicit operational scopes.'},
  settings:{title:'Platform settings',description:'Global settings do not have a connected administration API yet.'}
 };
-
-function initials(){
- return 'FA';
-}
 
 export function AdminShell({
  activeView,
@@ -92,6 +91,7 @@ export function AdminShell({
  applicationsMore,
  payments,
  paymentsMore,
+ canManageAdmins,
  onInspectApplication,
  children
 }:{
@@ -101,6 +101,7 @@ export function AdminShell({
  applicationsMore:boolean;
  payments:Payment[];
  paymentsMore:boolean;
+ canManageAdmins:boolean;
  onInspectApplication:(application:Application)=>void;
  children:ReactNode;
 }){
@@ -184,7 +185,7 @@ export function AdminShell({
     {navigation.map(group=><div key={group.label}>
      {!hideLabels&&<p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[.14em] text-muted-foreground">{group.label}</p>}
      <div className="space-y-1">
-      {group.items.map(item=>{
+      {group.items.filter(item=>item.id!=='access'||canManageAdmins).map(item=>{
        const Icon=item.icon,active=activeView===item.id;
        return <button key={item.id} type="button" aria-current={active?'page':undefined} aria-label={hideLabels?item.label:undefined} title={hideLabels?item.label:undefined} onClick={()=>navigate(item.id)} className={cn('group flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-[13px] font-medium transition-colors',active?'bg-[var(--sidebar-active)] text-accent-foreground':'text-[var(--sidebar-foreground)] hover:bg-muted',!item.available&&!active&&'opacity-80')}>
         <Icon className={cn('size-[17px] shrink-0',active?'text-primary':'text-[var(--sidebar-muted)]')}/>
@@ -257,7 +258,7 @@ export function AdminShell({
     <DropdownMenu>
      <DropdownMenuTrigger asChild>
       <Button type="button" variant="ghost" className="h-10 gap-2 px-1.5 sm:px-2" aria-label="Open administrator menu">
-       <span className="grid size-8 place-items-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">{initials()}</span>
+       <Image src="/icon.svg" alt="Fajify" width={32} height={32} className="size-8 rounded-full"/>
        <span className="hidden max-w-28 truncate text-left text-xs font-medium sm:block">Platform admin</span>
        <ChevronDown className="hidden size-3.5 text-muted-foreground sm:block"/>
       </Button>

@@ -32,6 +32,7 @@ import {toast} from 'sonner';
 import {z} from 'zod';
 import {AdminShell} from '../../components/admin/AdminShell';
 import AdminBackendViews,{AdminOverviewData} from '../../components/admin/AdminBackendViews';
+import AdminAccessWorkspace from '../../components/admin/AdminAccessWorkspace';
 import {DataTable,StatusBadge,type TableColumn} from '../../components/admin/DataTable';
 import type {AdminView,Application,ApplicationDetails,Payment} from '../../components/admin/types';
 import {Badge} from '../../components/ui/badge';
@@ -42,6 +43,7 @@ import {Dialog,DialogContent,DialogDescription,DialogHeader,DialogTitle} from '.
 import {Skeleton} from '../../components/ui/skeleton';
 import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator,DropdownMenuTrigger} from '../../components/ui/dropdown-menu';
 import {cn} from '../../lib/cn';
+import {adminRequest} from '../../lib/admin-api';
 
 type Page<T>={items:T[];nextOffset:number|null};
 type QueueState<T>={items:T[];nextOffset:number|null;loading:boolean;loadingMore:boolean;error:string|null};
@@ -175,6 +177,9 @@ function DetailValue({value}:{value:unknown}){
 
 export default function Console(){
  const [activeView,setActiveView]=useState<AdminView>('overview');
+ const [canManageAdmins,setCanManageAdmins]=useState(false);
+ const [managerSubject,setManagerSubject]=useState<string|null>(null);
+ const [accessManagerError,setAccessManagerError]=useState<string|null>(null);
  const [applications,setApplications]=useState<QueueState<Application>>({items:[],nextOffset:null,loading:true,loadingMore:false,error:null});
  const [payments,setPayments]=useState<QueueState<Payment>>({items:[],nextOffset:null,loading:true,loadingMore:false,error:null});
  const [selectedApplication,setSelectedApplication]=useState<{row:Application;detail:ApplicationDetails|null;loading:boolean;error:string|null}|null>(null);
@@ -183,6 +188,16 @@ export default function Console(){
  const [busy,setBusy]=useState<string|null>(null);
  const decisionForm=useForm<Acknowledgement>({resolver:zodResolver(acknowledgementSchema),defaultValues:{acknowledged:false}});
  const paymentForm=useForm<Acknowledgement>({resolver:zodResolver(acknowledgementSchema),defaultValues:{acknowledged:false}});
+
+ useEffect(()=>{
+  let active=true;
+  void adminRequest<{canManageAdmins:boolean;managerSubject:string|null}>('admin/access/manager').then(result=>{
+   if(active){setCanManageAdmins(result.canManageAdmins);setManagerSubject(result.managerSubject);}
+  }).catch(error=>{
+   if(active)setAccessManagerError(error instanceof Error?error.message:'Admin access management could not be verified.');
+  });
+  return ()=>{active=false;};
+ },[]);
 
  const refreshApplications=useCallback(async()=>{
   setApplications(current=>({...current,loading:true,error:null}));
@@ -305,8 +320,9 @@ export default function Console(){
  const searchApplications=useMemo(()=>applications.items.slice(0,50),[applications.items]);
  const activitySummary=applications.items.length+payments.items.length;
 
- return <AdminShell activeView={activeView} onNavigate={setActiveView} applications={searchApplications} applicationsMore={applications.nextOffset!==null} payments={payments.items} paymentsMore={payments.nextOffset!==null} onInspectApplication={inspect}>
+ return <AdminShell activeView={activeView} onNavigate={setActiveView} applications={searchApplications} applicationsMore={applications.nextOffset!==null} payments={payments.items} paymentsMore={payments.nextOffset!==null} canManageAdmins={canManageAdmins} onInspectApplication={inspect}>
   {activeView==='overview'&&<div className="space-y-5">
+   {accessManagerError&&<p role="status" className="rounded-lg border border-warning-foreground/15 bg-warning p-3 text-sm text-warning-foreground">Admin access management could not be verified: {accessManagerError}</p>}
    <section aria-label="Operational metrics" className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
     <MetricCard label="Business approvals" value={applications.error?'—':queueValue(applications.items.length,applications.nextOffset!==null)} description={applications.error?'The review queue is unavailable. Retry to load current records.':applications.nextOffset!==null?'Pending items loaded from the review queue.':'Applications currently returned by the review queue.'} icon={Building2} loading={applications.loading}/>
     <MetricCard label="Payment simulations" value={payments.error?'—':queueValue(payments.items.length,payments.nextOffset!==null)} description={payments.error?'The simulation queue is unavailable. Retry to load current records.':'Pending test outcomes only. This queue never represents live money movement.'} icon={CreditCard} loading={payments.loading} accent/>
@@ -353,6 +369,7 @@ export default function Console(){
   </QueueSection>}
 
   {isBackendView(activeView)&&<AdminBackendViews view={activeView}/>}
+  {activeView==='access'&&canManageAdmins&&<AdminAccessWorkspace managerSubject={managerSubject}/>}
   {activeView==='settings'&&<ComingSoon onBack={()=>setActiveView('overview')}/>}
 
   <Dialog open={selectedApplication!==null} onOpenChange={open=>{if(!open)setSelectedApplication(null);}}>
@@ -546,6 +563,6 @@ function ComingSoon({onBack}:{onBack:()=>void}){
  </Card>;
 }
 
-function isBackendView(view:AdminView):view is Exclude<AdminView,'overview'|'applications'|'payments'|'settings'>{
- return !['overview','applications','payments','settings'].includes(view);
+function isBackendView(view:AdminView):view is Exclude<AdminView,'overview'|'applications'|'payments'|'access'|'settings'>{
+ return !['overview','applications','payments','access','settings'].includes(view);
 }

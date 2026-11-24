@@ -141,6 +141,9 @@ test('Admin bridge exposes only reviewed admin workflows and preserves the stric
   ['admin/finance/simulations','GET'],
   ['admin/finance/payments/00000000-0000-4000-8000-000000000000/simulation','POST'],
   ['admin/operations/overview','GET'],
+  ['admin/access/manager','GET'],
+  ['admin/access/admins','GET'],
+  ['admin/access/grants','POST'],
   ['admin/waitlist','GET'],
   ['admin/waitlist/business','GET'],
   ['admin/operations/audit','GET'],
@@ -182,6 +185,7 @@ test('Admin bridge exposes only reviewed admin workflows and preserves the stric
   ['admin/governance/approvals','POST'],
  ] as const)assert.equal(allowedRoute(path,method,'admin'),false,`${method} ${path}`);
  assert.equal(allowedRoute('admin/finance/simulations','GET','unified'),false);
+ assert.equal(allowedRoute('admin/access/grants','POST','unified'),false);
  setup();let target='';
  globalThis.fetch=async(input)=>{target=String(input);return Response.json({items:[],nextOffset:null});};
  const response=await platformProxy(req('admin/finance/simulations?limit=20&offset=0'),'admin');

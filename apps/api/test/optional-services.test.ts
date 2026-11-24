@@ -7,6 +7,7 @@ const baseline={
  NODE_ENV:'staging',FAJI_DATABASE_URL:'postgresql://localhost:5432/faji',
  REDIS_URL:'redis://localhost:6379',BETTER_AUTH_SECRET:'a'.repeat(32),
  BETTER_AUTH_URL:'https://api.fajify.com',FAJI_WEB_ORIGINS:'https://preview.fajify.com',
+ FAJI_PLATFORM_ADMIN_OWNER_EMAIL:'fajify1@gmail.com',
 };
 
 test('explicitly disabled email and Ride storage permit staging configuration without SMTP/S3',()=>{

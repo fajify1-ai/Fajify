@@ -32,7 +32,8 @@ test('design review is inaccessible by default before rendering any fixture',asy
 
 test('delivery policy blocks reset and SMS transports while preserving password and TOTP auth',async()=>{
  const {requiresDeferredDelivery}=await import('../unified/delivery-policy');
- for(const path of ['request-password-reset','reset-password','phone-number/send-otp','phone-number/verify','two-factor/send-otp','verify-email'])assert.equal(requiresDeferredDelivery('/api/auth/'+path),true,path);
+ for(const path of ['request-password-reset','reset-password','phone-number/send-otp','phone-number/verify','two-factor/send-otp'])assert.equal(requiresDeferredDelivery('/api/auth/'+path),true,path);
+ for(const path of ['send-verification-email','verify-email'])assert.equal(requiresDeferredDelivery('/api/auth/'+path),false,path);
  for(const path of ['sign-in/email','sign-up/email','sign-out','get-session','two-factor/verify-totp','two-factor/verify-backup-code','faji/step-up'])assert.equal(requiresDeferredDelivery('/api/auth/'+path),false,path);
 });
 

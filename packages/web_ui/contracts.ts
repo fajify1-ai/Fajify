@@ -2685,6 +2685,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/access/manager": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminAccessController_manager_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/access/admins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminAccessController_admins_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/access/grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminAccessController_setAccess_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/governance/approvals": {
         parameters: {
             query?: never;
@@ -3061,6 +3109,70 @@ export interface paths {
             cookie?: never;
         };
         get: operations["AdminInsightsController_activity_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/waitlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["WaitlistController_signup_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/waitlist/business": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["WaitlistController_signupBusiness_v1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/waitlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminWaitlistController_list_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/waitlist/business": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminWaitlistController_listBusiness_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4504,6 +4616,56 @@ export interface components {
         };
         AdminCommandAuditPage: {
             items: components["schemas"]["AdminCommandAuditView"][];
+            nextOffset: number | null;
+        };
+        WaitlistSignupInput: {
+            email: string;
+            /** @example 801 234 5678 */
+            whatsapp: string;
+            consent: boolean;
+        };
+        BusinessWaitlistSignupInput: {
+            businessName: string;
+            /** @enum {string} */
+            category: "party_event_organizer" | "restaurant_lounge" | "event_venue" | "fun_recreation" | "other";
+            email: string;
+            /** @example +234 801 234 5678 */
+            whatsapp: string;
+            consent: boolean;
+        };
+        WaitlistSignupView: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            whatsapp: string;
+            consentVersion: string;
+            /** Format: date-time */
+            consentedAt: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        WaitlistPage: {
+            items: components["schemas"]["WaitlistSignupView"][];
+            nextOffset: number | null;
+        };
+        BusinessWaitlistSignupView: {
+            /** Format: uuid */
+            id: string;
+            businessName: string;
+            /** @enum {string} */
+            category: "party_event_organizer" | "restaurant_lounge" | "event_venue" | "fun_recreation" | "other";
+            /** Format: email */
+            email: string;
+            whatsapp: string;
+            consentVersion: string;
+            /** Format: date-time */
+            consentedAt: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        BusinessWaitlistPage: {
+            items: components["schemas"]["BusinessWaitlistSignupView"][];
             nextOffset: number | null;
         };
     };
@@ -9571,6 +9733,68 @@ export interface operations {
             };
         };
     };
+    AdminAccessController_manager_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        canManageAdmins?: boolean;
+                        managerSubject?: string | null;
+                    };
+                };
+            };
+        };
+    };
+    AdminAccessController_admins_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>[];
+                };
+            };
+        };
+    };
+    AdminAccessController_setAccess_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        changed?: boolean;
+                    };
+                };
+            };
+        };
+    };
     AdminGovernanceController_applications_v1: {
         parameters: {
             query?: {
@@ -10141,6 +10365,102 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminPagedResult"];
+                };
+            };
+        };
+    };
+    WaitlistController_signup_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WaitlistSignupInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        accepted?: boolean;
+                    };
+                };
+            };
+        };
+    };
+    WaitlistController_signupBusiness_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BusinessWaitlistSignupInput"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        accepted?: boolean;
+                    };
+                };
+            };
+        };
+    };
+    AdminWaitlistController_list_v1: {
+        parameters: {
+            query?: {
+                search?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WaitlistPage"];
+                };
+            };
+        };
+    };
+    AdminWaitlistController_listBusiness_v1: {
+        parameters: {
+            query?: {
+                search?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessWaitlistPage"];
                 };
             };
         };

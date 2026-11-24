@@ -73,6 +73,7 @@ services:
       FAJI_WEB_ORIGINS: https://preview.fajify.com,https://admin-dev.fajify.com,https://fajify.com
       FAJI_TRUSTED_PROXY_CIDRS: 172.30.88.0/24
       FAJI_REGISTRATION_ENABLED: 'true'
+      FAJI_PLATFORM_ADMIN_OWNER_EMAIL: fajify1@gmail.com
       S3_ENDPOINT: ${S3_ENDPOINT:?configure private staging object store}
       S3_BUCKET: ${S3_BUCKET:?configure private staging bucket}
       AUTH_EMAIL_FROM: Faji Staging <auth@faji.test>

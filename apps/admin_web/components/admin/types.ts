@@ -1,4 +1,4 @@
-export type AdminView='overview'|'applications'|'payments'|'waitlist'|'business-waitlist'|'reviews'|'restrictions'|'support'|'incidents'|'monitoring'|'customers'|'businesses'|'rides'|'reports'|'audit'|'integrations'|'settings';
+export type AdminView='overview'|'applications'|'payments'|'waitlist'|'business-waitlist'|'reviews'|'restrictions'|'support'|'incidents'|'monitoring'|'customers'|'businesses'|'rides'|'reports'|'audit'|'integrations'|'access'|'settings';
 
 export type Application={
  id:string;

@@ -6,9 +6,11 @@ import {CustomerBookingRideController,BookingRideEmptyBodyGuard} from './custome
 import {CustomerBookingRideService} from './customer-booking-ride.service';
 import {CustomerSupportNotificationsService} from './customer-support-notifications.service';
 import {AdminOperationsController} from './admin.controller';
+import {AdminAccessController} from './admin-access.controller';
 import {AdminGovernanceController,AdminSupportController,AdminIncidentController} from './admin-workflows.controller';
 import {AdminInsightsController} from './admin-insights.controller';
 import {AdminOperationsService} from './admin.service';
+import {AdminAccessService,PlatformAdminOwnerGuard} from './admin-access.service';
 import {AdminCommandService} from './admin-command.service';
 import {AdminScopeGuard} from './admin-scope.guard';
 import {AdminGovernanceService} from './admin-governance.service';
@@ -23,8 +25,8 @@ import {WaitlistService} from './waitlist.service';
 
 @Module({
  imports:[IdentityModule,CustomerModule],
- controllers:[CustomerSupportNotificationsController,CustomerBookingRideController,AdminOperationsController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController,WaitlistController,AdminWaitlistController],
- providers:[CustomerBookingRideService,BookingRideEmptyBodyGuard,CustomerSupportNotificationsService,SupportNoticeEmptyBodyGuard,WaitlistService,AdminReadAuditGuard,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminCommandService,AdminGovernanceService,AdminSupportService,
+ controllers:[CustomerSupportNotificationsController,CustomerBookingRideController,AdminOperationsController,AdminAccessController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController,WaitlistController,AdminWaitlistController],
+ providers:[CustomerBookingRideService,BookingRideEmptyBodyGuard,CustomerSupportNotificationsService,SupportNoticeEmptyBodyGuard,WaitlistService,AdminReadAuditGuard,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminAccessService,PlatformAdminOwnerGuard,AdminCommandService,AdminGovernanceService,AdminSupportService,
   AdminIncidentService,AdminInsightsService,AdminMonitorService]
 })
 export class AdminOperationsModule {}

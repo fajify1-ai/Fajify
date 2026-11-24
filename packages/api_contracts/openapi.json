@@ -8673,6 +8673,101 @@
         ]
       }
     },
+    "/api/v1/admin/access/manager": {
+      "get": {
+        "operationId": "AdminAccessController_manager_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "canManageAdmins": {
+                      "type": "boolean"
+                    },
+                    "managerSubject": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "admin-access"
+        ]
+      }
+    },
+    "/api/v1/admin/access/admins": {
+      "get": {
+        "operationId": "AdminAccessController_admins_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "admin-access"
+        ]
+      }
+    },
+    "/api/v1/admin/access/grants": {
+      "post": {
+        "operationId": "AdminAccessController_setAccess_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "changed": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "tags": [
+          "admin-access"
+        ]
+      }
+    },
     "/api/v1/admin/governance/approvals": {
       "get": {
         "operationId": "AdminGovernanceController_applications_v1",

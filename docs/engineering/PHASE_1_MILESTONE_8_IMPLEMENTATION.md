@@ -66,7 +66,7 @@ Commands accept bounded strict DTOs. State mutations require `requestKey` (8–1
 - `0102_m8_booking_ride_links.sql`: owner-scoped booking/M7 ride associations, PostGIS venue proximity validation, immutable identifiers and terminal unlink with partial uniqueness for safe rebooking.
 - `admin_incidents`, `admin_monitor_signals`, `admin_alerts` (monitored, acknowledged event inbox).
 
-The restricted runtime may SELECT scope grants, never write them; it may SELECT/INSERT immutable command/audit records but not UPDATE/DELETE them. It may modify only the designated mutable M8 domain state. Grants are added to `packages/database/scripts/grant-m5-runtime.ts`; the disposable-target verifier now accepts an explicitly marked `fajify_m8_test_*` PostgreSQL 16 database. M8 uses the same app runtime pool as existing M1–M6 domains, not a connection to the Keycloak database.
+The restricted runtime may SELECT scope grants and execute the narrowly scoped `faji_admin_set_access` security-definer function; it cannot directly write grants or application roles. API owner verification, recent privileged authentication, rate limiting, and immutable command/audit records gate that function. The runtime may SELECT/INSERT immutable command/audit records but not UPDATE/DELETE them, and may modify only designated mutable M8 domain state. Runtime grants are added to `packages/database/scripts/grant-m5-runtime.ts`; the disposable-target verifier now accepts an explicitly marked `fajify_m8_test_*` PostgreSQL 16 database. M8 uses the same app runtime pool as existing M1–M6 domains, not a connection to the Keycloak database.
 
 See [M8 operations runbook](../operations/M8_ADMIN_OPERATIONS.md) and [security analysis](../security/M8_ADMIN_SECURITY.md).
 

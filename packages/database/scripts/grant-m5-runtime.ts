@@ -31,6 +31,8 @@ export async function grantM5RuntimeGrants(pool:Pool,runtimeUrl:string){
  await pool.query('GRANT SELECT,INSERT,DELETE ON settlement_claims TO '+quoted);
  await pool.query('GRANT SELECT ON finance_all_postings,finance_order_links TO '+quoted);
  await pool.query('GRANT SELECT ON admin_scope_grants,admin_scope_grant_events TO '+quoted);
+ await pool.query('GRANT SELECT ON platform_admin_owner TO '+quoted);
+ await pool.query('GRANT EXECUTE ON FUNCTION faji_admin_set_access(varchar,varchar,boolean,varchar[],varchar) TO '+quoted);
  await pool.query('GRANT SELECT,INSERT ON admin_action_events,admin_command_receipts TO '+quoted);
  await pool.query('GRANT SELECT,INSERT,UPDATE ON admin_marketplace_restrictions,admin_incidents,admin_monitor_signals,admin_alerts TO '+quoted);
  await pool.query('GRANT SELECT,INSERT,UPDATE ON customer_support_notifications TO '+quoted);

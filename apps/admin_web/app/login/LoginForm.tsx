@@ -12,12 +12,39 @@ export default function LoginForm(){
  const [stepUp,setStepUp]=useState(false);
  const [useBackupCode,setUseBackupCode]=useState(false);
  const [password,setPassword]=useState('');
+ const [email,setEmail]=useState('');
  const [message,setMessage]=useState('');
+ const [messageRole,setMessageRole]=useState<'alert'|'status'>('alert');
+
+ async function resendVerification(){
+  if(busy)return;
+  if(!email.trim()){
+   setMessageRole('alert');
+   setMessage('Enter your work email address first.');
+   return;
+  }
+  setBusy(true);
+  setMessageRole('status');
+  setMessage('');
+  try{
+   await authPost('send-verification-email',{
+    email:email.trim(),
+    callbackURL:`${window.location.origin}/login`
+   });
+   setMessage('If this account needs verification, a verification email has been sent.');
+  }catch{
+   setMessageRole('alert');
+   setMessage('A verification email could not be sent right now. Please try again later.');
+  }finally{
+   setBusy(false);
+  }
+ }
 
  async function submit(event:FormEvent<HTMLFormElement>){
   event.preventDefault();
   if(busy)return;
   setBusy(true);
+  setMessageRole('alert');
   setMessage('');
   const values=new FormData(event.currentTarget);
   const email=String(values.get('email')??'').trim();
@@ -72,7 +99,7 @@ export default function LoginForm(){
    <form onSubmit={submit} className={styles.form}>
     {!secondFactor&&!stepUp&&<>
      <label htmlFor="admin-email">Work email</label>
-     <input id="admin-email" name="email" type="email" autoComplete="username" inputMode="email" maxLength={254} required autoFocus/>
+     <input id="admin-email" name="email" type="email" autoComplete="username" inputMode="email" maxLength={254} required autoFocus value={email} onChange={event=>setEmail(event.target.value)}/>
     </>}
     {!secondFactor&&!stepUp&&<div className={styles.passwordLabel}>
      <label htmlFor="admin-password">Password</label>
@@ -91,10 +118,13 @@ export default function LoginForm(){
      <label htmlFor="admin-code">{useBackupCode?'Recovery code':'Authenticator code'}</label>
      <input id="admin-code" name="code" type="text" autoComplete="one-time-code" inputMode={useBackupCode?'text':'numeric'} maxLength={128} required autoFocus/>
     </>}
-    {message&&<p className={styles.message} role="alert">{message}</p>}
+    {message&&<p className={styles.message} role={messageRole}>{message}</p>}
     <button className={styles.submit} type="submit" disabled={busy}>
      {busy?<><span className={styles.spinner} aria-hidden="true"/>Signing in…</>:stepUp?'Confirm and continue':secondFactor?'Verify and continue':'Sign in securely'}
     </button>
+    {!secondFactor&&!stepUp&&<button className={styles.textButton} type="button" disabled={busy} onClick={()=>void resendVerification()}>
+     Resend verification email
+    </button>}
    </form>
    {(secondFactor||stepUp)&&<button type="button" className={styles.textButton} onClick={()=>{setUseBackupCode(value=>!value);setMessage('');}}>
     {useBackupCode?'Use authenticator code':'Use a recovery code'}

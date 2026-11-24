@@ -2,7 +2,7 @@
 
 This branch adds explicit opt-outs; **neither opt-out should be inferred from missing credentials**.
 
-- `FAJI_EMAIL_DELIVERY_ENABLED=false`: Better Auth does not create an SMTP transport. Password reset email callbacks return a service-unavailable error; do not advertise password recovery as available. The default is `true`, preserving the staging/production requirement for `SMTP_URL` and `AUTH_EMAIL_FROM`. Email verification and any other delivery-dependent user journeys require separate acceptance before release.
+- `FAJI_EMAIL_DELIVERY_ENABLED=false`: Better Auth does not create an SMTP transport. Password reset and email verification are unavailable; do not advertise either flow as available. The default is `true`, preserving the staging/production requirement for `SMTP_URL` and `AUTH_EMAIL_FROM`.
 - `FAJI_RIDE_STORAGE_ENABLED=false`: the API configuration no longer requires `S3_ENDPOINT` or `S3_BUCKET`; Ride document uploads and verification fail with HTTP 503. Default is `true`, preserving the existing HTTPS S3 requirement in staging/production.
 - SMS remains unconfigured unless a real approved webhook is supplied; its existing callback fails closed. Do not simulate delivery.
 
