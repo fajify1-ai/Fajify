@@ -56,7 +56,7 @@ export async function platformProxy(request:NextRequest,audience:'customer'|'bus
        ?apiError.message
        :'message'in errorBody?errorBody.message:undefined;
       if(typeof detail==='string'&&detail.length<=200)message=detail;
-      else if(Array.isArray(detail)&&detail.length<=5&&detail.every(item=>typeof item==='string'&&item.length<=200)){
+      else if(Array.isArray(detail)&&detail.length<=10&&detail.every(item=>typeof item==='string'&&item.length<=200)){
        const validationMessage=detail.join(' ');
        if(validationMessage.length<=500)message=validationMessage;
       }
