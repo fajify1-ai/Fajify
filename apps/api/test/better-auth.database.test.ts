@@ -82,7 +82,7 @@ test('Better Auth: native bearer and web cookie lifecycle, recovery and authoriz
   const created=await request(http).post('/api/auth/sign-up/email').set('Origin','http://localhost:3000').send(registration);
   assert.equal(created.status,200,JSON.stringify(created.body));
   const unverifiedLogin=await request(http).post('/api/auth/sign-in/email').set('Origin','http://localhost:3000').send({email,password});
-  assert.equal(unverifiedLogin.status,403,'login must not establish a new session before email verification');
+  assert.equal(unverifiedLogin.status,200,'email verification is not a global login prerequisite');
   const resend=await request(http).post('/api/auth/send-verification-email').set('Origin','https://preview.fajify.com').send({email,callbackURL:'https://preview.fajify.com/login'});
   assert.equal(resend.status,200,`trusted staging origin can request verification delivery: ${JSON.stringify(resend.body)}`);
   const verificationMail=smtp.messages.filter(message=>message.includes('Verify your email address')).at(-1);

@@ -198,7 +198,7 @@ export default function CustomerAuthScreen({ initialMode, onBack, onComplete, on
 
           {registrationComplete&&<section className="mt-6 rounded-2xl border border-[#DDEBDD] bg-[#F5FBF5] p-5" aria-labelledby="registration-success">
             <h3 id="registration-success" className="text-base font-bold text-[#214D2A]">Account created</h3>
-            <p className="mt-2 text-sm leading-6 text-[#4F6652]">We attempted to send a verification link to {form.email}. Check your inbox and spam folder. You can continue now, but verify your email before your next sign-in.</p>
+            <p className="mt-2 text-sm leading-6 text-[#4F6652]">We attempted to send a verification link to {form.email}. Check your inbox and spam folder to verify your address. You can continue to Fajify now; verified email is required for certain account privileges.</p>
             {onContinue&&<button type="button" onClick={onContinue} className="mt-4 h-12 w-full rounded-2xl bg-[#FA3F38] text-sm font-black text-white">Continue to Fajify</button>}
             {onResendVerification&&<button type="button" disabled={verificationBusy} onClick={()=>void resendVerification()} className="mt-3 w-full rounded-xl px-3 py-2 text-sm font-bold text-[#FA3F38] disabled:opacity-60">{verificationBusy?'Sending…':'Resend verification email'}</button>}
           </section>}

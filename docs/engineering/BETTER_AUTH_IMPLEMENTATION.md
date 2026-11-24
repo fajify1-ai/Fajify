@@ -12,7 +12,7 @@ Sessions last seven days, renew after a day, and have no cookie cache. Logout/re
 
 Admin authorization does **not** infer password proof from a session creation timestamp. `/api/auth/faji/step-up` verifies the actual credential through Better Auth crypto, requires an enrolled authenticator or single-use recovery code where applicable, records proof/audit and expires after five minutes. SMS-only sessions do not establish this proof. Older identity/finance routes require explicit `identity.write`, `governance.write`, `finance.read` or `finance.write` scopes. The configured owner can assign scopes through the audited Admin Access workflow; the runtime cannot write scope or role tables directly.
 
-When `FAJI_EMAIL_DELIVERY_ENABLED` is enabled, Better Auth sends a signed email-verification link after registration and exposes its standard resend/verification endpoints. New sign-ins remain blocked for unverified email accounts; the Admin login offers a generic resend action, while Customer and Business verification links return through Better Auth on the API host. The staging SMTP destination and a real inbox must be verified before relying on this flow.
+When `FAJI_EMAIL_DELIVERY_ENABLED` is enabled, Better Auth sends a signed email-verification link after registration and exposes its standard resend/verification endpoints. Email verification is not a global prerequisite for ordinary sign-in; the Admin login offers a generic resend action, while Customer and Business verification links return through Better Auth on the API host. The owner-managed admin-access workflow separately requires the configured owner email to be verified. The staging SMTP destination and a real inbox must be verified before relying on this flow.
 
 ## Phone OTP and optional MFA
 
