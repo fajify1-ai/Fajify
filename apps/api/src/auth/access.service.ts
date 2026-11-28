@@ -4,7 +4,7 @@ import {DATABASE_POOL} from '../tokens';
 export type ResourceType='business'|'branch'|'dispatch_area';
 export type ResourceRole='owner'|'manager'|'staff'|'driver'|'dispatcher';
 export interface AccessState {suspended:boolean;revokedAfter:Date|null;}
-export interface ApprovedBusinessMembership {resourceType:'business';resourceId:string;role:ResourceRole;status:'approved';}
+export interface ApprovedBusinessMembership {resourceType:'business';resourceId:string;role:ResourceRole;status:'pending'|'approved'|'rejected';}
 const validTypes=new Set<ResourceType>(['business','branch','dispatch_area']);
 const validRoles=new Set<ResourceRole>(['owner','manager','staff','driver','dispatcher']);
 @Injectable()
@@ -39,21 +39,27 @@ export class AccessService {
    await client.query('COMMIT');
   }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
  }
- /** Only verified, active account memberships for approved businesses are exposed.
-  * No coarse application role can independently grant a business scope. */
+ /** Expose owner setup workspaces before business verification; other memberships
+  * remain unavailable until the business is approved. */
  async approvedBusinessMemberships(subject:string):Promise<ApprovedBusinessMembership[]>{
-  const result=await this.pool.query<{resource_id:string;role:ResourceRole}>(`
-   SELECT DISTINCT m.resource_id,m.role FROM resource_memberships m
-   JOIN business_onboarding b ON b.id=m.resource_id AND b.status='approved'
+  const result=await this.pool.query<{resource_id:string;role:ResourceRole;status:'pending'|'approved'|'rejected'}>(`
+   SELECT DISTINCT m.resource_id,m.role,b.status FROM resource_memberships m
+   JOIN business_onboarding b ON b.id=m.resource_id
    JOIN account_access a ON a.identity_subject=m.identity_subject AND a.suspended=false
    JOIN user_profiles p ON p.identity_subject=m.identity_subject AND p.suspended=false
    WHERE m.identity_subject=$1 AND m.resource_type='business' AND m.active=true
+    AND (b.status='approved' OR (m.role='owner' AND b.status IN ('pending','rejected')))
    ORDER BY m.resource_id,m.role`,[subject]);
-  return result.rows.map(m=>({resourceType:'business',resourceId:m.resource_id,role:m.role,status:'approved'}));
+  return result.rows.map(m=>({resourceType:'business',resourceId:m.resource_id,role:m.role,status:m.status}));
+ }
+ async accountKycStatus(subject:string){
+  const result=await this.pool.query<{status:string;rejection_reason:string|null;submitted_at:Date|null;reviewed_at:Date|null}>(
+   "SELECT status,rejection_reason,submitted_at,reviewed_at FROM account_kyc_verifications WHERE identity_subject=$1",[subject]);
+  return result.rows[0]??{status:'unverified',rejection_reason:null,submitted_at:null,reviewed_at:null};
  }
  async member(subject:string,type:ResourceType,id:string,roles:readonly string[]):Promise<boolean>{
   if(!validTypes.has(type)||!roles.length||roles.some(r=>!validRoles.has(r as ResourceRole)))return false;
-  const result=await this.pool.query(`SELECT 1 FROM resource_memberships m JOIN account_access a ON a.identity_subject=m.identity_subject JOIN user_profiles p ON p.identity_subject=m.identity_subject WHERE m.identity_subject=$1 AND m.resource_type=$2 AND m.resource_id=$3::uuid AND m.role=ANY($4::varchar[]) AND m.active=true AND a.suspended=false AND p.suspended=false AND (m.resource_type<>'business' OR EXISTS (SELECT 1 FROM business_onboarding b WHERE b.id=m.resource_id AND b.status='approved')) LIMIT 1`,[subject,type,id,roles]);
+  const result=await this.pool.query(`SELECT 1 FROM resource_memberships m JOIN account_access a ON a.identity_subject=m.identity_subject JOIN user_profiles p ON p.identity_subject=m.identity_subject WHERE m.identity_subject=$1 AND m.resource_type=$2 AND m.resource_id=$3::uuid AND m.role=ANY($4::varchar[]) AND m.active=true AND a.suspended=false AND p.suspended=false AND (m.resource_type<>'business' OR EXISTS (SELECT 1 FROM business_onboarding b WHERE b.id=m.resource_id AND (b.status='approved' OR (m.role='owner' AND b.status IN ('pending','rejected'))))) LIMIT 1`,[subject,type,id,roles]);
   return result.rowCount===1;
  }
  /** Trusted identity event handler. Default is suspended until an authorized onboarding decision. */

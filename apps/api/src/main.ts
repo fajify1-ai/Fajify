@@ -20,7 +20,7 @@ async function bootstrap(){
  const {AppModule}=await import('./app.module');
  const app=await NestFactory.create<import('@nestjs/platform-express').NestExpressApplication>(AppModule,{bufferLogs:true,rawBody:true,bodyParser:false});
  app.use('/api/auth', (req:import('node:http').IncomingMessage,res:import('node:http').ServerResponse,next:(error?:unknown)=>void)=>{if((req as import('node:http').IncomingMessage & {originalUrl:string}).originalUrl.split('?')[0].startsWith('/api/auth/faji/'))return next();app.get(BetterAuthService).handle(req,res).catch(next);});
- app.useBodyParser('json',{limit:'384kb'});
+ app.useBodyParser('json',{limit:'8mb'});
  app.useBodyParser('urlencoded',{extended:true});
  setupApi(app);
  if(process.env.NODE_ENV!=='production') SwaggerModule.setup('api/docs',app,apiDocument(app));

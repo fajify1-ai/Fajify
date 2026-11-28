@@ -16,44 +16,46 @@ export class BusinessService {
  private async emit(client:PoolClient,eventType:string,businessId:string,resourceId:string){
   await client.query('INSERT INTO outbox_events(event_type,payload) VALUES($1,$2)',[eventType,JSON.stringify({businessId,resourceId})]);
  }
- private async authorized(client:PoolClient,subject:string,businessId:string,roles:readonly string[],branchId?:string){
-  // Lock the approval row so a revocation or review cannot race the business mutation.
+ private async authorized(client:PoolClient,subject:string,businessId:string,roles:readonly string[],branchId?:string,allowOwnerSetup=false){
   const state=await this.access.state(subject);
   if(state.suspended)throw new ForbiddenException();
-  const approval=await client.query("SELECT id FROM business_onboarding WHERE id=$1::uuid AND status='approved' FOR SHARE",[businessId]);
-  if(approval.rowCount!==1)throw new ForbiddenException('Business not approved');
+  const approval=await client.query("SELECT status FROM business_onboarding WHERE id=$1::uuid FOR SHARE",[businessId]);
+  if(approval.rowCount!==1)throw new ForbiddenException();
   // Lock granted membership rows until the transaction commits; revocation cannot overtake a write.
   const membership=await client.query(`SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true ORDER BY CASE role WHEN 'owner' THEN 0 WHEN 'manager' THEN 1 ELSE 2 END LIMIT 1 FOR SHARE`,[subject,businessId,roles]);
   if(branchId){const found=await client.query('SELECT 1 FROM business_branches WHERE id=$1 AND business_id=$2 AND active',[branchId,businessId]);if(found.rowCount!==1)throw new NotFoundException('Branch unavailable');}
   const branch=branchId?await client.query("SELECT 1 FROM resource_memberships WHERE identity_subject=$1 AND resource_type='branch' AND resource_id=$2::uuid AND role=ANY($3::varchar[]) AND active=true LIMIT 1 FOR SHARE",[subject,branchId,['staff']]):null;
   // An owner/manager has business-wide authority. Staff require both a business membership and branch grant.
-  if(membership.rowCount!==1 || (branchId&&!['owner','manager'].includes(membership.rows[0].role as string)&&branch?.rowCount!==1))throw new ForbiddenException();
+  const role=membership.rows[0]?.role as string|undefined;
+  const canUseUnverified=allowOwnerSetup&&role==='owner'&&['pending','rejected'].includes(approval.rows[0].status);
+  if(membership.rowCount!==1 || (approval.rows[0].status!=='approved'&&!canUseUnverified) || (branchId&&!['owner','manager'].includes(role??'')&&branch?.rowCount!==1))throw new ForbiddenException('Business verification required for this operation');
  }
  async createBranch(subject:string,businessId:string,input:{name:string;contactEmail?:string;address?:string;timezone?:string}){
-  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager']);
+  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager'],undefined,true);
    const r=await c.query("INSERT INTO business_branches(business_id,name,contact_email,address,timezone) VALUES($1,$2,$3,$4,$5) RETURNING *",[businessId,input.name.trim(),input.contactEmail??null,input.address??null,input.timezone??'Africa/Lagos']);return r.rows[0];});
  }
  async branches(subject:string,businessId:string){
-  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff']);const permissions=await c.query("SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2 AND active AND role IN ('owner','manager') LIMIT 1",[subject,businessId]);
+  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],undefined,true);const permissions=await c.query("SELECT role FROM resource_memberships WHERE identity_subject=$1 AND resource_type='business' AND resource_id=$2 AND active AND role IN ('owner','manager') LIMIT 1",[subject,businessId]);
    return (await c.query(permissions.rowCount?'SELECT * FROM business_branches WHERE business_id=$1 ORDER BY created_at,id':"SELECT b.* FROM business_branches b JOIN resource_memberships m ON m.resource_type='branch' AND m.resource_id=b.id AND m.identity_subject=$2 AND m.active AND m.role='staff' WHERE b.business_id=$1 ORDER BY b.created_at,b.id",permissions.rowCount?[businessId]:[businessId,subject])).rows;});
  }
  async createItem(subject:string,businessId:string,branchId:string,input:{name:string;description?:string;kind:string;priceMinor:number;currency?:string;published?:boolean}){
-  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager'],branchId);
+  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager'],branchId,true);
+   if(input.published===true&&!(await c.query("SELECT 1 FROM business_onboarding WHERE id=$1 AND status='approved' FOR SHARE",[businessId])).rowCount)throw new ConflictException('Business verification required before publishing');
    const r=await c.query("INSERT INTO business_catalogue(business_id,branch_id,name,description,kind,price_minor,currency,published) SELECT $1,$2,$3,$4,$5,$6,$7,$8 WHERE EXISTS(SELECT 1 FROM business_branches WHERE id=$2 AND business_id=$1 AND active) RETURNING *",[businessId,branchId,input.name.trim(),input.description??null,input.kind,input.priceMinor,input.currency??'NGN',input.published??false]);
    if(!r.rowCount)throw new NotFoundException('Branch unavailable');return r.rows[0];});
  }
  async items(subject:string,businessId:string,branchId:string){
-  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
+  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId,true);
    return (await c.query('SELECT * FROM business_catalogue WHERE business_id=$1 AND branch_id=$2 AND active ORDER BY created_at,id',[businessId,branchId])).rows;});
  }
  async createSlot(subject:string,businessId:string,branchId:string,input:{catalogueId:string;startsAt:string;endsAt:string;capacity:number}){
   if(!Number.isFinite(Date.parse(input.startsAt))||!Number.isFinite(Date.parse(input.endsAt))||Date.parse(input.endsAt)<=Date.parse(input.startsAt))throw new BadRequestException('Invalid slot time');
-  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager'],branchId);
+  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager'],branchId,true);
    const r=await c.query("INSERT INTO business_availability(business_id,branch_id,catalogue_id,starts_at,ends_at,capacity) SELECT $1,$2,$3,$4::timestamptz,$5::timestamptz,$6 WHERE EXISTS(SELECT 1 FROM business_catalogue WHERE id=$3 AND business_id=$1 AND branch_id=$2 AND active AND published) RETURNING *",[businessId,branchId,input.catalogueId,input.startsAt,input.endsAt,input.capacity]);
    if(!r.rowCount)throw new NotFoundException('Published catalogue item unavailable');return r.rows[0];});
  }
  async slots(subject:string,businessId:string,branchId:string){
-  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
+  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId,true);
    return (await c.query('SELECT * FROM business_availability WHERE business_id=$1 AND branch_id=$2 ORDER BY starts_at',[businessId,branchId])).rows;});
  }
  async reserve(subject:string,businessId:string,branchId:string,input:{availabilityId:string;customerSubject:string;guests:number;requestKey?:string}){
@@ -125,7 +127,7 @@ export class BusinessService {
    await this.emit(c,'business.order.placed',businessId,order.rows[0].id);return order.rows[0];});
  }
  async orders(subject:string,businessId:string,branchId:string){
-  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId);
+  return this.tx(async c=>{await this.authorized(c,subject,businessId,['owner','manager','staff'],branchId,true);
    return (await c.query('SELECT * FROM business_orders WHERE business_id=$1 AND branch_id=$2 ORDER BY created_at DESC',[businessId,branchId])).rows;});
  }
  async orderStatus(subject:string,businessId:string,branchId:string,id:string,to:OrderState){

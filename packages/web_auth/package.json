@@ -5,6 +5,7 @@
   "exports": {
     "./client": "./client.ts",
     "./form": "./form.tsx",
+    "./password": "./password.ts",
     "./server": "./server.ts",
     "./proxy": "./proxy.ts",
     "./security": "./security.tsx",

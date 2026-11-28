@@ -50,6 +50,11 @@
 .merchant-page-heading{display:flex;align-items:end;justify-content:space-between;margin:0 0 24px}
 .merchant-page-heading h1{margin:0;color:inherit;font-size:26px;font-weight:750;letter-spacing:-.03em}
 .merchant-page-heading p{margin:5px 0 0;color:#919191;font-size:12px}
+.verification-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 16px;padding:16px 18px;border:1px solid #f1c7a6;border-radius:16px;background:#fff8f1;color:#4b3324}
+.verification-banner p{margin:5px 0 0;color:#755f50;font-size:13px}
+.verification-banner .faji-outline{flex:none}
+.account-verification-banner{border-color:#ddd4ad;background:#fffdf1}
+@media(max-width:600px){.verification-banner{align-items:flex-start;flex-direction:column}.verification-banner .faji-outline{width:100%}}
 .overview-empty{margin-top:14px;border-radius:14px;background:#222;padding:16px;color:#a6a6a6;font-size:12px}
 .overview-count{display:grid;width:28px;height:28px;place-items:center;border-radius:50%;background:#351b19;color:#ff665e;font-size:11px;font-weight:750}
 .overview-order-status{text-transform:capitalize;color:#e6bc61;background:#3a301b}
@@ -122,3 +127,62 @@
  .merchant-home .overview-link{padding:8px 10px;font-size:11px}
 }
 @media(prefers-reduced-motion:reduce){.merchant-home .merchant-nav button,.merchant-home .overview-task{transition:none}}
+
+.business-verification-page{max-width:1240px;margin:0 auto;padding:clamp(22px,4vw,48px) clamp(18px,4vw,52px) 72px;color:#f4f4f4}
+.business-verification-intro{max-width:760px;margin:0 0 26px}
+.verification-kicker,.verification-step{display:block;color:#ff756d;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.business-verification-intro h1{margin:8px 0 9px;color:#fff;font-size:clamp(28px,4vw,38px);font-weight:800;letter-spacing:-.045em;line-height:1.1}
+.business-verification-intro>p,.verification-panel-heading p,.verification-section-heading p,.verification-next-step>p{margin:0;color:#a6a6a6;font-size:13px;line-height:1.7}
+.business-verification-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(250px,.8fr);align-items:start;gap:18px}
+.verification-panel,.verification-next-step,.verification-business-card{min-width:0;border:1px solid #2b2b2b;border-radius:20px;background:#191919;color:#f3f3f3;box-shadow:0 12px 32px #0002}
+.verification-panel{padding:clamp(18px,3vw,26px)}
+.verification-panel-heading,.verification-business-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.verification-panel-heading h2,.verification-section-heading h2,.verification-next-step h2{margin:7px 0 8px;color:#f5f5f5;font-size:18px;font-weight:750;letter-spacing:-.02em}
+.verification-status{display:inline-flex;flex:none;align-items:center;justify-content:center;border:1px solid #474747;border-radius:999px;background:#242424;padding:5px 10px;color:#d4d4d4;font-size:11px;font-weight:700;text-transform:capitalize}
+.verification-status.is-pending{border-color:#5a4824;background:#342b19;color:#f0ca72}
+.verification-status.is-verified{border-color:#24533a;background:#183324;color:#76dfa0}
+.verification-status.is-rejected{border-color:#632c2a;background:#3c211f;color:#ff9690}
+.verification-panel-content{margin-top:20px}
+.verification-status-note,.verification-success{margin:0 0 16px;border:1px solid #3c3320;border-radius:12px;background:#282318;padding:12px 14px;color:#e3c879;font-size:12px;line-height:1.6}
+.verification-success{border-color:#244d35;background:#192b20;color:#8ce0aa}
+.verification-review-note{display:grid;gap:4px;margin:0 0 16px;border:1px solid #5b3230;border-radius:12px;background:#2d1f1e;padding:12px 14px;color:#ffc1bd;font-size:12px;line-height:1.6}
+.verification-review-note strong{color:#ff918a;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.verification-form{display:grid;gap:13px;border-top:1px solid #303030;padding-top:18px}
+.verification-form h3{margin:0;color:#f5f5f5;font-size:14px;font-weight:700}
+.verification-field{display:grid;gap:7px;color:#e6e6e6;font-size:12px;font-weight:650}
+.verification-field input,.verification-field select{width:100%;min-height:44px;border:1px solid #3b3b3b;border-radius:11px;background:#111;color:#ededed;padding:9px 11px;font-size:12px}
+.verification-field input[type=file]{padding:7px}
+.verification-field input::file-selector-button{margin-right:10px;border:0;border-radius:7px;background:#30201f;padding:7px 10px;color:#ff928c;font-size:11px;font-weight:700}
+.verification-field input:focus-visible,.verification-field select:focus-visible,.verification-form button:focus-visible{outline:2px solid #ff756d;outline-offset:2px}
+.verification-file-help{margin:0;color:#929292;font-size:11px;line-height:1.6}
+.verification-form .faji-primary{min-height:42px}
+.verification-form .faji-primary:disabled,.verification-next-step .faji-primary:disabled{cursor:not-allowed;opacity:.55}
+.verification-message{margin:0;color:#84dfa2;font-size:12px}
+.verification-next-step{position:sticky;top:88px;padding:22px}
+.verification-next-step h2{font-size:17px}
+.verification-next-step>p{margin-bottom:18px;font-size:12px}
+.verification-next-step .faji-primary{width:100%;white-space:normal;line-height:1.45}
+.verification-businesses{margin-top:28px}
+.verification-section-heading{margin:0 0 14px}
+.verification-business-card{margin-top:12px;padding:clamp(16px,2.4vw,22px)}
+.verification-business-heading h3{margin:0;color:#f5f5f5;font-size:16px;font-weight:750}
+.verification-business-heading p{margin:5px 0 0;color:#999;font-size:11px}
+.verification-evidence{margin-top:18px;border-top:1px solid #303030;padding-top:14px}
+.verification-evidence summary{cursor:pointer;color:#ff8982;font-size:12px;font-weight:700}
+.verification-evidence>p{margin:11px 0 15px;color:#a1a1a1;font-size:11px;line-height:1.65}
+.verification-document{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:10px;border:1px solid #333;border-radius:12px;background:#202020;padding:12px}
+.verification-document>div{display:grid;min-width:0;gap:4px}
+.verification-document strong{color:#e8e8e8;font-size:11px;text-transform:capitalize}
+.verification-document span{overflow-wrap:anywhere;color:#999;font-size:10px}
+.verification-businesses [role=alert]{color:#ffaaa5}
+@media(max-width:760px){
+ .business-verification-grid{grid-template-columns:minmax(0,1fr)}
+ .verification-next-step{position:static}
+ .verification-panel-heading,.verification-business-heading{align-items:flex-start}
+}
+@media(max-width:480px){
+ .business-verification-page{padding:22px 14px 52px}
+ .verification-panel,.verification-next-step,.verification-business-card{border-radius:16px}
+ .verification-document{align-items:flex-start;flex-direction:column}
+ .verification-document button{width:100%}
+}

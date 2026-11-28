@@ -1,4 +1,4 @@
-import {Body,Controller,Get,Header,HttpCode,Inject,Param,ParseUUIDPipe,Post,Put,Query,Req,UseGuards} from '@nestjs/common';
+import {Body,Controller,Get,Header,HttpCode,Inject,Param,ParseUUIDPipe,Post,Put,Query,Req,UseGuards,BadRequestException} from '@nestjs/common';
 import {ApiBearerAuth,ApiBody,ApiTags} from '@nestjs/swagger';
 import {IdentityGuard} from '../auth/identity.guard';
 import {AccountGuard} from '../auth/account.guard';
@@ -30,6 +30,9 @@ export class WebOnboardingController {
  @Header('Cache-Control','no-store') @Get('draft/current') @Views.journeyResponse(Views.WebDraftView) async draft(@Req()r:AuthRequest){return {data:await this.service.draft(r.identity.subject)};}
  @Put('draft/current') @ApiBody({type:DraftInput}) @Views.journeyResponse(Views.WebDraftView) async save(@Req()r:AuthRequest,@Body(validated(DraftInput))input:DraftInput){return {data:await this.service.saveDraft(r.identity.subject,input)};}
  @Header('Cache-Control','no-store') @Get('applications/mine') @pagination() @Views.journeyResponse(Views.WebApplications) async applications(@Req()r:AuthRequest,@Query(validated(PageQuery))page:PageQuery){return {data:await this.service.applications(r.identity.subject,page)};}
+ @Header('Cache-Control','no-store') @Get('account/kyc') async kyc(@Req()r:AuthRequest){return {data:await this.service.kyc(r.identity.subject)};}
+ @HttpCode(200) @Post('account/kyc/documents') @ApiBody({type:UploadInput}) async uploadKyc(@Req()r:AuthRequest,@Body(validated(UploadInput))input:UploadInput){if(input.documentType)throw new BadRequestException('Account identity documents do not use a business document type');return {data:await this.service.uploadKyc(r.identity.subject,input)};}
+ @Header('Cache-Control','no-store') @Get('account/kyc/documents/:documentId') async kycDocument(@Req()r:AuthRequest,@Param('documentId',ParseUUIDPipe)id:string){return {data:await this.service.kycDocument(r.identity.subject,r.identity.subject,id)};}
  @Header('Cache-Control','no-store') @Get(':id/verification-documents') @Views.journeyResponse(Views.WebDocuments) async documents(@Req()r:AuthRequest,@Param('id',ParseUUIDPipe)id:string){return {data:await this.service.documents(r.identity.subject,id)};}
  @HttpCode(200) @Post(':id/verification-documents') @ApiBody({type:UploadInput}) @Views.journeyResponse(Views.WebUploadResult) async upload(@Req()r:AuthRequest,@Param('id',ParseUUIDPipe)id:string,@Body(validated(UploadInput))input:UploadInput){return {data:await this.service.upload(r.identity.subject,id,input)};}
  @Header('Cache-Control','no-store') @Get(':id/verification-documents/:documentId') @Views.journeyResponse(Views.WebDocumentFile) async document(@Req()r:AuthRequest,@Param('id',ParseUUIDPipe)id:string,@Param('documentId',ParseUUIDPipe)document:string){return {data:await this.service.document(r.identity.subject,id,document)};}

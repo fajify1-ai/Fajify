@@ -13,7 +13,7 @@ import {IdentityGuard} from '../src/auth/identity.guard';
 import {AccountGuard} from '../src/auth/account.guard';
 import {IDENTITY_VERIFIER,type IdentityVerifier} from '../src/auth/identity.types';
 
-test('approved /auth/me business memberships enforce real PostgreSQL identity, approval, revocation and account/profile suspension',async()=>{
+test('business /auth/me workspaces expose unverified owners only and enforce membership plus account/profile suspension',async()=>{
  assert.ok(process.env.FAJI_DATABASE_URL);assert.ok(process.env.FAJI_RUNTIME_DATABASE_URL);
  const migrationUrl=new URL(process.env.FAJI_DATABASE_URL!),runtimeUrl=new URL(process.env.FAJI_RUNTIME_DATABASE_URL!);
  assert.equal(migrationUrl.host,runtimeUrl.host);assert.equal(migrationUrl.pathname,runtimeUrl.pathname);assert.notEqual(migrationUrl.username,runtimeUrl.username);
@@ -27,9 +27,9 @@ test('approved /auth/me business memberships enforce real PostgreSQL identity, a
    await admin.query("INSERT INTO business_onboarding(id,applicant_subject,display_name,status,reviewer_subject,reviewed_at) VALUES($1,$2,'Membership acceptance',$3,$4,$5)",[ids[i],subjects[i===3?1:0],status,status==='pending'?null:'synthetic-reviewer',status==='pending'?null:new Date()]);
    await admin.query("INSERT INTO resource_memberships(identity_subject,resource_type,resource_id,role) VALUES($1,'business',$2,'owner')",[subjects[i===3?1:0],ids[i]]);
   }
-  // A branch grant by itself never becomes an approved business workspace entry.
+  // A branch grant by itself never becomes a business workspace entry.
   await admin.query("INSERT INTO resource_memberships(identity_subject,resource_type,resource_id,role) VALUES($1,'branch',$2,'staff')",[subjects[0],randomUUID()]);
-  const expected=[{resourceType:'business',resourceId:ids[0],role:'owner',status:'approved'}];
+  const expected=ids.slice(0,3).sort().map(resourceId=>({resourceType:'business' as const,resourceId,role:'owner' as const,status:(resourceId===ids[0]?'approved':resourceId===ids[1]?'pending':'rejected') as 'approved'|'pending'|'rejected'}));
   assert.deepEqual(await access.approvedBusinessMemberships(subjects[0]),expected);
   assert.deepEqual(await access.approvedBusinessMemberships('merchant-role-without-any-membership'),[]);
   assert.deepEqual(await access.approvedBusinessMemberships(subjects[1]),[{resourceType:'business',resourceId:ids[3],role:'owner',status:'approved'}]);
@@ -39,13 +39,14 @@ test('approved /auth/me business memberships enforce real PostgreSQL identity, a
   const get=()=>request(app!.getHttpServer()).get('/api/v1/auth/me?subject='+subjects[1]).set('Authorization','Bearer synthetic-signed-token');
   const owned=await get();assert.equal(owned.status,200);assert.equal(owned.body.subject,subjects[0]);assert.deepEqual(owned.body.memberships,expected);assert.deepEqual(owned.body.roles,['merchant']);
   await admin.query("UPDATE resource_memberships SET active=false WHERE identity_subject=$1 AND resource_id=$2",[subjects[0],ids[0]]);
-  const revoked=await get();assert.equal(revoked.status,200);assert.deepEqual(revoked.body.memberships,[]);
+  const stillOwned=expected.filter(item=>item.resourceId!==ids[0]);
+  const revoked=await get();assert.equal(revoked.status,200);assert.deepEqual(revoked.body.memberships,stillOwned);
   await admin.query("UPDATE resource_memberships SET active=true WHERE identity_subject=$1 AND resource_id=$2",[subjects[0],ids[0]]);
   await admin.query('UPDATE account_access SET suspended=true WHERE identity_subject=$1',[subjects[0]]);assert.deepEqual(await access.approvedBusinessMemberships(subjects[0]),[]);assert.equal((await get()).status,403);
   await admin.query('UPDATE account_access SET suspended=false WHERE identity_subject=$1',[subjects[0]]);
   await admin.query('UPDATE user_profiles SET suspended=true WHERE identity_subject=$1',[subjects[0]]);assert.deepEqual(await access.approvedBusinessMemberships(subjects[0]),[]);assert.equal((await get()).status,403);
   await admin.query('UPDATE user_profiles SET suspended=false WHERE identity_subject=$1',[subjects[0]]);
-  await admin.query("UPDATE business_onboarding SET status='rejected' WHERE id=$1",[ids[0]]);assert.deepEqual(await access.approvedBusinessMemberships(subjects[0]),[]);assert.deepEqual((await get()).body.memberships,[]);
+  await admin.query("UPDATE business_onboarding SET status='rejected' WHERE id=$1",[ids[0]]);const rejected=expected.map(item=>item.resourceId===ids[0]?{...item,status:'rejected' as const}:item);assert.deepEqual(await access.approvedBusinessMemberships(subjects[0]),rejected);assert.deepEqual((await get()).body.memberships,rejected);
  }finally{
   if(app)await app.close();
   if(fixturesStarted){await admin.query('DELETE FROM resource_memberships WHERE identity_subject=ANY($1::varchar[])',[subjects]);

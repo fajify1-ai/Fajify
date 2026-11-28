@@ -16,6 +16,7 @@ import {BetterAuthService} from '../src/auth/better-auth.service';
 import {AdminOperationsModule} from '../src/admin/admin.module';
 import {BusinessModule} from '../src/business/business.module';
 import {WebCompletionModule} from '../src/web-completion/module';
+import {WebCompletionService} from '../src/web-completion/service';
 import {DATABASE_POOL} from '../src/tokens';
 import {setupApi} from '../src/main';
 import {PaystackGateway} from '../src/payments/paystack.gateway';
@@ -24,6 +25,7 @@ import {CommerceLifecycle} from '../src/payments/commerce-lifecycle.service';
 import {FinancialOperations} from '../src/payments/financial-operations.service';
 import {PaymentsService} from '../src/payments/payments.service';
 import {CustomerService} from '../src/customer/customer.service';
+import {BusinessApprovalService} from '../src/auth/business-approval.service';
 const owner=new Pool({connectionString:process.env.FAJI_DATABASE_URL}),runtime=new Pool({connectionString:process.env.FAJI_RUNTIME_DATABASE_URL});
 let app:NestExpressApplication,a:{id:string;token:string;email:string},b:{id:string;token:string;email:string},business:string,application:string;
 const auth=(user:{token:string})=>({Authorization:`Bearer ${user.token}`});
@@ -31,9 +33,16 @@ const api=()=>request(app.getHttpServer());
 before(async()=>{
  await assertDisposable(owner);await applyMigrations(owner);await grantM7Runtime(owner,process.env.FAJI_RUNTIME_DATABASE_URL!);
  process.env.NODE_ENV='test';process.env.BETTER_AUTH_SECRET='disposable-web-continuation-secret-over-thirty-two-characters';process.env.BETTER_AUTH_URL='http://localhost:3041';process.env.FAJI_WEB_ORIGINS='http://localhost:3000';process.env.FAJI_VERIFICATION_ENCRYPTION_KEY='12'.repeat(32);
- const module=await Test.createTestingModule({imports:[DatabaseModule,IdentityModule,WebCompletionModule,AdminOperationsModule,BusinessModule]}).overrideProvider(DATABASE_POOL).useValue(runtime).compile();app=module.createNestApplication<NestExpressApplication>({bodyParser:false});app.use('/api/auth',(req:import('node:http').IncomingMessage,res:import('node:http').ServerResponse,next:(error?:unknown)=>void)=>{module.get(BetterAuthService).handle(req,res).catch(next);});app.useBodyParser('json',{limit:'384kb'});setupApi(app);await app.init();
+ const module=await Test.createTestingModule({imports:[DatabaseModule,IdentityModule,WebCompletionModule,AdminOperationsModule,BusinessModule]}).overrideProvider(DATABASE_POOL).useValue(runtime).compile(); app=module.createNestApplication<NestExpressApplication>({bodyParser:false});app.use('/api/auth',(req:import('node:http').IncomingMessage,res:import('node:http').ServerResponse,next:(error?:unknown)=>void)=>{module.get(BetterAuthService).handle(req,res).catch(next);});app.useBodyParser('json',{limit:'8mb'});setupApi(app);await app.init();
  async function signup(){const result=await api().post('/api/auth/sign-up/email').send({name:'Disposable Web Test',email:`web-${randomUUID()}@example.test`,password:'Disposable-web-test-password-2026!',termsAccepted:true});assert.equal(result.status,200);return {id:result.body.user.id as string,token:result.body.token as string,email:result.body.user.email as string};}
- a=await signup();b=await signup();const applied=await api().post('/api/v1/business/onboarding').set(auth(a)).send({displayName:'Disposable completion merchant'});assert.equal(applied.status,201);application=applied.body.id;business=application;await owner.query("UPDATE business_onboarding SET status='approved',reviewer_subject='disposable-test-reviewer',reviewed_at=now() WHERE id=$1",[business]);await owner.query("INSERT INTO resource_memberships(identity_subject,resource_type,resource_id,role) VALUES($1,'business',$2,'owner')",[a.id,business]);
+ a=await signup();b=await signup();
+ const applied=await api().post('/api/v1/business/onboarding').set(auth(a)).send({displayName:'Disposable completion merchant'});
+ assert.equal(applied.status,201);application=applied.body.id;business=application;
+ const identityImage='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jF9sAAAAASUVORK5CYII=';
+ const kyc=await api().post('/api/v1/business/onboarding/account/kyc/documents').set(auth(a)).send({name:'government-id.png',mime:'image/png',base64:identityImage});
+ assert.equal(kyc.status,200,JSON.stringify(kyc.body));
+ const verification=app.get(WebCompletionService);
+ await verification.decideKyc('synthetic-admin',a.id,'verified');
 });
 after(async()=>{await app?.close();await owner.end();});
 test('onboarding drafts persist privately, reject stale revisions and credentials, recover only own applications',async()=>{
@@ -43,19 +52,70 @@ test('onboarding drafts persist privately, reject stale revisions and credential
  assert.equal((await api().put('/api/v1/business/onboarding/draft/current').set(auth(a)).send({...draft,revision:2,fields:JSON.stringify({password:'must-not-persist'})})).status,400);
  const own=await api().get('/api/v1/business/onboarding/applications/mine').set(auth(a));assert.equal(own.body.data.items[0].id,business);assert.equal((await api().get('/api/v1/business/onboarding/applications/mine').set(auth(b))).body.data.items.length,0);
 });
-test('verification uploads are encrypted, bounded and owner-only; upload never changes approval',async()=>{
+test('business evidence uploads are encrypted, bounded and approval requires each evidence category',async()=>{
  const base64='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jF9sAAAAASUVORK5CYII=';
  const route=`/api/v1/business/onboarding/${application}/verification-documents`;const uploaded=await api().post(route).set(auth(a)).send({name:'test.png',mime:'image/png',base64});assert.equal(uploaded.status,200,JSON.stringify(uploaded.body));const id=uploaded.body.data.document.id;
  const stored=(await owner.query('SELECT ciphertext FROM web_verification_documents WHERE id=$1',[id])).rows[0];assert.notDeepEqual(stored.ciphertext,Buffer.from(base64,'base64'));
  assert.equal((await api().get(`${route}/${id}`).set(auth(a))).body.data.base64,base64);assert.equal((await api().get(`${route}/${id}`).set(auth(b))).status,404);assert.equal((await api().post(route).set(auth(b)).send({name:'test.png',mime:'image/png',base64})).status,404);
  assert.equal((await api().post(route).set(auth(a)).send({name:'wrong.png',mime:'image/png',base64:Buffer.from('not-a-png-document').toString('base64')})).status,400);
+ assert.equal((await owner.query('SELECT status FROM business_onboarding WHERE id=$1',[application])).rows[0].status,'pending');
+ const photo=Buffer.from('ffd8ff112233445566','hex').toString('base64');
+ for(const [name,type,mime,evidence] of [
+  ['registration.pdf','business_registration','application/pdf',Buffer.from('%PDF-1.4\\nregistration').toString('base64')],
+  ['business.jpg','business_photo','image/jpeg',photo]
+ ] as const){
+  const uploaded=await api().post(route).set(auth(a)).send({name,documentType:type,mime,base64:evidence});
+  assert.equal(uploaded.status,200,JSON.stringify(uploaded.body));
+ }
+ await assert.doesNotReject(()=>new BusinessApprovalService(runtime).review('synthetic-admin',application,'approved'));
  assert.equal((await owner.query('SELECT status FROM business_onboarding WHERE id=$1',[application])).rows[0].status,'approved');
+});
+test('account KYC persists encrypted ID evidence, supports rejection and resubmission, and remains account-wide',async()=>{
+ const route='/api/v1/business/onboarding/account/kyc/documents';
+ const base64='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jF9sAAAAASUVORK5CYII=';
+ const rejectedType=await api().post(route).set(auth(b)).send({name:'id.txt',mime:'text/plain',base64});
+ assert.equal(rejectedType.status,400);
+ const first=await api().post(route).set(auth(b)).send({name:'government-id.png',mime:'image/png',base64});
+ assert.equal(first.status,200,JSON.stringify(first.body));assert.equal(first.body.data.status,'pending');
+ const stored=(await owner.query('SELECT id,ciphertext FROM account_kyc_documents WHERE identity_subject=$1',[b.id])).rows[0];
+ assert.notDeepEqual(stored.ciphertext,Buffer.from(base64,'base64'));
+ const directStatus=await app.get(WebCompletionService).kyc(b.id);
+ assert.equal(directStatus.status,'pending');
+ const pendingStatus=await api().get('/api/v1/business/onboarding/account/kyc').set(auth(b));
+ assert.equal(pendingStatus.status,200,JSON.stringify(pendingStatus.body));
+ assert.equal(pendingStatus.body.data.status,'pending');
+ const verification=app.get(WebCompletionService);
+ await verification.decideKyc('synthetic-admin',b.id,'rejected','The ID image is not clear enough');
+ const rejectionStatus=await api().get('/api/v1/business/onboarding/account/kyc').set(auth(b));
+ assert.equal(rejectionStatus.status,200,JSON.stringify(rejectionStatus.body));
+ assert.equal(rejectionStatus.body.data.rejection_reason,'The ID image is not clear enough');
+ const resubmitted=await api().post(route).set(auth(b)).send({name:'government-id.png',mime:'image/png',base64});
+ assert.equal(resubmitted.status,200,JSON.stringify(resubmitted.body));assert.equal(resubmitted.body.data.status,'pending');
+ assert.equal(Number((await owner.query('SELECT count(*)::int AS n FROM account_kyc_documents WHERE identity_subject=$1',[b.id])).rows[0].n),1);
+ await owner.query("UPDATE auth_user SET email_verified=true WHERE id=$1",[a.id]);
+ await owner.query("INSERT INTO application_roles(identity_subject,role) VALUES($1,'platform-admin') ON CONFLICT DO NOTHING",[a.id]);
+ await owner.query("INSERT INTO admin_scope_grants(identity_subject,scope,granted_by) VALUES($1,'governance.write','disposable-operator') ON CONFLICT DO NOTHING",[a.id]);
+ await owner.query('UPDATE auth_session SET step_up_at=now() WHERE user_id=$1',[a.id]);
+ const requestKey=randomUUID(),reviewPath=`/api/v1/admin/governance/kyc/${b.id}/review`;
+ const decision=await api().post(reviewPath).set(auth(a)).send({decision:'verified',requestKey});
+ assert.equal(decision.status,200,JSON.stringify(decision.body));assert.equal(decision.body.status,'verified');
+ const replay=await api().post(reviewPath).set(auth(a)).send({decision:'verified',requestKey});
+ assert.equal(replay.status,200,JSON.stringify(replay.body));assert.deepEqual(replay.body,decision.body);
+ const conflict=await api().post(reviewPath).set(auth(a)).send({decision:'rejected',reason:'Changed decision after replay',requestKey});
+ assert.equal(conflict.status,409);
+ const verifiedStatus=await api().get('/api/v1/business/onboarding/account/kyc').set(auth(b));
+ assert.equal(verifiedStatus.status,200,JSON.stringify(verifiedStatus.body));
+ assert.equal(verifiedStatus.body.data.status,'verified');
 });
 test('merchant reports, support, offers and notifications enforce current approved business scope',async()=>{
  for(const path of ['reports','health','support','promotions','notifications']){assert.equal((await api().get(`/api/v1/businesses/${business}/${path}`).set(auth(a))).status,200,path);assert.equal((await api().get(`/api/v1/businesses/${business}/${path}`).set(auth(b))).status,403,path);}
  const support=await api().post(`/api/v1/businesses/${business}/support`).set(auth(a)).send({title:'Disposable support',message:'Local disposable integration test.'});assert.equal(support.status,200);assert.equal((await api().get(`/api/v1/businesses/${business}/support/${support.body.data.id}/messages`).set(auth(b))).status,403);
  const promo={title:'A real stored announcement',description:'Venue terms apply; no automatic discount.',expiresAt:new Date(Date.now()+86400000).toISOString()};assert.equal((await api().post(`/api/v1/businesses/${business}/promotions`).set(auth(b)).send(promo)).status,403);assert.equal((await api().post(`/api/v1/businesses/${business}/promotions`).set(auth(a)).send(promo)).status,200);
- await owner.query("UPDATE business_onboarding SET status='rejected' WHERE id=$1",[business]);assert.equal((await api().get(`/api/v1/businesses/${business}/reports`).set(auth(a))).status,403);await owner.query("UPDATE business_onboarding SET status='approved' WHERE id=$1",[business]);
+ await owner.query("UPDATE business_onboarding SET status='pending',reviewer_subject=NULL,reviewed_at=NULL WHERE id=$1",[business]);
+ await new BusinessApprovalService(runtime).review('synthetic-admin',business,'rejected','Business evidence needs another review');
+ assert.equal((await api().get(`/api/v1/businesses/${business}/reports`).set(auth(a))).status,200);
+ await owner.query("UPDATE business_onboarding SET status='pending',reviewer_subject=NULL,reviewed_at=NULL,review_reason=NULL WHERE id=$1",[business]);
+ await new BusinessApprovalService(runtime).review('synthetic-admin',business,'approved');
 });
 test('cart revisions and hosted invitations stay private, one-use and capacity bounded',async()=>{
  const save=await api().put('/api/v1/customer/cart').set(auth(a)).send({revision:0,items:[]});assert.equal(save.status,200);assert.equal((await api().put('/api/v1/customer/cart').set(auth(a)).send({revision:0,items:[]})).status,409);assert.equal((await api().get('/api/v1/customer/cart').set(auth(b))).body.data.revision,0);
@@ -82,9 +142,9 @@ test('complete merchant submissions are immutable, retry-safe and visible only t
  assert.equal(save.status,200,JSON.stringify(save.body));const draftRevision=save.body.data.revision;
  assert.equal((await api().post('/api/v1/business/onboarding').set(auth(a)).send({displayName:'Full submitted business',draftRevision:draftRevision-1})).status,409);
  const input={displayName:'Full submitted business',draftRevision};const results=await Promise.all([1,2].map(()=>api().post('/api/v1/business/onboarding').set(auth(a)).send(input)));
- assert.ok(results.every(result=>result.status===201),JSON.stringify(results.map(result=>result.body)));assert.equal(results[0].body.id,results[1].body.id);const id=results[0].body.id;
- assert.equal(results[0].body.status,'pending');assert.equal((await api().get(`/api/v1/business/onboarding/${id}/workspace`).set(auth(a))).status,403);
- assert.equal((await owner.query('SELECT count(*)::int AS n FROM resource_memberships WHERE resource_id=$1',[id])).rows[0].n,0);
+ assert.ok(results.every(result=>result.status===201),JSON.stringify(results.map(result=>({status:result.status,body:result.body}))));assert.equal(results[0].body.id,results[1].body.id);const id=results[0].body.id;
+ assert.equal(results[0].body.status,'pending');assert.equal((await api().get(`/api/v1/business/onboarding/${id}/workspace`).set(auth(a))).status,200);
+ assert.equal((await owner.query('SELECT count(*)::int AS n FROM resource_memberships WHERE resource_id=$1',[id])).rows[0].n,1);
  const path=`/api/v1/admin/governance/approvals/${id}`;assert.equal((await api().get(path)).status,401);assert.equal((await api().get(path).set(auth(a))).status,403);assert.equal((await api().get(path).set(auth(b))).status,403);
  const reviewer=await api().post('/api/auth/sign-up/email').send({name:'Disposable scoped reviewer',email:`review-${randomUUID()}@example.test`,password:'Disposable-web-test-password-2026!',termsAccepted:true});assert.equal(reviewer.status,200);
  const actor={id:reviewer.body.user.id,token:reviewer.body.token};await owner.query("INSERT INTO application_roles(identity_subject,role) VALUES($1,'platform-admin')",[actor.id]);await owner.query('UPDATE auth_session SET step_up_at=now() WHERE user_id=$1',[actor.id]);
@@ -95,7 +155,14 @@ test('complete merchant submissions are immutable, retry-safe and visible only t
  assert.equal((await api().get(path).set(auth(actor))).body.application.contact.fullName,fields.fullName);
  await assert.rejects(()=>runtime.query("UPDATE web_business_submissions SET snapshot='{}' WHERE application_id=$1",[id]),/permission denied/);
  const review=`/api/v1/business/onboarding/${id}/review`;assert.equal((await api().post(review).set(auth(actor)).send({decision:'approved'})).status,403);
- await owner.query("INSERT INTO admin_scope_grants(identity_subject,scope,granted_by) VALUES($1,'governance.write','disposable-operator')",[actor.id]);assert.equal((await api().post(review).set(auth(actor)).send({decision:'approved'})).status,201);
+ await owner.query("INSERT INTO admin_scope_grants(identity_subject,scope,granted_by) VALUES($1,'governance.write','disposable-operator')",[actor.id]);
+ assert.equal((await api().post(review).set(auth(actor)).send({decision:'approved'})).status,409,'approval requires per-business registration and photo evidence');
+ const evidence=`/api/v1/business/onboarding/${id}/verification-documents`;
+ const registration=await api().post(evidence).set(auth(a)).send({name:'registration.pdf',mime:'application/pdf',documentType:'business_registration',base64:Buffer.from('%PDF-1.4\\nregistration').toString('base64')});
+ assert.equal(registration.status,200,JSON.stringify(registration.body));
+ const photo=await api().post(evidence).set(auth(a)).send({name:'business.jpg',mime:'image/jpeg',documentType:'business_photo',base64:Buffer.from('ffd8ff998877665544','hex').toString('base64')});
+ assert.equal(photo.status,200,JSON.stringify(photo.body));
+ assert.equal((await api().post(review).set(auth(actor)).send({decision:'approved'})).status,201);
  assert.equal((await api().get(`/api/v1/business/onboarding/${id}/workspace`).set(auth(a))).status,200);assert.equal((await api().get(`/api/v1/business/onboarding/${id}/workspace`).set(auth(b))).status,403);
  assert.ok((await owner.query("SELECT 1 FROM admin_action_events WHERE actor_subject=$1 AND resource_id='AdminGovernanceController:application'",[actor.id])).rowCount);
  const latest=(await api().get('/api/v1/business/onboarding/draft/current').set(auth(a))).body.data;

@@ -470,6 +470,21 @@
     "audience": "business"
   },
   {
+    "path": "business/onboarding/account/kyc",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/account/kyc/documents",
+    "method": "POST",
+    "audience": "business"
+  },
+  {
+    "path": "business/onboarding/account/kyc/documents/{documentId}",
+    "method": "GET",
+    "audience": "business"
+  },
+  {
     "path": "business/onboarding/{id}/verification-documents",
     "method": "GET",
     "audience": "business"
@@ -652,6 +667,36 @@
   {
     "path": "admin/governance/approvals/{id}",
     "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/approvals/{id}/documents",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/approvals/{id}/documents/{documentId}",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/kyc",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/kyc/{subject}/documents",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/kyc/{subject}/documents/{documentId}",
+    "method": "GET",
+    "audience": "admin"
+  },
+  {
+    "path": "admin/governance/kyc/{subject}/review",
+    "method": "POST",
     "audience": "admin"
   },
   {

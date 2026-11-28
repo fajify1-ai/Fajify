@@ -44,3 +44,24 @@ test('business dashboard empty states do not present unavailable data as zeroed 
  assert.match(html,/No confirmed reservations for this branch yet/);
  assert.match(html,/No active orders for this branch right now/);
 });
+
+test('recent reservations and orders are sorted newest-first and capacity stays non-negative',()=>{
+ const resource=<T,>(data:T|null)=>({data,loading:false,error:'',reload(){}});
+ const html=renderToStaticMarkup(React.createElement(Overview,{
+  overview:resource({branches:1,catalogue_items:0,reservations:2,orders:2,fulfilled_order_total_minor:'0'}),
+  finance:resource({payableMinor:'0',recoveryDebtMinor:'0'}),
+  slots:resource([{id:'slot-1',active:true,capacity:4,reserved:6,ends_at:new Date(Date.now()+3600000).toISOString()}]),
+  reservations:resource([
+   {id:'older-reservation',status:'confirmed',created_at:'2026-11-20T09:00:00.000Z'},
+   {id:'newer-reservation',status:'confirmed',created_at:'2026-11-27T09:00:00.000Z'},
+  ]),
+  orders:resource([
+   {id:'older-order',status:'preparing',created_at:'2026-11-20T09:00:00.000Z'},
+   {id:'newer-order',status:'preparing',created_at:'2026-11-27T09:00:00.000Z'},
+  ]),
+  onTab(){},
+ }));
+ assert.ok(html.indexOf('Received 27 Nov')<html.indexOf('Received 20 Nov'));
+ assert.ok(html.indexOf('newer-or')<html.indexOf('older-or'));
+ assert.match(html,/0 places available/);
+});

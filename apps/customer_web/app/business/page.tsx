@@ -1,1 +1,3 @@
-export {default} from '../../unified/BusinessEntry';
+import {redirect} from 'next/navigation';
+
+export default function Page(){redirect('/business/login');}

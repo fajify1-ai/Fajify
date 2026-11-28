@@ -35,7 +35,7 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, aut
   }
 
   return (
-    <main className="grid min-h-screen bg-white font-[family-name:var(--font-ui)] lg:grid-cols-[1.05fr_0.95fr]">
+    <main className="grid min-h-screen bg-white font-[family-name:var(--font-ui)] lg:grid-cols-[1.18fr_1fr]">
       <section className="relative hidden min-h-screen overflow-hidden bg-[#171717] lg:block">
         <img
           src="/reference/d2aaaff55cdcccab.jpg"
@@ -43,9 +43,9 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, aut
           className="absolute inset-0 h-full w-full object-cover opacity-70"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/20" />
-        <div className="absolute inset-x-0 bottom-0 p-12 text-white xl:p-16">
+        <div className="absolute inset-x-0 bottom-0 p-12 text-white lg:p-16 xl:p-20">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">fajify Business</p>
-          <h1 className="mt-4 max-w-xl text-5xl font-black leading-[1.02] tracking-[-0.055em]">
+          <h1 className="mt-4 max-w-xl text-4xl font-black leading-[1.02] tracking-[-0.055em]">
             Your operation, clearly managed.
           </h1>
           <p className="mt-5 max-w-lg text-sm font-medium leading-6 text-white/70">
@@ -62,16 +62,16 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, aut
           Back to website
         </button>
 
-        <div className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center py-12">
+        <div className="mx-auto flex w-full max-w-[364px] flex-1 flex-col justify-center py-12">
           <div className="mb-10">
-            <FajifyLogo suffix="Business" />
-            <h2 className="mt-8 text-3xl font-black tracking-[-0.045em] text-[#1A1A1A]">Welcome back</h2>
+            <FajifyLogo suffix="Business" compact />
+            <h2 className="mt-8 text-2xl font-black tracking-[-0.045em] text-[#1A1A1A]">Welcome back</h2>
             <p className="mt-2 text-sm font-medium text-[#777477]">Sign in to manage your business account.</p>
           </div>
 
           {recoveryPreview && <p role="status" className="mb-4 text-sm">Password recovery is a preview. No email will be sent. Use any sample email and password to explore.</p>}
           <form
-            className="flex flex-col gap-5"
+            className="business-auth-form flex flex-col gap-3"
             onSubmit={async (event) => {
               event.preventDefault()
               if(busy)return
@@ -89,13 +89,13 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, aut
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@business.com"
-                className="h-14 rounded-2xl border border-[#E4E4E4] bg-[#FAFAFA] px-4 text-sm font-medium outline-none focus:border-[#FA3F38]"
+                className="h-10 rounded-xl border border-[#E4E4E4] bg-[#FAFAFA] px-4 text-sm font-medium outline-none focus:border-[#FA3F38]"
               />
             </label>
 
             <label className="flex flex-col gap-2">
               <span className="text-xs font-bold text-[#4F4A4B]">Password</span>
-              <span className="flex h-14 items-center rounded-2xl border border-[#E4E4E4] bg-[#FAFAFA] px-4 focus-within:border-[#FA3F38]">
+              <span className="business-password-field flex h-10 items-center rounded-xl border border-[#E4E4E4] bg-[#FAFAFA] px-4 focus-within:border-[#FA3F38]">
                 <input
                   aria-label="Password"
                   type={showPassword ? "text" : "password"}
@@ -120,7 +120,7 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, aut
               <button type="button" onClick={()=>onRecovery?onRecovery():setRecoveryPreview(true)} className="text-xs font-bold text-[#FA3F38]">Forgot password?</button>
             </div>
 
-            <button type="submit" disabled={busy} className="mt-2 h-14 rounded-2xl bg-[#FA3F38] text-sm font-black text-white transition hover:bg-[#E9352F]">
+            <button type="submit" disabled={busy} className="mt-2 h-10 rounded-xl bg-[#FA3F38] text-sm font-black text-white transition hover:bg-[#E9352F]">
               {busy?"Please wait…":"Sign in to Business"}
             </button>
             {error&&<p role="alert" className="text-sm text-red-700">{error}</p>}
@@ -130,7 +130,7 @@ export default function BusinessSignInScreen({ onBack, onSignIn, onRegister, aut
 
           <div className="mt-8 border-t border-[#EEEEEE] pt-7 text-center">
             <p className="text-sm font-medium text-[#777477]">New to fajify Business?</p>
-            <button onClick={onRegister} className="mt-3 h-12 w-full rounded-2xl border border-[#DADADA] text-sm font-black text-[#1A1A1A] hover:border-[#FA3F38] hover:text-[#FA3F38]">
+            <button onClick={onRegister} className="mt-3 h-9 w-full rounded-xl border border-[#DADADA] text-sm font-black text-[#1A1A1A] hover:border-[#FA3F38] hover:text-[#FA3F38]">
               Register your business
             </button>
           </div>

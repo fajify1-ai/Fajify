@@ -11,22 +11,33 @@ import {pagination,validated} from '../customer/customer-http';
 import {AdminScopeGuard,RequireAdminScope} from './admin-scope.guard';
 import {AdminReadAuditGuard} from './admin-read-audit.guard';
 import {AdminGovernanceService} from './admin-governance.service';
+import {WebCompletionService} from '../web-completion/service';
+import {AdminCommandService} from './admin-command.service';
 import {AdminSupportService} from './admin-support.service';
 import {AdminIncidentService} from './admin-incidents.service';
-import {AdminPagedResult,AdminModerateInput,AdminRestrictionInput,AdminAssignInput,AdminReplyInput,AdminSupportStatusInput,AdminIncidentInput,AdminIncidentTransitionInput,AdminIncidentView,AdminSupportListQuery,AdminModerationResultView,AdminRestrictionResultView,AdminSupportAssignmentView,AdminSupportStatusView,AdminIncidentStatusView,AdminSupportMessageView,AdminSupportDetailView} from './admin.dto';
+import {AdminPagedResult,AdminCommandKey,AdminModerateInput,AdminRestrictionInput,AdminAssignInput,AdminReplyInput,AdminSupportStatusInput,AdminIncidentInput,AdminIncidentTransitionInput,AdminIncidentView,AdminSupportListQuery,AdminModerationResultView,AdminRestrictionResultView,AdminSupportAssignmentView,AdminSupportStatusView,AdminIncidentStatusView,AdminSupportMessageView,AdminSupportDetailView} from './admin.dto';
+import {IsIn,IsOptional,IsString,Length} from 'class-validator';
 type ActorRequest={identity:VerifiedIdentity};
 const guards=[IdentityGuard,AccountGuard,PrivilegedGuard,AdminScopeGuard,AdminRateGuard,AdminReadAuditGuard];
+class KycDecisionInput extends AdminCommandKey {
+ @IsIn(['verified','rejected']) decision!:'verified'|'rejected';
+ @IsOptional() @IsString() @Length(8,500) reason?:string;
+}
 
 @ApiTags('admin-governance') @ApiBearerAuth('session')
 @Controller({path:'admin/governance',version:'1'}) @UseGuards(...guards)
 export class AdminGovernanceController {
- constructor(@Inject(AdminGovernanceService)private readonly service:AdminGovernanceService){}
+ constructor(@Inject(AdminGovernanceService)private readonly service:AdminGovernanceService,@Inject(WebCompletionService)private readonly verification:WebCompletionService){}
  @Get('approvals') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminPagedResult})
  applications(@Query(validated(PageQuery)) q:PageQuery){return this.service.applications(q);}
  @Get('approvals/:id') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
  @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @ApiOkResponse({type:WebApplicationReviewDetail})
  application(@Param('id',new ParseUUIDPipe()) id:string){return this.service.application(id);}
+ @Get('approvals/:id/documents') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
+ businessDocuments(@Param('id',new ParseUUIDPipe())id:string){return this.verification.businessDocuments(id);}
+ @Get('approvals/:id/documents/:documentId') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
+ businessDocument(@Req()req:ActorRequest,@Param('id',new ParseUUIDPipe())id:string,@Param('documentId',new ParseUUIDPipe())documentId:string){return this.verification.businessDocument(req.identity.subject,id,documentId);}
  @Get('reviews') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
  @pagination() @ApiOkResponse({type:AdminPagedResult})
  reviews(@Query(validated(PageQuery)) q:PageQuery){return this.service.reviews(q);}
@@ -39,6 +50,7 @@ export class AdminGovernanceController {
  moderate(@Req() req:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminModerateInput)) body:AdminModerateInput){
   return this.service.moderation(req.identity.subject,id,body);
  }
+
  @Post('branches/:id/restriction') @ApiParam({name:'id',schema:{type:'string',format:'uuid'}}) @HttpCode(200) @RequireAdminScope('governance.write') @Header('Cache-Control','no-store')
  @ApiOkResponse({type:AdminRestrictionResultView})
  @ApiBody({type:AdminRestrictionInput})
@@ -50,6 +62,26 @@ export class AdminGovernanceController {
  @ApiBody({type:AdminRestrictionInput})
  catalogue(@Req() req:ActorRequest,@Param('id',new ParseUUIDPipe()) id:string,@Body(validated(AdminRestrictionInput)) body:AdminRestrictionInput){
   return this.service.restriction(req.identity.subject,'catalogue',id,body);
+ }
+}
+
+@ApiTags('admin-account-kyc') @ApiBearerAuth('session')
+@Controller({path:'admin/governance/kyc',version:'1'}) @UseGuards(...guards)
+export class AdminKycController {
+ constructor(@Inject(WebCompletionService)private readonly verification:WebCompletionService,@Inject(AdminCommandService)private readonly commands:AdminCommandService){}
+ @Get() @RequireAdminScope('governance.read') @Header('Cache-Control','no-store') @pagination()
+ queue(@Query(validated(PageQuery)) q:PageQuery){return this.verification.kycQueue(q);}
+ @Get(':subject/documents') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
+ documents(@Param('subject')subject:string){return this.verification.kycDocuments(subject);}
+ @Get(':subject/documents/:documentId') @RequireAdminScope('governance.read') @Header('Cache-Control','no-store')
+ document(@Req()req:ActorRequest,@Param('subject')subject:string,@Param('documentId',new ParseUUIDPipe())id:string){return this.verification.kycDocument(req.identity.subject,subject,id);}
+ @Post(':subject/review') @RequireAdminScope('governance.write') @HttpCode(200) @Header('Cache-Control','no-store') @ApiBody({type:KycDecisionInput})
+ decide(@Req()req:ActorRequest,@Param('subject')subject:string,@Body(validated(KycDecisionInput))input:KycDecisionInput){
+  const reason=input.reason?.trim();
+  return this.commands.execute({
+   actor:req.identity.subject,requestKey:input.requestKey,operation:`account_kyc.${input.decision}`,
+   resourceType:'account_kyc',resourceId:subject,payload:{decision:input.decision,reason:reason??null},reason
+  },client=>this.verification.decideKycInTransaction(client,req.identity.subject,subject,input.decision,reason));
  }
 }
 

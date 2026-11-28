@@ -17,7 +17,13 @@ export class AdminGovernanceService {
   return page(r.rows,q);
  }
  async application(id:string){
-  const result=await this.pool.query(`SELECT b.id,b.display_name AS "displayName",b.status,b.created_at AS "createdAt",s.snapshot AS application,s.submitted_at AS "submittedAt" FROM business_onboarding b LEFT JOIN web_business_submissions s ON s.application_id=b.id WHERE b.id=$1`,[id]);
+  const result=await this.pool.query(`SELECT b.id,b.applicant_subject AS "applicantSubject",b.display_name AS "displayName",b.status,b.review_reason AS "reviewReason",b.created_at AS "createdAt",s.snapshot AS application,s.submitted_at AS "submittedAt",
+   COALESCE(k.status,'unverified') AS "accountKycStatus",
+   COALESCE(json_agg(json_build_object('id',d.id,'name',d.name,'mime',d.mime,'documentType',d.document_type,'createdAt',d.created_at)) FILTER(WHERE d.id IS NOT NULL),'[]'::json) AS "verificationDocuments"
+   FROM business_onboarding b LEFT JOIN web_business_submissions s ON s.application_id=b.id
+   LEFT JOIN web_verification_documents d ON d.application_id=b.id
+   LEFT JOIN account_kyc_verifications k ON k.identity_subject=b.applicant_subject
+   WHERE b.id=$1 GROUP BY b.id,s.snapshot,s.submitted_at,k.status`,[id]);
   if(!result.rows[0])throw new NotFoundException('Business application not found');
   return result.rows[0];
  }

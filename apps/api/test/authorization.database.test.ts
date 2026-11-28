@@ -22,6 +22,17 @@ const migrationUrl=process.env.FAJI_DATABASE_URL;
 const enabled=Boolean(url&&migrationUrl&&process.env.FAJI_DISPOSABLE_DATABASE);
 const runtime=enabled?new Pool({connectionString:url,max:2}):undefined;
 const admin=enabled?new Pool({connectionString:migrationUrl,max:2}):undefined;
+async function seedReviewRequirements(subjectId:string,applications:string[]){
+ await admin!.query("INSERT INTO account_kyc_verifications(identity_subject,status,reviewer_subject,reviewed_at) VALUES($1,'verified',$2,now()) ON CONFLICT(identity_subject) DO UPDATE SET status='verified',reviewer_subject=$2,reviewed_at=now(),rejection_reason=NULL",[subjectId,actor]);
+ for(const [index,applicationId] of applications.entries()){
+  for(const [type,name,mime,digest] of [
+   ['business_registration','registration.pdf','application/pdf','a'.repeat(64)],
+   ['business_photo','business.jpg','image/jpeg','b'.repeat(64)]
+  ] as const){
+   await admin!.query('INSERT INTO web_verification_documents(application_id,subject,name,mime,ciphertext,iv,tag,digest,document_type) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)',[applicationId,subjectId,`${index}-${name}`,mime,Buffer.from('encrypted-test'),Buffer.alloc(12),Buffer.alloc(16),digest,type]);
+  }
+ }
+}
 const subject='m2_'+randomUUID(),actor='admin_'+randomUUID(),liveSubject='m2_'+randomUUID(),signedSubject='m2_'+randomUUID();
 before(async()=>{
  if(!enabled||!admin||!runtime)throw Error('M2 database integration requires explicitly disposable migration/runtime URLs');
@@ -31,6 +42,9 @@ before(async()=>{
 });
 after(async()=>{
  if(admin){
+  await admin.query('DELETE FROM web_verification_documents WHERE subject=ANY($1::varchar[])',[[subject,actor,liveSubject,signedSubject]]);
+  await admin.query('DELETE FROM account_kyc_documents WHERE identity_subject=ANY($1::varchar[])',[[subject,actor,liveSubject,signedSubject]]);
+  await admin.query('DELETE FROM account_kyc_verifications WHERE identity_subject=ANY($1::varchar[])',[[subject,actor,liveSubject,signedSubject]]);
   await admin.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[subject,actor,liveSubject,signedSubject]]);
   await admin.query('DELETE FROM resource_memberships WHERE identity_subject=$1',[subject]);
   await admin.query('DELETE FROM business_onboarding WHERE applicant_subject=$1',[subject]);
@@ -45,6 +59,7 @@ test('unapproved identity denied then privileges remain scoped to verified resou
  const business=new BusinessApprovalService(runtime!);
  const registration=await business.apply(subject,'Fajify Scoped Fixture');
  const resource=registration.id;
+ await seedReviewRequirements(subject,[resource]);
  assert.equal((await access.state(subject)).suspended,true);
  await assert.rejects(runtime!.query('CREATE TABLE m2_privilege_escape(id integer)'),{code:'42501'});
  await assert.rejects(runtime!.query('UPDATE _faji_migrations SET checksum=$1',['tamper']),{code:'42501'});
@@ -166,12 +181,13 @@ test('business application stays pending, approval creates only its own scoped o
   assert.equal(first.status,'pending');
   assert.equal(await business.approvedMember(applicant,first.id,['owner']),false);
   assert.equal(await business.approvedMember(second,first.id,['owner']),false);
+  await seedReviewRequirements(applicant,[first.id]);
   await business.review(actor,first.id,'approved');
   assert.equal(await business.approvedMember(applicant,first.id,['owner']),true);
   assert.equal(await business.approvedMember(applicant,other.id,['owner']),false);
   assert.equal(await business.approvedMember(second,first.id,['owner']),false);
   await assert.rejects(business.review(actor,first.id,'approved'),{status:409});
-  await business.review(actor,other.id,'rejected');
+  await business.review(actor,other.id,'rejected','Required identity documents were not submitted');
   assert.equal(await business.approvedMember(second,other.id,['owner']),false);
   await access.setSuspended(actor,applicant,true);
   assert.equal(await business.approvedMember(applicant,first.id,['owner']),false);
@@ -180,15 +196,18 @@ test('business application stays pending, approval creates only its own scoped o
   assert.ok(events.rows.some(x=>x.event_type==='business_approved'));
   assert.ok(events.rows.some(x=>x.event_type==='business_rejected'));
  }finally{
+  await admin!.query('DELETE FROM web_verification_documents WHERE application_id=ANY($1::uuid[])',[[first.id,other.id]]);
   await admin!.query('DELETE FROM resource_memberships WHERE resource_id=ANY($1::uuid[])',[[first.id,other.id]]);
   await admin!.query('DELETE FROM business_onboarding WHERE id=ANY($1::uuid[])',[[first.id,other.id]]);
+  await admin!.query('DELETE FROM account_kyc_documents WHERE identity_subject=$1',[applicant]);
+  await admin!.query('DELETE FROM account_kyc_verifications WHERE identity_subject=$1',[applicant]);
   await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[applicant,second]]);
   await admin!.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
   await admin!.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[applicant,second]]);
  }
 });
 
-test('actual Business workspace HTTP route rejects pending, rejected, foreign and suspended identities',async()=>{
+test('actual Business workspace HTTP route allows pending and rejected owners but rejects foreign and suspended identities',async()=>{
  const access=new AccessService(runtime!),business=new BusinessApprovalService(runtime!);
  const first='m2_workspace_'+randomUUID(),foreign='m2_workspace_'+randomUUID();
  await access.provisionSubject(first);await access.provisionSubject(foreign);
@@ -197,8 +216,10 @@ test('actual Business workspace HTTP route rejects pending, rejected, foreign an
  const approved=await business.apply(first,'Approved Workspace');
  const rejected=await business.apply(first,'Rejected Workspace');
  const foreignWorkspace=await business.apply(foreign,'Foreign Workspace');
+ await seedReviewRequirements(first,[approved.id]);
+ await seedReviewRequirements(foreign,[foreignWorkspace.id]);
  await business.review(actor,approved.id,'approved');
- await business.review(actor,rejected.id,'rejected');
+ await business.review(actor,rejected.id,'rejected','Please provide clearer registration evidence');
  await business.review(actor,foreignWorkspace.id,'approved');
  let active=first;
  const verifier:IdentityVerifier={verifyAccessToken:async()=>({
@@ -219,8 +240,8 @@ test('actual Business workspace HTTP route rejects pending, rejected, foreign an
  try{
   const get=(id:string)=>request(app.getHttpServer()).get('/api/v1/business/onboarding/'+id+'/workspace')
    .set('Authorization','Bearer signed.workspace.token');
-  assert.equal((await get(pending.id)).status,403,'pending application cannot access workspace');
-  assert.equal((await get(rejected.id)).status,403,'rejected application cannot access workspace');
+  assert.equal((await get(pending.id)).status,200,'pending owner can access workspace');
+  assert.equal((await get(rejected.id)).status,200,'rejected owner can access workspace');
   assert.equal((await get(approved.id)).status,200,'approved owner accesses own workspace');
   assert.equal((await get(foreignWorkspace.id)).status,403,'owner cannot access foreign workspace');
   active=foreign;
@@ -231,8 +252,11 @@ test('actual Business workspace HTTP route rejects pending, rejected, foreign an
   assert.equal((await get(approved.id)).status,403,'suspension denies workspace');
  }finally{
   await app.close();
-  await admin!.query('DELETE FROM resource_memberships WHERE resource_id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
-  await admin!.query('DELETE FROM business_onboarding WHERE id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
+   await admin!.query('DELETE FROM web_verification_documents WHERE application_id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
+   await admin!.query('DELETE FROM resource_memberships WHERE resource_id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
+   await admin!.query('DELETE FROM business_onboarding WHERE id=ANY($1::uuid[])',[[pending.id,approved.id,rejected.id,foreignWorkspace.id]]);
+   await admin!.query('DELETE FROM account_kyc_documents WHERE identity_subject=ANY($1::varchar[])',[[first,foreign]]);
+   await admin!.query('DELETE FROM account_kyc_verifications WHERE identity_subject=ANY($1::varchar[])',[[first,foreign]]);
   await admin!.query('DELETE FROM identity_security_events WHERE actor_subject=ANY($1::varchar[])',[[first,foreign]]);
   await admin!.query('DELETE FROM account_access WHERE identity_subject=ANY($1::varchar[])',[[first,foreign]]);
   await admin!.query('DELETE FROM user_profiles WHERE identity_subject=ANY($1::varchar[])',[[first,foreign]]);

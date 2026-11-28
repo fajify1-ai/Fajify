@@ -13,7 +13,7 @@ export class ManagementService {
  private async owner(c:PoolClient,actor:string,business:string,allowManager=false){
   const state=await this.access.state(actor);if(state.suspended)throw new ForbiddenException();
   const roles=allowManager?['owner','manager']:['owner'];
-  const found=await c.query(`SELECT 1 FROM business_onboarding b JOIN resource_memberships m ON m.resource_type='business' AND m.resource_id=b.id AND m.identity_subject=$2 AND m.active AND m.role=ANY($3::varchar[]) WHERE b.id=$1 AND b.status='approved' FOR SHARE OF b,m`,[business,actor,roles]);
+  const found=await c.query(`SELECT 1 FROM business_onboarding b JOIN resource_memberships m ON m.resource_type='business' AND m.resource_id=b.id AND m.identity_subject=$2 AND m.active AND m.role=ANY($3::varchar[]) WHERE b.id=$1 AND (b.status='approved' OR (b.status IN ('pending','rejected') AND m.role='owner')) FOR SHARE OF b,m`,[business,actor,roles]);
   if(found.rowCount!==1)throw new ForbiddenException('Approved merchant authority required');
  }
  async grant(actor:string,business:string,subject:string,role:'manager'|'staff',branch?:string){
@@ -22,6 +22,8 @@ export class ManagementService {
   if(role==='staff'&&!branch)throw new BadRequestException('Staff must be branch-scoped');
   return this.transaction(async c=>{
    await this.owner(c,actor,business);
+   const approved=await c.query("SELECT 1 FROM business_onboarding WHERE id=$1 AND status='approved' FOR SHARE",[business]);
+   if(!approved.rowCount)throw new ConflictException('Business verification required before granting staff access');
    const active=await c.query('SELECT 1 FROM account_access a JOIN user_profiles p ON p.identity_subject=a.identity_subject WHERE a.identity_subject=$1 AND NOT a.suspended AND NOT p.suspended',[subject]);
    if(active.rowCount!==1)throw new ConflictException('Target identity not active');
    if(branch){const exists=await c.query('SELECT 1 FROM business_branches WHERE id=$1 AND business_id=$2 AND active',[branch,business]);if(exists.rowCount!==1)throw new NotFoundException('Branch unavailable');}
@@ -63,11 +65,13 @@ export class ManagementService {
  }
  async setCatalogue(actor:string,business:string,branch:string,item:string,input:{name?:string;priceMinor?:number;published?:boolean;active?:boolean}){
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
+   if(input.published===true&&!(await c.query("SELECT 1 FROM business_onboarding WHERE id=$1 AND status='approved' FOR SHARE",[business])).rowCount)throw new ConflictException('Business verification required before publishing');
    const result=await c.query(`UPDATE business_catalogue SET name=COALESCE($4,name),price_minor=COALESCE($5,price_minor),published=COALESCE($6,published),active=COALESCE($7,active) WHERE id=$1 AND business_id=$2 AND branch_id=$3 RETURNING *`,[item,business,branch,input.name??null,input.priceMinor??null,input.published??null,input.active??null]);
    if(!result.rowCount)throw new NotFoundException('Catalogue item unavailable');await this.audit(c,actor,'merchant_catalogue_updated',item);return result.rows[0];});
  }
  async setSlot(actor:string,business:string,branch:string,slot:string,input:{active:boolean}){
   return this.transaction(async c=>{await this.owner(c,actor,business,true);
+   if(input.active&&!(await c.query("SELECT 1 FROM business_onboarding WHERE id=$1 AND status='approved' FOR SHARE",[business])).rowCount)throw new ConflictException('Business verification required before activating availability');
    const result=await c.query('UPDATE business_availability SET active=$4 WHERE id=$1 AND business_id=$2 AND branch_id=$3 RETURNING *',[slot,business,branch,input.active]);
    if(!result.rowCount)throw new NotFoundException('Slot unavailable');await this.audit(c,actor,'merchant_slot_updated',slot);return result.rows[0];});
  }

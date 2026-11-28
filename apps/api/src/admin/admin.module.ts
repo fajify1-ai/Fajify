@@ -7,7 +7,7 @@ import {CustomerBookingRideService} from './customer-booking-ride.service';
 import {CustomerSupportNotificationsService} from './customer-support-notifications.service';
 import {AdminOperationsController} from './admin.controller';
 import {AdminAccessController} from './admin-access.controller';
-import {AdminGovernanceController,AdminSupportController,AdminIncidentController} from './admin-workflows.controller';
+import {AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminKycController} from './admin-workflows.controller';
 import {AdminInsightsController} from './admin-insights.controller';
 import {AdminOperationsService} from './admin.service';
 import {AdminAccessService,PlatformAdminOwnerGuard} from './admin-access.service';
@@ -22,10 +22,11 @@ import {AdminEmptyBodyGuard} from './admin-empty-body.guard';
 import {AdminReadAuditGuard} from './admin-read-audit.guard';
 import {WaitlistController,AdminWaitlistController} from './waitlist.controller';
 import {WaitlistService} from './waitlist.service';
+import {WebCompletionModule} from '../web-completion/module';
 
 @Module({
- imports:[IdentityModule,CustomerModule],
- controllers:[CustomerSupportNotificationsController,CustomerBookingRideController,AdminOperationsController,AdminAccessController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController,WaitlistController,AdminWaitlistController],
+ imports:[IdentityModule,CustomerModule,WebCompletionModule],
+ controllers:[CustomerSupportNotificationsController,CustomerBookingRideController,AdminOperationsController,AdminAccessController,AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminKycController,AdminInsightsController,WaitlistController,AdminWaitlistController],
  providers:[CustomerBookingRideService,BookingRideEmptyBodyGuard,CustomerSupportNotificationsService,SupportNoticeEmptyBodyGuard,WaitlistService,AdminReadAuditGuard,AdminEmptyBodyGuard,AdminScopeGuard,AdminOperationsService,AdminAccessService,PlatformAdminOwnerGuard,AdminCommandService,AdminGovernanceService,AdminSupportService,
   AdminIncidentService,AdminInsightsService,AdminMonitorService]
 })

@@ -1,5 +1,5 @@
 import {BadRequestException,ConflictException,ForbiddenException,Inject,Injectable,NotFoundException,ServiceUnavailableException} from '@nestjs/common';
-import {Pool} from 'pg';
+import {Pool,type PoolClient} from 'pg';
 import {createCipheriv,createDecipheriv,createHash,randomBytes} from 'node:crypto';
 import {DATABASE_POOL} from '../tokens';
 import {AccessService} from '../auth/access.service';
@@ -24,18 +24,95 @@ export class WebCompletionService {
   if(input.revision>0){const updated=await this.pool.query('UPDATE web_onboarding_drafts SET data=$2,revision=revision+1,updated_at=now() WHERE subject=$1 AND revision=$3 RETURNING revision,data,updated_at',[subject,JSON.stringify({step:input.step,businessName:input.businessName,fields:JSON.stringify(fields)}),input.revision]);if(updated.rows[0])return updated.rows[0];}
   throw new ConflictException('Draft changed. Reload before saving.');
  }
- async applications(subject:string,page:PageQuery){return this.page('SELECT id,display_name,status,created_at FROM business_onboarding WHERE applicant_subject=$1 ORDER BY created_at DESC,id',[subject],page);}
- async application(subject:string,id:string){const row=(await this.pool.query('SELECT id FROM business_onboarding WHERE id=$1 AND applicant_subject=$2',[id,subject])).rows[0];if(!row)throw new NotFoundException();return row;}
+ async applications(subject:string,page:PageQuery){return this.page('SELECT id,display_name,status,review_reason,created_at FROM business_onboarding WHERE applicant_subject=$1 ORDER BY created_at DESC,id',[subject],page);}
+ async application(subject:string,id:string){const row=(await this.pool.query('SELECT id,status FROM business_onboarding WHERE id=$1 AND applicant_subject=$2',[id,subject])).rows[0];if(!row)throw new NotFoundException();return row;}
  private key(){const value=process.env.FAJI_VERIFICATION_ENCRYPTION_KEY;if(!value||!/^[a-f0-9]{64}$/i.test(value))throw new ServiceUnavailableException('Secure verification storage is not configured');return Buffer.from(value,'hex');}
+ private validFile(input:UploadInput,bytes:Buffer){
+  const valid=input.mime==='image/png'?bytes.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex'))
+   :input.mime==='image/jpeg'?bytes.subarray(0,3).equals(Buffer.from('ffd8ff','hex'))
+   :input.mime==='application/pdf'?bytes.subarray(0,5).toString()==='%PDF-'
+   :input.mime==='video/mp4'?bytes.length>=12&&bytes.subarray(4,8).toString()==='ftyp'
+   :input.mime==='video/webm'?bytes.subarray(0,4).equals(Buffer.from('1a45dfa3','hex')):false;
+  if(!valid||bytes.length>5_242_880||bytes.length<8||bytes.toString('base64')!==input.base64)throw new BadRequestException('Invalid document encoding, type or size');
+ }
  async upload(subject:string,application:string,input:UploadInput){
   const key=this.key();await this.application(subject,application);const bytes=Buffer.from(input.base64,'base64');
-  const valid=input.mime==='image/png'?bytes.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex')):input.mime==='image/jpeg'?bytes.subarray(0,3).equals(Buffer.from('ffd8ff','hex')):bytes.subarray(0,5).toString()==='%PDF-';
-  if(!valid||bytes.length>262144||bytes.length<8||bytes.toString('base64')!==input.base64)throw new BadRequestException('Invalid document encoding or type');
+  this.validFile(input,bytes);
+  if(input.mime.startsWith('video/')&&input.documentType!=='business_video')throw new BadRequestException('Video files must be submitted as business video evidence');
+  if(input.mime.startsWith('image/')&&input.documentType==='business_video')throw new BadRequestException('Business video evidence must be a video file');
+  const type=input.documentType??'business_document';
   const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,iv);cipher.setAAD(Buffer.from(application+':'+subject));const ciphertext=Buffer.concat([cipher.update(bytes),cipher.final()]);
-  const client=await this.pool.connect();try{await client.query('BEGIN');await client.query('SELECT id FROM business_onboarding WHERE id=$1 FOR UPDATE',[application]);const count=await client.query('SELECT count(*)::int AS n FROM web_verification_documents WHERE application_id=$1',[application]);if(count.rows[0].n>=3)throw new ConflictException('Three documents are already stored');const result=await client.query('INSERT INTO web_verification_documents(application_id,subject,name,mime,ciphertext,iv,tag,digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(application_id,digest) DO NOTHING RETURNING id,name,mime,created_at',[application,subject,input.name,input.mime,ciphertext,iv,cipher.getAuthTag(),hash(bytes)]);await client.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'verification.document_stored','business_application',$2)",[subject,application]);await client.query('COMMIT');return {stored:true,document:result.rows[0]??null,verificationStatus:'not_reviewed'};}catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
+  const client=await this.pool.connect();try{
+   await client.query('BEGIN');
+   const state=await client.query('SELECT status FROM business_onboarding WHERE id=$1 AND applicant_subject=$2 FOR UPDATE',[application,subject]);
+   if(!state.rowCount)throw new NotFoundException();
+   if(state.rows[0].status==='approved')throw new ConflictException('Verified business documents cannot be changed');
+   const count=await client.query('SELECT count(*)::int AS n FROM web_verification_documents WHERE application_id=$1',[application]);
+   if(count.rows[0].n>=10)throw new ConflictException('Ten business verification files are already stored');
+   const result=await client.query('INSERT INTO web_verification_documents(application_id,subject,name,mime,ciphertext,iv,tag,digest,document_type) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(application_id,digest) DO NOTHING RETURNING id,name,mime,created_at,document_type',[application,subject,input.name,input.mime,ciphertext,iv,cipher.getAuthTag(),hash(bytes),type]);
+   await client.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'verification.document_stored','business_application',$2)",[subject,application]);
+   await client.query('COMMIT');return {stored:true,document:result.rows[0]??null,verificationStatus:state.rows[0].status};
+  }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
  }
- async documents(subject:string,application:string){await this.application(subject,application);return {items:(await this.pool.query('SELECT id,name,mime,created_at FROM web_verification_documents WHERE application_id=$1 AND subject=$2',[application,subject])).rows,verificationStatus:'not_reviewed'};}
- async document(subject:string,application:string,id:string){await this.application(subject,application);const row=(await this.pool.query('SELECT * FROM web_verification_documents WHERE id=$1 AND application_id=$2 AND subject=$3',[id,application,subject])).rows[0];if(!row)throw new NotFoundException();const decipher=createDecipheriv('aes-256-gcm',this.key(),row.iv);decipher.setAAD(Buffer.from(application+':'+subject));decipher.setAuthTag(row.tag);const plain=Buffer.concat([decipher.update(row.ciphertext),decipher.final()]);await this.pool.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,'verification.document_read','verification_document',$2)",[subject,id]);return {name:row.name,mime:row.mime,base64:plain.toString('base64')};}
+ async documents(subject:string,application:string){const app=await this.application(subject,application);return {items:(await this.pool.query('SELECT id,name,mime,created_at,document_type FROM web_verification_documents WHERE application_id=$1 AND subject=$2 ORDER BY created_at,id',[application,subject])).rows,verificationStatus:app.status};}
+ async document(subject:string,application:string,id:string){await this.application(subject,application);const row=(await this.pool.query('SELECT * FROM web_verification_documents WHERE id=$1 AND application_id=$2 AND subject=$3',[id,application,subject])).rows[0];if(!row)throw new NotFoundException();return this.decrypt(row,application+':'+subject,'verification.document_read',subject,id);}
+ private async decrypt(row:{id:string;name:string;mime:string;iv:Buffer;tag:Buffer;ciphertext:Buffer},aad:string,action:string,actor:string,resourceId:string){
+  const decipher=createDecipheriv('aes-256-gcm',this.key(),row.iv);decipher.setAAD(Buffer.from(aad));decipher.setAuthTag(row.tag);const plain=Buffer.concat([decipher.update(row.ciphertext),decipher.final()]);
+  await this.pool.query("INSERT INTO audit_events(actor_subject,action,resource_type,resource_id) VALUES($1,$2,'verification_document',$3)",[actor,action,resourceId]);return {id:row.id,name:row.name,mime:row.mime,base64:plain.toString('base64')};
+ }
+ async kyc(subject:string){
+  const status=await this.access.accountKycStatus(subject),items=(await this.pool.query('SELECT id,name,mime,created_at FROM account_kyc_documents WHERE identity_subject=$1 ORDER BY created_at,id',[subject])).rows;
+  return {...status,documents:items};
+ }
+ async uploadKyc(subject:string,input:UploadInput){
+  if(!['image/jpeg','image/png','application/pdf'].includes(input.mime))throw new BadRequestException('Account verification accepts a government-issued ID image or PDF');
+  const key=this.key(),bytes=Buffer.from(input.base64,'base64');this.validFile(input,bytes);
+  const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,iv);cipher.setAAD(Buffer.from('account-kyc:'+subject));const ciphertext=Buffer.concat([cipher.update(bytes),cipher.final()]);
+  const client=await this.pool.connect();try{
+   await client.query('BEGIN');
+   const state=await client.query("INSERT INTO account_kyc_verifications(identity_subject) VALUES($1) ON CONFLICT(identity_subject) DO UPDATE SET updated_at=now() RETURNING status",[subject]);
+   if(state.rows[0].status==='verified')throw new ConflictException('Account KYC is already verified');
+   if(state.rows[0].status==='rejected')await client.query('DELETE FROM account_kyc_documents WHERE identity_subject=$1',[subject]);
+   const count=await client.query('SELECT count(*)::int AS n FROM account_kyc_documents WHERE identity_subject=$1',[subject]);
+   if(count.rows[0].n>=3)throw new ConflictException('Three account identity files are already stored');
+   const result=await client.query('INSERT INTO account_kyc_documents(identity_subject,name,mime,ciphertext,iv,tag,digest) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(identity_subject,digest) DO NOTHING RETURNING id,name,mime,created_at',[subject,input.name,input.mime,ciphertext,iv,cipher.getAuthTag(),hash(bytes)]);
+   await client.query("UPDATE account_kyc_verifications SET status='pending',submitted_at=now(),reviewer_subject=NULL,reviewed_at=NULL,rejection_reason=NULL,updated_at=now() WHERE identity_subject=$1",[subject]);
+   await client.query("INSERT INTO identity_security_events(actor_subject,event_type,details) VALUES($1,'account_kyc_document_stored',$2)",[subject,result.rows[0]?.id??'duplicate']);
+   await client.query('COMMIT');return {status:'pending',document:result.rows[0]??null};
+  }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
+ }
+ async kycDocument(actor:string,subject:string,id:string){
+  const row=(await this.pool.query('SELECT * FROM account_kyc_documents WHERE id=$1 AND identity_subject=$2',[id,subject])).rows[0];if(!row)throw new NotFoundException();
+  return this.decrypt(row,'account-kyc:'+subject,'account_kyc.document_read',actor,id);
+ }
+ async kycQueue(page:PageQuery){return this.page("SELECT k.identity_subject AS subject,u.name AS account_name,u.email,k.status,k.submitted_at,k.reviewed_at,k.rejection_reason FROM account_kyc_verifications k JOIN auth_user u ON u.id=k.identity_subject WHERE k.status IN ('pending','rejected') ORDER BY k.submitted_at DESC NULLS LAST,k.identity_subject",[ ],page);}
+ async kycDocuments(subject:string){
+  const status=await this.kyc(subject);
+  return {status:status.status,rejectionReason:status.rejection_reason,documents:status.documents};
+ }
+ async businessDocuments(application:string){
+  const result=await this.pool.query('SELECT id,name,mime,created_at,document_type FROM web_verification_documents WHERE application_id=$1 ORDER BY created_at,id',[application]);
+  return result.rows;
+ }
+ async businessDocument(actor:string,application:string,id:string){
+  const row=(await this.pool.query('SELECT * FROM web_verification_documents WHERE id=$1 AND application_id=$2',[id,application])).rows[0];
+  if(!row)throw new NotFoundException('Business verification document not found');
+  return this.decrypt(row,application+':'+row.subject,'business_verification.document_read',actor,id);
+ }
+ async decideKyc(actor:string,subject:string,decision:'verified'|'rejected',reason?:string){
+  const client=await this.pool.connect();try{
+   await client.query('BEGIN');
+   const result=await this.decideKycInTransaction(client,actor,subject,decision,reason);
+   await client.query('COMMIT');return result;
+  }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
+ }
+ async decideKycInTransaction(client:PoolClient,actor:string,subject:string,decision:'verified'|'rejected',reason?:string){
+  if(decision==='rejected'&&(!reason||reason.trim().length<8||reason.trim().length>500))throw new BadRequestException('A rejection reason of 8 to 500 characters is required');
+  const result=await client.query("UPDATE account_kyc_verifications SET status=$3,reviewer_subject=$1,reviewed_at=now(),rejection_reason=$4,updated_at=now() WHERE identity_subject=$2 AND status='pending' RETURNING identity_subject,status,rejection_reason",[actor,subject,decision,decision==='rejected'?reason!.trim():null]);
+  if(!result.rowCount)throw new ConflictException('Account KYC is not awaiting review');
+  await client.query('INSERT INTO identity_security_events(actor_subject,event_type,details) VALUES($1,$2,$3)',[actor,'account_kyc_'+decision,subject]);
+  return result.rows[0];
+ }
  async receipt(subject:string,id:string){const row=(await this.pool.query(`SELECT p.id,p.amount_minor::text,p.currency,p.verified_at,r.evidence_source FROM payment_intents p JOIN payment_receipts r ON r.intent_id=p.id JOIN ledger_entries l ON l.intent_id=p.id WHERE p.id=$1 AND p.customer_subject=$2 AND p.status='succeeded' AND l.amount_minor=p.amount_minor AND l.currency=p.currency`,[id,subject])).rows[0];if(!row)throw new NotFoundException('Payment receipt not found');const {evidence_source,...receipt}=row;const simulated=evidence_source==='simulation';return {...receipt,filename:`fajify-receipt-${receipt.id}.txt`,contentType:'text/plain',content:`FAJIFY PAYMENT RECEIPT\nPayment ${receipt.id}\nAmount (minor units): ${receipt.amount_minor} ${receipt.currency}\n${simulated?'Simulated at':'Verified at'}: ${new Date(receipt.verified_at).toISOString()}\n${simulated?'This receipt records a simulated payment outcome; no money was moved.':'This receipt records a verified payment, not settlement or delivery.'}\n`};}
  async cart(subject:string){const saved=(await this.pool.query('SELECT revision,items FROM web_carts WHERE subject=$1',[subject])).rows[0]??{revision:0,items:[]};const ids=saved.items.map((line:{catalogueId:string})=>line.catalogueId);const items=(await this.pool.query(`SELECT c.id,c.name,c.branch_id,b.name AS branch_name,a.display_name AS business_name,c.price_minor::text,c.currency,COALESCE((SELECT json_agg(json_build_object('id',p.id,'url',p.url,'alt',p.alt,'position',p.position) ORDER BY p.position) FROM business_public_media p WHERE p.catalogue_id=c.id),'[]'::json) AS media FROM business_catalogue c JOIN business_branches b ON b.id=c.branch_id JOIN business_onboarding a ON a.id=c.business_id WHERE c.id=ANY($1::uuid[]) AND c.kind='product' AND c.active AND c.published AND b.active AND a.status='approved'`,[ids])).rows;return {...saved,quotes:items,checkoutEnabled:false};}
  async saveCart(subject:string,input:CartInput){if(new Set(input.items.map(item=>item.catalogueId)).size!==input.items.length)throw new BadRequestException('Duplicate cart item');const result=input.revision===0?await this.pool.query('INSERT INTO web_carts(subject,items) VALUES($1,$2) ON CONFLICT DO NOTHING RETURNING revision',[subject,JSON.stringify(input.items)]):await this.pool.query('UPDATE web_carts SET items=$2,revision=revision+1,updated_at=now() WHERE subject=$1 AND revision=$3 RETURNING revision',[subject,JSON.stringify(input.items),input.revision]);if(!result.rows[0])throw new ConflictException('Cart changed');return this.cart(subject);}

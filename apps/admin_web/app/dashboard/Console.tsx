@@ -183,7 +183,11 @@ export default function Console(){
  const [applications,setApplications]=useState<QueueState<Application>>({items:[],nextOffset:null,loading:true,loadingMore:false,error:null});
  const [payments,setPayments]=useState<QueueState<Payment>>({items:[],nextOffset:null,loading:true,loadingMore:false,error:null});
  const [selectedApplication,setSelectedApplication]=useState<{row:Application;detail:ApplicationDetails|null;loading:boolean;error:string|null}|null>(null);
+ const selectedCanApprove=Boolean(selectedApplication?.detail?.accountKycStatus==='verified'&&
+  selectedApplication.detail.verificationDocuments.some(document=>document.documentType==='business_registration')&&
+  selectedApplication.detail.verificationDocuments.some(document=>document.documentType==='business_photo'));
  const [reviewAction,setReviewAction]=useState<{application:Application;decision:Decision}|null>(null);
+ const [reviewReason,setReviewReason]=useState('');
  const [paymentAction,setPaymentAction]=useState<{payment:Payment;outcome:SimulationOutcome}|null>(null);
  const [busy,setBusy]=useState<string|null>(null);
  const decisionForm=useForm<Acknowledgement>({resolver:zodResolver(acknowledgementSchema),defaultValues:{acknowledged:false}});
@@ -259,6 +263,7 @@ export default function Console(){
 
  function openReview(application:Application,decision:Decision){
   setReviewAction({application,decision});
+  setReviewReason('');
   decisionForm.reset({acknowledged:false});
  }
 
@@ -267,7 +272,8 @@ export default function Console(){
   const {application,decision}=reviewAction;
   setBusy(application.id);
   try{
-   await request(`business/onboarding/${application.id}/review`,{decision});
+   if(decision==='rejected'&&reviewReason.trim().length<8)throw new Error('Provide a rejection reason of at least 8 characters.');
+   await request(`business/onboarding/${application.id}/review`,{decision,...(decision==='rejected'?{reason:reviewReason.trim()}: {})});
    toast.success(decision==='approved'?'Business application approved.':'Business application rejected.');
    setReviewAction(null);
    setSelectedApplication(null);
@@ -384,6 +390,8 @@ export default function Console(){
       <DetailField label="Submitted" value={formatDate(selectedApplication.detail.submittedAt??selectedApplication.detail.createdAt,{dateStyle:'long',timeStyle:'short'})}/>
       <DetailField label="Application ID" value={selectedApplication.detail.id} mono/>
       <DetailField label="Review status" value={capitalize(selectedApplication.detail.status)}/>
+      <DetailField label="Account KYC" value={capitalize(selectedApplication.detail.accountKycStatus)}/>
+      {selectedApplication.detail.reviewReason&&<DetailField label="Previous review reason" value={selectedApplication.detail.reviewReason}/>}
      </div>
      <section>
       <h3 className="mb-3 text-sm font-semibold">Submitted application details</h3>
@@ -395,9 +403,14 @@ export default function Console(){
         </div>)}
        </dl>:<EmptyDetails/>:<EmptyDetails/>}
      </section>
+     <section>
+      <h3 className="mb-3 text-sm font-semibold">Business verification evidence</h3>
+      {selectedApplication.detail.verificationDocuments.length===0?<EmptyDetails/>:<div className="space-y-2">{selectedApplication.detail.verificationDocuments.map(file=><div key={file.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3 text-sm"><span>{humanize(file.documentType)} · {file.name} · {file.mime}</span><Button type="button" size="sm" variant="outline" onClick={async()=>{try{const fileData=await request<{name:string;mime:string;base64:string}>(`admin/governance/approvals/${selectedApplication.detail!.id}/documents/${file.id}`);const bytes=Uint8Array.from(atob(fileData.base64),value=>value.charCodeAt(0));const url=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));const anchor=document.createElement('a');anchor.href=url;anchor.download=fileData.name;anchor.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(error){toast.error(error instanceof Error?error.message:'Unable to retrieve the verification file.');}}}>Download for review</Button></div>)}</div>}
+     </section>
      {selectedApplication.detail.status==='pending'&&<div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
       <Button type="button" variant="outline" onClick={()=>openReview(selectedApplication.row,'rejected')}>Reject application</Button>
-      <Button type="button" onClick={()=>openReview(selectedApplication.row,'approved')}><CheckCircle2 className="size-4"/>Approve business</Button>
+      <Button type="button" disabled={!selectedCanApprove} onClick={()=>openReview(selectedApplication.row,'approved')}><CheckCircle2 className="size-4"/>Approve business</Button>
+      {!selectedCanApprove&&<p role="status" className="self-center text-sm text-muted-foreground">Approval requires verified account KYC, a business registration document, and at least one business photo.</p>}
      </div>}
     </div>}
    </DialogContent>
@@ -411,10 +424,11 @@ export default function Console(){
      <DialogDescription>{reviewAction?.application.displayName} will be recorded as {reviewAction?.decision}. The API retains its existing platform-admin authorization and review safeguards.</DialogDescription>
     </DialogHeader>
     <form className="mt-5 space-y-5" onSubmit={decisionForm.handleSubmit(submitReview)}>
+     {reviewAction?.decision==='rejected'&&<label className="block text-sm">Reason for rejection<textarea className="mt-1 min-h-24 w-full rounded-md border bg-background p-2" required minLength={8} maxLength={500} value={reviewReason} onChange={event=>setReviewReason(event.target.value)} /></label>}
      <AcknowledgementControl register={decisionForm.register('acknowledged')} error={decisionForm.formState.errors.acknowledged?.message} text="I have reviewed the submitted application and confirm this decision."/>
      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
       <Button type="button" variant="outline" disabled={!!busy} onClick={()=>setReviewAction(null)}>Cancel</Button>
-      <Button type="submit" variant={reviewAction?.decision==='approved'?'default':'destructive'} disabled={!!busy}>{busy?'Recording decision…':reviewAction?.decision==='approved'?'Confirm approval':'Confirm rejection'}</Button>
+      <Button type="submit" variant={reviewAction?.decision==='approved'?'default':'destructive'} disabled={!!busy||(reviewAction?.decision==='approved'&&!selectedCanApprove)}>{busy?'Recording decision…':reviewAction?.decision==='approved'?'Confirm approval':'Confirm rejection'}</Button>
      </div>
     </form>
    </DialogContent>

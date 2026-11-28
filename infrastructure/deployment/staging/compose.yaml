@@ -82,6 +82,7 @@ services:
     secrets:
     - db_runtime_password
     - better_auth_secret
+    - verification_encryption_key
     - smtp_url
     - sms_webhook_secret
     - redis_password
@@ -211,6 +212,8 @@ secrets:
     file: ./.secrets/redis_password
   better_auth_secret:
     file: ./.secrets/better_auth_secret
+  verification_encryption_key:
+    file: ./.secrets/verification_encryption_key
   smtp_url:
     file: ./.secrets/smtp_url
   sms_webhook_secret:

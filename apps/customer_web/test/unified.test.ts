@@ -7,13 +7,21 @@ import BusinessSignInScreen from '../../business_web/webapp/screens/BusinessSign
 import {AuthForm} from '@faji/web-auth/form';
 import BusinessEntry from '@faji/business-web/webapp/components/BusinessEntry';
 import {SecuritySettings} from '@faji/web-auth/security';
+import {passwordsMatch} from '@faji/web-auth/password';
 import DeferredDelivery from '../unified/DeferredDelivery';
 Object.assign(globalThis,{React});
 test('restored real credential forms require credentials and keep fixture bypass outside real mode',()=>{
  const customer=renderToStaticMarkup(React.createElement(CustomerAuthScreen,{initialMode:'register',onBack(){},onComplete(){},authenticate:async()=>{}}));
- assert.match(customer,/We simplify the planning/);assert.match(customer,/minLength="12"/);assert.match(customer,/autocomplete="new-password"/i);assert.doesNotMatch(customer,/Visual preview only/);
+ assert.match(customer,/We simplify the planning/);assert.match(customer,/minLength="12"/);assert.match(customer,/autocomplete="new-password"/i);assert.match(customer,/Confirm password/);assert.doesNotMatch(customer,/Visual preview only/);
+ const businessRegistration=renderToStaticMarkup(React.createElement(CustomerAuthScreen,{initialMode:'register',businessExperience:true,onBack(){},onComplete(){},authenticate:async()=>{}}));
+ assert.match(businessRegistration,/fajify Business/);assert.match(businessRegistration,/Your operation, clearly managed/);assert.match(businessRegistration,/Register your business/);assert.match(businessRegistration,/Confirm password/);assert.match(businessRegistration,/minLength="12"/);assert.match(businessRegistration,/Terms &amp; Conditions/);assert.doesNotMatch(businessRegistration,/We simplify the planning/);
  const merchant=renderToStaticMarkup(React.createElement(BusinessSignInScreen,{onBack(){},onSignIn(){},onRegister(){},authenticate:async()=>{}}));
- assert.match(merchant,/Your operation/);assert.match(merchant,/autocomplete="current-password"/i);assert.match(merchant,/required/);
+ assert.match(merchant,/Your operation/);assert.match(merchant,/autocomplete="current-password"/i);assert.match(merchant,/required/);assert.match(merchant,/max-w-\[364px\]/);
+});
+test('password confirmation requires an exact match before account creation',()=>{
+ assert.equal(passwordsMatch('StrongPassword12!','StrongPassword12!'),true);
+ assert.equal(passwordsMatch('StrongPassword12!','StrongPassword12?'),false);
+ assert.equal(passwordsMatch('StrongPassword12!','StrongPassword12! '),false);
 });
 test('deferred delivery renders no form and never claims a message was delivered',()=>{
  const html=renderToStaticMarkup(React.createElement(DeferredDelivery));assert.match(html,/currently disabled/);assert.doesNotMatch(html,/<form/);assert.match(html,/No code or recovery message has been sent/);

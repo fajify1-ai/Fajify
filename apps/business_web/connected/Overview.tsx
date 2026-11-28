@@ -12,15 +12,23 @@ function rowDate(value?:string){
  return Number.isNaN(date.getTime())?'Date not provided':new Intl.DateTimeFormat('en-NG',{day:'numeric',month:'short'}).format(date);
 }
 
+function newestFirst(items:MerchantRow[]){
+ return [...items].sort((a,b)=>{
+  const aTime=a.created_at?new Date(a.created_at).getTime():Number.NEGATIVE_INFINITY;
+  const bTime=b.created_at?new Date(b.created_at).getTime():Number.NEGATIVE_INFINITY;
+  return (Number.isNaN(bTime)?Number.NEGATIVE_INFINITY:bTime)-(Number.isNaN(aTime)?Number.NEGATIVE_INFINITY:aTime);
+ });
+}
+
 export default function Overview({overview,finance,slots,reservations,orders,onTab}:{overview:Resource<BusinessOverview>;finance:Resource<Finance>;slots:Resource<MerchantRow[]>;reservations:Resource<MerchantRow[]>;orders:Resource<MerchantRow[]>;onTab:(tab:Tab)=>void}){
  const activeSlots=(slots.data??[]).filter(slot=>slot.active!==false&&(!slot.ends_at||new Date(slot.ends_at).getTime()>Date.now()));
- const capacity=activeSlots.reduce((total,slot)=>total+Number(slot.capacity??0),0);
- const reserved=activeSlots.reduce((total,slot)=>total+Number(slot.reserved??0),0);
+ const capacity=activeSlots.reduce((total,slot)=>total+(Number.isFinite(slot.capacity)?Math.max(0,slot.capacity??0):0),0);
+ const reserved=activeSlots.reduce((total,slot)=>total+(Number.isFinite(slot.reserved)?Math.max(0,slot.reserved??0):0),0);
  const percent=capacity?Math.min(100,Math.round(reserved/capacity*100)):0;
  const confirmed=(reservations.data??[]).filter(item=>item.status==='confirmed');
  const activeOrders=(orders.data??[]).filter(item=>['placed','accepted','preparing','ready'].includes(item.status??''));
- const recentReservations=confirmed.slice(0,3);
- const recentOrders=activeOrders.slice(0,3);
+ const recentReservations=newestFirst(confirmed).slice(0,3);
+ const recentOrders=newestFirst(activeOrders).slice(0,3);
 
  return <section className="merchant-overview" aria-label="Business overview">
   <article className="overview-card overview-revenue">
@@ -50,7 +58,7 @@ export default function Overview({overview,finance,slots,reservations,orders,onT
      ? <div className="overview-empty">No active capacity is scheduled for this branch.</div>
      : <>
         <div className="overview-capacity" role="progressbar" aria-label="Reserved capacity" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}><span style={{width:`${percent}%`}}/></div>
-        <div className="overview-heading overview-caption"><span>{percent}% booked</span><strong>{capacity-reserved} places available</strong></div>
+        <div className="overview-heading overview-caption"><span>{percent}% booked</span><strong>{Math.max(0,capacity-reserved)} places available</strong></div>
        </>}
    </State>
   </article>

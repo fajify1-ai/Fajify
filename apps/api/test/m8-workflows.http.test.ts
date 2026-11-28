@@ -12,9 +12,11 @@ import {AccessService} from '../src/auth/access.service';
 import {IDENTITY_VERIFIER} from '../src/auth/identity.types';
 import {AdminScopeGuard,RequireAdminScope} from '../src/admin/admin-scope.guard';
 import {AdminReadAuditGuard} from '../src/admin/admin-read-audit.guard';
-import {AdminGovernanceController,AdminSupportController,AdminIncidentController} from '../src/admin/admin-workflows.controller';
+import {AdminCommandService} from '../src/admin/admin-command.service';
+import {AdminGovernanceController,AdminKycController,AdminSupportController,AdminIncidentController} from '../src/admin/admin-workflows.controller';
 import {AdminInsightsController} from '../src/admin/admin-insights.controller';
 import {AdminGovernanceService} from '../src/admin/admin-governance.service';
+import {WebCompletionService} from '../src/web-completion/service';
 import {AdminSupportService} from '../src/admin/admin-support.service';
 import {AdminIncidentService} from '../src/admin/admin-incidents.service';
 import {AdminInsightsService} from '../src/admin/admin-insights.service';
@@ -72,7 +74,7 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
  };
  const monitor={tick:async()=>({opened:[],cleared:[]}),alerts:async()=>({items:[],nextOffset:null}),acknowledge:async()=>({id,changed:true})};
  const module=await Test.createTestingModule({
-  controllers:[AdminGovernanceController,AdminSupportController,AdminIncidentController,AdminInsightsController],
+  controllers:[AdminGovernanceController,AdminKycController,AdminSupportController,AdminIncidentController,AdminInsightsController],
   providers:[
    IdentityGuard,AccountGuard,PrivilegedGuard,AdminRateGuard,
    {provide:AdminScopeGuard,useValue:{canActivate:()=>true}},
@@ -82,6 +84,13 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
     allowPrivilegedRequest:async()=>rate}},
    {provide:IDENTITY_VERIFIER,useValue:{verifyAccessToken:async()=>identity}},
    {provide:AdminGovernanceService,useValue:governance},
+   {provide:WebCompletionService,useValue:{
+    kycQueue:async()=>({items:[],nextOffset:null}),kycDocuments:async()=>[],
+    kycDocument:async()=>({}),decideKycInTransaction:async()=>({subject:'customer-A',status:'verified'})
+   }},
+   {provide:AdminCommandService,useValue:{
+    execute:async(_command:unknown,run:(client:unknown)=>unknown)=>run({})
+   }},
    {provide:AdminSupportService,useValue:support},
    {provide:AdminIncidentService,useValue:incident},
    {provide:AdminInsightsService,useValue:insights},
@@ -108,6 +117,14 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
   rate=true;
   const finance=await auth(request(server).get('/api/v1/admin/finance/summary'));
   assert.equal(finance.status,200);assert.equal(finance.headers['cache-control'],'no-store');
+  const kycQueue=await auth(request(server).get('/api/v1/admin/governance/kyc'));
+  assert.equal(kycQueue.status,200);
+  assert.equal((await auth(request(server).post('/api/v1/admin/governance/kyc/customer-A/review').send({
+   requestKey:'1f7e7f81-c095-49f7-9186-5f5e490b64a0',decision:'rejected',reason:'short'
+  }))).status,400);
+  assert.equal((await auth(request(server).post('/api/v1/admin/governance/kyc/customer-A/review').send({
+   requestKey:'1f7e7f81-c095-49f7-9186-5f5e490b64a0',decision:'verified'
+  }))).status,200);
   for(const query of ['limit=51','offset=-1','unexpected=value'])
    assert.equal((await auth(request(server).get('/api/v1/admin/governance/reviews?'+query))).status,400,query);
   assert.equal((await auth(request(server).get('/api/v1/admin/reports/overview?days=91'))).status,400);
@@ -130,8 +147,9 @@ test('M8 HTTP: guards, strict admin commands, bounded inputs and secured respons
   const doc=apiDocument(app);
   for(const path of ['/api/v1/admin/governance/reviews/{id}/moderation',
    '/api/v1/admin/support/cases/{id}/assignment','/api/v1/admin/incidents',
+   '/api/v1/admin/governance/kyc','/api/v1/admin/governance/kyc/{subject}/review',
    '/api/v1/admin/monitoring/status','/api/v1/admin/finance/summary']){
-   const verb=path.includes('moderation')||path.includes('assignment')||path.endsWith('/incidents')?'post':'get';
+   const verb=path.includes('moderation')||path.includes('assignment')||path.endsWith('/incidents')||path.endsWith('/review')?'post':'get';
    const op=doc.paths[path]?.[verb];
    assert.ok(op?.security?.some(s=>Object.hasOwn(s,'session')),path);
    assert.ok(op?.responses?.[verb==='post'&&path.endsWith('/incidents')?'201':'200'],path);

@@ -30,7 +30,7 @@ export async function platformProxy(request:NextRequest,audience:'customer'|'bus
   const trustedOrigins=trustedWebOrigins(origin);
   if(request.method!=='GET'&&(!requestOrigin||!trustedOrigins.includes(requestOrigin)))return Response.json({message:'Invalid request origin.'},{status:403,headers:responseHeaders});
   const body=request.method==='GET'?undefined:await request.text();
-  if(body&&new TextEncoder().encode(body).length>(/^business\/onboarding\/[^/]+\/verification-documents$/.test(path)?380000:65536))return new Response(null,{status:413,headers:responseHeaders});
+  if(body&&new TextEncoder().encode(body).length>(/^business\/onboarding\/[^/]+\/verification-documents$/.test(path)||path==='business/onboarding/account/kyc/documents'?7_200_000:65_536))return new Response(null,{status:413,headers:responseHeaders});
   const target=new URL('/api/v1/'+path+request.nextUrl.search,api);
   const headers:Record<string,string>={'content-type':'application/json',origin:request.method==='GET'?origin:requestOrigin!};
   if(path!=='waitlist'&&path!=='waitlist/business')headers.cookie=authCookies(request.headers.get('cookie')??'');

@@ -42,6 +42,7 @@ const navigation:{label:string;items:NavigationItem[]}[]=[
  {label:'Overview',items:[{id:'overview',label:'Overview',icon:LayoutDashboard,available:true}]},
  {label:'Operations',items:[
   {id:'applications',label:'Business approvals',icon:Building2,available:true},
+  {id:'account-kyc',label:'Account KYC',icon:ShieldCheck,available:true},
   {id:'payments',label:'Finance simulations',icon:CreditCard,available:true},
   {id:'waitlist',label:'Customer waitlist',icon:UserPlus,available:true},
   {id:'business-waitlist',label:'Business waitlist',icon:Building2,available:true},
@@ -66,6 +67,7 @@ const navigation:{label:string;items:NavigationItem[]}[]=[
 const viewCopy:Record<AdminView,{title:string;description:string}>={
  overview:{title:'Platform overview',description:'A clear view of the operational queues that need attention.'},
  applications:{title:'Business approvals',description:'Review submitted business applications and record an approval decision.'},
+ 'account-kyc':{title:'Account KYC',description:'Review government-issued identity documents once for the account, independently from each business verification.'},
  payments:{title:'Finance simulations',description:'Review pending test payments. These controls never move real money.'},
  waitlist:{title:'Customer waitlist',description:'Review consented customer early-access signups. Contact data is limited to authorized administrators.'},
  'business-waitlist':{title:'Business waitlist',description:'Review Faji Business partner interest. These records are separate from submitted business applications.'},
@@ -195,15 +197,6 @@ export function AdminShell({
      </div>
     </div>)}
    </nav>
-   {!hideLabels&&<div className="border-t p-4">
-    <div className="flex gap-3 rounded-xl bg-muted/70 p-3">
-     <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-card text-primary"><ShieldCheck className="size-4"/></span>
-     <div className="min-w-0">
-      <p className="text-xs font-semibold">Protected workspace</p>
-      <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">Privileged actions require an authorized admin session.</p>
-     </div>
-    </div>
-   </div>}
   </>;
  }
 

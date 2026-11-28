@@ -4532,7 +4532,7 @@ export default function VendorDashboardScreen({ onExit }: Props) {
   }
 
   const renderSettings = () => (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
+    <div className="vendor-modal-overlay fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-[3px]"
         onClick={() => {
@@ -4542,7 +4542,7 @@ export default function VendorDashboardScreen({ onExit }: Props) {
         }}
       />
       <div
-        className="relative rounded-t-[28px] overflow-hidden"
+        className="vendor-modal-panel relative rounded-t-[28px] overflow-hidden"
         style={{ background: surface, zIndex: 1 }}
       >
         <div className="flex justify-center pt-3 pb-2">
@@ -4702,13 +4702,13 @@ export default function VendorDashboardScreen({ onExit }: Props) {
   }
 
   const renderAddItem = () => (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
+    <div className="vendor-modal-overlay fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-[3px]"
         onClick={closeAddItem}
       />
       <div
-        className="relative rounded-t-[28px] overflow-hidden"
+        className="vendor-modal-panel relative rounded-t-[28px] overflow-hidden"
         style={{ background: surface, zIndex: 1 }}
       >
         <div className="flex justify-center pt-3 pb-2">
@@ -4966,13 +4966,13 @@ export default function VendorDashboardScreen({ onExit }: Props) {
   )
 
   const renderBizPicker = () => (
-    <div ref={businessPickerRef} role="dialog" aria-modal="true" aria-label="Switch business" className="fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
+    <div ref={businessPickerRef} role="dialog" aria-modal="true" aria-label="Switch business" className="vendor-modal-overlay fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
       <div
         className="absolute inset-0 bg-black/55 backdrop-blur-[3px]"
         aria-label="Close business switcher" onClick={() => setBizPickerOpen(false)}
       />
       <div
-        className="relative rounded-t-[28px] overflow-hidden"
+        className="vendor-modal-panel relative rounded-t-[28px] overflow-hidden"
         style={{ background: surface, zIndex: 1 }}
       >
         <div className="flex justify-center pt-3 pb-2">
@@ -5301,7 +5301,7 @@ export default function VendorDashboardScreen({ onExit }: Props) {
           const commission = Math.round(order.amount * 0.12)
           const net = order.amount - commission
           return (
-            <div className="fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
+            <div className="vendor-modal-overlay fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
               <div
                 className="absolute inset-0 bg-black/55 backdrop-blur-[3px]"
                 onClick={() => {
@@ -5310,7 +5310,7 @@ export default function VendorDashboardScreen({ onExit }: Props) {
                 }}
               />
               <div
-                className="relative rounded-t-[28px] overflow-hidden"
+                className="vendor-modal-panel relative rounded-t-[28px] overflow-hidden"
                 style={{ background: surface, zIndex: 1 }}
               >
                 <div className="flex justify-center pt-3 pb-2">
@@ -5562,13 +5562,13 @@ export default function VendorDashboardScreen({ onExit }: Props) {
         })()}
 
       {healthOpen && (
-        <div ref={healthDialogRef} role="dialog" aria-modal="true" aria-label="Business health details" className="fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
+        <div ref={healthDialogRef} role="dialog" aria-modal="true" aria-label="Business health details" className="vendor-modal-overlay fixed inset-0 z-50 flex flex-col justify-end max-w-[430px] mx-auto">
           <div
             className="absolute inset-0 bg-black/55 backdrop-blur-[3px]"
             aria-label="Close business health" onClick={() => setHealthOpen(false)}
           />
           <div
-            className="relative rounded-t-[28px] overflow-hidden"
+            className="vendor-modal-panel relative rounded-t-[28px] overflow-hidden"
             style={{ background: surface, zIndex: 1 }}
           >
             <div className="flex justify-center pt-3 pb-2">

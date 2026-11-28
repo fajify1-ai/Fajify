@@ -11,7 +11,7 @@ function fixture(options:{approved?:boolean;member?:boolean;capacity?:boolean;st
  const sql:string[]=[];
  const client={query:async(q:string,params?:unknown[])=>{
   sql.push(q);
-  if(q.includes('FROM business_onboarding'))return {rowCount:options.approved===false?0:1,rows:[{id:business}]};
+  if(q.includes('FROM business_onboarding'))return {rowCount:options.approved===false?0:1,rows:[{id:business,status:'approved'}]};
   if(q.includes('FROM paid_holds h JOIN payment_intents p'))return {rowCount:0,rows:[]};
   if(q.includes('FROM resource_memberships'))return {rowCount:options.member===false?0:1,rows:[{role:options.role??'owner'}]};
   if(q.startsWith('SELECT id,availability_id,guests FROM business_reservations')||q.startsWith('SELECT id FROM business_orders WHERE'))return {rowCount:0,rows:[]};

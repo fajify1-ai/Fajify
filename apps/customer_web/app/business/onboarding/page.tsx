@@ -1,2 +1,2 @@
 import {redirect} from 'next/navigation';
-export default function Page(){redirect('/business/dashboard#onboarding');}
+export default function Page(){redirect('/business/verification');}

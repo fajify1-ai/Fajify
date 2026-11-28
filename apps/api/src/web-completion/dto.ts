@@ -9,8 +9,9 @@ export class DraftInput {
 }
 export class UploadInput {
  @ApiProperty({type:String,maxLength:120}) @IsString() @Length(1,120) @Matches(/^[\w .()-]+$/) name!:string;
- @ApiProperty({enum:['image/jpeg','image/png','application/pdf']}) @IsIn(['image/jpeg','image/png','application/pdf']) mime!:string;
- @ApiProperty({type:String,maxLength:349528}) @IsString() @Length(4,349528) @Matches(/^[A-Za-z0-9+/]+={0,2}$/) base64!:string;
+ @ApiPropertyOptional({enum:['business_document','business_registration','business_photo','business_video']}) @IsOptional() @IsIn(['business_document','business_registration','business_photo','business_video']) documentType?:string;
+ @ApiProperty({enum:['image/jpeg','image/png','application/pdf','video/mp4','video/webm']}) @IsIn(['image/jpeg','image/png','application/pdf','video/mp4','video/webm']) mime!:string;
+ @ApiProperty({type:String,maxLength:7000000}) @IsString() @Length(4,7000000) @Matches(/^[A-Za-z0-9+/]+={0,2}$/) base64!:string;
 }
 export class CartLine {
  @ApiProperty({type:String,format:'uuid'}) @IsUUID() catalogueId!:string;
